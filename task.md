@@ -1,0 +1,40 @@
+# Checklist - Supabase Auth, routes, and dynamic rendering gates
+
+- [x] Install `@supabase/supabase-js` package
+- [x] Create Supabase client file at `src/lib/supabase.js`
+- [x] Create AuthContext provider file at `src/context/AuthContext.js`
+- [x] Wrap application root layout `src/app/layout.js` inside `<AuthProvider>`
+- [x] Create `/signup` page route at `src/app/signup/page.jsx`
+- [x] Create `/login` page route at `src/app/login/page.jsx`
+- [x] Create `/verify-email` page route at `src/app/verify-email/page.jsx`
+- [x] Create secure `/terminal` page route at `src/app/terminal/page.jsx` (renamed from dashboard)
+- [x] Create 5-step onboarding wizard at `/onboarding`
+- [x] Optimize Onboarding Step 1 layout to horizontal 3-column side-by-side display with name personalization
+- [x] Add inline SVG icons, consequence preview subtitles, and dynamic "Continue" button selectors below the cards
+- [x] Move onboarding Skip Setup actions below the Continue CTA and hide top card progress bar lines
+- [x] Implement database schema migration file for public profiles and signals under `supabase/migrations/`
+- [x] Add database `upsert` queries and automated profile creation fallbacks in `AuthContext` to prevent missing row/trigger crash errors
+- [x] Implement resilient split update-then-insert querying to prevent RLS insert policy violations for existing profile records
+- [x] Add custom `insert` policy for public profiles in the schema migration files
+- [x] Catch onboarding query errors and output actionable instructions if the database migration SQL has not been executed
+- [x] Apply all visual design system and feature specifications from the Free Plan Dashboard Audits
+- [x] Set up true viewport internal scrolling (`h-screen overflow-hidden`) on the console page to prevent vertical content cuts
+- [x] Default-expand both BTC signals (BUY + SELL) on the Free plan via multi-expansion dictionary
+- [x] Use brand blue `#3D5AFE` for lock icons, "PRO ONLY" buttons, and sidebar upgrade buttons to unify visual style
+- [x] Collapse the yellow Telegram warning strip into the sidebar below the navigation menu
+- [x] Remove red/green status dot indicators from locked coin cards (ETH, SOL, BNB)
+- [x] Clean up AI rationale detail panels by removing technical "Heikin Ashi Confirmation" secondary tags
+- [x] Add user settings dropdown and mock notification bell inside header bar
+- [x] Render locked altcoin signal cards as premium blurred teasers to improve upgrade conversion rate
+- [x] Implement live ticking relative timestamps on signal cards updating every 10 seconds in the background
+- [x] Customize page headers, CTAs, and final banner buttons to conditionally link to `/terminal` if user is logged in
+- [x] Swap out original inline SVG logo icon with `public/sanddock-logo.png` across headers, footers, auth forms, and terminal dashboard
+- [x] Clean up header links to remove redundant Sign Up button and display only Login and Start Free
+- [x] Redesign `/signup` and `/login` into responsive 2-column split-screen layouts
+- [x] Update auth layout statements, disclaimers, feature checklists, and mockup cards
+- [x] Optimize `/terminal` with a premium mobile bottom navigation layout
+- [x] Ensure brand logo is displayed at the top of both sign-up and login forms for all viewport sizes
+- [x] Implement height restriction (`lg:h-screen lg:overflow-hidden`) and compact layout spacing to prevent scrolling on auth screens
+- [x] Remove WebKit pointer click blocker `select-none` from sticky headers and mobile navigation bar containers to ensure click responsiveness
+- [x] Run production build tests to verify page generation
+- [x] Write final walkthrough summary
