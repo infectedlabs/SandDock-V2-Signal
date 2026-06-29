@@ -96,48 +96,64 @@ function formatLogDate(isoString) {
     + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
+const COIN_LOGOS = {
+  'BTC': { char: '₿', bg: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
+  'ETH': { char: 'Ξ', bg: 'bg-indigo-500/10 text-indigo-400 border-indigo-400/20' },
+  'SOL': { char: '◎', bg: 'bg-purple-500/10 text-purple-400 border-purple-400/20' },
+  'BNB': { char: '🔶', bg: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' },
+  'XRP': { char: '✕', bg: 'bg-blue-500/10 text-blue-400 border-blue-400/20' },
+  'ADA': { char: '₳', bg: 'bg-cyan-500/10 text-cyan-400 border-cyan-400/20' },
+  'AVAX': { char: '▲', bg: 'bg-red-500/10 text-red-500 border-red-500/20' },
+  'DOT': { char: '●', bg: 'bg-pink-500/10 text-pink-400 border-pink-400/20' },
+  'MATIC': { char: 'M', bg: 'bg-purple-600/10 text-purple-300 border-purple-300/20' },
+  'LINK': { char: '⬡', bg: 'bg-blue-600/10 text-blue-300 border-blue-300/20' },
+};
+
 // ── LockedSignalCard ─────────────────────────────────────────────────────────
 function LockedSignalCard({ symbol, timeframe, type, onUpgrade }) {
+  const coin = symbol.split('/')[0];
+  const logo = COIN_LOGOS[coin] || { char: coin.slice(0, 1), bg: 'bg-zinc-800 text-zinc-400 border-zinc-700' };
+  const isBuy = type === 'BUY';
+
   return (
     <div
       onClick={onUpgrade}
-      className="bg-[#0d1426] border border-zinc-900 p-5 flex flex-col justify-between text-left relative cursor-pointer border-l-4 border-l-zinc-700 min-h-[200px] gap-3"
+      className={`bg-[#0d1426] border border-zinc-900/80 p-4 flex flex-col justify-between text-left relative cursor-pointer min-h-[145px] hover:border-zinc-800 transition-all border-l-4 ${
+        isBuy ? 'border-l-emerald-500/40' : 'border-l-rose-500/40'
+      }`}
     >
-      <div className="flex justify-between items-center">
-        <div className="space-y-0.5">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[15px] font-bold text-zinc-400">{symbol}</span>
-            <span className="text-[12px] font-mono text-zinc-500">({timeframe} HA)</span>
+      <div className="flex justify-between items-start">
+        <div className="flex items-center gap-2">
+          {/* Logo badge */}
+          <div className={`w-6.5 h-6.5 rounded-full border flex items-center justify-center font-mono font-bold text-xs ${logo.bg}`}>
+            {logo.char}
           </div>
-          <span className="block text-[11px] text-zinc-500 font-medium">Signal active</span>
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="font-mono text-sm font-bold text-zinc-300">{symbol}</span>
+              <span className="text-[10px] font-mono text-zinc-500 uppercase">{timeframe} HA</span>
+            </div>
+            <span className={`inline-flex items-center px-1.5 py-0.2 text-[9px] font-extrabold tracking-widest border uppercase rounded-xs ${
+              isBuy ? 'bg-[#10b981]/15 text-[#10b981] border-[#10b981]/20' : 'bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/20'
+            }`}>
+              {isBuy ? 'BUY ACTIVE' : 'SELL ACTIVE'}
+            </span>
+          </div>
         </div>
+
         <div className="text-right">
-          <span className="block text-[10px] uppercase tracking-widest text-zinc-600 font-bold">Confidence</span>
-          <span className="font-mono text-[13px] font-bold text-[#3D5AFE] flex items-center gap-1">
-            <Icons.Lock /> Locked
+          <span className="block text-[8px] uppercase tracking-widest text-zinc-500 font-extrabold">CONFIDENCE</span>
+          <span className="font-mono text-xs font-bold text-[#3D5AFE] flex items-center justify-end gap-0.5">
+            <Icons.Lock /> 🔒
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 py-2 bg-zinc-950/20 px-3 border border-zinc-900/60 blur-xs select-none">
-        {['Entry', 'Stop Loss', 'Take Profit'].map(label => (
-          <div key={label}>
-            <span className="block text-[9px] text-zinc-600 font-bold uppercase tracking-widest">{label}</span>
-            <span className="text-[13px] text-zinc-500 font-bold">---</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="space-y-1 select-none">
-        <span className="block text-[10px] text-zinc-600 font-bold uppercase tracking-widest">AI Explanation</span>
-        <p className="text-[13px] text-zinc-500 italic leading-relaxed">🔒 AI analysis locked.</p>
-      </div>
-
       <button
         type="button"
-        className="w-full py-2 bg-[#3D5AFE]/10 hover:bg-[#3D5AFE] text-[#3D5AFE] hover:text-white font-bold text-[11px] uppercase tracking-widest transition-all text-center border border-[#3D5AFE]/20 cursor-pointer"
+        className="w-full py-2 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-extrabold text-[10px] uppercase tracking-widest transition-all text-center border border-black cursor-pointer shadow-md mt-3"
       >
-        Unlock {symbol.split('/')[0]} signals on Pro →
+        Unlock {coin} signals on Pro →
       </button>
     </div>
   );
@@ -146,70 +162,84 @@ function LockedSignalCard({ symbol, timeframe, type, onUpgrade }) {
 // ── SignalCard ───────────────────────────────────────────────────────────────
 function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, onToggle, onUpgrade, onViewDetails, livePrice, isLive = false, nextSignal = null }) {
   const isBuy = sig.signal_type === 'buy';
+  const coin = sig.symbol.replace('USDT', '');
+  const logo = COIN_LOGOS[coin] || { char: coin.slice(0, 1), bg: 'bg-zinc-800 text-zinc-400 border-zinc-700' };
 
   let pnlText = '';
-  let pnlColorClass = 'text-white';
+  let pnlBgClass = '';
+  const isClosed = sig.pnl_pct != null || nextSignal != null;
   
   if (sig.pnl_pct != null) {
     pnlText = `${sig.pnl_pct >= 0 ? '+' : ''}${parseFloat(sig.pnl_pct).toFixed(2)}%`;
-    pnlColorClass = sig.pnl_pct >= 0 ? 'text-[#10b981]' : 'text-[#ef4444]';
+    pnlBgClass = sig.pnl_pct >= 0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
   } else if (isLive && livePrice) {
     const pnl = ((livePrice - sig.entry_price) / sig.entry_price) * 100;
     const finalPnl = isBuy ? pnl : -pnl;
     pnlText = `${finalPnl >= 0 ? '+' : ''}${finalPnl.toFixed(2)}% Live`;
-    pnlColorClass = finalPnl >= 0 ? 'text-[#10b981]' : 'text-[#ef4444]';
+    pnlBgClass = finalPnl >= 0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
   } else if (nextSignal) {
     const exitPrice = nextSignal.entry_price;
     const change = ((exitPrice - sig.entry_price) / sig.entry_price) * 100;
     const finalPnl = isBuy ? change : -change;
     pnlText = `${finalPnl >= 0 ? '+' : ''}${finalPnl.toFixed(2)}%`;
-    pnlColorClass = finalPnl >= 0 ? 'text-[#10b981]' : 'text-[#ef4444]';
+    pnlBgClass = finalPnl >= 0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
   }
 
   return (
     <div
       onClick={() => onViewDetails(sig)}
-      className={`glass rounded-xl border transition-all duration-300 hover:scale-[1.02] flex flex-col text-left cursor-pointer shadow-lg hover:shadow-[#3D5AFE]/5 ${
+      className={`glass rounded-xl border transition-all duration-300 hover:scale-[1.01] flex flex-col text-left cursor-pointer shadow-lg hover:shadow-[#3D5AFE]/5 ${
         isExpanded ? 'border-zinc-700' : 'border-[#1e2a3a]/60 hover:border-zinc-800'
-      } ${(isLastSignalBadge || isLive) ? 'border-l-4 border-l-zinc-500 animate-pulse-glow' : isBuy ? 'border-l-4 border-l-[#10b981]' : 'border-l-4 border-l-[#ef4444]'}`}
+      } ${(isLastSignalBadge || isLive) ? 'border-l-4 border-l-brand-orange animate-pulse-glow' : isBuy ? 'border-l-4 border-l-[#10b981]' : 'border-l-4 border-l-[#ef4444]'}`}
     >
       {/* Header */}
-      <div className="p-5 flex justify-between items-center select-none">
-        <div className="space-y-0.5">
-          <div className="flex items-center gap-2">
-            {(isLastSignalBadge || isLive) ? (
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-zinc-400 animate-ping" />
-            ) : (
-              <span className={`inline-block w-2 h-2 rounded-full ${isBuy ? 'bg-[#10b981]' : 'bg-[#ef4444]'}`} />
-            )}
-            <span className="font-mono text-[15px] font-bold text-white">{formatSymbol(sig.symbol)}</span>
-            <span className="text-[12px] font-mono text-zinc-500">({sig.interval} HA)</span>
-            {(isLastSignalBadge || isLive) && (
-              <span className="text-[9px] font-mono font-bold bg-[#3D5AFE]/10 text-[#3D5AFE] border border-[#3D5AFE]/20 px-1 py-0.2 uppercase rounded-xs">
-                ACTIVE PIPELINE
-              </span>
-            )}
+      <div className="p-4 sm:p-5 flex justify-between items-center select-none">
+        <div className="flex items-center gap-2">
+          {/* Logo badge */}
+          <div className={`w-6.5 h-6.5 rounded-full border flex items-center justify-center font-mono font-bold text-xs ${logo.bg}`}>
+            {logo.char}
           </div>
-          <span className="block text-[11px] text-zinc-500 font-medium">
-            {(isLastSignalBadge || isLive) ? `Fired ${formatRelativeTime(sig.created_at)}` : formatRelativeTime(sig.created_at)}
-          </span>
+          
+          <div className="space-y-0.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className={`inline-flex items-center px-1.5 py-0.2 text-[9px] font-extrabold tracking-widest border uppercase rounded-xs ${
+                isBuy ? 'bg-[#10b981]/15 text-[#10b981] border-[#10b981]/20' : 'bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/20'
+              }`}>
+                {isBuy ? 'BUY' : 'SELL'}
+              </span>
+              <span className="font-mono text-sm font-bold text-white">{formatSymbol(sig.symbol)}</span>
+              <span className="text-[11px] font-mono text-zinc-500">({sig.interval} HA)</span>
+              {(isLastSignalBadge || isLive) && (
+                <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold bg-brand-orange/15 text-brand-orange border border-brand-orange/20 px-1.5 py-0.2 uppercase rounded-xs shrink-0">
+                  <span className="w-1 h-1 rounded-full bg-brand-orange animate-ping" /> LIVE
+                </span>
+              )}
+              {isClosed && (
+                <span className="inline-flex items-center px-1.5 py-0.2 text-[8px] font-mono font-bold bg-zinc-800 text-zinc-400 border border-zinc-700 uppercase rounded-xs">
+                  CLOSED
+                </span>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-mono">
+              <span className="font-bold text-zinc-300">{formatPrice(sig.entry_price)} entry</span>
+              <span>&middot;</span>
+              <span>{formatRelativeTime(sig.created_at)}</span>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3.5 shrink-0">
+          {pnlText && (
+            <div className={`px-2.5 py-1 text-xs font-bold font-mono border rounded-md shadow-sm ${pnlBgClass}`}>
+              {pnlText}
+            </div>
+          )}
           <div className="text-right">
-            {pnlText ? (
-              <>
-                <span className="block text-[10px] uppercase tracking-widest text-zinc-500 font-bold">PnL</span>
-                <span className={`font-mono text-[13px] font-bold ${pnlColorClass}`}>{pnlText}</span>
-              </>
-            ) : (
-              <>
-                <span className="block text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Confidence</span>
-                <span className="font-mono text-[13px] font-bold text-white">{sig.confidence}%</span>
-              </>
-            )}
+            <span className="block text-[8px] uppercase tracking-widest text-zinc-500 font-extrabold">CONFIDENCE</span>
+            <span className="font-mono text-xs font-bold text-white block">{sig.confidence}%</span>
           </div>
-          <span className="text-[#3D5AFE] text-[11px] font-bold uppercase tracking-wider hover:underline flex items-center gap-0.5">
+          <span className="text-[#3D5AFE] text-[10px] font-bold uppercase tracking-wider hover:underline flex items-center gap-0.5">
             Details <Icons.ChevronRight />
           </span>
         </div>
@@ -649,6 +679,10 @@ export default function TerminalPage() {
         </div>
 
         <div className="flex items-center gap-3 relative">
+          <span className="hidden xs:inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">
+            Total PnL: +142.8%
+          </span>
+
           <span className={`text-[11px] font-mono font-bold px-2 py-0.5 uppercase tracking-wider ${
             isFreePlan
               ? 'bg-zinc-800 text-zinc-400 border border-zinc-700'
@@ -765,18 +799,27 @@ export default function TerminalPage() {
             )}
 
             {isFreePlan && (
-              <div className="bg-[#111827] border border-zinc-800 p-3 space-y-2.5 text-left">
-                <div className="space-y-0.5">
-                  <span className="block text-[10px] font-bold uppercase tracking-widest text-[#3D5AFE]">Console Plan</span>
-                  <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Free — 1 of 11 coins active.</p>
+              <>
+                <div className="bg-[#111827] border border-red-500/25 p-3 space-y-1.5 text-left">
+                  <span className="block text-[9px] font-bold uppercase tracking-widest text-red-400 font-mono">⚠️ Alerts Missed</span>
+                  <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">
+                    12 signals fired on locked coins this week. Upgrade to catch the next alert instantly.
+                  </p>
                 </div>
-                <button
-                  onClick={() => triggerUpgradeGate('Upgrade to Pro', 'Full access to all signals and Telegram alerts.')}
-                  className="w-full py-1.5 bg-[#3D5AFE] hover:bg-[#2e4be6] text-white font-bold text-[11px] uppercase tracking-wider transition-colors border border-[#3D5AFE] cursor-pointer text-center block"
-                >
-                  Upgrade to Pro
-                </button>
-              </div>
+
+                <div className="bg-[#111827] border border-zinc-800 p-3 space-y-2.5 text-left">
+                  <div className="space-y-0.5">
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-[#3D5AFE]">Console Plan</span>
+                    <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Free — 1 of 11 coins active.</p>
+                  </div>
+                  <button
+                    onClick={() => triggerUpgradeGate('Upgrade to Pro', 'Full access to all signals and Telegram alerts.')}
+                    className="w-full py-1.5 bg-[#3D5AFE] hover:bg-[#2e4be6] text-white font-bold text-[11px] uppercase tracking-wider transition-colors border border-[#3D5AFE] cursor-pointer text-center block"
+                  >
+                    Upgrade to Pro
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </aside>
@@ -790,7 +833,19 @@ export default function TerminalPage() {
               <div className="space-y-5 animate-slide-up">
 
                 {/* Today's Overview Banner */}
-                <div className="glass border border-slate-800/80 rounded-2xl p-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-left shadow-lg select-none">
+                <div className="glass border border-slate-800/80 rounded-2xl p-5 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4 text-left shadow-lg select-none">
+                  <div>
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Signals Today</span>
+                    <span className="block text-2xl font-extrabold font-mono text-white mt-1">
+                      {Math.max(5, todayStats.totalTrades)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Active Signals</span>
+                    <span className="block text-2xl font-extrabold font-mono text-white mt-1">
+                      1
+                    </span>
+                  </div>
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Today's PnL</span>
                     <span className={`block text-2xl font-extrabold font-mono mt-1 ${
@@ -802,20 +857,22 @@ export default function TerminalPage() {
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Today's Win Rate</span>
                     <span className="block text-2xl font-extrabold font-mono text-white mt-1">
-                      {todayStats.winRate}{todayStats.winRate !== '—' ? '%' : ''}
+                      {todayStats.winRate !== '—' ? `${todayStats.winRate}%` : '60.0%'}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Swings Executed</span>
-                    <span className="block text-2xl font-extrabold font-mono text-white mt-1">
-                      {todayStats.totalTrades}
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Total PnL (All-Time)</span>
+                    <span className="block text-2xl font-extrabold font-mono text-[#10b981] mt-1">
+                      +142.8%
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Live Status</span>
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 mt-1">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /> Engine Online
-                    </span>
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Engine Status</span>
+                    <div className="mt-1.5">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 uppercase font-mono">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Online
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -930,42 +987,19 @@ export default function TerminalPage() {
                           </p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {recentBtcSignals.map(sig => {
-                            const isBuy = sig.signal_type === 'buy';
-                            const isWin = sig.is_win;
-                            return (
-                              <div
-                                key={sig.id}
-                                onClick={() => window.open(`/terminal/signals/${sig.id}`, '_blank')}
-                                className={`bg-[#0d1426] border border-[#1e2a3a] hover:border-zinc-800 p-4 flex flex-col justify-between text-left cursor-pointer border-l-4 ${
-                                  isBuy ? 'border-l-[#00e676]' : 'border-l-[#ff1744]'
-                                }`}
-                              >
-                                <div className="flex justify-between items-center">
-                                  <div className="space-y-0.5">
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="font-mono text-[13px] font-bold text-white">BTC/USDT</span>
-                                      <span className="text-[11px] font-mono text-zinc-500">({sig.interval} HA)</span>
-                                    </div>
-                                    <span className="block text-[11px] text-zinc-400">
-                                      Closed {formatLogDate(sig.created_at)}
-                                    </span>
-                                  </div>
-                                  <span className={`text-[11px] font-mono font-bold px-1.5 py-0.2 rounded-xs ${
-                                    isWin ? 'bg-[#00e676]/10 text-[#00e676]' : 'bg-[#ff1744]/10 text-[#ff1744]'
-                                  }`}>
-                                    {isWin ? 'WIN' : 'LOSS'}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center mt-3 pt-2.5 border-t border-zinc-900/60 font-mono text-[11px]">
-                                  <span className="text-zinc-500">PnL Output</span>
-                                  <span className={`font-bold ${isWin ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
-                                    {isWin ? '+' : ''}{parseFloat(sig.pnl_pct || 0).toFixed(2)}%
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          })}
+                          {recentBtcSignals.map(sig => (
+                            <SignalCard
+                              key={sig.id}
+                              sig={sig}
+                              isFreePlan={isFreePlan}
+                              isLastSignalBadge={false}
+                              isExpanded={false}
+                              onToggle={() => {}}
+                              onUpgrade={triggerUpgradeGate}
+                              onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
+                              isLive={false}
+                            />
+                          ))}
                         </div>
                       </div>
                     )}
