@@ -11,22 +11,7 @@ const PLAN_SYMBOLS = {
             'AVAXUSDT', 'DOTUSDT', 'MATICUSDT', 'LINKUSDT'],
 };
 
-async function fetchFromBinance(symbol, interval, limit) {
-  const binanceInterval = interval.toLowerCase();
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${binanceInterval}&limit=${limit}`;
-  const res = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`Binance API error: ${res.status}`);
-
-  const rows = await res.json();
-  return rows.map(r => ({
-    open_time: new Date(r[0]).toISOString(),
-    open:      parseFloat(r[1]),
-    high:      parseFloat(r[2]),
-    low:       parseFloat(r[3]),
-    close:     parseFloat(r[4]),
-    volume:    parseFloat(r[5]),
-  }));
-}
+import { fetchFromBinance } from '@/lib/binanceFallback';
 
 export async function GET(request) {
   try {

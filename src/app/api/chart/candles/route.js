@@ -18,24 +18,11 @@ function computeHA(candles) {
   return ha;
 }
 
-// ── Fetch candles directly from Binance ────────────────────────────────────────
-async function fetchFromBinance(symbol, interval, limit) {
-  const binanceInterval = interval.toLowerCase();
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${binanceInterval}&limit=${limit}`;
-  const res  = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`Binance API error: ${res.status}`);
+import { fetchFromBinance } from '@/lib/binanceFallback';
 
-  const rows = await res.json();
-
-  const candles = rows.map(r => ({
-    open_time: new Date(r[0]).toISOString(),
-    open:      parseFloat(r[1]),
-    high:      parseFloat(r[2]),
-    low:       parseFloat(r[3]),
-    close:     parseFloat(r[4]),
-    volume:    parseFloat(r[5]),
-  }));
-
+// ── Fetch candles wrapper for local HA ────────────────────────────────────────
+async function getHACandles(symbol, interval, limit) {
+  const candles = await fetchFromBinance(symbol, interval, limit);
   return computeHA(candles);
 }
 
@@ -47,7 +34,7 @@ export async function GET(request) {
     const interval = searchParams.get('interval')  || '15m';
     const limit    = Math.min(parseInt(searchParams.get('limit') || '200'), 1000);
 
-    const candles = await fetchFromBinance(symbol, interval, limit);
+    const candles = await getHACandles(symbol, interval, limit);
 
     return NextResponse.json(candles, {
       headers: {

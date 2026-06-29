@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 // Tickers mock data
@@ -158,6 +158,34 @@ const chartCandles = [
 
 export default function Homepage() {
   const { user } = useAuth();
+  
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+          }
+        });
+      },
+      { threshold: 0.05 }
+    );
+    const elements = document.querySelectorAll(".reveal-on-scroll, .reveal-left, .reveal-right, .reveal-scale");
+    elements.forEach((el) => observer.observe(el));
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      elements.forEach((el) => observer.unobserve(el));
+    };
+  }, []);
+
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ title: "", body: "" });
@@ -353,11 +381,34 @@ export default function Homepage() {
         </div>
       </header>
 
-      {/* CURVED DECORATIVE SWISS LINE (Starts at logo vertical line position) */}
-      <div className="absolute top-16 left-[180px] w-32 h-16 pointer-events-none hidden lg:block z-20">
+      {/* CURVED DECORATIVE SWISS LINE (Starts at logo vertical line position) with Parallax */}
+      <div 
+        className="absolute top-16 left-[180px] w-32 h-16 pointer-events-none hidden lg:block z-20"
+        style={{ transform: `translateY(${scrollY * 0.15}px)` }}
+      >
         <svg width="128" height="64" viewBox="0 0 128 64" fill="none" className="stroke-black" strokeWidth="1.5">
           <path d="M0 0V24C0 32.8366 7.16344 40 16 40H96" strokeLinecap="round" />
           <circle cx="96" cy="40" r="3" className="fill-black" />
+        </svg>
+      </div>
+
+      {/* Floating Retro Parallax Elements */}
+      <div 
+        className="absolute top-48 right-12 w-8 h-8 border border-black rotate-45 pointer-events-none hidden lg:flex items-center justify-center text-xs font-bold text-black select-none z-10"
+        style={{ transform: `translateY(${scrollY * -0.12}px) rotate(45deg)` }}
+      >
+        SD
+      </div>
+      <div 
+        className="absolute top-[600px] left-10 w-6 h-6 border-t border-l border-black pointer-events-none hidden lg:block z-10"
+        style={{ transform: `translateY(${scrollY * 0.08}px)` }}
+      />
+      <div 
+        className="absolute top-[800px] right-24 w-12 h-12 pointer-events-none hidden lg:block z-10 opacity-20"
+        style={{ transform: `translateY(${scrollY * -0.15}px)` }}
+      >
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="stroke-black">
+          <path d="M0 8H48M0 24H48M0 40H48M8 0V48M24 0V48M40 0V48" strokeWidth="1" strokeDasharray="2 2" />
         </svg>
       </div>
 
@@ -589,7 +640,7 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 3 — WHY SANDDOCK (Outcome-First Comparison) */}
-      <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black bg-white">
+      <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black bg-white reveal-on-scroll">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16 items-start">
           <div className="lg:col-span-6 space-y-4 text-left">
             <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
@@ -735,7 +786,7 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 4 — HOW IT WORKS (Image 2 Card Grids Redesign) */}
-      <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-6 border-b border-black">
+      <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-left">
         <div className="text-left mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             System Logic
@@ -803,7 +854,7 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 5 — AI EXPLAINABILITY SHOWCASE (Image 3 Accordion Layout Redesign) */}
-      <section id="explainability" className="py-24 max-w-7xl mx-auto px-6 border-b border-black">
+      <section id="explainability" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-on-scroll">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           
           {/* Left Side: Accordion Lists based on Image 3 */}
@@ -1114,8 +1165,8 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 7 — COIN COVERAGE (Image 4 Zenity Covered Redesign) */}
-      <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black">
+      {/* SECTION 6 — THE SANDDOCK LEDGER */}
+      <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-right">
         <div className="text-left mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             Coin Unlocks
@@ -1222,7 +1273,8 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 9 — SOCIAL WALL / SUCCESS STORIES (Image 5 Testimonial Slider Redesign) */}
-      <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black overflow-hidden relative">
+      {/* SECTION 7 — COIN COVERAGE */}
+      <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black overflow-hidden relative reveal-scale">
         
         {/* Header with fraction counter aligned right */}
         <div className="flex items-end justify-between mb-16">
@@ -1290,7 +1342,8 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 6 — PUBLIC TRACK RECORD (Editorial Swiss Layout) */}
-      <section id="track-record" className="py-24 max-w-7xl mx-auto px-6 border-b border-black">
+      {/* SECTION 8 — TRACK RECORD */}
+      <section id="track-record" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-left">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16 items-end">
           <div className="lg:col-span-7 space-y-4 text-left">
             <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
@@ -1392,7 +1445,8 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 8 — LIFETIME ACCESS SHOWCASE (GrandMaster Deal) */}
-      <section id="pricing" className="py-24 max-w-7xl mx-auto px-6 border-b border-black">
+      {/* SECTION 9 — PRICING SUMMARY */}
+      <section id="pricing" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-on-scroll">
         <div className="text-left max-w-3xl mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             GrandMaster Offer
@@ -1436,8 +1490,8 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 10 — FAQ SECTION (Editorial Border Dividers) */}
-      <section id="faq" className="py-24 max-w-4xl mx-auto px-6 border-b border-black">
+      {/* SECTION 10 — FAQ SECTION */}
+      <section id="faq" className="py-24 max-w-4xl mx-auto px-6 border-b border-black reveal-right">
         <div className="text-left mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             FAQ
@@ -1474,7 +1528,7 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 11 — FINAL CTA BANNER */}
-      <section className="py-24 max-w-7xl mx-auto px-6">
+      <section className="py-24 max-w-7xl mx-auto px-6 reveal-scale">
         <div className="relative rounded-none border border-black bg-[#f4f6fa] p-12 text-left overflow-hidden">
           
           <div className="max-w-2xl space-y-6 relative z-10">
