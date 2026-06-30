@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { toHeikinAshi, detectSwings } from '@/lib/signalsEngineLive';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,14 @@ const PLAN_SYMBOLS = {
             'AVAXUSDT', 'DOTUSDT', 'MATICUSDT', 'LINKUSDT'],
 };
 
+import { createClient } from '@supabase/supabase-js';
 import { fetchFromBinance } from '@/lib/binanceFallback';
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  { auth: { persistSession: false } }
+);
 
 export async function GET(request) {
   try {
@@ -36,6 +44,8 @@ export async function GET(request) {
 
         const entrySwings = swings.filter(s => s.action === 'new');
 
+        const dbPayload = [];
+
         entrySwings.forEach((s, idx) => {
           const isBuy = s.type === 'bot';
           let closePrice = null;
@@ -51,38 +61,48 @@ export async function GET(request) {
             closedAt = nextSig.bar_time;
             
             let change = ((nextSig.price - s.price) / s.price) * 100;
-            
-            // Introduce standard trading losses (approx 60% win rate) for authenticity
-            const forceLoss = (Math.random() > 0.60);
-            if (forceLoss) {
-              const lossMagnitude = (Math.random() * 1.2 + 0.3); // 0.3% to 1.5% loss
-              change = isBuy ? -lossMagnitude : lossMagnitude;
-              closePrice = isBuy ? s.price * (1 - lossMagnitude / 100) : s.price * (1 + lossMagnitude / 100);
-            }
-
             pnlPct = Number((isBuy ? change : -change).toFixed(4));
             isWin = pnlPct >= 0;
           }
 
-          allLogs.push({
-            id: `log-${sym}-${s.bar_time}`,
+          const signalObj = {
             symbol: sym,
-            interval,
+            interval: interval,
             signal_type: isBuy ? 'buy' : 'sell',
-            bar_time: s.bar_time,
+            action: 'new',
             entry_price: s.price,
+            bar_time: s.bar_time,
+            confidence: Math.floor(Math.random() * 20) + 70,
+            rationale: `Automated Heikin Ashi swing ${isBuy ? 'bottom' : 'top'} confirmation for ${sym} on the ${interval} timeframe.`,
             sl_price: s.sl_price,
             tp_price: s.tp2_price,
+            sl_pct: s.sl_price ? Number((Math.abs(s.sl_price - s.price) / s.price * 100).toFixed(2)) : 0,
+            tp_pct: s.tp2_price ? Number((Math.abs(s.tp2_price - s.price) / s.price * 100).toFixed(2)) : 0,
+            closed_at: closedAt,
             close_price: closePrice,
-            close_reason: closeReason,
             pnl_pct: pnlPct,
             is_win: isWin,
+            swing_group_id: crypto.randomUUID(),
+            close_reason: closeReason,
             created_at: s.bar_time,
-            closed_at: closedAt,
-            confidence: Math.floor(Math.random() * 20) + 70,
-            swing_group_id: `group-${sym}-${s.bar_time}`,
+          };
+
+          dbPayload.push(signalObj);
+
+          allLogs.push({
+            id: `log-${sym}-${s.bar_time}`,
+            ...signalObj
           });
         });
+
+        if (dbPayload.length > 0) {
+          const { error: upsertErr } = await supabaseAdmin
+            .from('signals')
+            .upsert(dbPayload, { onConflict: 'symbol,interval,bar_time' });
+          if (upsertErr) {
+            console.error(`[/api/signals/log] Database upsert error for ${sym}:`, upsertErr);
+          }
+        }
       } catch (err) {
         console.warn(`[/api/signals/log] Failed for ${sym}:`, err.message);
       }

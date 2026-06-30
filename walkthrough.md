@@ -18,6 +18,19 @@ We have successfully deleted the legacy `/demo-dashboard` workspace, renamed and
 - **Split Update-then-Insert Pattern**: Refactored the `updateProfile` method inside `src/context/AuthContext.js` to attempt an `update` query first. If no profile row is found, it falls back to an `insert` query. This bypasses client-side insert security violations completely for users with pre-existing profiles.
 - **Profiles RLS Insert Policy**: Added the missing RLS insert policy (`Allow users to insert their own profile`) under `supabase/migrations/20260627230000_create_schema.sql` to permit client-side inserts.
 
+### 3. Signal Log Synchronization
+- **Forced Loss Removal**: Removed the artificial `forceLoss` simulation inside [route.js](file:///c:/Users/GHURU%20PRASAATH/Desktop/sanddock/src/app/api/signals/log/route.js) which randomly introduced simulated losses in the Signal History Ledger. This ensures that the closed signals shown in the Signal Log tab match the true swing signals shown in the Live Signals and the Heikin Ashi chart.
+
+### 4. Signal Database Logging & Performance Charts
+- **Database Unique Constraint**: Applied a unique constraint `unique_symbol_interval_bar_time` on the `public.signals` table via a migration script, ensuring no duplicate entries are saved.
+- **Auto-Sync to Database**: Modified `/api/signals/log` to upsert all processed signals (both open and closed) into the Supabase database.
+- **Closed Signals History API**: Added a new `/api/signals/history` endpoint that queries the closed signals from the database with built-in range filtering (`today`, `1w`, `30d`, `6m`, `1y`).
+- **Premium Performance Line Chart**: Built a premium, interactive custom SVG [PerformanceChart](file:///c:/Users/GHURU%20PRASAATH/Desktop/sanddock/src/components/PerformanceChart.jsx) that calculates and displays running Cumulative P&L and Win Rate with glow states, gradient shadows, grid lines, and interactive tooltips.
+- **Integrations**: 
+  - Integrated range filtering and the performance chart in the [SignalDetailPage](file:///c:/Users/GHURU%20PRASAATH/Desktop/sanddock/src/app/terminal/signals/%5Bid%5D/page.jsx), feeding from the database instead of mock data.
+  - Refactored `fetchSignal` to query Supabase first for the exact parameters (`sl_price`, `tp_price`, etc.) and fall back to the fully populated `/api/signals/log` calculation endpoint instead of `chart/signals`, resolving the price and parameter mismatch bugs.
+- **Unique swing_group_id**: Updated the `/api/signals/log` and `/api/signals/live` route handlers to populate `swing_group_id` with a dynamically generated UUID (v4) via `crypto.randomUUID()`, avoiding any long/custom concatenated identifiers.
+
 ## Verification
 
 - Built the project successfully with `npm run build` and verified compile-time correctness:
@@ -25,11 +38,19 @@ We have successfully deleted the legacy `/demo-dashboard` workspace, renamed and
   Route (app)
   ┌ ○ /
   ├ ○ /_not-found
+  ├ ƒ /api/backtest/results
+  ├ ƒ /api/chart/candles
+  ├ ƒ /api/chart/signals
+  ├ ƒ /api/performance/summary
+  ├ ƒ /api/signals/history
+  ├ ƒ /api/signals/live
+  ├ ƒ /api/signals/log
   ├ ○ /contact
   ├ ○ /login
   ├ ○ /onboarding
   ├ ○ /pricing
   ├ ○ /signup
   ├ ○ /terminal
+  ├ ƒ /terminal/signals/[id]
   └ ○ /verify-email
   ```

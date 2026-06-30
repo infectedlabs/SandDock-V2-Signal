@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import HAChart from '@/components/HAChart';
+import PerformanceChart from '@/components/PerformanceChart';
+import { supabase } from '@/lib/supabase';
 
 // ── Icons (SVG components) ──────────────────────────────────────────────────
 const Icons = {
@@ -59,6 +61,9 @@ export default function SignalDetailPage() {
   const [error, setError] = useState(null);
   const [livePrice, setLivePrice] = useState(null);
   const [isWatched, setIsWatched] = useState(false);
+  const [timeFilter, setTimeFilter] = useState('30d');
+  const [historySignals, setHistorySignals] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
 
   // Modal alert gateway
   const [modalOpen, setModalOpen] = useState(false);
@@ -91,33 +96,68 @@ export default function SignalDetailPage() {
       try {
         setSigLoading(true);
         const idStr = decodeURIComponent(String(params.id));
-        const parts = idStr.split('-');
         let sym = 'BTCUSDT';
-        if (parts.length > 1) {
-          sym = parts[1];
+        let barTime = null;
+
+        if (idStr.includes('-')) {
+          const parts = idStr.split('-');
+          const symIndex = parts.findIndex(p => p.toUpperCase().endsWith('USDT'));
+          if (symIndex !== -1) {
+            sym = parts[symIndex].toUpperCase();
+            const timePart = parts.slice(symIndex + 1).join('-');
+            if (timePart && !isNaN(Date.parse(timePart))) {
+              barTime = new Date(timePart).toISOString();
+            }
+          }
         }
 
-        const intervals = ['15m', '1h', '4h'];
         let foundSignal = null;
 
-        for (const tf of intervals) {
-          const res = await fetch(`/api/chart/signals?symbol=${sym}&interval=${tf}`);
-          if (res.ok) {
-            const signalsList = await res.json();
-            const found = signalsList.find(s => idStr.includes(s.bar_time));
-            if (found) {
-              foundSignal = {
-                id: params.id,
-                symbol: sym,
-                interval: tf,
-                signal_type: found.signal_type,
-                entry_price: found.entry_price,
-                sl_price: found.sl_price,
-                tp_price: found.tp_price,
-                confidence: found.confidence || 88,
-                created_at: found.bar_time
-              };
-              break;
+        // 1. Try querying the database first
+        let query = supabase.from('signals').select('*');
+        if (barTime) {
+          query = query.eq('symbol', sym).eq('bar_time', barTime);
+        } else {
+          query = query.eq('id', idStr);
+        }
+
+        const { data: dbData } = await query.maybeSingle();
+        if (dbData) {
+          foundSignal = {
+            id: dbData.id,
+            symbol: dbData.symbol,
+            interval: dbData.interval,
+            signal_type: dbData.signal_type,
+            entry_price: parseFloat(dbData.entry_price),
+            sl_price: dbData.sl_price ? parseFloat(dbData.sl_price) : null,
+            tp_price: dbData.tp_price ? parseFloat(dbData.tp_price) : null,
+            confidence: dbData.confidence || 88,
+            created_at: dbData.bar_time,
+          };
+        }
+
+        // 2. Fallback to API calculation if database entry doesn't exist yet
+        if (!foundSignal) {
+          const intervals = ['15m', '1h', '4h'];
+          for (const tf of intervals) {
+            const res = await fetch(`/api/signals/log?symbol=${sym}&interval=${tf}&plan=${profile?.plan || 'free'}`);
+            if (res.ok) {
+              const signalsList = await res.json();
+              const found = signalsList.find(s => idStr.includes(s.bar_time) || (barTime && new Date(s.bar_time).getTime() === new Date(barTime).getTime()));
+              if (found) {
+                foundSignal = {
+                  id: params.id,
+                  symbol: sym,
+                  interval: tf,
+                  signal_type: found.signal_type,
+                  entry_price: parseFloat(found.entry_price),
+                  sl_price: found.sl_price ? parseFloat(found.sl_price) : null,
+                  tp_price: found.tp_price ? parseFloat(found.tp_price) : null,
+                  confidence: found.confidence || 88,
+                  created_at: found.bar_time,
+                };
+                break;
+              }
             }
           }
         }
@@ -167,6 +207,26 @@ export default function SignalDetailPage() {
     const interval = setInterval(fetchLivePrice, 5000);
     return () => clearInterval(interval);
   }, [signal]);
+
+  // Fetch closed signals history for chart & stats
+  useEffect(() => {
+    if (!signal) return;
+    const fetchHistory = async () => {
+      try {
+        setHistoryLoading(true);
+        const res = await fetch(`/api/signals/history?symbol=${signal.symbol}&interval=${signal.interval}&filter=${timeFilter}`);
+        if (res.ok) {
+          const data = await res.json();
+          setHistorySignals(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch history:', err);
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+    fetchHistory();
+  }, [signal, timeFilter]);
 
   if (loading || sigLoading) {
     return (
@@ -235,18 +295,6 @@ export default function SignalDetailPage() {
   // What to Watch Targets
   const targetConfirm = formatPrice(isBuy ? signal.entry_price * 1.004 : signal.entry_price * 0.996);
   const targetInvalidate = formatPrice(isBuy ? signal.entry_price * 0.99 : signal.entry_price * 1.01);
-
-  // Mock historical log
-  const mockHistory = [
-    { date: "Jun 29", type: isBuy ? "BUY" : "SELL", entry: signal.entry_price, exit: "Open", result: "Live", free: true },
-    { date: "Jun 28", type: isBuy ? "SELL" : "BUY", entry: signal.entry_price * 1.012, exit: signal.entry_price * 0.998, result: "+1.38%", free: true },
-    { date: "Jun 27", type: isBuy ? "BUY" : "SELL", entry: signal.entry_price * 0.99, exit: signal.entry_price * 0.995, result: "+0.51%", free: true },
-    { date: "Jun 26", type: isBuy ? "SELL" : "BUY", entry: signal.entry_price * 1.018, exit: signal.entry_price * 1.0, result: "+1.77%", free: true },
-    { date: "Jun 25", type: isBuy ? "BUY" : "SELL", entry: signal.entry_price * 0.985, exit: signal.entry_price * 0.962, result: "-2.33%", free: true },
-    { date: "Jun 24", type: isBuy ? "SELL" : "BUY", entry: signal.entry_price * 1.01, exit: signal.entry_price * 1.005, result: "+0.50%", free: false },
-    { date: "Jun 23", type: isBuy ? "BUY" : "SELL", entry: signal.entry_price * 0.978, exit: signal.entry_price * 0.983, result: "+0.51%", free: false },
-    { date: "Jun 22", type: isBuy ? "SELL" : "BUY", entry: signal.entry_price * 1.005, exit: signal.entry_price * 0.992, result: "+1.29%", free: false },
-  ];
 
   return (
     <div className="h-screen bg-[#020617] text-white font-mono antialiased overflow-hidden flex flex-col selection:bg-[#3D5AFE]/20 selection:text-[#3D5AFE] animate-fade-in">
@@ -597,65 +645,118 @@ export default function SignalDetailPage() {
             </div>
           </div>
 
+          {/* Timeframe Filter for Signal History & Performance */}
+          <div className="bg-[#0a0f1d] border border-slate-800/80 p-4 sm:p-5 rounded-none glass shadow-2xl flex flex-col justify-between shrink-0 text-left space-y-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+              <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest font-mono">
+                Signal History Filter
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { v: 'today', l: 'Today' },
+                  { v: '1w', l: '1 Week' },
+                  { v: '30d', l: '30d' },
+                  { v: '6m', l: '6m' },
+                  { v: '1y', l: '1y' },
+                ].map(opt => (
+                  <button
+                    key={opt.v}
+                    onClick={() => setTimeFilter(opt.v)}
+                    className={`px-2.5 py-1 text-[10px] font-mono font-bold uppercase transition-colors border cursor-pointer ${
+                      timeFilter === opt.v
+                        ? 'bg-brand-orange border-brand-orange text-white font-extrabold'
+                        : 'bg-transparent border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {opt.l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Performance line chart showing P&L and win rate */}
+            <div className="w-full">
+              {historyLoading ? (
+                <div className="h-64 flex flex-col items-center justify-center border border-slate-800 bg-[#070b19]/60 p-6 text-center">
+                  <div className="w-5 h-5 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
+                  <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-wider mt-3">Loading stats & chart...</p>
+                </div>
+              ) : (
+                <PerformanceChart signals={historySignals} />
+              )}
+            </div>
+          </div>
+
           {/* History log table for the coin */}
           <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-none glass shadow-xl text-left">
             <div className="flex justify-between items-center mb-4">
               <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
                 Ledger Signal History for {coinLabel}
               </span>
-              <span className="text-[10px] font-bold text-brand-orange uppercase">15m HA</span>
+              <span className="text-[10px] font-bold text-brand-orange uppercase">{signal.interval} HA</span>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-xs font-mono text-slate-300">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-500 uppercase text-[10px] font-bold">
-                    <th className="pb-2">Date</th>
-                    <th className="pb-2">Type</th>
-                    <th className="pb-2">Entry</th>
-                    <th className="pb-2">Exit</th>
-                    <th className="pb-2 text-right">Result</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {mockHistory.map((h, i) => {
-                    const showRow = !isFreePlan || h.free;
-                    return (
-                      <tr key={i} className="hover:bg-slate-900/40 transition-colors">
-                        <td className="py-3">{h.date}</td>
-                        <td className="py-3">
-                          <span className={`font-bold ${h.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {h.type}
-                          </span>
-                        </td>
-                        <td className="py-3 font-semibold">
-                          {showRow ? formatPrice(h.entry) : <span className="blur-xs select-none">$59,100.00</span>}
-                        </td>
-                        <td className="py-3">
-                          {showRow ? (typeof h.exit === 'number' ? formatPrice(h.exit) : h.exit) : <span className="blur-xs select-none">$59,400.00</span>}
-                        </td>
-                        <td className="py-3 text-right font-bold">
-                          {showRow ? (
-                            <span className={h.result.startsWith('+') ? 'text-emerald-400' : h.result === 'Live' ? 'text-white' : 'text-rose-400'}>
-                              {h.result}
+              {historyLoading ? (
+                <div className="flex items-center justify-center py-8 gap-3">
+                  <div className="w-4 h-4 border border-slate-600 border-t-[#3D5AFE] rounded-full animate-spin" />
+                  <span className="text-[12px] font-mono text-slate-500 uppercase">Loading history...</span>
+                </div>
+              ) : historySignals.length === 0 ? (
+                <div className="text-center py-8 border border-dashed border-slate-800 text-[12px] text-zinc-500">
+                  No historical closed signals found in this window.
+                </div>
+              ) : (
+                <table className="w-full border-collapse text-left text-xs font-mono text-slate-300">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-500 uppercase text-[10px] font-bold">
+                      <th className="pb-2">Date</th>
+                      <th className="pb-2">Type</th>
+                      <th className="pb-2">Entry</th>
+                      <th className="pb-2">Exit</th>
+                      <th className="pb-2 text-right">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {historySignals.map((h, i) => {
+                      const showRow = !isFreePlan || i < 3; // free plan gets 3 rows preview
+                      return (
+                        <tr key={i} className="hover:bg-slate-900/40 transition-colors">
+                          <td className="py-3">{new Date(h.bar_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
+                          <td className="py-3">
+                            <span className={`font-bold ${h.signal_type === 'buy' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              {h.signal_type.toUpperCase()}
                             </span>
-                          ) : (
-                            <span 
-                              onClick={() => handleOpenModal("Unlock History Logs", "Reveal full historical signal listings, trade verification logs, and backtest files on Pro.")}
-                              className="text-[10px] text-[#3D5AFE] hover:underline cursor-pointer flex items-center justify-end font-bold"
-                            >
-                              <Icons.Lock /> Pro
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          </td>
+                          <td className="py-3 font-semibold">
+                            {showRow ? formatPrice(h.entry_price) : <span className="blur-xs select-none">$59,100.00</span>}
+                          </td>
+                          <td className="py-3">
+                            {showRow ? formatPrice(h.close_price) : <span className="blur-xs select-none">$59,400.00</span>}
+                          </td>
+                          <td className="py-3 text-right font-bold">
+                            {showRow ? (
+                              <span className={h.is_win ? 'text-emerald-400' : 'text-rose-400'}>
+                                {h.is_win ? '+' : ''}{parseFloat(h.pnl_pct || 0).toFixed(2)}% {h.is_win ? '✅' : '❌'}
+                              </span>
+                            ) : (
+                              <span 
+                                onClick={() => handleOpenModal("Unlock History Logs", "Reveal full historical signal listings, trade verification logs, and backtest files on Pro.")}
+                                className="text-[10px] text-[#3D5AFE] hover:underline cursor-pointer flex items-center justify-end font-bold"
+                              >
+                                <Icons.Lock /> Pro
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </div>
 
-            {isFreePlan && (
+            {isFreePlan && historySignals.length > 3 && (
               <div 
                 onClick={() => handleOpenModal("Unlock Signal History", "Upgrade to Pro to access all historical signals, ledger entry-exit exports, and full coin directories.")}
                 className="mt-4 border border-dashed border-[#3D5AFE]/30 bg-[#3D5AFE]/5 p-3 text-center text-[11px] text-[#3D5AFE] font-bold uppercase cursor-pointer hover:bg-[#3D5AFE]/10 transition-colors"

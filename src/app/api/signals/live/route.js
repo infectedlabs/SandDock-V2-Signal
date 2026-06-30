@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { toHeikinAshi, detectSwings } from '@/lib/signalsEngineLive';
 
 export const dynamic = 'force-dynamic';
@@ -86,7 +87,7 @@ export async function GET(request) {
               confidence: conf,
               rationale: rat,
               created_at: s.bar_time,
-              swing_group_id: `group-${sym}-${s.bar_time}`,
+              swing_group_id: crypto.randomUUID(),
             });
           }
         });

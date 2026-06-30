@@ -7,6 +7,7 @@ import { useSignals } from '@/hooks/useSignals';
 import { useSignalLog } from '@/hooks/useSignalLog';
 import { usePerformance } from '@/hooks/usePerformance';
 import HAChart from '@/components/HAChart';
+import PerformanceChart from '@/components/PerformanceChart';
 
 // ── SVG Icons (Replacing Emojis) ─────────────────────────────────────────────
 const Icons = {
@@ -501,6 +502,11 @@ export default function TerminalPage() {
   // Detail Drawer state
   const [selectedDrawerSignal, setSelectedDrawerSignal] = useState(null);
   
+  // Performance chart & history states
+  const [perfTimeFilter, setPerfTimeFilter] = useState('30d');
+  const [perfSignals, setPerfSignals] = useState([]);
+  const [perfLoading, setPerfLoading] = useState(true);
+
   // Live price poll
   const [liveBtcPrice, setLiveBtcPrice] = useState(null);
   useEffect(() => {
@@ -537,6 +543,58 @@ export default function TerminalPage() {
     const interval = setInterval(fetchLivePrice, 5000);
     return () => clearInterval(interval);
   }, [selectedSymbol]);
+
+  // Fetch closed performance signals history based on filter
+  useEffect(() => {
+    const fetchPerfHistory = async () => {
+      try {
+        setPerfLoading(true);
+        const res = await fetch(`/api/signals/history?symbol=${selectedSymbol}&interval=${selectedInterval}&filter=${perfTimeFilter}`);
+        if (res.ok) {
+          const data = await res.json();
+          setPerfSignals(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch performance history:', err);
+      } finally {
+        setPerfLoading(false);
+      }
+    };
+    fetchPerfHistory();
+  }, [selectedSymbol, selectedInterval, perfTimeFilter]);
+
+  // Compute stats dynamically based on performance signals
+  const computedStats = useMemo(() => {
+    if (!perfSignals || perfSignals.length === 0) return null;
+    const completed = perfSignals;
+    const wins = completed.filter(s => s.is_win === true).length;
+    const losses = completed.filter(s => s.is_win === false).length;
+    const pnlValues = completed.map(s => parseFloat(s.pnl_pct || 0));
+    
+    const avgPnl = pnlValues.length > 0
+      ? (pnlValues.reduce((a, b) => a + b, 0) / pnlValues.length).toFixed(2)
+      : '0.00';
+    const bestTrade = pnlValues.length > 0 ? Math.max(...pnlValues).toFixed(2) : '0.00';
+    const worstTrade = pnlValues.length > 0 ? Math.min(...pnlValues).toFixed(2) : '0.00';
+    const winRate = completed.length > 0
+      ? ((wins / completed.length) * 100).toFixed(1)
+      : '0.0';
+
+    const positiveSum = pnlValues.filter(p => p > 0).reduce((sum, p) => sum + p, 0);
+    const negativeSum = Math.abs(pnlValues.filter(p => p < 0).reduce((sum, p) => sum + p, 0));
+    const profitFactor = negativeSum > 0 ? (positiveSum / negativeSum).toFixed(2) : positiveSum > 0 ? 'Infinite' : '—';
+
+    return {
+      total_signals: completed.length,
+      wins,
+      losses,
+      win_rate_pct: winRate,
+      avg_pnl: avgPnl,
+      best_trade: bestTrade,
+      worst_trade: worstTrade,
+      profit_factor: profitFactor,
+    };
+  }, [perfSignals]);
 
   useEffect(() => {
     if (!loading) {
@@ -1150,39 +1208,65 @@ export default function TerminalPage() {
 
                 {activeSubTab === 'performance' && (
                   <div className="space-y-5">
-                    {statsLoading ? (
-                      <div className="flex items-center gap-3 py-8">
-                        <div className="w-4 h-4 border border-zinc-600 border-t-brand-orange rounded-full animate-spin" />
-                        <span className="text-[12px] font-mono text-zinc-500 uppercase">Loading stats...</span>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {/* Timeframe Filter Selector */}
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-[#0d1426] border border-[#1e2a3a] p-4 text-left">
+                      <span className="block text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-400">
+                        Performance History Range
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
                         {[
-                          { label: 'Total Signals', val: stats?.total_signals ?? '—', note: 'All-time' },
-                          { label: 'Win Rate',      val: stats?.win_rate_pct != null ? `${stats.win_rate_pct}%` : '—', note: 'Wins vs losses' },
-                          { label: 'Wins / Losses', val: stats ? `${stats.wins}W / ${stats.losses}L` : '—', note: 'Completed trades' },
-                          { label: 'Profit Factor', val: stats?.profit_factor ?? '—', note: 'Gross wins / losses' },
-                          { label: 'Best Trade',    val: stats?.best_trade != null ? `+${stats.best_trade}%` : '—', note: 'Historical high' },
-                          { label: 'Worst Trade',   val: stats?.worst_trade != null ? `${stats.worst_trade}%` : '—', note: 'Historical low' },
-                          { label: 'Average PnL',   val: stats?.avg_pnl != null ? `${parseFloat(stats.avg_pnl) >= 0 ? '+' : ''}${stats.avg_pnl}%` : '—', note: 'Per closed swing' },
-                          { label: 'Open Signals',  val: stats?.open_signals ?? '—', note: 'Currently active' },
-                        ].map((s, i) => (
-                          <div key={i} className="bg-[#0d1426] border border-[#1e2a3a] p-4 text-left space-y-1">
-                            <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">{s.label}</span>
-                            <span className="block text-[22px] font-bold font-mono text-white">{s.val}</span>
-                            <span className="block text-[11px] text-zinc-400 normal-case">{s.note}</span>
-                          </div>
+                          { v: 'today', l: 'Today' },
+                          { v: '1w', l: '1 Week' },
+                          { v: '30d', l: '30 Days' },
+                          { v: '6m', l: '6 Months' },
+                          { v: '1y', l: '1 Year' },
+                        ].map(opt => (
+                          <button
+                            key={opt.v}
+                            onClick={() => setPerfTimeFilter(opt.v)}
+                            className={`px-3 py-1.5 text-[11px] font-mono font-bold uppercase transition-colors border cursor-pointer ${
+                              perfTimeFilter === opt.v
+                                ? 'bg-brand-orange border-brand-orange text-white font-extrabold'
+                                : 'bg-transparent border-slate-800 text-zinc-500 hover:text-white'
+                            }`}
+                          >
+                            {opt.l}
+                          </button>
                         ))}
                       </div>
-                    )}
+                    </div>
 
-                    {!statsLoading && stats?.completed_trades === 0 && (
-                      <div className="bg-[#0d1426] border border-dashed border-[#1e2a3a] p-8 text-center space-y-3">
-                        <span className="text-2xl">📊</span>
-                        <p className="text-[12px] text-zinc-400 normal-case max-w-sm mx-auto leading-relaxed">
-                          Performance charts appear once signals have closed trades.
-                          Run <code className="font-mono bg-zinc-900 px-1 text-[11px]">backtest_worker.py</code> for instant history.
-                        </p>
+                    {perfLoading ? (
+                      <div className="flex items-center gap-3 py-8">
+                        <div className="w-4 h-4 border border-zinc-600 border-t-brand-orange rounded-full animate-spin" />
+                        <span className="text-[12px] font-mono text-zinc-500 uppercase">Loading performance stats...</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {[
+                            { label: 'Total Signals', val: computedStats?.total_signals ?? '—', note: `In selected range` },
+                            { label: 'Win Rate',      val: computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '—', note: 'Wins vs losses' },
+                            { label: 'Wins / Losses', val: computedStats ? `${computedStats.wins}W / ${computedStats.losses}L` : '—', note: 'Completed trades' },
+                            { label: 'Profit Factor', val: computedStats?.profit_factor ?? '—', note: 'Gross wins / losses' },
+                            { label: 'Best Trade',    val: computedStats?.best_trade != null ? `+${computedStats.best_trade}%` : '—', note: 'Selected range high' },
+                            { label: 'Worst Trade',   val: computedStats?.worst_trade != null ? `${computedStats.worst_trade}%` : '—', note: 'Selected range low' },
+                            { label: 'Average PnL',   val: computedStats?.avg_pnl != null ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${computedStats.avg_pnl}%` : '—', note: 'Per closed swing' },
+                            { label: 'Open Signals',  val: todayStats.length, note: 'Today\'s active signals' },
+                          ].map((s, i) => (
+                            <div key={i} className="bg-[#0d1426] border border-[#1e2a3a] p-4 text-left space-y-1">
+                              <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">{s.label}</span>
+                              <span className="block text-[22px] font-bold font-mono text-white">{s.val}</span>
+                              <span className="block text-[11px] text-zinc-400 normal-case">{s.note}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Interactive Line Chart */}
+                        <div className="w-full">
+                          <PerformanceChart signals={perfSignals} />
+                        </div>
                       </div>
                     )}
                   </div>
