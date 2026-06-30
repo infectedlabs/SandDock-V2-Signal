@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
-  const { signUpWithEmail, signInWithGoogle } = useAuth();
+  const { signUpWithEmail, signInWithGoogle, user, loading: authLoading } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,6 +13,26 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  // Redirect to terminal if already authenticated
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/terminal');
+    }
+  }, [user, authLoading, router]);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
+          <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-12 h-12 animate-pulse object-contain" />
+          <span className="text-xs font-bold uppercase tracking-widest font-mono text-zinc-500 animate-pulse">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   const handleSignup = async (e) => {
     e.preventDefault();

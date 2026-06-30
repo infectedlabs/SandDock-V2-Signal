@@ -33,6 +33,13 @@ export default function PerformanceChart({ signals = [] }) {
 
   const points = chartData;
 
+  const labelIndices = useMemo(() => {
+    if (points.length === 0) return [];
+    if (points.length === 1) return [0];
+    if (points.length === 2) return [0, 1];
+    return Array.from(new Set([0, Math.floor(points.length / 2), points.length - 1]));
+  }, [points.length]);
+
   // Layout parameters for SVG
   const width = 600;
   const height = 260;
@@ -259,7 +266,7 @@ export default function PerformanceChart({ signals = [] }) {
           )}
 
           {/* X Axis Labels */}
-          {points.length > 0 && [0, Math.floor(points.length / 2), points.length - 1].map((idx) => {
+          {points.length > 0 && labelIndices.map((idx) => {
             const p = points[idx];
             if (!p) return null;
             return (

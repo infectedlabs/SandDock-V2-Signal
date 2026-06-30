@@ -50,11 +50,12 @@ export default function HAChart({
 
       // Destroy previous instance on re-render
       if (chartRef.current) {
-        try {
-          chartRef.current.remove();
-        } catch (e) {}
+        const prevChart = chartRef.current;
         chartRef.current  = null;
         seriesRef.current = null;
+        try {
+          prevChart.remove();
+        } catch (e) {}
       }
 
       const chart = createChart(containerRef.current, {
@@ -77,8 +78,7 @@ export default function HAChart({
           timeVisible:    true,
           secondsVisible: false,
         },
-        width:  containerRef.current.clientWidth,
-        height: 460,
+        autoSize: true,
       });
 
       if (!isMounted) {
@@ -262,8 +262,7 @@ export default function HAChart({
       setLoading(false);
 
       resizeObserver = new ResizeObserver(() => {
-        if (isMounted && chartRef.current && containerRef.current) {
-          chartRef.current.applyOptions({ width: containerRef.current.clientWidth });
+        if (isMounted && containerRef.current) {
           updateCardPositions();
         }
       });
@@ -278,14 +277,17 @@ export default function HAChart({
       isMounted = false;
       if (livePoll) clearInterval(livePoll);
       if (resizeObserver) resizeObserver.disconnect();
-      if (chartRef.current) {
+      
+      const toRemove = chartRef.current;
+      chartRef.current  = null;
+      seriesRef.current = null;
+      
+      if (toRemove) {
         try {
-          chartRef.current.remove();
+          toRemove.remove();
         } catch (e) {}
-        chartRef.current  = null;
-        seriesRef.current = null;
       }
-      if (chartLocal) {
+      if (chartLocal && chartLocal !== toRemove) {
         try {
           chartLocal.remove();
         } catch (e) {}
@@ -428,7 +430,7 @@ export default function HAChart({
           );
         })}
 
-        <div ref={containerRef} style={{ visibility: loading || noData ? 'hidden' : 'visible' }} />
+        <div ref={containerRef} className="w-full h-[460px]" style={{ visibility: loading || noData ? 'hidden' : 'visible' }} />
       </div>
 
       {/* Modern Legend */}
