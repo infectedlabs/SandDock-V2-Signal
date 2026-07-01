@@ -105,7 +105,7 @@ export default function HAChart({
       try {
         // ── Load HA candles ─────────────────────────────────────────────────
         const candleRes = await fetch(
-          `/api/chart/candles?symbol=${selectedSymbol}&interval=${selectedInterval}&limit=300`
+          `/api/chart/candles?symbol=${selectedSymbol}&interval=${selectedInterval}&limit=500`
         );
         if (!isMounted) return;
         const candles = await candleRes.json();
@@ -195,7 +195,7 @@ export default function HAChart({
           if (!isMounted) return;
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1500);
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
             const tickerRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${selectedSymbol}`, {
               signal: controller.signal
             });
@@ -227,12 +227,10 @@ export default function HAChart({
 
             updateCardPositions();
           } catch (e) {
-            console.warn('[HAChart] Live poll failed, simulating price tick:', e.message);
-            const prevPrice = livePriceRef.current || lastCandle?.close || 67000;
-            const currentPrice = prevPrice + (Math.random() - 0.5) * (prevPrice * 0.0005);
-            livePriceRef.current = currentPrice;
+            console.warn('[HAChart] Live poll failed, retaining previous price:', e.message);
+            const currentPrice = livePriceRef.current;
 
-            if (lastCandle) {
+            if (currentPrice && lastCandle) {
               const haClose = (lastCandle.open + lastCandle.high + lastCandle.low + currentPrice) / 4;
               const haHigh = Math.max(lastCandle.high, lastCandle.open, haClose, currentPrice);
               const haLow = Math.min(lastCandle.low, lastCandle.open, haClose, currentPrice);

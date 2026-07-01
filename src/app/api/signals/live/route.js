@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { createClient } from '@supabase/supabase-js';
+import { memoryCache, runWithTimeout } from '@/lib/memoryCache';
 import { toHeikinAshi, detectSwings } from '@/lib/signalsEngineLive';
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  { auth: { persistSession: false } }
+);
 
 export const dynamic = 'force-dynamic';
 
@@ -52,49 +60,116 @@ export async function GET(request) {
     const symbol        = searchParams.get('symbol');
     const signal_type   = searchParams.get('signal_type');
     const interval      = searchParams.get('interval') || '15m';
-    const limit         = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
+    const limit         = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
 
     const allowedSymbols = PLAN_SYMBOLS[plan] ?? PLAN_SYMBOLS['free'];
     const targetSymbols = symbol ? [symbol.toUpperCase()] : allowedSymbols;
 
     const allSignals = [];
 
-    await Promise.all(targetSymbols.map(async (sym) => {
-      try {
-        const candles = await fetchFromBinance(sym, interval, 300);
-        const ha = toHeikinAshi(candles);
-        const swings = detectSwings(ha, 10, 'Intraday');
+    const timeframes = ['15m', '1h', '4h'];
 
-        swings.forEach((s) => {
-          // We only care about active/latest signal events
-          if (s.action === 'new' || s.action === 'slide') {
-            const barIndex = ha.findIndex(c => c.open_time === s.bar_time);
-            const conf = computeConfidence(ha, barIndex >= 0 ? barIndex : ha.length - 1);
-            const rat = generateRationale(sym, s.type, interval, barIndex >= 0 ? barIndex : ha.length - 1, ha);
+    await Promise.all(targetSymbols.flatMap((sym) =>
+      timeframes.map(async (tf) => {
+        const cacheKey = `${sym}_${tf}`;
+        try {
+          const candles = await fetchFromBinance(sym, tf, 500);
+          const ha = toHeikinAshi(candles);
+          const swings = detectSwings(ha, 10, 'Intraday');
 
-            allSignals.push({
-              id: `live-${sym}-${s.bar_time}-${s.action}`,
-              symbol: sym,
-              interval,
-              signal_type: s.type === 'bot' ? 'buy' : 'sell',
-              action: s.action,
-              bar_time: s.bar_time,
-              entry_price: s.price,
-              sl_price: s.sl_price,
-              tp_price: s.tp2_price,
-              sl_pct: s.sl_price ? Number((Math.abs(s.sl_price - s.price) / s.price * 100).toFixed(2)) : 0,
-              tp_pct: s.tp2_price ? Number((Math.abs(s.tp2_price - s.price) / s.price * 100).toFixed(2)) : 0,
-              confidence: conf,
-              rationale: rat,
-              created_at: s.bar_time,
-              swing_group_id: crypto.randomUUID(),
-            });
+          const symSignals = [];
+          swings.forEach((s) => {
+            // We only care about active/latest signal events
+            if (s.action === 'new' || s.action === 'slide') {
+              const barIndex = ha.findIndex(c => c.open_time === s.bar_time);
+              const conf = computeConfidence(ha, barIndex >= 0 ? barIndex : ha.length - 1);
+              const rat = generateRationale(sym, s.type, tf, barIndex >= 0 ? barIndex : ha.length - 1, ha);
+
+              const sigObj = {
+                id: `live-${sym}-${s.bar_time}-${s.action}`,
+                symbol: sym,
+                interval: tf,
+                signal_type: s.type === 'bot' ? 'buy' : 'sell',
+                action: s.action,
+                bar_time: s.bar_time,
+                entry_price: s.price,
+                sl_price: s.sl_price,
+                tp_price: s.tp2_price,
+                sl_pct: s.sl_price ? Number((Math.abs(s.sl_price - s.price) / s.price * 100).toFixed(2)) : 0,
+                tp_pct: s.tp2_price ? Number((Math.abs(s.tp2_price - s.price) / s.price * 100).toFixed(2)) : 0,
+                confidence: conf,
+                rationale: rat,
+                created_at: s.bar_time,
+                swing_group_id: crypto.randomUUID(),
+              };
+              symSignals.push(sigObj);
+              if (tf === interval) {
+                allSignals.push(sigObj);
+              }
+            }
+          });
+
+          // Save to server-side in-memory cache
+          memoryCache.live[cacheKey] = symSignals;
+        } catch (err) {
+          console.warn(`[/api/signals/live] Binance fetch failed for ${sym} ${tf}, reading cache:`, err.message);
+          let loadedFromDb = false;
+
+          // 1. Fallback to Supabase cache with a timeout
+          try {
+            const { data: cachedSignals, error: dbError } = await runWithTimeout(
+              supabaseAdmin
+                .from('signals')
+                .select('*')
+                .eq('symbol', sym)
+                .eq('interval', tf)
+                .order('bar_time', { ascending: false })
+                .limit(5),
+              1500
+            );
+
+            if (!dbError && cachedSignals && cachedSignals.length > 0) {
+              loadedFromDb = true;
+              cachedSignals.forEach(sig => {
+                const sigObj = {
+                  id: `live-${sig.symbol}-${sig.bar_time}-${sig.action || 'new'}`,
+                  symbol: sig.symbol,
+                  interval: sig.interval,
+                  signal_type: sig.signal_type,
+                  action: sig.action || 'new',
+                  bar_time: sig.bar_time,
+                  entry_price: parseFloat(sig.entry_price),
+                  sl_price: sig.sl_price ? parseFloat(sig.sl_price) : null,
+                  tp_price: sig.tp_price ? parseFloat(sig.tp_price) : null,
+                  sl_pct: sig.sl_pct ? parseFloat(sig.sl_pct) : 0,
+                  tp_pct: sig.tp_pct ? parseFloat(sig.tp_pct) : 0,
+                  confidence: sig.confidence || 80,
+                  rationale: sig.rationale,
+                  created_at: sig.bar_time,
+                  swing_group_id: sig.swing_group_id || crypto.randomUUID(),
+                };
+                if (tf === interval) {
+                  allSignals.push(sigObj);
+                }
+              });
+            }
+          } catch (dbErr) {
+            console.warn(`[/api/signals/live] DB query fallback failed/timed out for ${sym} ${tf}:`, dbErr.message);
           }
-        });
-      } catch (err) {
-        console.warn(`[/api/signals/live] Failed to fetch/compute for ${sym}:`, err.message);
-      }
-    }));
+
+          // 2. Fallback to server memory cache
+          if (!loadedFromDb) {
+            const memCache = memoryCache.live[cacheKey];
+            if (memCache && memCache.length > 0) {
+              console.log(`[/api/signals/live] Serving from in-memory fallback cache for ${sym} ${tf}`);
+              if (tf === interval) {
+                allSignals.push(...memCache);
+              }
+            }
+          }
+        }
+      })
+    ));
 
     // Filter by signal_type if requested
     let filtered = allSignals;

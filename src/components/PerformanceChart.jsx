@@ -133,43 +133,46 @@ export default function PerformanceChart({ signals = [] }) {
   }
 
   return (
-    <div className="bg-[#0a0f1d] border border-slate-800 p-4 sm:p-5 rounded-none shadow-2xl relative select-none">
+    <div className="bg-[#0b1224]/80 backdrop-blur-md border border-[#1e2d4a]/70 p-5 rounded-2xl shadow-xl relative select-none">
       
       {/* Header and Toggles */}
-      <div className="flex justify-between items-center mb-5">
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+        {/* Toggle Pill Container */}
+        <div className="flex p-1 bg-slate-950/50 rounded-full border border-slate-800/60 shadow-inner self-start">
           <button
             onClick={() => setActiveTab('pnl')}
-            className={`px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors border cursor-pointer ${
+            className={`px-4 py-2 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
               activeTab === 'pnl'
-                ? 'bg-brand-orange border-brand-orange text-white font-extrabold'
-                : 'bg-transparent border-slate-800 text-slate-400 hover:text-white'
+                ? 'bg-[#3D5AFE] text-white shadow-lg shadow-[#3D5AFE]/20 font-extrabold'
+                : 'bg-transparent text-slate-400 hover:text-white border-0'
             }`}
           >
             PnL Performance
           </button>
           <button
             onClick={() => setActiveTab('winrate')}
-            className={`px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider transition-colors border cursor-pointer ${
+            className={`px-4 py-2 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
               activeTab === 'winrate'
-                ? 'bg-brand-orange border-brand-orange text-white font-extrabold'
-                : 'bg-transparent border-slate-800 text-slate-400 hover:text-white'
+                ? 'bg-[#3D5AFE] text-white shadow-lg shadow-[#3D5AFE]/20 font-extrabold'
+                : 'bg-transparent text-slate-400 hover:text-white border-0'
             }`}
           >
             Win Rate %
           </button>
         </div>
 
-        <div className="text-right">
-          <span className="text-[10px] text-slate-400 uppercase block tracking-widest font-extrabold">
-            {activeTab === 'pnl' ? 'Net Cumulative PnL' : 'Running Win Rate'}
+        <div className="text-left sm:text-right">
+          <span className="text-[9px] text-slate-500 uppercase block tracking-widest font-extrabold">
+            {activeTab === 'pnl' ? 'Net Cumulative Outcome' : 'Cumulative Success Accuracy'}
           </span>
-          <span className={`text-lg font-black font-mono ${
+          <span className={`text-xl font-black font-mono tracking-tight ${
             activeTab === 'pnl'
-              ? points[points.length - 1].cumulativePnl >= 0 ? 'text-emerald-400' : 'text-rose-400'
-              : 'text-cyan-400'
+              ? points[points.length - 1].cumulativePnl >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
+              : 'text-[#06b6d4]'
           }`}>
-            {activeTab === 'pnl' ? `${points[points.length - 1].cumulativePnl >= 0 ? '+' : ''}${points[points.length - 1].cumulativePnl}%` : `${points[points.length - 1].winRate}%`}
+            {activeTab === 'pnl' 
+              ? `${points[points.length - 1].cumulativePnl >= 0 ? '+' : ''}${points[points.length - 1].cumulativePnl.toFixed(2)}%` 
+              : `${points[points.length - 1].winRate.toFixed(1)}%`}
           </span>
         </div>
       </div>
@@ -185,16 +188,22 @@ export default function PerformanceChart({ signals = [] }) {
           viewBox={`0 0 ${width} ${height}`} 
           className="w-full h-auto overflow-visible"
         >
-          {/* Gradients */}
+          {/* Gradients and Neon Glow Filters */}
           <defs>
             <linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#00e676" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#00e676" stopOpacity="0.0" />
             </linearGradient>
             <linearGradient id="winrateGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.3" />
+              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.25" />
               <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
             </linearGradient>
+            <filter id="neonGlowPnl" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#00e676" floodOpacity="0.35" />
+            </filter>
+            <filter id="neonGlowWin" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#06b6d4" floodOpacity="0.35" />
+            </filter>
           </defs>
 
           {/* Grid lines */}
@@ -207,15 +216,15 @@ export default function PerformanceChart({ signals = [] }) {
                   y1={y} 
                   x2={width - padding.right} 
                   y2={y} 
-                  stroke="#475569" 
+                  stroke="#334155" 
                   strokeWidth="0.8" 
                   strokeDasharray="4 4"
                 />
                 <text 
-                  x={padding.left - 10} 
-                  y={y + 4} 
+                  x={padding.left - 12} 
+                  y={y + 3.5} 
                   fill="#94a3b8" 
-                  fontSize="10" 
+                  fontSize="9" 
                   fontFamily="monospace"
                   textAnchor="end"
                 >
@@ -235,10 +244,11 @@ export default function PerformanceChart({ signals = [] }) {
           <path 
             d={pathString} 
             fill="none" 
-            stroke={activeTab === 'pnl' ? '#10b981' : '#06b6d4'} 
+            stroke={activeTab === 'pnl' ? '#00e676' : '#06b6d4'} 
             strokeWidth="2.5" 
             strokeLinecap="round"
             strokeLinejoin="round"
+            filter={`url(#${activeTab === 'pnl' ? 'neonGlowPnl' : 'neonGlowWin'})`}
           />
 
           {/* Hover indicator line & dot */}
@@ -252,15 +262,16 @@ export default function PerformanceChart({ signals = [] }) {
                 stroke="#475569" 
                 strokeWidth="1" 
                 strokeDasharray="2 2"
-                className="opacity-60"
+                className="opacity-50"
               />
               <circle 
                 cx={xScale(hoveredIndex)} 
                 cy={yScale(activeTab === 'pnl' ? points[hoveredIndex].cumulativePnl : points[hoveredIndex].winRate)} 
-                r="5" 
-                fill={activeTab === 'pnl' ? '#10b981' : '#06b6d4'} 
-                stroke="#0f172a" 
-                strokeWidth="2"
+                r="6" 
+                fill={activeTab === 'pnl' ? '#00e676' : '#06b6d4'} 
+                stroke="#020617" 
+                strokeWidth="2.5"
+                className="transition-all duration-75"
               />
             </g>
           )}
@@ -273,8 +284,8 @@ export default function PerformanceChart({ signals = [] }) {
               <text 
                 key={idx}
                 x={xScale(idx)} 
-                y={height - padding.bottom + 16} 
-                fill="#94a3b8" 
+                y={height - padding.bottom + 18} 
+                fill="#64748b" 
                 fontSize="9" 
                 fontFamily="monospace"
                 textAnchor={idx === 0 ? 'start' : idx === points.length - 1 ? 'end' : 'middle'}
@@ -288,29 +299,31 @@ export default function PerformanceChart({ signals = [] }) {
         {/* Hover Tooltip Overlay */}
         {hoveredIndex !== null && points[hoveredIndex] && (
           <div 
-            className="absolute z-20 bg-slate-950/95 border border-slate-800 p-2.5 shadow-2xl pointer-events-none font-mono text-[10px]"
+            className="absolute z-20 bg-slate-950/90 backdrop-blur-md border border-slate-800/80 p-3 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.65)] pointer-events-none font-mono text-[10px] min-w-[155px] text-white"
             style={{ 
-              left: `${Math.min(width - 150, Math.max(10, xScale(hoveredIndex) - 60))}px`,
+              left: `${Math.min(width - 165, Math.max(10, xScale(hoveredIndex) - 77))}px`,
               top: '40px' 
             }}
           >
-            <span className="block text-slate-500 font-extrabold uppercase mb-1">
-              Trade #{hoveredIndex + 1} ({points[hoveredIndex].date})
+            <span className="block text-slate-500 font-extrabold uppercase mb-1.5 border-b border-slate-800/50 pb-1">
+              Trade #{hoveredIndex + 1} • {points[hoveredIndex].date}
             </span>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               <div className="flex justify-between gap-4">
                 <span className="text-slate-400">Trade PnL:</span>
-                <span className={`font-bold ${points[hoveredIndex].pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <span className={`font-bold ${points[hoveredIndex].pnl >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
                   {points[hoveredIndex].pnl >= 0 ? '+' : ''}{points[hoveredIndex].pnl.toFixed(2)}%
                 </span>
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-slate-400">Cumulative:</span>
-                <span className="text-white font-bold">{points[hoveredIndex].cumulativePnl >= 0 ? '+' : ''}{points[hoveredIndex].cumulativePnl}%</span>
+                <span className={`font-bold ${points[hoveredIndex].cumulativePnl >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
+                  {points[hoveredIndex].cumulativePnl >= 0 ? '+' : ''}{points[hoveredIndex].cumulativePnl.toFixed(2)}%
+                </span>
               </div>
               <div className="flex justify-between gap-4">
-                <span className="text-slate-400">Win Rate:</span>
-                <span className="text-cyan-400 font-bold">{points[hoveredIndex].winRate}%</span>
+                <span className="text-slate-400">Accuracy:</span>
+                <span className="text-[#06b6d4] font-bold">{points[hoveredIndex].winRate.toFixed(1)}%</span>
               </div>
             </div>
           </div>

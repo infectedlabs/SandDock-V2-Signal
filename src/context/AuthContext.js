@@ -88,22 +88,22 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (isSupabaseConfigured) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
+      supabase.auth.getSession().then(async ({ data: { session } }) => {
         setSession(session);
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         if (currentUser) {
-          fetchProfile(currentUser.id, currentUser.email, currentUser.user_metadata);
+          await fetchProfile(currentUser.id, currentUser.email, currentUser.user_metadata);
         }
         setLoading(false);
       });
 
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
         setSession(session);
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         if (currentUser) {
-          fetchProfile(currentUser.id, currentUser.email, currentUser.user_metadata);
+          await fetchProfile(currentUser.id, currentUser.email, currentUser.user_metadata);
         } else {
           setProfile(null);
         }

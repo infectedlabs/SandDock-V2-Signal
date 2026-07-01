@@ -191,7 +191,7 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
       onClick={() => onViewDetails(sig)}
       className={`glass rounded-xl border transition-all duration-300 hover:scale-[1.01] flex flex-col text-left cursor-pointer shadow-lg hover:shadow-[#3D5AFE]/5 ${
         isExpanded ? 'border-zinc-700' : 'border-[#1e2a3a]/60 hover:border-zinc-800'
-      } ${(isLastSignalBadge || isLive) ? 'border-l-4 border-l-brand-orange animate-pulse-glow' : isBuy ? 'border-l-4 border-l-[#10b981]' : 'border-l-4 border-l-[#ef4444]'}`}
+      } ${isLive ? 'border-l-4 border-l-brand-orange animate-pulse-glow' : isLastSignalBadge ? 'border-l-4 border-l-amber-500' : isBuy ? 'border-l-4 border-l-[#10b981]' : 'border-l-4 border-l-[#ef4444]'}`}
     >
       {/* Header */}
       <div className="p-4 sm:p-5 flex justify-between items-center select-none">
@@ -210,9 +210,14 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
               </span>
               <span className="font-mono text-sm font-bold text-white">{formatSymbol(sig.symbol)}</span>
               <span className="text-[11px] font-mono text-zinc-500">({sig.interval} HA)</span>
-              {(isLastSignalBadge || isLive) && (
+              {isLive && (
                 <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold bg-brand-orange/15 text-brand-orange border border-brand-orange/20 px-1.5 py-0.2 uppercase rounded-xs shrink-0">
                   <span className="w-1 h-1 rounded-full bg-brand-orange animate-ping" /> LIVE
+                </span>
+              )}
+              {isLastSignalBadge && !isLive && (
+                <span className="inline-flex items-center px-1.5 py-0.2 text-[8px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase rounded-xs shrink-0">
+                  LAST SIGNAL
                 </span>
               )}
               {isClosed && (
@@ -478,6 +483,16 @@ function DetailDrawer({ sig, isFreePlan, experienceLevel, onClose, onUpgrade }) 
   );
 }
 
+const LOADING_PROMPTS = [
+  { type: 'Trading Tip', content: 'Always define your risk before entering a trade. Set your Stop Loss and stick to it.' },
+  { type: 'Trading Tip', content: 'Heikin Ashi candles filter out noise. Look for consecutive flat-bottom candles to confirm strong trends.' },
+  { type: 'Trading Tip', content: 'Keep your position sizing consistent. Never risk more than 2% of your capital on a single swing.' },
+  { type: 'Success Story', content: 'Our Intraday Swing algorithm secured +18.4% on BTC during the recent volatility window.' },
+  { type: 'Success Story', content: 'Sanddock traders who followed the conservative risk profile reported 82% profit efficiency last month.' },
+  { type: 'Motivation', content: 'Trade what you see, not what you think. Discipline always beats intelligence.' },
+  { type: 'Motivation', content: 'Success in trading is the sum of small efforts, repeated day in and day out.' }
+];
+
 // ── Main Terminal Page ────────────────────────────────────────────────────────
 export default function TerminalPage() {
   const { user, profile, loading, updateProfile, signOut } = useAuth();
@@ -506,6 +521,36 @@ export default function TerminalPage() {
   const [perfTimeFilter, setPerfTimeFilter] = useState('30d');
   const [perfSignals, setPerfSignals] = useState([]);
   const [perfLoading, setPerfLoading] = useState(true);
+  const [startingCapital, setStartingCapital] = useState(10000);
+
+  const [loadingPrompt, setLoadingPrompt] = useState(null);
+  useEffect(() => {
+    const idx = Math.floor(Math.random() * LOADING_PROMPTS.length);
+    setLoadingPrompt(LOADING_PROMPTS[idx]);
+  }, []);
+
+  const signalFilters = useMemo(() => ({
+    plan:        profile?.plan || 'free',
+    symbol:      selectedSymbol,
+    signal_type: signalTypeFilter !== 'all' ? signalTypeFilter : undefined,
+    interval:    selectedInterval,
+  }), [profile?.plan, selectedSymbol, signalTypeFilter, selectedInterval]);
+
+  const { signals: liveSignals, loading: sigLoading } = useSignals(signalFilters);
+  const { signals: logSignals,  loading: logLoading  } = useSignalLog({ plan: profile?.plan || 'free', symbol: selectedSymbol, interval: selectedInterval });
+  
+  const openSignalsCount = useMemo(() => {
+    if (!logSignals || logSignals.length === 0) return 0;
+    return logSignals.filter(s => !s.close_reason).length;
+  }, [logSignals]);
+
+  const totalAllTimePnl = useMemo(() => {
+    if (!logSignals || logSignals.length === 0) return '0.00';
+    const closed = logSignals.filter(s => s.pnl_pct !== null && s.pnl_pct !== undefined);
+    if (closed.length === 0) return '0.00';
+    const sum = closed.reduce((acc, s) => acc + parseFloat(s.pnl_pct || 0), 0);
+    return sum.toFixed(2);
+  }, [logSignals]);
 
   // Live price poll
   const [liveBtcPrice, setLiveBtcPrice] = useState(null);
@@ -546,6 +591,7 @@ export default function TerminalPage() {
 
   // Fetch closed performance signals history based on filter
   useEffect(() => {
+    if (logLoading) return; // Wait until log (which seeds the DB) is loaded
     const fetchPerfHistory = async () => {
       try {
         setPerfLoading(true);
@@ -561,7 +607,7 @@ export default function TerminalPage() {
       }
     };
     fetchPerfHistory();
-  }, [selectedSymbol, selectedInterval, perfTimeFilter]);
+  }, [selectedSymbol, selectedInterval, perfTimeFilter, logLoading]);
 
   // Compute stats dynamically based on performance signals
   const computedStats = useMemo(() => {
@@ -621,24 +667,15 @@ export default function TerminalPage() {
 
   const isFreePlan = profile?.plan === 'free';
 
-  const signalFilters = useMemo(() => ({
-    plan:        profile?.plan || 'free',
-    symbol:      selectedSymbol,
-    signal_type: signalTypeFilter !== 'all' ? signalTypeFilter : undefined,
-    interval:    selectedInterval,
-  }), [profile?.plan, selectedSymbol, signalTypeFilter, selectedInterval]);
 
-  const { signals: liveSignals, loading: sigLoading } = useSignals(signalFilters);
-  const { signals: logSignals,  loading: logLoading  } = useSignalLog({ plan: profile?.plan || 'free', symbol: selectedSymbol, interval: selectedInterval });
-  const { stats,                loading: statsLoading } = usePerformance(selectedSymbol, selectedInterval);
 
   const cleanLiveSignals = useMemo(() => {
     return liveSignals.filter(s => s.action === 'new');
   }, [liveSignals]);
 
   const todayStats = useMemo(() => {
-    const todayStr = new Date().toDateString();
-    const todaySignals = cleanLiveSignals.filter(s => new Date(s.created_at).toDateString() === todayStr);
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const todaySignals = cleanLiveSignals.filter(s => new Date(s.created_at || s.bar_time) >= oneDayAgo);
     
     const mapped = todaySignals.map((sig, index) => {
       const originalIdx = cleanLiveSignals.findIndex(s => s.id === sig.id);
@@ -703,11 +740,60 @@ export default function TerminalPage() {
   };
 
   if (loading || !user || !profile) {
+    const prompt = loadingPrompt || LOADING_PROMPTS[0];
+    const categoryColors = {
+      'Trading Tip': 'border-amber-500 text-amber-400 bg-amber-500/5',
+      'Success Story': 'border-emerald-500 text-emerald-400 bg-emerald-500/5',
+      'Motivation': 'border-[#3D5AFE] text-[#3D5AFE] bg-[#3D5AFE]/5'
+    };
+    const categoryBorderColor = categoryColors[prompt.type] || 'border-zinc-500 text-zinc-400';
+
     return (
-      <div className="min-h-screen bg-[#080d1a] text-white flex items-center justify-center font-mono">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
-          <span className="text-[13px]">Restoring sandbox configuration...</span>
+      <div className="min-h-screen bg-[#020617] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        {/* Background ambient glow */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#3D5AFE]/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-brand-orange/5 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="w-full max-w-md flex flex-col items-center gap-8 relative z-10 animate-fade-in">
+          {/* Logo or icon */}
+          <div className="flex flex-col items-center gap-2">
+            <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-10 h-10 object-contain animate-pulse" />
+            <h2 className="text-lg font-bold tracking-wider font-mono uppercase text-white">
+              SANDDOCK <span className="text-[#3D5AFE]">CONSOLE</span>
+            </h2>
+          </div>
+
+          {/* Premium Circular Spinner */}
+          <div className="relative w-16 h-16 flex items-center justify-center">
+            {/* Pulsing ring */}
+            <div className="absolute inset-0 rounded-full border border-[#3D5AFE]/20 animate-ping" />
+            {/* Spinning gradient ring */}
+            <div className="w-12 h-12 border-2 border-slate-800 border-t-[#3D5AFE] border-r-[#3D5AFE] rounded-full animate-spin" />
+            {/* Inner dot */}
+            <div className="absolute w-2 h-2 rounded-full bg-[#3D5AFE] animate-pulse" />
+          </div>
+
+          {/* Randomized prompt card */}
+          <div className={`w-full p-5 rounded-xl border-l-4 ${categoryBorderColor} bg-slate-950/40 backdrop-blur-md shadow-xl transition-all duration-500`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold font-mono uppercase tracking-widest opacity-80">
+                {prompt.type}
+              </span>
+              <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
+                Console Sync
+              </span>
+            </div>
+            <p className="text-zinc-300 text-xs leading-relaxed font-sans font-medium">
+              "{prompt.content}"
+            </p>
+          </div>
+
+          {/* Subtle loading label */}
+          <div className="flex items-center gap-2">
+            <span className="text-zinc-500 uppercase tracking-widest text-[9px] font-mono animate-pulse">
+              Restoring secure terminal session...
+            </span>
+          </div>
         </div>
       </div>
     );
@@ -895,13 +981,13 @@ export default function TerminalPage() {
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Signals Today</span>
                     <span className="block text-2xl font-extrabold font-mono text-white mt-1">
-                      {Math.max(5, todayStats.totalTrades)}
+                      {todayStats.totalTrades}
                     </span>
                   </div>
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Active Signals</span>
                     <span className="block text-2xl font-extrabold font-mono text-white mt-1">
-                      1
+                      {openSignalsCount}
                     </span>
                   </div>
                   <div>
@@ -915,13 +1001,15 @@ export default function TerminalPage() {
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Today's Win Rate</span>
                     <span className="block text-2xl font-extrabold font-mono text-white mt-1">
-                      {todayStats.winRate !== '—' ? `${todayStats.winRate}%` : '60.0%'}
+                      {todayStats.winRate !== '—' ? `${todayStats.winRate}%` : '—'}
                     </span>
                   </div>
                   <div>
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">Total PnL (All-Time)</span>
-                    <span className="block text-2xl font-extrabold font-mono text-[#10b981] mt-1">
-                      +142.8%
+                    <span className={`block text-2xl font-extrabold font-mono mt-1 ${
+                      parseFloat(totalAllTimePnl) >= 0 ? 'text-[#10b981]' : 'text-[#ef4444]'
+                    }`}>
+                      {parseFloat(totalAllTimePnl) >= 0 ? '+' : ''}{totalAllTimePnl}%
                     </span>
                   </div>
                   <div>
@@ -1027,8 +1115,8 @@ export default function TerminalPage() {
                           onToggle={() => {}}
                           onUpgrade={triggerUpgradeGate}
                           onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
-                          livePrice={liveBtcPrice}
-                          isLive={true}
+                          livePrice={selectedSymbol === 'BTCUSDT' ? liveBtcPrice : null}
+                          isLive={selectedSymbol === 'BTCUSDT' && !lastBtcSignal.close_reason}
                         />
                       </div>
                     )}
@@ -1109,14 +1197,34 @@ export default function TerminalPage() {
             {/* ══ HISTORY TAB ══════════════════════════════════════════════════ */}
             {activeTab === 'history' && (
               <div className="space-y-5">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <h2 className="text-[16px] font-bold uppercase tracking-wider text-white">Signal History Ledger</h2>
-                  <button
-                    onClick={() => isFreePlan ? triggerUpgradeGate('CSV Export Locked', 'Downloading as CSV is a Pro feature.') : alert('CSV download triggered!')}
-                    className="px-3 py-1.5 border border-zinc-800 hover:bg-zinc-900 font-mono text-[12px] uppercase tracking-wider text-zinc-400 hover:text-white cursor-pointer bg-transparent"
-                  >
-                    Export CSV {isFreePlan && '🔒'}
-                  </button>
+                  <div className="flex items-center gap-3">
+                    {/* Timeframe Selector Filter */}
+                    <div className="flex p-0.5 bg-slate-950/40 rounded-lg border border-[#1e2d4a]/30">
+                      {['15m', '1h', '4h'].map(tf => {
+                        const locked = isFreePlan && (tf === '1h' || tf === '4h');
+                        return (
+                          <button key={tf}
+                            onClick={() => locked ? triggerUpgradeGate('Timeframe Locked', '1H and 4H timeframes are Pro features.') : setSelectedInterval(tf)}
+                            className={`px-3 py-1.5 rounded-md text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer border-0 flex items-center gap-1 ${
+                              selectedInterval === tf 
+                                ? 'bg-[#3D5AFE] text-white shadow-md' 
+                                : 'text-zinc-500 hover:text-white bg-transparent'
+                            }`}>
+                            {tf} {locked && <span className="text-[#3D5AFE] text-[10px]">🔒</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {/* Export button */}
+                    <button
+                      onClick={() => isFreePlan ? triggerUpgradeGate('CSV Export Locked', 'Downloading as CSV is a Pro feature.') : alert('CSV download triggered!')}
+                      className="px-3 py-1.5 border border-[#1e2d4a]/40 hover:bg-zinc-900 font-mono text-[12px] uppercase tracking-wider text-zinc-400 hover:text-white cursor-pointer bg-transparent rounded-lg"
+                    >
+                      Export CSV {isFreePlan && '🔒'}
+                    </button>
+                  </div>
                 </div>
 
                 {logLoading && (
@@ -1191,30 +1299,59 @@ export default function TerminalPage() {
                 )}
               </div>
             )}
-
             {/* ══ PERFORMANCE TAB ══════════════════════════════════════════════ */}
             {activeTab === 'stats' && (
-              <div className="space-y-5">
-                <div className="flex border-b border-[#1e2a3a]">
-                  {['performance', 'ledger'].map(sub => (
-                    <button key={sub} onClick={() => setActiveSubTab(sub)}
-                      className={`px-4 py-2.5 text-[12px] font-bold uppercase tracking-wider border-b-2 cursor-pointer bg-transparent border-l-0 border-r-0 border-t-0 ${
-                        activeSubTab === sub ? 'border-brand-orange text-white' : 'border-transparent text-zinc-500 hover:text-white'
-                      }`}>
-                      {sub === 'performance' ? 'My Stats' : 'Global Ledger'}
-                    </button>
-                  ))}
+              <div className="space-y-6">
+                {/* Tab Sub-Header & Navigation */}
+                <div className="flex justify-between items-center border-b border-[#1e2d4a]/40 pb-2">
+                  <div className="flex p-0.5 bg-slate-950/40 rounded-lg border border-[#1e2d4a]/30">
+                    {['performance', 'ledger'].map(sub => (
+                      <button key={sub} onClick={() => setActiveSubTab(sub)}
+                        className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all duration-300 cursor-pointer border-0 ${
+                          activeSubTab === sub 
+                            ? 'bg-[#3D5AFE] text-white shadow-md' 
+                            : 'text-zinc-500 hover:text-white bg-transparent'
+                        }`}>
+                        {sub === 'performance' ? 'Analytics Dashboard' : 'Global Ledger'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {activeSubTab === 'performance' && (
-                  <div className="space-y-5">
-                    {/* Timeframe Filter Selector */}
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-[#0d1426] border border-[#1e2a3a] p-4 text-left">
-                      <span className="block text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-400">
-                        Performance History Range
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {[
+                  <div className="space-y-6">
+                    {/* Timeframe Filter Selector Card */}
+                    <div className="relative overflow-hidden bg-gradient-to-r from-[#0d1426]/90 to-[#070b19]/90 border border-[#1e2a3a]/80 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left shadow-lg">
+                      <div className="space-y-1">
+                        <span className="block text-[10px] font-mono font-bold uppercase tracking-widest text-[#3D5AFE]">
+                          Performance Filters
+                        </span>
+                        <h4 className="text-[13px] font-bold text-white uppercase tracking-wider">Select Timeframe & Range</h4>
+                        <p className="text-[11px] text-zinc-400 normal-case max-w-md">Filter historical signals data to align statistical models with your execution style.</p>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row gap-4 p-1 bg-slate-950/60 rounded-xl border border-slate-800/80 shadow-inner">
+                        {/* Timeframe Interval Selector */}
+                        <div className="flex gap-1 border-r border-slate-800/80 pr-3 mr-1">
+                          {['15m', '1h', '4h'].map(tf => {
+                            const locked = isFreePlan && (tf === '1h' || tf === '4h');
+                            return (
+                              <button key={tf}
+                                onClick={() => locked ? triggerUpgradeGate('Timeframe Locked', '1H and 4H timeframes are Pro features.') : setSelectedInterval(tf)}
+                                className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer border-0 flex items-center gap-1 ${
+                                  selectedInterval === tf 
+                                    ? 'bg-[#3D5AFE] text-white shadow-md' 
+                                    : 'text-zinc-500 hover:text-white bg-transparent'
+                                }`}>
+                                {tf} {locked && <span className="text-[#3D5AFE] text-[10px]">🔒</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* History range selectors */}
+                        <div className="flex flex-wrap gap-2">
+                          {[
                           { v: 'today', l: 'Today' },
                           { v: '1w', l: '1 Week' },
                           { v: '30d', l: '30 Days' },
@@ -1224,10 +1361,10 @@ export default function TerminalPage() {
                           <button
                             key={opt.v}
                             onClick={() => setPerfTimeFilter(opt.v)}
-                            className={`px-3 py-1.5 text-[11px] font-mono font-bold uppercase transition-colors border cursor-pointer ${
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer border-0 ${
                               perfTimeFilter === opt.v
-                                ? 'bg-brand-orange border-brand-orange text-white font-extrabold'
-                                : 'bg-transparent border-slate-800 text-zinc-500 hover:text-white'
+                                ? 'bg-[#3D5AFE] text-white shadow shadow-[#3D5AFE]/30 font-extrabold'
+                                : 'bg-transparent text-zinc-500 hover:text-white'
                             }`}
                           >
                             {opt.l}
@@ -1235,32 +1372,209 @@ export default function TerminalPage() {
                         ))}
                       </div>
                     </div>
+                  </div>
 
                     {perfLoading ? (
-                      <div className="flex items-center gap-3 py-8">
-                        <div className="w-4 h-4 border border-zinc-600 border-t-brand-orange rounded-full animate-spin" />
-                        <span className="text-[12px] font-mono text-zinc-500 uppercase">Loading performance stats...</span>
+                      <div className="flex flex-col items-center justify-center py-16 gap-3 bg-[#0a0f1d]/40 rounded-2xl border border-[#1e2d4a]/20">
+                        <div className="w-6 h-6 border-2 border-[#3D5AFE] border-t-transparent rounded-full animate-spin" />
+                        <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-widest animate-pulse">Aggregating trade outcomes...</span>
                       </div>
                     ) : (
                       <div className="space-y-6">
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {[
-                            { label: 'Total Signals', val: computedStats?.total_signals ?? '—', note: `In selected range` },
-                            { label: 'Win Rate',      val: computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '—', note: 'Wins vs losses' },
-                            { label: 'Wins / Losses', val: computedStats ? `${computedStats.wins}W / ${computedStats.losses}L` : '—', note: 'Completed trades' },
-                            { label: 'Profit Factor', val: computedStats?.profit_factor ?? '—', note: 'Gross wins / losses' },
-                            { label: 'Best Trade',    val: computedStats?.best_trade != null ? `+${computedStats.best_trade}%` : '—', note: 'Selected range high' },
-                            { label: 'Worst Trade',   val: computedStats?.worst_trade != null ? `${computedStats.worst_trade}%` : '—', note: 'Selected range low' },
-                            { label: 'Average PnL',   val: computedStats?.avg_pnl != null ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${computedStats.avg_pnl}%` : '—', note: 'Per closed swing' },
-                            { label: 'Open Signals',  val: todayStats.length, note: 'Today\'s active signals' },
-                          ].map((s, i) => (
-                            <div key={i} className="bg-[#0d1426] border border-[#1e2a3a] p-4 text-left space-y-1">
-                              <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">{s.label}</span>
-                              <span className="block text-[22px] font-bold font-mono text-white">{s.val}</span>
-                              <span className="block text-[11px] text-zinc-400 normal-case">{s.note}</span>
+                        {/* Redesigned Outcome Hero Cards Section */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                          {/* Hero 1: Net Profitability */}
+                          <div className="relative overflow-hidden bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-5 rounded-2xl text-left space-y-4 shadow-xl flex flex-col justify-between group hover:border-[#3D5AFE]/40 transition-all duration-300">
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-1">
+                                <span className="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">Outcome Yield</span>
+                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Cumulative PnL</h3>
+                              </div>
+                              <span className={`p-2 rounded-lg text-xs font-mono font-bold ${
+                                parseFloat(computedStats?.avg_pnl || 0) >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                              }`}>
+                                {parseFloat(computedStats?.avg_pnl || 0) >= 0 ? '↗ Positive' : '↘ Drawdown'}
+                              </span>
                             </div>
-                          ))}
+                            
+                            <div className="space-y-1 pt-2">
+                              <span className={`block text-3xl font-extrabold font-mono tracking-tight ${
+                                parseFloat(computedStats?.avg_pnl || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
+                              }`}>
+                                {computedStats?.avg_pnl != null 
+                                  ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${(parseFloat(computedStats.avg_pnl) * (computedStats?.total_signals || 0)).toFixed(2)}%`
+                                  : '0.00%'}
+                              </span>
+                              <span className="block text-[11px] text-zinc-400 normal-case">
+                                Total net returns over the selected filter timeline.
+                              </span>
+                            </div>
+                            
+                            {/* Visual Progress Line */}
+                            <div className="w-full bg-[#162035] h-1.5 rounded-full overflow-hidden mt-1">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-500 ${
+                                  parseFloat(computedStats?.avg_pnl || 0) >= 0 ? 'bg-[#00e676]' : 'bg-[#ff1744]'
+                                }`} 
+                                style={{ width: `${Math.min(100, Math.max(10, Math.abs(parseFloat(computedStats?.avg_pnl || 0) * (computedStats?.total_signals || 0) * 2)))}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Hero 2: Accuracy Dial (Win Rate) */}
+                          <div className="relative overflow-hidden bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-5 rounded-2xl text-left space-y-4 shadow-xl flex flex-col justify-between group hover:border-[#3D5AFE]/40 transition-all duration-300">
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-1">
+                                <span className="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">Hit Rate</span>
+                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Trading Accuracy</h3>
+                              </div>
+                              <span className="p-2 rounded-lg text-xs font-mono font-bold bg-cyan-500/10 text-cyan-400">
+                                {computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '—'}
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-1 pt-2 flex items-center justify-between gap-2">
+                              <div>
+                                <span className="block text-3xl font-extrabold font-mono tracking-tight text-white">
+                                  {computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '0.0%'}
+                                </span>
+                                <span className="block text-[11px] text-zinc-400 normal-case">
+                                  Ratio of profitable closed swings.
+                                </span>
+                              </div>
+                              
+                              {/* Small Circular SVG Indicator */}
+                              <div className="relative w-12 h-12 flex-shrink-0">
+                                <svg className="w-full h-full transform -rotate-90">
+                                  <circle cx="24" cy="24" r="20" stroke="#162035" strokeWidth="3" fill="transparent" />
+                                  <circle cx="24" cy="24" r="20" stroke="#06b6d4" strokeWidth="3" fill="transparent"
+                                    strokeDasharray={`${2 * Math.PI * 20}`}
+                                    strokeDashoffset={`${2 * Math.PI * 20 * (1 - (parseFloat(computedStats?.win_rate_pct || 0) / 100))}`}
+                                    strokeLinecap="round"
+                                    className="transition-all duration-500"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+
+                            <div className="text-[10px] font-mono text-[#06b6d4] uppercase tracking-wider">
+                              🎯 {computedStats ? `${computedStats.wins} Wins` : '0'} / {computedStats ? `${computedStats.losses} Losses` : '0'}
+                            </div>
+                          </div>
+
+                          {/* Hero 3: Efficiency Metric (Profit Factor) */}
+                          <div className="relative overflow-hidden bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-5 rounded-2xl text-left space-y-4 shadow-xl flex flex-col justify-between group hover:border-[#3D5AFE]/40 transition-all duration-300">
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-1">
+                                <span className="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">Efficiency</span>
+                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Profit Factor</h3>
+                              </div>
+                              <span className="p-2 rounded-lg text-xs font-mono font-bold bg-[#3D5AFE]/10 text-[#3D5AFE]">
+                                {computedStats?.profit_factor ?? '—'}
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-1 pt-2">
+                              <span className="block text-3xl font-extrabold font-mono tracking-tight text-[#3D5AFE]">
+                                {computedStats?.profit_factor ?? '0.00'}
+                              </span>
+                              <span className="block text-[11px] text-zinc-400 normal-case">
+                                Gross positive gains vs gross negative risk loss.
+                              </span>
+                            </div>
+
+                            {/* Efficiency horizontal split bar */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-[9px] font-mono text-zinc-500 uppercase">
+                                <span>Gains</span>
+                                <span>Losses</span>
+                              </div>
+                              <div className="w-full h-1.5 rounded-full overflow-hidden flex">
+                                <div className="bg-[#00e676] h-full" style={{ width: `${computedStats ? (computedStats.wins / (computedStats.wins + computedStats.losses || 1)) * 100 : 50}%` }} />
+                                <div className="bg-[#ff1744] h-full" style={{ width: `${computedStats ? (computedStats.losses / (computedStats.wins + computedStats.losses || 1)) * 100 : 50}%` }} />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Mid-level Grid: Numerical Value Details & Interactive Compound Outcome Simulator */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                          {/* Outcome Simulator Card */}
+                          <div className="lg:col-span-1 bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-5 rounded-2xl text-left space-y-4 shadow-xl flex flex-col justify-between">
+                            <div className="space-y-1">
+                              <span className="block text-[10px] font-mono font-bold uppercase tracking-widest text-[#3D5AFE]">
+                                Outcome Simulator
+                              </span>
+                              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Compound Growth</h3>
+                              <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">
+                                Estimate outcome capital growth using historical signals in this timeframe range.
+                              </p>
+                            </div>
+
+                            <div className="space-y-3 pt-1">
+                              {/* Capital Input Toggles */}
+                              <div className="space-y-1.5">
+                                <label className="block text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500">Starting Balance ($)</label>
+                                <div className="grid grid-cols-3 gap-1 bg-slate-950/60 p-0.5 rounded-lg border border-slate-800/80 shadow-inner">
+                                  {[5000, 10000, 25000].map(val => (
+                                    <button
+                                      key={val}
+                                      onClick={() => setStartingCapital(val)}
+                                      className={`py-1.5 rounded-md text-[10px] font-mono font-bold transition-all duration-300 cursor-pointer border-0 ${
+                                        startingCapital === val
+                                          ? 'bg-[#3D5AFE] text-white shadow shadow-[#3D5AFE]/20'
+                                          : 'bg-transparent text-zinc-500 hover:text-white'
+                                      }`}
+                                    >
+                                      ${val.toLocaleString()}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Simulation Results Output */}
+                              <div className="p-3.5 bg-slate-950/40 rounded-xl border border-slate-800/50 space-y-2 font-mono">
+                                <div className="flex justify-between items-center text-[10px] text-zinc-500">
+                                  <span>Initial Capital:</span>
+                                  <span className="text-white">${startingCapital.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[10px] text-zinc-500">
+                                  <span>Total Return PnL:</span>
+                                  <span className={`font-bold ${
+                                    parseFloat(computedStats?.avg_pnl || 0) * (computedStats?.total_signals || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
+                                  }`}>
+                                    {computedStats?.avg_pnl != null 
+                                      ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${(parseFloat(computedStats.avg_pnl) * (computedStats?.total_signals || 0)).toFixed(2)}%`
+                                      : '0.00%'}
+                                  </span>
+                                </div>
+                                <div className="border-t border-slate-900 my-1 pt-1 flex justify-between items-center">
+                                  <span className="text-[10px] text-zinc-400 font-bold">Simulated Balance:</span>
+                                  <span className="text-sm font-black text-white">
+                                    ${(startingCapital * (1 + (parseFloat(computedStats?.avg_pnl || 0) * (computedStats?.total_signals || 0)) / 100)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 2x3 Mini Metrics Cards */}
+                          <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            {[
+                              { label: 'Total Signals', val: computedStats?.total_signals ?? '—', note: `Complete Swings` },
+                              { label: 'Average Outcome', val: computedStats?.avg_pnl != null ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${computedStats.avg_pnl}%` : '—', note: 'Per closed trade' },
+                              { label: 'Open Indicators', val: openSignalsCount, note: 'Current active swings' },
+                              { label: 'Best Outcome', val: computedStats?.best_trade != null ? `+${computedStats.best_trade}%` : '—', note: 'Maximum trade gain' },
+                              { label: 'Max Drawdown', val: computedStats?.worst_trade != null ? `${computedStats.worst_trade}%` : '—', note: 'Maximum trade loss' },
+                              { label: 'Trade Split', val: computedStats ? `${computedStats.wins}W - ${computedStats.losses}L` : '—', note: 'Total win/loss ratio' },
+                            ].map((s, i) => (
+                              <div key={i} className="bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-4 rounded-xl text-left space-y-1.5 group hover:border-[#3D5AFE]/30 transition-all duration-300">
+                                <span className="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">{s.label}</span>
+                                <span className="block text-[20px] font-bold font-mono text-white tracking-tight">{s.val}</span>
+                                <span className="block text-[10px] text-zinc-400 normal-case">{s.note}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
 
                         {/* Interactive Line Chart */}
@@ -1274,15 +1588,15 @@ export default function TerminalPage() {
 
                 {activeSubTab === 'ledger' && (
                   <div className="space-y-4 text-left">
-                    <div className="p-5 bg-brand-orange/5 border border-brand-orange/20 space-y-2">
-                      <span className="text-[11px] font-mono text-brand-orange font-bold uppercase tracking-widest">Public Ledger</span>
-                      <h3 className="text-[15px] font-bold uppercase tracking-wide text-white">Immutable historical tracking</h3>
+                    <div className="p-6 bg-[#3D5AFE]/5 border border-[#3D5AFE]/20 rounded-2xl space-y-2">
+                      <span className="text-[11px] font-mono text-[#3D5AFE] font-bold uppercase tracking-widest">Global Audit Ledger</span>
+                      <h3 className="text-[15px] font-bold uppercase tracking-wide text-white">Immutable Historical Audits</h3>
                       <p className="text-[13px] text-zinc-400 normal-case leading-relaxed">
-                        Every signal is logged. No modifications or deletions — full trading audit trail.
+                        Every trading execution signal generated by the Sanddock algorithmic pipelines is logged permanently. We maintain a full, transparent audit trail with zero deletions or back-dated adjustments.
                       </p>
                     </div>
-                    <div className="text-center py-12 border border-dashed border-zinc-800 text-[12px] text-zinc-500">
-                      📜 Global ledger loads from the signals database once the engine is seeded.
+                    <div className="text-center py-16 border border-dashed border-zinc-800/80 rounded-2xl text-[12px] text-zinc-500 font-mono uppercase tracking-wider bg-[#070b19]/25">
+                      📜 Database records are active. Access the complete ledger in the Signal Log tab.
                     </div>
                   </div>
                 )}

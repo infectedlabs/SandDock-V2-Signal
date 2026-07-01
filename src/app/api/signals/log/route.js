@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { toHeikinAshi, detectSwings } from '@/lib/signalsEngineLive';
+import { memoryCache, runWithTimeout } from '@/lib/memoryCache';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,77 +37,134 @@ export async function GET(request) {
 
     const allLogs = [];
 
-    await Promise.all(targetSymbols.map(async (sym) => {
-      try {
-        const candles = await fetchFromBinance(sym, interval, 400);
-        const ha = toHeikinAshi(candles);
-        const swings = detectSwings(ha, 10, 'Intraday');
+    const timeframes = ['15m', '1h', '4h'];
 
-        const entrySwings = swings.filter(s => s.action === 'new');
+    await Promise.all(targetSymbols.flatMap((sym) =>
+      timeframes.map(async (tf) => {
+        const cacheKey = `${sym}_${tf}`;
+        try {
+          const candles = await fetchFromBinance(sym, tf, 500);
+          const ha = toHeikinAshi(candles);
+          const swings = detectSwings(ha, 10, 'Intraday');
 
-        const dbPayload = [];
+          const entrySwings = swings.filter(s => s.action === 'new');
 
-        entrySwings.forEach((s, idx) => {
-          const isBuy = s.type === 'bot';
-          let closePrice = null;
-          let closeReason = null;
-          let pnlPct = null;
-          let isWin = null;
-          let closedAt = null;
+          const dbPayload = [];
+          const symLogs = [];
 
-          if (idx < entrySwings.length - 1) {
-            const nextSig = entrySwings[idx + 1];
-            closePrice = nextSig.price;
-            closeReason = 'direction_flip';
-            closedAt = nextSig.bar_time;
-            
-            let change = ((nextSig.price - s.price) / s.price) * 100;
-            pnlPct = Number((isBuy ? change : -change).toFixed(4));
-            isWin = pnlPct >= 0;
+          entrySwings.forEach((s, idx) => {
+            const isBuy = s.type === 'bot';
+            let closePrice = null;
+            let closeReason = null;
+            let pnlPct = null;
+            let isWin = null;
+            let closedAt = null;
+
+            if (idx < entrySwings.length - 1) {
+              const nextSig = entrySwings[idx + 1];
+              closePrice = nextSig.price;
+              closeReason = 'direction_flip';
+              closedAt = nextSig.bar_time;
+              
+              let change = ((nextSig.price - s.price) / s.price) * 100;
+              pnlPct = Number((isBuy ? change : -change).toFixed(4));
+              isWin = pnlPct >= 0;
+            }
+
+            const signalObj = {
+              symbol: sym,
+              interval: tf,
+              signal_type: isBuy ? 'buy' : 'sell',
+              action: 'new',
+              entry_price: s.price,
+              bar_time: s.bar_time,
+              confidence: Math.floor(Math.random() * 20) + 70,
+              rationale: `Automated Heikin Ashi swing ${isBuy ? 'bottom' : 'top'} confirmation for ${sym} on the ${tf} timeframe.`,
+              sl_price: s.sl_price,
+              tp_price: s.tp2_price,
+              sl_pct: s.sl_price ? Number((Math.abs(s.sl_price - s.price) / s.price * 100).toFixed(2)) : 0,
+              tp_pct: s.tp2_price ? Number((Math.abs(s.tp2_price - s.price) / s.price * 100).toFixed(2)) : 0,
+              closed_at: closedAt,
+              close_price: closePrice,
+              pnl_pct: pnlPct,
+              is_win: isWin,
+              swing_group_id: crypto.randomUUID(),
+              close_reason: closeReason,
+              created_at: s.bar_time,
+            };
+
+            dbPayload.push(signalObj);
+
+            const logObj = {
+              id: `log-${sym}-${s.bar_time}`,
+              ...signalObj
+            };
+            symLogs.push(logObj);
+            if (tf === interval) {
+              allLogs.push(logObj);
+            }
+          });
+
+          // Save to in-memory cache
+          memoryCache.log[cacheKey] = symLogs;
+
+          if (dbPayload.length > 0) {
+            runWithTimeout(
+              supabaseAdmin.from('signals').upsert(dbPayload, { onConflict: 'symbol,interval,bar_time' }),
+              1500
+            ).catch((e) => console.warn(`[/api/signals/log] DB signals write failed/timed out for ${sym} ${tf}:`, e.message));
+          }
+        } catch (err) {
+          console.warn(`[/api/signals/log] Binance fetch failed for ${sym} ${tf}, reading cache:`, err.message);
+          let loadedFromDb = false;
+
+          // 1. Fallback to Supabase cache with a timeout
+          try {
+            const { data: cachedSignals, error: dbError } = await runWithTimeout(
+              supabaseAdmin
+                .from('signals')
+                .select('*')
+                .eq('symbol', sym)
+                .eq('interval', tf)
+                .order('bar_time', { ascending: false })
+                .limit(50),
+              1500
+            );
+
+            if (!dbError && cachedSignals && cachedSignals.length > 0) {
+              loadedFromDb = true;
+              cachedSignals.forEach(sig => {
+                const logObj = {
+                  id: `log-${sig.symbol}-${sig.bar_time}`,
+                  ...sig,
+                  entry_price: parseFloat(sig.entry_price),
+                  close_price: sig.close_price ? parseFloat(sig.close_price) : null,
+                  sl_price: sig.sl_price ? parseFloat(sig.sl_price) : null,
+                  tp_price: sig.tp_price ? parseFloat(sig.tp_price) : null,
+                  pnl_pct: sig.pnl_pct ? parseFloat(sig.pnl_pct) : null,
+                };
+                if (tf === interval) {
+                  allLogs.push(logObj);
+                }
+              });
+            }
+          } catch (dbErr) {
+            console.warn(`[/api/signals/log] DB query fallback failed/timed out for ${sym} ${tf}:`, dbErr.message);
           }
 
-          const signalObj = {
-            symbol: sym,
-            interval: interval,
-            signal_type: isBuy ? 'buy' : 'sell',
-            action: 'new',
-            entry_price: s.price,
-            bar_time: s.bar_time,
-            confidence: Math.floor(Math.random() * 20) + 70,
-            rationale: `Automated Heikin Ashi swing ${isBuy ? 'bottom' : 'top'} confirmation for ${sym} on the ${interval} timeframe.`,
-            sl_price: s.sl_price,
-            tp_price: s.tp2_price,
-            sl_pct: s.sl_price ? Number((Math.abs(s.sl_price - s.price) / s.price * 100).toFixed(2)) : 0,
-            tp_pct: s.tp2_price ? Number((Math.abs(s.tp2_price - s.price) / s.price * 100).toFixed(2)) : 0,
-            closed_at: closedAt,
-            close_price: closePrice,
-            pnl_pct: pnlPct,
-            is_win: isWin,
-            swing_group_id: crypto.randomUUID(),
-            close_reason: closeReason,
-            created_at: s.bar_time,
-          };
-
-          dbPayload.push(signalObj);
-
-          allLogs.push({
-            id: `log-${sym}-${s.bar_time}`,
-            ...signalObj
-          });
-        });
-
-        if (dbPayload.length > 0) {
-          const { error: upsertErr } = await supabaseAdmin
-            .from('signals')
-            .upsert(dbPayload, { onConflict: 'symbol,interval,bar_time' });
-          if (upsertErr) {
-            console.error(`[/api/signals/log] Database upsert error for ${sym}:`, upsertErr);
+          // 2. Fallback to server memory cache
+          if (!loadedFromDb) {
+            const memCache = memoryCache.log[cacheKey];
+            if (memCache && memCache.length > 0) {
+              console.log(`[/api/signals/log] Serving from in-memory fallback cache for ${sym} ${tf}`);
+              if (tf === interval) {
+                allLogs.push(...memCache);
+              }
+            }
           }
         }
-      } catch (err) {
-        console.warn(`[/api/signals/log] Failed for ${sym}:`, err.message);
-      }
-    }));
+      })
+    ));
 
     // Sort by created_at descending
     allLogs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
