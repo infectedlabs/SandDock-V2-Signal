@@ -161,7 +161,7 @@ function LockedSignalCard({ symbol, timeframe, type, onUpgrade }) {
 }
 
 // ── SignalCard ───────────────────────────────────────────────────────────────
-function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, onToggle, onUpgrade, onViewDetails, livePrice, isLive = false, nextSignal = null }) {
+function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, onToggle, onUpgrade, onViewDetails, livePrice, isLive = false, nextSignal = null, rank = null, isLatest = false }) {
   const isBuy = sig.signal_type === 'buy';
   const coin = sig.symbol.replace('USDT', '');
   const logo = COIN_LOGOS[coin] || { char: coin.slice(0, 1), bg: 'bg-zinc-800 text-zinc-400 border-zinc-700' };
@@ -203,6 +203,15 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
           
           <div className="space-y-0.5">
             <div className="flex flex-wrap items-center gap-1.5">
+              {rank !== null && (
+                <span className={`inline-flex items-center px-1.5 py-0.2 text-[9px] font-mono font-bold border uppercase rounded-xs ${
+                  isLatest
+                    ? 'bg-[#3D5AFE]/15 text-[#3D5AFE] border-[#3D5AFE]/25 font-extrabold'
+                    : 'bg-zinc-800/60 text-zinc-400 border-zinc-700/60'
+                }`}>
+                  #{rank}{isLatest ? ' • LATEST' : ''}
+                </span>
+              )}
               <span className={`inline-flex items-center px-1.5 py-0.2 text-[9px] font-extrabold tracking-widest border uppercase rounded-xs ${
                 isBuy ? 'bg-[#10b981]/15 text-[#10b981] border-[#10b981]/20' : 'bg-[#ef4444]/15 text-[#ef4444] border-[#ef4444]/20'
               }`}>
@@ -558,7 +567,7 @@ export default function TerminalPage() {
     const fetchLivePrice = async () => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${selectedSymbol}`, {
           signal: controller.signal
         });
@@ -673,7 +682,24 @@ export default function TerminalPage() {
     return liveSignals.filter(s => s.action === 'new');
   }, [liveSignals]);
 
+  const { todaySignals, pastSignals } = useMemo(() => {
+    // eslint-disable-next-line react-hooks/purity
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const today = [];
+    const past = [];
+    cleanLiveSignals.forEach(s => {
+      const time = new Date(s.created_at || s.bar_time);
+      if (time >= oneDayAgo) {
+        today.push(s);
+      } else {
+        past.push(s);
+      }
+    });
+    return { todaySignals: today, pastSignals: past };
+  }, [cleanLiveSignals]);
+
   const todayStats = useMemo(() => {
+    // eslint-disable-next-line react-hooks/purity
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const todaySignals = cleanLiveSignals.filter(s => new Date(s.created_at || s.bar_time) >= oneDayAgo);
     
@@ -1152,32 +1178,91 @@ export default function TerminalPage() {
                   </div>
                 )}
 
-                {/* Active signals grid */}
+                {/* Active signals split view */}
                 {cleanLiveSignals.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {cleanLiveSignals.map((sig, index) => (
-                      <SignalCard
-                        key={sig.id}
-                        sig={sig}
-                        isFreePlan={isFreePlan}
-                        isExpanded={false}
-                        onToggle={() => {}}
-                        onUpgrade={triggerUpgradeGate}
-                        onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
-                        livePrice={liveBtcPrice}
-                        isLive={index === 0}
-                        nextSignal={index > 0 ? cleanLiveSignals[index - 1] : null}
-                      />
-                    ))}
-                    {isFreePlan && TEASER_LOCKED_COINS.map(coin => (
-                      <LockedSignalCard
-                        key={coin.symbol}
-                        symbol={coin.symbol}
-                        timeframe={coin.timeframe}
-                        type={coin.type}
-                        onUpgrade={() => triggerUpgradeGate(`Unlock ${coin.symbol.split('/')[0]} Signals`, `HA signals for ${coin.symbol} are locked on free tier.`)}
-                      />
-                    ))}
+                  <div className="space-y-6">
+                    {/* Today's Signals Section */}
+                    {(todaySignals.length > 0 || (isFreePlan && TEASER_LOCKED_COINS.length > 0)) && (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between border-b border-[#1e2a3a]/40 pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#3D5AFE]">{"Today's Signals"}</span>
+                            <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-[#3D5AFE]/15 text-[#3D5AFE] rounded border border-[#3D5AFE]/20">
+                              {todaySignals.length} SETUP{todaySignals.length !== 1 ? 'S' : ''}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Fired within last 24 hours</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {todaySignals.map((sig) => {
+                            const globalIndex = cleanLiveSignals.findIndex(s => s.id === sig.id);
+                            return (
+                              <SignalCard
+                                key={sig.id}
+                                sig={sig}
+                                isFreePlan={isFreePlan}
+                                isExpanded={false}
+                                onToggle={() => {}}
+                                onUpgrade={triggerUpgradeGate}
+                                onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
+                                livePrice={liveBtcPrice}
+                                isLive={globalIndex === 0}
+                                rank={globalIndex + 1}
+                                isLatest={globalIndex === 0}
+                                nextSignal={globalIndex > 0 ? cleanLiveSignals[globalIndex - 1] : null}
+                              />
+                            );
+                          })}
+                          {isFreePlan && TEASER_LOCKED_COINS.map(coin => (
+                            <LockedSignalCard
+                              key={coin.symbol}
+                              symbol={coin.symbol}
+                              timeframe={coin.timeframe}
+                              type={coin.type}
+                              onUpgrade={() => triggerUpgradeGate(`Unlock ${coin.symbol.split('/')[0]} Signals`, `HA signals for ${coin.symbol} are locked on free tier.`)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Past Signals Section */}
+                    {pastSignals.length > 0 && (
+                      <div className="space-y-3 pt-2">
+                        <div className="flex items-center justify-between border-b border-[#1e2a3a]/40 pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-zinc-400">Past Signals</span>
+                            <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-zinc-800 text-zinc-400 rounded border border-zinc-700/60">
+                              {pastSignals.length} SETUP{pastSignals.length !== 1 ? 'S' : ''}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Setups older than 24 hours</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {pastSignals.map((sig) => {
+                            const globalIndex = cleanLiveSignals.findIndex(s => s.id === sig.id);
+                            return (
+                              <SignalCard
+                                key={sig.id}
+                                sig={sig}
+                                isFreePlan={isFreePlan}
+                                isExpanded={false}
+                                onToggle={() => {}}
+                                onUpgrade={triggerUpgradeGate}
+                                onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
+                                livePrice={liveBtcPrice}
+                                isLive={globalIndex === 0}
+                                rank={globalIndex + 1}
+                                isLatest={globalIndex === 0}
+                                nextSignal={globalIndex > 0 ? cleanLiveSignals[globalIndex - 1] : null}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

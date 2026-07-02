@@ -67,7 +67,7 @@ export async function fetchFromBinance(symbol, interval, limit = 300) {
   const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${binanceInterval}&limit=${limit}`;
   
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
 
   try {
     const res = await fetch(url, { 

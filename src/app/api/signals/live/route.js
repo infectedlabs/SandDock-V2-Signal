@@ -22,6 +22,17 @@ const PLAN_SYMBOLS = {
 
 import { fetchFromBinance } from '@/lib/binanceFallback';
 
+function generateDeterministicUUID(symbol, interval, barTime) {
+  const hash = crypto.createHash('md5').update(`${symbol}-${interval}-${barTime}`).digest('hex');
+  return [
+    hash.slice(0, 8),
+    hash.slice(8, 12),
+    '4' + hash.slice(13, 16),
+    'a' + hash.slice(17, 20),
+    hash.slice(20, 32)
+  ].join('-');
+}
+
 function computeConfidence(ha, barIndex) {
   let score = 60;
   const windowStart = Math.max(0, barIndex - 20);
@@ -86,7 +97,7 @@ export async function GET(request) {
               const rat = generateRationale(sym, s.type, tf, barIndex >= 0 ? barIndex : ha.length - 1, ha);
 
               const sigObj = {
-                id: `live-${sym}-${s.bar_time}-${s.action}`,
+                id: generateDeterministicUUID(sym, tf, s.bar_time),
                 symbol: sym,
                 interval: tf,
                 signal_type: s.type === 'bot' ? 'buy' : 'sell',
@@ -125,14 +136,14 @@ export async function GET(request) {
                 .eq('interval', tf)
                 .order('bar_time', { ascending: false })
                 .limit(5),
-              1500
+              800
             );
 
             if (!dbError && cachedSignals && cachedSignals.length > 0) {
               loadedFromDb = true;
               cachedSignals.forEach(sig => {
                 const sigObj = {
-                  id: `live-${sig.symbol}-${sig.bar_time}-${sig.action || 'new'}`,
+                  id: sig.id || generateDeterministicUUID(sig.symbol, sig.interval, sig.bar_time),
                   symbol: sig.symbol,
                   interval: sig.interval,
                   signal_type: sig.signal_type,

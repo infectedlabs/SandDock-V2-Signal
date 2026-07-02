@@ -69,7 +69,7 @@ export async function GET(request) {
           .eq('interval', interval)
           .order('bar_time', { ascending: true })
           .limit(100),
-        1500
+        800
       );
 
       if (!dbError && dbSignals && dbSignals.length > 0) {

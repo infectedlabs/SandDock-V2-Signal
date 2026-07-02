@@ -69,7 +69,7 @@ export async function GET(request) {
       }));
       runWithTimeout(
         supabaseAdmin.from('ohlcv_cache').upsert(dbPayload, { onConflict: 'symbol,interval,open_time' }),
-        1500
+        800
       ).catch((e) => console.warn('[/api/chart/candles] DB cache write timed out/failed:', e.message));
     } catch (dbErr) {
       console.error('[/api/chart/candles] DB cache payload mapping error:', dbErr);
@@ -93,7 +93,7 @@ export async function GET(request) {
           .eq('interval', interval)
           .order('open_time', { ascending: false })
           .limit(limit),
-        1500
+        800
       );
 
       if (!dbError && cachedCandles && cachedCandles.length > 0) {

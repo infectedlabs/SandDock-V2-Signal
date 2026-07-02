@@ -96,59 +96,48 @@ export default function SignalDetailPage() {
       try {
         setSigLoading(true);
         const idStr = decodeURIComponent(String(params.id));
-        let sym = 'BTCUSDT';
-        let barTime = null;
-
-        if (idStr.includes('-')) {
-          const parts = idStr.split('-');
-          const symIndex = parts.findIndex(p => p.toUpperCase().endsWith('USDT'));
-          if (symIndex !== -1) {
-            sym = parts[symIndex].toUpperCase();
-            const timePart = parts.slice(symIndex + 1).join('-');
-            if (timePart && !isNaN(Date.parse(timePart))) {
-              barTime = new Date(timePart).toISOString();
-            }
-          }
-        }
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idStr);
 
         let foundSignal = null;
 
-        // 1. Try querying the database first
-        let query = supabase.from('signals').select('*');
-        if (barTime) {
-          query = query.eq('symbol', sym).eq('bar_time', barTime);
-        } else {
-          query = query.eq('id', idStr);
-        }
+        // 1. Try querying the database first if it's a valid UUID
+        if (isUuid) {
+          const { data: dbData } = await supabase
+            .from('signals')
+            .select('*')
+            .eq('id', idStr)
+            .maybeSingle();
 
-        const { data: dbData } = await query.maybeSingle();
-        if (dbData) {
-          foundSignal = {
-            id: dbData.id,
-            symbol: dbData.symbol,
-            interval: dbData.interval,
-            signal_type: dbData.signal_type,
-            entry_price: parseFloat(dbData.entry_price),
-            sl_price: dbData.sl_price ? parseFloat(dbData.sl_price) : null,
-            tp_price: dbData.tp_price ? parseFloat(dbData.tp_price) : null,
-            confidence: dbData.confidence || 88,
-            created_at: dbData.bar_time,
-          };
+          if (dbData) {
+            foundSignal = {
+              id: dbData.id,
+              symbol: dbData.symbol,
+              interval: dbData.interval,
+              signal_type: dbData.signal_type,
+              entry_price: parseFloat(dbData.entry_price),
+              sl_price: dbData.sl_price ? parseFloat(dbData.sl_price) : null,
+              tp_price: dbData.tp_price ? parseFloat(dbData.tp_price) : null,
+              confidence: dbData.confidence || 88,
+              created_at: dbData.bar_time,
+            };
+          }
         }
 
         // 2. Fallback to API calculation if database entry doesn't exist yet
         if (!foundSignal) {
           const intervals = ['15m', '1h', '4h'];
+          
+          // First, search in live signals endpoints (no symbol filter to fetch all coins)
           for (const tf of intervals) {
-            const res = await fetch(`/api/signals/log?symbol=${sym}&interval=${tf}&plan=${profile?.plan || 'free'}`);
+            const res = await fetch(`/api/signals/live?interval=${tf}&plan=${profile?.plan || 'free'}`);
             if (res.ok) {
               const signalsList = await res.json();
-              const found = signalsList.find(s => idStr.includes(s.bar_time) || (barTime && new Date(s.bar_time).getTime() === new Date(barTime).getTime()));
+              const found = signalsList.find(s => s.id === idStr);
               if (found) {
                 foundSignal = {
-                  id: params.id,
-                  symbol: sym,
-                  interval: tf,
+                  id: found.id,
+                  symbol: found.symbol,
+                  interval: found.interval,
                   signal_type: found.signal_type,
                   entry_price: parseFloat(found.entry_price),
                   sl_price: found.sl_price ? parseFloat(found.sl_price) : null,
@@ -157,6 +146,31 @@ export default function SignalDetailPage() {
                   created_at: found.bar_time,
                 };
                 break;
+              }
+            }
+          }
+
+          // Next, search in log signals endpoints (no symbol filter to fetch all coins)
+          if (!foundSignal) {
+            for (const tf of intervals) {
+              const res = await fetch(`/api/signals/log?interval=${tf}&plan=${profile?.plan || 'free'}`);
+              if (res.ok) {
+                const signalsList = await res.json();
+                const found = signalsList.find(s => s.id === idStr);
+                if (found) {
+                  foundSignal = {
+                    id: found.id,
+                    symbol: found.symbol,
+                    interval: found.interval,
+                    signal_type: found.signal_type,
+                    entry_price: parseFloat(found.entry_price),
+                    sl_price: found.sl_price ? parseFloat(found.sl_price) : null,
+                    tp_price: found.tp_price ? parseFloat(found.tp_price) : null,
+                    confidence: found.confidence || 88,
+                    created_at: found.bar_time,
+                  };
+                  break;
+                }
               }
             }
           }
@@ -183,7 +197,7 @@ export default function SignalDetailPage() {
     const fetchLivePrice = async () => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${signal.symbol}`, {
           signal: controller.signal
         });
@@ -261,6 +275,7 @@ export default function SignalDetailPage() {
   const coinLabel = signal.symbol.replace('USDT', '');
 
   // Time calculations
+  // eslint-disable-next-line react-hooks/purity
   const elapsed = Date.now() - new Date(signal.created_at).getTime();
   const hoursAgo = Math.floor(elapsed / (1000 * 60 * 60));
   const minutesAgo = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));

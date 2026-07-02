@@ -16,6 +16,17 @@ const PLAN_SYMBOLS = {
 import { createClient } from '@supabase/supabase-js';
 import { fetchFromBinance } from '@/lib/binanceFallback';
 
+function generateDeterministicUUID(symbol, interval, barTime) {
+  const hash = crypto.createHash('md5').update(`${symbol}-${interval}-${barTime}`).digest('hex');
+  return [
+    hash.slice(0, 8),
+    hash.slice(8, 12),
+    '4' + hash.slice(13, 16),
+    'a' + hash.slice(17, 20),
+    hash.slice(20, 32)
+  ].join('-');
+}
+
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -71,7 +82,10 @@ export async function GET(request) {
               isWin = pnlPct >= 0;
             }
 
+            const sigId = generateDeterministicUUID(sym, tf, s.bar_time);
+
             const signalObj = {
+              id: sigId,
               symbol: sym,
               interval: tf,
               signal_type: isBuy ? 'buy' : 'sell',
@@ -96,7 +110,7 @@ export async function GET(request) {
             dbPayload.push(signalObj);
 
             const logObj = {
-              id: `log-${sym}-${s.bar_time}`,
+              id: sigId,
               ...signalObj
             };
             symLogs.push(logObj);
@@ -110,9 +124,9 @@ export async function GET(request) {
 
           if (dbPayload.length > 0) {
             runWithTimeout(
-              supabaseAdmin.from('signals').upsert(dbPayload, { onConflict: 'symbol,interval,bar_time' }),
-              1500
-            ).catch((e) => console.warn(`[/api/signals/log] DB signals write failed/timed out for ${sym} ${tf}:`, e.message));
+              upsertSignalsSafe(supabaseAdmin, dbPayload),
+              2000
+            ).catch((e) => console.warn(`[/api/signals/log] safe upsert failed/timed out for ${sym} ${tf}:`, e.message));
           }
         } catch (err) {
           console.warn(`[/api/signals/log] Binance fetch failed for ${sym} ${tf}, reading cache:`, err.message);
@@ -128,14 +142,14 @@ export async function GET(request) {
                 .eq('interval', tf)
                 .order('bar_time', { ascending: false })
                 .limit(50),
-              1500
+              800
             );
 
             if (!dbError && cachedSignals && cachedSignals.length > 0) {
               loadedFromDb = true;
               cachedSignals.forEach(sig => {
                 const logObj = {
-                  id: `log-${sig.symbol}-${sig.bar_time}`,
+                  id: sig.id || generateDeterministicUUID(sig.symbol, sig.interval, sig.bar_time),
                   ...sig,
                   entry_price: parseFloat(sig.entry_price),
                   close_price: sig.close_price ? parseFloat(sig.close_price) : null,
@@ -185,5 +199,69 @@ export async function GET(request) {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
       }
     });
+  }
+}
+
+async function upsertSignalsSafe(supabaseAdmin, dbPayload) {
+  if (!dbPayload || dbPayload.length === 0) return;
+  const sym = dbPayload[0].symbol;
+  const tf = dbPayload[0].interval;
+
+  // 1. Fetch existing signals for this symbol and interval
+  const { data: existing, error } = await supabaseAdmin
+    .from('signals')
+    .select('bar_time, entry_price, close_price')
+    .eq('symbol', sym)
+    .eq('interval', tf);
+
+  if (error) {
+    throw error;
+  }
+
+  const existingMap = new Map();
+  if (existing) {
+    existing.forEach(row => {
+      const key = new Date(row.bar_time).getTime();
+      existingMap.set(key, row);
+    });
+  }
+
+  const toInsert = [];
+  const toUpdate = [];
+
+  dbPayload.forEach(item => {
+    const itemKey = new Date(item.bar_time).getTime();
+    if (!existingMap.has(itemKey)) {
+      toInsert.push(item);
+    } else {
+      const existingRow = existingMap.get(itemKey);
+      // Only update if close_price changed
+      if (item.close_price !== existingRow.close_price) {
+        toUpdate.push(item);
+      }
+    }
+  });
+
+  if (toInsert.length > 0) {
+    const { error: insErr } = await supabaseAdmin.from('signals').insert(toInsert);
+    if (insErr) console.warn('[upsertSignalsSafe] Insert error:', insErr.message);
+  }
+
+  if (toUpdate.length > 0) {
+    for (const item of toUpdate) {
+      const { error: updErr } = await supabaseAdmin
+        .from('signals')
+        .update({
+          close_price: item.close_price,
+          close_reason: item.close_reason,
+          closed_at: item.closed_at,
+          pnl_pct: item.pnl_pct,
+          is_win: item.is_win
+        })
+        .eq('symbol', sym)
+        .eq('interval', tf)
+        .eq('bar_time', item.bar_time);
+      if (updErr) console.warn('[upsertSignalsSafe] Update error:', updErr.message);
+    }
   }
 }
