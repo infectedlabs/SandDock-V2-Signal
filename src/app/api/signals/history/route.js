@@ -27,30 +27,26 @@ export async function GET(request) {
       .not('pnl_pct', 'is', null) // only closed signals with PnL
       .order('bar_time', { ascending: true }); // ascending order for chart plotting
 
-    if (symbol) {
+    if (symbol && symbol !== 'ALL') {
       query = query.eq('symbol', symbol.toUpperCase());
     }
     if (interval) {
       query = query.eq('interval', interval);
     }
 
-    // Apply date filter
-    const now = new Date();
-    let filterDate = new Date();
-
+    // Apply date filter (using rolling millisecond windows for 100% timezone-independent queries)
+    let filterMs = 30 * 24 * 60 * 60 * 1000; // default 30d
     if (filter === '1y') {
-      filterDate.setFullYear(now.getFullYear() - 1);
+      filterMs = 365 * 24 * 60 * 60 * 1000;
     } else if (filter === '6m') {
-      filterDate.setMonth(now.getMonth() - 6);
+      filterMs = 180 * 24 * 60 * 60 * 1000;
     } else if (filter === '1w') {
-      filterDate.setDate(now.getDate() - 7);
+      filterMs = 7 * 24 * 60 * 60 * 1000;
     } else if (filter === 'today') {
-      filterDate.setHours(0, 0, 0, 0);
-    } else {
-      // Default '30d'
-      filterDate.setDate(now.getDate() - 30);
+      filterMs = 24 * 60 * 60 * 1000;
     }
 
+    const filterDate = new Date(Date.now() - filterMs);
     query = query.gte('bar_time', filterDate.toISOString());
 
     const { data, error } = await runWithTimeout(query, 1500);
@@ -60,23 +56,25 @@ export async function GET(request) {
 
     // Secondary fallback: if DB returned nothing, reconstruct from memoryCache.log
     if (resultData.length === 0) {
-      const logCache = memoryCache.log[`${symbol}_${interval}`];
+      const logCache = symbol === 'ALL'
+        ? Object.keys(memoryCache.log)
+            .filter(key => key.endsWith(`_${interval}`))
+            .reduce((acc, key) => acc.concat(memoryCache.log[key] || []), [])
+        : memoryCache.log[`${symbol}_${interval}`];
       if (logCache && logCache.length > 0) {
         console.log(`[/api/signals/history] DB returned empty array, reconstructing from memoryCache.log for ${symbol} ${interval}`);
         
-        const now = new Date();
-        let filterDate = new Date();
+        let filterMs = 30 * 24 * 60 * 60 * 1000; // default 30d
         if (filter === '1y') {
-          filterDate.setFullYear(now.getFullYear() - 1);
+          filterMs = 365 * 24 * 60 * 60 * 1000;
         } else if (filter === '6m') {
-          filterDate.setMonth(now.getMonth() - 6);
+          filterMs = 180 * 24 * 60 * 60 * 1000;
         } else if (filter === '1w') {
-          filterDate.setDate(now.getDate() - 7);
+          filterMs = 7 * 24 * 60 * 60 * 1000;
         } else if (filter === 'today') {
-          filterDate.setHours(0, 0, 0, 0);
-        } else {
-          filterDate.setDate(now.getDate() - 30);
+          filterMs = 24 * 60 * 60 * 1000;
         }
+        const filterDate = new Date(Date.now() - filterMs);
 
         resultData = logCache.filter(sig => {
           const hasPnl = sig.pnl_pct !== null && sig.pnl_pct !== undefined;
@@ -111,23 +109,25 @@ export async function GET(request) {
     }
 
     // Secondary fallback: Reconstruct history from memoryCache.log (calculated logs)
-    const logCache = memoryCache.log[`${symbol}_${interval}`];
+    const logCache = symbol === 'ALL'
+        ? Object.keys(memoryCache.log)
+            .filter(key => key.endsWith(`_${interval}`))
+            .reduce((acc, key) => acc.concat(memoryCache.log[key] || []), [])
+        : memoryCache.log[`${symbol}_${interval}`];
     if (logCache && logCache.length > 0) {
       console.log(`[/api/signals/history] Reconstructing history from memoryCache.log for ${symbol} ${interval}`);
       
-      const now = new Date();
-      let filterDate = new Date();
+      let filterMs = 30 * 24 * 60 * 60 * 1000; // default 30d
       if (filter === '1y') {
-        filterDate.setFullYear(now.getFullYear() - 1);
+        filterMs = 365 * 24 * 60 * 60 * 1000;
       } else if (filter === '6m') {
-        filterDate.setMonth(now.getMonth() - 6);
+        filterMs = 180 * 24 * 60 * 60 * 1000;
       } else if (filter === '1w') {
-        filterDate.setDate(now.getDate() - 7);
+        filterMs = 7 * 24 * 60 * 60 * 1000;
       } else if (filter === 'today') {
-        filterDate.setHours(0, 0, 0, 0);
-      } else {
-        filterDate.setDate(now.getDate() - 30);
+        filterMs = 24 * 60 * 60 * 1000;
       }
+      const filterDate = new Date(Date.now() - filterMs);
 
       const reconstructed = logCache.filter(sig => {
         const hasPnl = sig.pnl_pct !== null && sig.pnl_pct !== undefined;

@@ -26,6 +26,53 @@ export function AuthProvider({ children }) {
   const [isMock, setIsMock] = useState(!isSupabaseConfigured);
   const router = useRouter();
 
+  // ── Expiry check — runs on every app load instead of a cron ──────────────
+  // Called after profile is loaded. If the user's paid subscription or free
+  // trial has expired, silently calls the server-side expiry-check endpoint
+  // which downgrades the plan in Supabase, then re-fetches the profile.
+  const checkExpiry = async (uid, profileData) => {
+    try {
+      const now = Date.now();
+      const isPaidPlan = ['pro', 'master'].includes(profileData?.plan);
+      const isFreePlan = profileData?.plan === 'free';
+
+      const paidExpired =
+        isPaidPlan &&
+        profileData?.current_period_end &&
+        new Date(profileData.current_period_end).getTime() < now &&
+        profileData?.subscription_status !== 'lifetime';
+
+      const trialExpired =
+        isFreePlan &&
+        profileData?.trial_ends_at &&
+        new Date(profileData.trial_ends_at).getTime() < now &&
+        profileData?.subscription_status !== 'expired';
+
+      if (paidExpired || trialExpired) {
+        console.log('[AuthContext] Subscription/trial expired — updating plan…');
+        // Update directly in Supabase (no CRON_SECRET needed from browser)
+        const updates = paidExpired
+          ? { plan: 'free', subscription_status: 'expired', current_period_end: null, trial_ends_at: new Date(now - 1).toISOString() }
+          : { subscription_status: 'expired' };
+
+        const { data: updated } = await supabase
+          .from('profiles')
+          .update(updates)
+          .eq('id', uid)
+          .select()
+          .single();
+
+        if (updated) {
+          setProfile(updated);
+          console.log('[AuthContext] Plan downgraded to free (expiry).');
+        }
+      }
+    } catch (err) {
+      // Non-fatal — silently ignore
+      console.warn('[AuthContext] Expiry check failed (non-fatal):', err.message);
+    }
+  };
+
   // Helper to fetch/create profile in actual database
   const fetchProfile = async (uid, email, metadata = {}) => {
     try {
@@ -36,13 +83,18 @@ export function AuthProvider({ children }) {
         .single();
       if (data) {
         setProfile(data);
+        // Run expiry check on every login/load — replaces cron
+        await checkExpiry(uid, data);
       } else {
         // Safe creation of profile record if trigger failed or table is empty
+        const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
         const defaultProfile = {
           id: uid,
           email: email || '',
           name: metadata?.full_name || email?.split('@')[0] || '',
           plan: 'free',
+          subscription_status: 'trial',
+          trial_ends_at: trialEndsAt,
           coins_selected: ['BTC'],
           alert_delivery: { web: true, telegram: false }
         };
@@ -67,11 +119,14 @@ export function AuthProvider({ children }) {
     if (stored) {
       setProfile(JSON.parse(stored));
     } else {
+      const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const defaultProfile = {
         id: uid,
         email: email,
         name: name || email.split('@')[0],
         plan: 'free',
+        subscription_status: 'trial',
+        trial_ends_at: trialEndsAt,
         experience_level: null,
         risk_style: null,
         primary_goal: null,

@@ -6,11 +6,9 @@ import { memoryCache, runWithTimeout } from '@/lib/memoryCache';
 export const dynamic = 'force-dynamic';
 
 const PLAN_SYMBOLS = {
-  free:   ['BTCUSDT'],
-  pro:    ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT', 'ADAUSDT',
-            'AVAXUSDT', 'DOTUSDT', 'MATICUSDT', 'LINKUSDT'],
-  master: ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT', 'ADAUSDT',
-            'AVAXUSDT', 'DOTUSDT', 'MATICUSDT', 'LINKUSDT'],
+  free:   ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT', 'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT', 'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'],
+  pro:    ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT', 'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT', 'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'],
+  master: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT', 'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT', 'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'],
 };
 
 import { createClient } from '@supabase/supabase-js';
@@ -54,6 +52,43 @@ export async function GET(request) {
       timeframes.map(async (tf) => {
         const cacheKey = `${sym}_${tf}`;
         try {
+          // 1. Try to fetch from database first
+          const { data: dbSignals, error: dbError } = await runWithTimeout(
+            supabaseAdmin
+              .from('signals')
+              .select('*')
+              .eq('symbol', sym.toUpperCase())
+              .eq('interval', tf)
+              .order('bar_time', { ascending: false })
+              .limit(100),
+            1200
+          );
+
+          if (!dbError && dbSignals && dbSignals.length > 0) {
+            const formatted = dbSignals.map(sig => ({
+              id: sig.id || generateDeterministicUUID(sig.symbol, sig.interval, sig.bar_time),
+              ...sig,
+              entry_price: parseFloat(sig.entry_price),
+              close_price: sig.close_price ? parseFloat(sig.close_price) : null,
+              sl_price: sig.sl_price ? parseFloat(sig.sl_price) : null,
+              tp_price: sig.tp_price ? parseFloat(sig.tp_price) : null,
+              pnl_pct: sig.pnl_pct ? parseFloat(sig.pnl_pct) : null,
+              sl_pct: sig.sl_pct ? parseFloat(sig.sl_pct) : 0,
+              tp_pct: sig.tp_pct ? parseFloat(sig.tp_pct) : 0,
+            }));
+            
+            // Save to memory cache
+            memoryCache.log[cacheKey] = formatted;
+            
+            formatted.forEach(logObj => {
+              if (tf === interval) {
+                allLogs.push(logObj);
+              }
+            });
+            return;
+          }
+
+          // 2. Fallback to calculation
           const candles = await fetchFromBinance(sym, tf, 500);
           const ha = toHeikinAshi(candles);
           const swings = detectSwings(ha, 10, 'Intraday');

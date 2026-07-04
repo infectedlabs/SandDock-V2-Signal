@@ -1,14 +1,49 @@
 version: "3.8"
 services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+
+  api:
+    build: .
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    env_file: ../.env.local
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: redis://redis:6379
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+
+  stream_subscriber:
+    build: .
+    command: python stream_subscriber.py
+    env_file: ../.env.local
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+    restart: always
+
   signal_engine:
     build: .
     command: python signal_engine.py
     env_file: ../.env.local
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: redis://redis:6379
       BINANCE_SYMBOL: BTCUSDT
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+    depends_on:
+      - redis
     restart: always
 
   backtest_worker:
@@ -17,4 +52,7 @@ services:
     env_file: ../.env.local
     environment:
       DATABASE_URL: ${DATABASE_URL}
-    restart: "no"  # runs once then exits
+    restart: "no"
+
+volumes:
+  redis_data:

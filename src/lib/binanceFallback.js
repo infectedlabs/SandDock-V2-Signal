@@ -64,7 +64,7 @@ export function generateMockCandles(symbol, interval, limit) {
 
 export async function fetchFromBinance(symbol, interval, limit = 300) {
   const binanceInterval = interval.toLowerCase();
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${binanceInterval}&limit=${limit}`;
+  const url = `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${binanceInterval}&limit=${limit}`;
   
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 2500);

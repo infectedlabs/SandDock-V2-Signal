@@ -198,7 +198,7 @@ export default function SignalDetailPage() {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
-        const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${signal.symbol}`, {
+        const res = await fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${signal.symbol}`, {
           signal: controller.signal
         });
         clearTimeout(timeoutId);
@@ -656,7 +656,7 @@ export default function SignalDetailPage() {
               Interactive Signal Performance Chart
             </span>
             <div className="w-full overflow-hidden">
-              <HAChart symbol={signal.symbol} interval={signal.interval} isFreePlan={isFreePlan} theme="dark" />
+              <HAChart symbol={signal.symbol} interval={signal.interval} isFreePlan={isFreePlan} theme="dark" hideSymbolSelector={true} />
             </div>
           </div>
 
@@ -733,8 +733,10 @@ export default function SignalDetailPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
-                    {historySignals.map((h, i) => {
-                      const showRow = !isFreePlan || i < 3; // free plan gets 3 rows preview
+                    {[...historySignals]
+                      .sort((a, b) => new Date(b.bar_time || b.created_at).getTime() - new Date(a.bar_time || a.created_at).getTime())
+                      .map((h, i) => {
+                        const showRow = !isFreePlan || i < 3; // free plan gets 3 rows preview
                       return (
                         <tr key={i} className="hover:bg-slate-900/40 transition-colors">
                           <td className="py-3">{new Date(h.bar_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>

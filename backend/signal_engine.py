@@ -8,6 +8,9 @@ import time
 import logging
 import requests
 import pandas as pd
+import redis
+import psycopg2
+import json
 from datetime import datetime, timezone
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -74,35 +77,65 @@ def tg_edit(message_id: int, text: str) -> bool:
     return False
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Binance REST helpers
+# Redis & DB helpers replacing REST API
 # ──────────────────────────────────────────────────────────────────────────────
 
-def fetch_klines(symbol: str, interval: str, limit: int = 200) -> pd.DataFrame:
-    """Fetch closed klines from Binance REST API."""
-    params = {"symbol": symbol, "interval": interval, "limit": limit + 1}
-    r = requests.get(BINANCE_REST, params=params, timeout=10)
-    r.raise_for_status()
-    raw = r.json()[:-1]   # drop the currently open bar
-    df = pd.DataFrame(raw, columns=[
-        "open_time", "open", "high", "low", "close",
-        "volume", "close_time", "qav", "trades",
-        "tbbav", "tbqav", "ignore",
-    ])
-    for col in ("open", "high", "low", "close"):
-        df[col] = df[col].astype(float)
-    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms", utc=True)
-    df.set_index("open_time", inplace=True)
-    return df
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
+
+def get_db():
+    return psycopg2.connect(os.getenv("DATABASE_URL"))
+
+def fetch_klines_from_db(symbol: str, interval: str, limit: int = 200) -> pd.DataFrame:
+    """Read historical candles from ohlcv_cache instead of Binance REST API."""
+    try:
+        conn = get_db()
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT open_time, open, high, low, close, volume,
+                       ha_open, ha_high, ha_low, ha_close
+                FROM ohlcv_cache
+                WHERE symbol = %s AND interval = %s
+                ORDER BY open_time DESC
+                LIMIT %s
+            """, (symbol, interval, limit))
+            rows = cur.fetchall()
+        conn.close()
+        
+        if not rows:
+            return pd.DataFrame()
+            
+        df = pd.DataFrame(reversed(rows), columns=[
+            "open_time", "open", "high", "low", "close", "volume",
+            "ha_open", "ha_high", "ha_low", "ha_close"
+        ])
+        df["open_time"] = pd.to_datetime(df["open_time"], utc=True)
+        df.set_index("open_time", inplace=True)
+        return df
+    except Exception as e:
+        log.error(f"Error fetching klines from DB: {e}")
+        return pd.DataFrame()
 
 def fetch_live_price(symbol: str) -> float:
-    """Fetch the latest traded price from Binance."""
-    r = requests.get(
-        "https://api.binance.com/api/v3/ticker/price",
-        params={"symbol": symbol},
-        timeout=5,
-    )
-    r.raise_for_status()
-    return float(r.json()["price"])
+    """Read the latest mark price from Redis cache instead of Binance REST API."""
+    try:
+        val = redis_client.get(f"price:{symbol}")
+        if val is not None:
+            return float(val)
+    except Exception as e:
+        log.error(f"Error reading live price from Redis: {e}")
+    # Fallback to REST API if Redis is down
+    try:
+        r = requests.get(
+            f"https://fapi.binance.com/fapi/v1/ticker/price",
+            params={"symbol": symbol},
+            timeout=5,
+        )
+        if r.ok:
+            return float(r.json()["price"])
+    except Exception:
+        pass
+    return 0.0
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Heikin Ashi conversion
@@ -372,14 +405,16 @@ def format_flip_close(
 # ──────────────────────────────────────────────────────────────────────────────
 
 def main():
-    log.info("Signal engine starting (database-free mode)...")
+    log.info("Signal engine starting (event-driven mode)...")
 
-    df_seed  = fetch_klines(BINANCE_SYMBOL, INTERVAL, limit=200)
-    ha_seed  = to_heikin_ashi(df_seed)
-    log.info("Candle engine initialized with %d bars.", len(df_seed))
-
-    startup_watermark: datetime = df_seed.index[-1]
-    log.info("Watermark seeded to %s — ignoring all older events", startup_watermark)
+    # Seed initial state from DB
+    df_seed = fetch_klines_from_db(BINANCE_SYMBOL, INTERVAL, limit=200)
+    if not df_seed.empty:
+        log.info("Candle engine initialized with %d bars from DB.", len(df_seed))
+        startup_watermark = df_seed.index[-1]
+    else:
+        log.warning("No DB history found. Waiting for first stream event to start...")
+        startup_watermark = datetime.now(timezone.utc)
 
     pending_tg_id:    int | None      = None
     pending_sig_type: str | None      = None   # "top" or "bot"
@@ -394,137 +429,159 @@ def main():
 
     while True:
         try:
-            # ── 1. Check live price against active SL ─────────────────────
-            if active_sl_price is not None and not sl_already_hit:
+            # Listen to Redis channels instead of polling
+            pubsub = redis_client.pubsub()
+            pubsub.subscribe("signal_engine:trigger", f"price:{BINANCE_SYMBOL}")
+            log.info("Subscribed to Redis channels 'signal_engine:trigger' and 'price:%s'", BINANCE_SYMBOL)
+
+            for message in pubsub.listen():
+                if message["type"] != "message":
+                    continue
+
+                channel = message["channel"]
+                data_raw = message["data"]
+
                 try:
-                    live = fetch_live_price(BINANCE_SYMBOL)
-                    sl_hit = (
-                        (active_trade_type == "bot" and live <= active_sl_price)
-                        or
-                        (active_trade_type == "top" and live >= active_sl_price)
-                    )
+                    # ── 1. Check live price against active SL (real-time price updates) ──
+                    if channel == f"price:{BINANCE_SYMBOL}":
+                        if active_sl_price is not None and not sl_already_hit:
+                            try:
+                                price_data = json.loads(data_raw)
+                                live = float(price_data["price"])
+                                
+                                sl_hit = (
+                                    (active_trade_type == "bot" and live <= active_sl_price)
+                                    or
+                                    (active_trade_type == "top" and live >= active_sl_price)
+                                )
 
-                    if sl_hit:
-                        safe_entry = active_entry_price if active_entry_price is not None else active_sl_price
-                        msg = format_sl_hit(
-                            BINANCE_SYMBOL,
-                            active_trade_type,
-                            safe_entry,
-                            active_sl_price,
-                            live,
-                        )
-                        tg_send(msg)
-                        log.warning(
-                            "SL HIT  type=%s  entry=%.2f  sl=%.2f  price=%.2f",
-                            active_trade_type, safe_entry,
-                            active_sl_price, live,
-                        )
-                        
-                        sl_already_hit     = True
-                        active_sl_price    = None
-                        active_entry_price = None
-                        active_trade_type  = None
+                                if sl_hit:
+                                    safe_entry = active_entry_price if active_entry_price is not None else active_sl_price
+                                    msg = format_sl_hit(
+                                        BINANCE_SYMBOL,
+                                        active_trade_type,
+                                        safe_entry,
+                                        active_sl_price,
+                                        live,
+                                    )
+                                    tg_send(msg)
+                                    log.warning(
+                                        "SL HIT  type=%s  entry=%.2f  sl=%.2f  price=%.2f",
+                                        active_trade_type, safe_entry,
+                                        active_sl_price, live,
+                                    )
+                                    
+                                    sl_already_hit     = True
+                                    active_sl_price    = None
+                                    active_entry_price = None
+                                    active_trade_type  = None
 
-                except requests.exceptions.RequestException as exc:
-                    log.warning("Price check failed: %s", exc)
+                            except Exception as exc:
+                                log.warning("Real-time SL check failed: %s", exc)
+                        continue
 
-            # ── 2. Fetch klines and run swing detection ────────────────────
-            df = fetch_klines(BINANCE_SYMBOL, INTERVAL, limit=200)
-            if df.empty:
-                time.sleep(POLL_SECONDS)
-                continue
+                    # ── 2. Run swing detection on trigger (candle close events) ──────────
+                    if channel == "signal_engine:trigger":
+                        trigger = json.loads(data_raw)
+                        symbol = trigger["symbol"]
+                        interval = trigger["interval"]
 
-            ha     = to_heikin_ashi(df)
-            events = detect_swings(ha, LOOKBACK, ATR_MULT, TP1_MULT, TP2_MULT)
+                        if symbol != BINANCE_SYMBOL or interval != INTERVAL:
+                            continue
 
-            if not events:
-                time.sleep(POLL_SECONDS)
-                continue
+                        df = fetch_klines_from_db(symbol, interval, limit=200)
+                        if df.empty:
+                            continue
 
-            new_events = [e for e in events if e["bar"] > last_processed_close]
+                        events = detect_swings(df, LOOKBACK, ATR_MULT, TP1_MULT, TP2_MULT)
 
-            for ev in new_events:
-                sig_type  = ev["type"]
-                price     = ev["price"]
-                bar_time  = ev["bar"]
-                action    = ev["action"]
-                sl_price  = ev["sl_price"]
-                tp1_price = ev.get("tp1_price")
-                tp2_price = ev.get("tp2_price")
+                        if not events:
+                            continue
 
-                live_price = fetch_live_price(BINANCE_SYMBOL)
-                log.info("Swing event: %s %s @ %.2f (action=%s)", sig_type.upper(), BINANCE_SYMBOL, live_price, action)
+                        new_events = [e for e in events if e["bar"] > last_processed_close]
 
-                # Telegram alerts logic
-                text = format_alert(BINANCE_SYMBOL, sig_type, live_price, bar_time,
-                                    sl_price, tp1_price, tp2_price)
+                        for ev in new_events:
+                            sig_type  = ev["type"]
+                            price     = ev["price"]
+                            bar_time  = ev["bar"]
+                            action    = ev["action"]
+                            sl_price  = ev["sl_price"]
+                            tp1_price = ev.get("tp1_price")
+                            tp2_price = ev.get("tp2_price")
 
-                if action == "new":
-                    msg_id = tg_send(text)
-                    pending_tg_id    = msg_id
-                    pending_sig_type = sig_type
+                            live_price = fetch_live_price(BINANCE_SYMBOL)
+                            log.info("Swing event: %s %s @ %.2f (action=%s)", sig_type.upper(), BINANCE_SYMBOL, live_price, action)
 
-                    # Arm SL monitoring
-                    active_sl_price    = sl_price
-                    active_entry_price = live_price
-                    active_trade_type  = sig_type
-                    sl_already_hit     = False
-                    log.info(
-                        "SL armed  type=%s  entry=%.2f  sl=%.2f  tp1=%.2f  tp2=%.2f",
-                        sig_type, live_price, sl_price or 0,
-                        tp1_price or 0, tp2_price or 0,
-                    )
+                            # Telegram alerts logic
+                            text = format_alert(BINANCE_SYMBOL, sig_type, live_price, bar_time,
+                                                sl_price, tp1_price, tp2_price)
 
-                elif action == "slide":
-                    if pending_tg_id and pending_sig_type == sig_type:
-                        tg_edit(pending_tg_id, text)
-                    else:
-                        msg_id = tg_send(text)
-                        pending_tg_id    = msg_id
-                        pending_sig_type = sig_type
+                            if action == "new":
+                                msg_id = tg_send(text)
+                                pending_tg_id    = msg_id
+                                pending_sig_type = sig_type
 
-                    if sl_price is not None:
-                        active_sl_price   = sl_price
-                        active_trade_type = sig_type
-                        sl_already_hit    = False
-                        if active_entry_price is None:
-                            active_entry_price = live_price
+                                # Arm SL monitoring
+                                active_sl_price    = sl_price
+                                active_entry_price = live_price
+                                active_trade_type  = sig_type
+                                sl_already_hit     = False
+                                log.info(
+                                    "SL armed  type=%s  entry=%.2f  sl=%.2f  tp1=%.2f  tp2=%.2f",
+                                    sig_type, live_price, sl_price or 0,
+                                    tp1_price or 0, tp2_price or 0,
+                                )
 
-                elif action == "commit":
-                    if (
-                        active_trade_type is not None
-                        and active_entry_price is not None
-                        and not sl_already_hit
-                    ):
-                        flip_live = fetch_live_price(BINANCE_SYMBOL)
-                        flip_text = format_flip_close(
-                            BINANCE_SYMBOL,
-                            active_trade_type,
-                            active_entry_price,
-                            flip_live,
-                        )
-                        tg_send(flip_text)
-                        log.info(
-                            "Trade closed (flip)  type=%s  entry=%.2f  close=%.2f",
-                            active_trade_type, active_entry_price, flip_live,
-                        )
+                            elif action == "slide":
+                                if pending_tg_id and pending_sig_type == sig_type:
+                                    tg_edit(pending_tg_id, text)
+                                else:
+                                    msg_id = tg_send(text)
+                                    pending_tg_id    = msg_id
+                                    pending_sig_type = sig_type
+
+                                if sl_price is not None:
+                                    active_sl_price   = sl_price
+                                    active_trade_type = sig_type
+                                    sl_already_hit    = False
+                                    if active_entry_price is None:
+                                        active_entry_price = live_price
+
+                            elif action == "commit":
+                                if (
+                                    active_trade_type is not None
+                                    and active_entry_price is not None
+                                    and not sl_already_hit
+                                ):
+                                    flip_live = fetch_live_price(BINANCE_SYMBOL)
+                                    flip_text = format_flip_close(
+                                        BINANCE_SYMBOL,
+                                        active_trade_type,
+                                        active_entry_price,
+                                        flip_live,
+                                    )
+                                    tg_send(flip_text)
+                                    log.info(
+                                        "Trade closed (flip)  type=%s  entry=%.2f  close=%.2f",
+                                        active_trade_type, active_entry_price, flip_live,
+                                    )
+                                
+                                pending_tg_id      = None
+                                pending_sig_type   = None
+                                active_sl_price    = None
+                                active_entry_price = None
+                                active_trade_type  = None
+                                sl_already_hit     = False
+
+                            if bar_time > last_processed_close:
+                                last_processed_close = bar_time
+
+                except Exception as exc:
+                    log.exception("Unexpected error in signal engine event loop: %s", exc)
                     
-                    pending_tg_id      = None
-                    pending_sig_type   = None
-                    active_sl_price    = None
-                    active_entry_price = None
-                    active_trade_type  = None
-                    sl_already_hit     = False
-
-                if bar_time > last_processed_close:
-                    last_processed_close = bar_time
-
-        except requests.exceptions.RequestException as exc:
-            log.error("Network error: %s — retrying in %ds", exc, POLL_SECONDS)
-        except Exception as exc:
-            log.exception("Unexpected error: %s", exc)
-
-        time.sleep(POLL_SECONDS)
+        except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError) as exc:
+            log.error("Redis connection error: %s. Retrying subscription in 5 seconds...", exc)
+            time.sleep(5)
 
 
 if __name__ == "__main__":

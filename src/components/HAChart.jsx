@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 /**
  * HAChart — Heikin Ashi candlestick chart using TradingView Lightweight Charts v5.
@@ -13,8 +14,14 @@ export default function HAChart({
   isFreePlan = true, 
   theme = 'dark',
   onSymbolChange,
-  onIntervalChange
+  onIntervalChange,
+  onPriceTick,
+  plan = 'free',
+  onUpgradeGate,
+  hideSymbolSelector = false
 }) {
+  const { session } = useAuth();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const containerRef = useRef(null);
   const chartRef     = useRef(null);
   const seriesRef    = useRef(null);
@@ -27,7 +34,19 @@ export default function HAChart({
   const sigsRef = useRef([]);
   const livePriceRef = useRef(null);
 
-  const PRO_SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT'];
+  const PRO_SYMBOLS = [
+    'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT', 
+    'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT', 
+    'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'
+  ];
+
+  const isSymbolLocked = (sym) => {
+    if (plan === 'master') return false;
+    if (plan === 'pro') {
+      return !['BTCUSDT', 'ETHUSDT', 'BNBUSDT'].includes(sym);
+    }
+    return sym !== 'BTCUSDT'; // free plan
+  };
 
   const isLight = theme === 'light';
 
@@ -35,7 +54,7 @@ export default function HAChart({
     let isMounted = true;
     let chartLocal = null;
     let resizeObserver = null;
-    let livePoll = null;
+    let ws = null;
 
     if (!containerRef.current) return;
 
@@ -190,62 +209,76 @@ export default function HAChart({
         // Hook coordinate update listeners
         chart.timeScale().subscribeVisibleTimeRangeChange(updateCardPositions);
         
-        // ── Live ticking interval (real-time price & PnL updates) ────────────
-        livePoll = setInterval(async () => {
+        // ── Live ticking WebSocket (real-time price & candle updates) ────────
+        const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = process.env.NEXT_PUBLIC_WS_URL 
+          ? process.env.NEXT_PUBLIC_WS_URL.replace(/^https?:\/\//, '')
+          : 'localhost:8000';
+        const wsUrl = `${wsProto}//${wsHost}/ws/chart?token=${session?.access_token || ''}`;
+        
+        console.log(`Connecting to Sanddock WebSocket: ${wsUrl}`);
+        ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+          console.log("WebSocket connection established. Subscribing...");
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+              action: "subscribe",
+              symbol: selectedSymbol,
+              interval: selectedInterval
+            }));
+          }
+        };
+        
+        ws.onmessage = (event) => {
           if (!isMounted) return;
           try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-            const tickerRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${selectedSymbol}`, {
-              signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-
-            let currentPrice;
-            if (isMounted && tickerRes.ok) {
-              const tickerData = await tickerRes.json();
-              currentPrice = parseFloat(tickerData.price);
-            } else {
-              throw new Error('Binance connection error or timeout');
-            }
-
-            livePriceRef.current = currentPrice;
-
-            if (lastCandle) {
-              const haClose = (lastCandle.open + lastCandle.high + lastCandle.low + currentPrice) / 4;
-              const haHigh = Math.max(lastCandle.high, lastCandle.open, haClose, currentPrice);
-              const haLow = Math.min(lastCandle.low, lastCandle.open, haClose, currentPrice);
-
+            const msg = JSON.parse(event.data);
+            
+            if (msg.type === "candle_update" && msg.symbol === selectedSymbol && msg.interval === selectedInterval) {
+              const offsetSeconds = -new Date().getTimezoneOffset() * 60;
+              const candleTime = msg.time + offsetSeconds;
+              
               candleSeries.update({
-                time: lastCandle.time,
-                open: lastCandle.open,
-                high: haHigh,
-                low: haLow,
-                close: haClose
+                time: candleTime,
+                open: msg.open,
+                high: msg.high,
+                low: msg.low,
+                close: msg.close,
               });
+              
+              livePriceRef.current = msg.close;
+              onPriceTick?.(msg.close);
+              
+              if (msg.is_closed) {
+                lastCandle = {
+                  time: candleTime,
+                  open: msg.open,
+                  high: msg.high,
+                  low: msg.low,
+                  close: msg.close
+                };
+              }
+              updateCardPositions();
             }
-
-            updateCardPositions();
-          } catch (e) {
-            console.warn('[HAChart] Live poll failed, retaining previous price:', e.message);
-            const currentPrice = livePriceRef.current;
-
-            if (currentPrice && lastCandle) {
-              const haClose = (lastCandle.open + lastCandle.high + lastCandle.low + currentPrice) / 4;
-              const haHigh = Math.max(lastCandle.high, lastCandle.open, haClose, currentPrice);
-              const haLow = Math.min(lastCandle.low, lastCandle.open, haClose, currentPrice);
-
-              candleSeries.update({
-                time: lastCandle.time,
-                open: lastCandle.open,
-                high: haHigh,
-                low: haLow,
-                close: haClose
-              });
+            
+            if (msg.type === "price_tick" && msg.symbol === selectedSymbol) {
+              livePriceRef.current = msg.price;
+              onPriceTick?.(msg.price);
+              updateCardPositions();
             }
-            updateCardPositions();
+          } catch (err) {
+            console.warn("Error processing WebSocket message:", err);
           }
-        }, 5000);
+        };
+        
+        ws.onerror = (err) => {
+          console.error("WebSocket connection error:", err);
+        };
+        
+        ws.onclose = () => {
+          console.log("WebSocket disconnected.");
+        };
 
         // Initial positioning delay
         setTimeout(() => {
@@ -273,7 +306,7 @@ export default function HAChart({
 
     return () => {
       isMounted = false;
-      if (livePoll) clearInterval(livePoll);
+      if (ws) ws.close();
       if (resizeObserver) resizeObserver.disconnect();
       
       const toRemove = chartRef.current;
@@ -298,33 +331,70 @@ export default function HAChart({
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Premium Chart header */}
-      <div className={`p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 rounded-xl border backdrop-blur-md shadow-2xl transition-all duration-300 ${
-        isLight ? 'bg-white/80 border-slate-200 text-slate-800' : 'bg-[#0f172a]/70 border-slate-800/80 text-slate-100'
+      <div className={`p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 rounded-xl border shadow-2xl transition-all duration-300 ${
+        isLight ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#0f172a] border-slate-800/80 text-slate-100'
       }`}>
         <div className="flex items-center gap-4 flex-wrap">
-          {/* Custom Tabs Symbol selector */}
-          <div className="flex p-1 bg-slate-950/40 rounded-lg border border-slate-800/50 shadow-inner">
-            {PRO_SYMBOLS.map(sym => {
-              const isLocked = isFreePlan && sym !== 'BTCUSDT';
-              const active = selectedSymbol === sym;
-              return (
-                <button
-                  key={sym}
-                  onClick={() => { if (!isLocked) onSymbolChange?.(sym); }}
-                  className={`px-3.5 py-1.5 rounded-md text-xs font-bold font-mono tracking-wider transition-all duration-300 flex items-center gap-1 ${
-                    active
-                      ? 'bg-[#3D5AFE] text-white shadow-lg shadow-[#3D5AFE]/30 scale-[1.03]'
-                      : isLocked
-                      ? 'text-slate-600 cursor-not-allowed'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5 cursor-pointer'
-                  }`}
-                >
-                  {sym.replace('USDT', '')}
-                  {isLocked && <span className="text-[10px] filter drop-shadow">🔒</span>}
-                </button>
-              );
-            })}
-          </div>
+          {/* Custom Dropdown Symbol selector */}
+          {!hideSymbolSelector && (
+            <div className="relative z-50">
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold font-mono tracking-wider transition-all duration-200 flex items-center gap-2 border cursor-pointer select-none ${
+                  isLight 
+                    ? 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800' 
+                    : 'bg-slate-950/40 hover:bg-slate-900 border-slate-800/50 text-white'
+                }`}
+              >
+                <span>{selectedSymbol.replace('USDT', '')} / USDT</span>
+                <svg className={`w-3.5 h-3.5 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {dropdownOpen && (
+                <>
+                  {/* Click outside backdrop */}
+                  <div className="fixed inset-0 z-30" onClick={() => setDropdownOpen(false)} />
+                  <div className={`absolute left-0 mt-2 w-48 rounded-xl border p-2 z-50 shadow-2xl backdrop-blur-xl animate-slide-down ${
+                    isLight 
+                      ? 'bg-white/95 border-slate-250 text-slate-800' 
+                      : 'bg-[#0b1224]/95 border-slate-800/80 text-white'
+                  }`}>
+                    <div className="max-h-60 overflow-y-auto space-y-0.5 custom-scrollbar pr-1">
+                      {PRO_SYMBOLS.map(sym => {
+                        const isLocked = isSymbolLocked(sym);
+                        const active = selectedSymbol === sym;
+                        return (
+                          <button
+                            key={sym}
+                            onClick={() => {
+                              setDropdownOpen(false);
+                              if (isLocked) {
+                                onUpgradeGate?.('Symbol Locked', `${sym.replace('USDT', '')} chart access is restricted under your plan.`);
+                              } else {
+                                onSymbolChange?.(sym);
+                              }
+                            }}
+                            className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-mono font-bold tracking-wide transition-all duration-200 flex items-center justify-between cursor-pointer border-0 ${
+                              active
+                                ? 'bg-[#3D5AFE] text-white shadow-md'
+                                : isLocked
+                                ? 'text-slate-600 hover:bg-white/5 bg-transparent'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5 bg-transparent'
+                            }`}
+                          >
+                            <span>{sym.replace('USDT', '')} / USDT</span>
+                            {isLocked && <span className="text-[10px]">🔒</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Timeframe Selector */}
           <div className="flex p-1 bg-slate-950/40 rounded-lg border border-slate-800/50 shadow-inner">
