@@ -9,9 +9,9 @@ export const PLANS = {
     name: '7-Day Free Trial',
     monthlyPrice: 0,
     yearlyPrice: 0,
-    description: 'Start with BTC signals — upgrade when the edge proves itself.',
+    description: 'Start with BTC signals - upgrade when the edge proves itself.',
     features: [
-      'BTC/USDT signals — all 3 timeframes (15m, 1h, 4h)',
+      'BTC/USDT signals - all 3 timeframes (15m, 1h, 4h)',
       'Real-time web dashboard',
       'AI explanation & confidence score',
       'Full BTC signal history (log + performance)',
@@ -92,9 +92,9 @@ export const PLANS = {
     name: 'GrandMaster Lifetime',
     oneTimePrice: 799,
     productId: process.env.DODO_LIFETIME_PRODUCT_ID,
-    description: 'Permanent Master-level access — one payment, forever.',
+    description: 'Permanent Master-level access - one payment, forever.',
     features: [
-      'Everything in Master — permanently',
+      'Everything in Master - permanently',
       'All future coins, features & updates included',
       'Dedicated premium support access',
       'GrandMaster certification tag',

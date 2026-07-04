@@ -63,7 +63,7 @@ export default function ArticleRenderer({ article, category }) {
           if (data && data.total_signals) {
             let updated = html;
             updated = updated.replace(
-              /\[live signal count — pulled dynamically from the signals database\]/g,
+              /\[live signal count - pulled dynamically from the signals database\]/g,
               `<span class="font-mono font-bold text-[#ff5722] bg-[#ff5722]/5 px-1.5 py-0.5 rounded border border-[#ff5722]/20">${data.total_signals}</span>`
             );
             
@@ -72,7 +72,7 @@ export default function ArticleRenderer({ article, category }) {
               : `${data.wins} wins and ${data.losses} losses`;
             
             updated = updated.replace(
-              /\[live win\/loss breakdown — pulled dynamically\]/g,
+              /\[live win\/loss breakdown - pulled dynamically\]/g,
               `<span class="font-mono font-bold text-black bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200">${winRateText}</span>`
             );
             setRenderedHtml(updated);

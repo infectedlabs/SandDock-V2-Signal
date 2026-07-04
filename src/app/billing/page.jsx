@@ -23,7 +23,7 @@ const STATUS_BADGES = {
 };
 
 function formatDate(isoString) {
-  if (!isoString) return '—';
+  if (!isoString) return '-';
   return new Date(isoString).toLocaleDateString('en-US', {
     year: 'numeric', month: 'short', day: 'numeric',
   });
@@ -152,7 +152,7 @@ export default function BillingPage() {
 
               {isTrialExpired && (
                 <p className="text-[12px] text-red-400 font-bold uppercase tracking-wider">
-                  ⚠ Trial ended — upgrade to restore live signals
+                  ⚠ Trial ended - upgrade to restore live signals
                 </p>
               )}
 
@@ -165,7 +165,7 @@ export default function BillingPage() {
               )}
 
               {plan === 'lifetime' && (
-                <p className="text-[12px] text-amber-400 font-mono font-bold">♾ Permanent access — no renewal needed</p>
+                <p className="text-[12px] text-amber-400 font-mono font-bold">♾ Permanent access - no renewal needed</p>
               )}
             </div>
 
@@ -204,7 +204,7 @@ export default function BillingPage() {
                   disabled={!!checkoutLoading}
                   className="px-5 py-2.5 bg-amber-500/20 hover:bg-amber-500 text-amber-400 hover:text-black font-bold text-[11px] uppercase tracking-widest rounded-xl transition-all border border-amber-500/30 disabled:opacity-50 cursor-pointer"
                 >
-                  {checkoutLoading === 'lifetime_lifetime' ? 'Loading…' : 'Get Lifetime — $799'}
+                  {checkoutLoading === 'lifetime_lifetime' ? 'Loading…' : 'Get Lifetime - $799'}
                 </button>
               )}
             </div>
@@ -258,7 +258,7 @@ export default function BillingPage() {
                     <tr key={p.id} className="hover:bg-[#111827] transition-colors">
                       <td className="py-3 pr-4 font-mono text-zinc-400">{formatDate(p.created_at)}</td>
                       <td className="py-3 pr-4 font-bold uppercase text-white">{p.plan}</td>
-                      <td className="py-3 pr-4 capitalize text-zinc-400">{p.billing_cycle || '—'}</td>
+                      <td className="py-3 pr-4 capitalize text-zinc-400">{p.billing_cycle || '-'}</td>
                       <td className="py-3 pr-4 font-mono font-bold text-emerald-400">{formatCurrency(p.amount, p.currency)}</td>
                       <td className="py-3">
                         <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold border ${

@@ -27,7 +27,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
   } else {
-    console.warn('[Dodo Webhook] DODO_WEBHOOK_SECRET not set — skipping verification');
+    console.warn('[Dodo Webhook] DODO_WEBHOOK_SECRET not set - skipping verification');
   }
 
   const event = JSON.parse(rawBody);
@@ -78,7 +78,7 @@ export async function POST(request) {
         const userId = metadata?.user_id;
         if (!userId) break;
 
-        // Keep current plan until period end — just mark status
+        // Keep current plan until period end - just mark status
         await supabase.from('profiles').update({
           subscription_status: 'cancelled',
         }).eq('id', userId);

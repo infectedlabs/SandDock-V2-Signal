@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
 /**
- * HAChart — Heikin Ashi candlestick chart using TradingView Lightweight Charts v5.
+ * HAChart - Heikin Ashi candlestick chart using TradingView Lightweight Charts v5.
  * Features live ticking price updates, dynamic cumulative PnL calculations,
  * and floating premium HTML label cards that auto-expand on hover.
  */

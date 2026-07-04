@@ -12,7 +12,7 @@ author: Sanddock Research Team
 
 # How to Avoid Crypto Trading Scams: Spotting Fake Signals & Bots
 
-Avoiding **crypto trading scams** is one of the most critical security skills for retail participants in the digital asset space. Because cryptocurrency markets are largely unregulated, they attract bad actors operating deceptive schemes — including fake Telegram signal channels, fraudulent trading bots, and manipulated track records designed to steal your capital.
+Avoiding **crypto trading scams** is one of the most critical security skills for retail participants in the digital asset space. Because cryptocurrency markets are largely unregulated, they attract bad actors operating deceptive schemes - including fake Telegram signal channels, fraudulent trading bots, and manipulated track records designed to steal your capital.
 
 > **Verify before you trust**: Sanddock publishes every signal's outcome, win or loss, to an immutable public track record instead of using curated screenshots. [See the track record →](/track-record)
 
@@ -51,7 +51,7 @@ Never trust an individual or automated bot to trade on your behalf without absol
 
 Sanddock's public ledger protects you from signal fraud by automating the logging of every signal at the exact moment it fires, making it technically impossible to edit, delete, or hide losing trades. Our background engine writes all signal states (New, Slide, Commit) directly to a PostgreSQL database that updates our public track record page in real time.
 
-This means you can audit our historic win rate, inspect our drawdowns, and review our average risk-to-reward ratio with complete transparency — establishing a trust-first environment that contrasts sharply with standard industry practices.
+This means you can audit our historic win rate, inspect our drawdowns, and review our average risk-to-reward ratio with complete transparency - establishing a trust-first environment that contrasts sharply with standard industry practices.
 
 ## Frequently asked questions
 
@@ -72,7 +72,7 @@ While affiliate links are common, some unethical groups send high-leverage tradi
 **Demand absolute transparency in your trading data.** Join Sanddock to access a verified, immutable track record and AI-explained signals on Bitcoin. [Start free →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

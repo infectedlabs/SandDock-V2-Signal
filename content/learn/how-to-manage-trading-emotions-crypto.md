@@ -71,7 +71,7 @@ Manage crypto-related anxiety by establishing firm boundaries. Use limit orders,
 **Remove the guesswork and trade with discipline.** Sign up for Sanddock to access technical signals backed by transparent metrics and AI confidence. [Start free today →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

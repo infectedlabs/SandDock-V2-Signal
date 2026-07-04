@@ -12,7 +12,7 @@ author: Sanddock Research Team
 
 # How to Use RSI in Crypto Trading: A Complete Guide
 
-Learning **how to use RSI in crypto** trading is essential for measuring market momentum and identifying potential price reversals. The Relative Strength Index (RSI) is a classic technical indicator that plots speed and change of price movements on a scale from 0 to 100 — giving traders clear signals when an asset is overbought, oversold, or forming momentum divergences.
+Learning **how to use RSI in crypto** trading is essential for measuring market momentum and identifying potential price reversals. The Relative Strength Index (RSI) is a classic technical indicator that plots speed and change of price movements on a scale from 0 to 100 - giving traders clear signals when an asset is overbought, oversold, or forming momentum divergences.
 
 > **Automate your indicators**: Sanddock combines momentum analysis and Heikin Ashi swing detection to deliver high-probability alerts. [Start free today →](/signup)
 
@@ -53,7 +53,7 @@ Traders use the 50-level to avoid trading against the trend: you should focus pr
 
 Combining the RSI with Heikin Ashi candles creates a reliable trading system by matching momentum confirmation with noise-reduced trend signals. Heikin Ashi candles smooth out short-term price spikes, allowing you to clearly see when a trend is changing color. When your Heikin Ashi chart prints a green swing-bottom candle, you look at the RSI to see if it is recovering from an oversold condition (crossing above 30) or breaking above the 50-midline.
 
-This confluence — a structural swing reversal on smoothed candles backed by a confirmed shift in momentum on the RSI — significantly reduces false breakouts and improves your win-rate.
+This confluence - a structural swing reversal on smoothed candles backed by a confirmed shift in momentum on the RSI - significantly reduces false breakouts and improves your win-rate.
 
 ## Frequently asked questions
 
@@ -74,7 +74,7 @@ Most traders use the default setting of 14 periods, as it is the industry standa
 **Combine momentum signals with structural alerts.** Join Sanddock to access real-time Heikin Ashi swing alerts backed by AI-scored momentum analysis. [Start free today →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

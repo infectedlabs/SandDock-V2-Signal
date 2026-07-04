@@ -29,7 +29,7 @@ To perform this calculation correctly, the signal provider must establish clear 
 *   **A Loss (Failure):** The market price enters the entry zone, triggers the trade, and hits the Stop-Loss level before reaching the first Take-Profit level.
 *   **Invalidated/Canceled (Excluded):** If the price moves past the entry zone and hits a target without ever triggering the entry, or if the analyst cancels the signal before entry, the trade is discarded from the accuracy calculation.
 
-An accurate calculation must cover a statistically significant sample size—ideally at least 100 trades over several months—to account for short-term streaks of good or bad luck.
+An accurate calculation must cover a statistically significant sample size-ideally at least 100 trades over several months-to account for short-term streaks of good or bad luck.
 
 ## Why are 90%+ win rate claims usually fake?
 

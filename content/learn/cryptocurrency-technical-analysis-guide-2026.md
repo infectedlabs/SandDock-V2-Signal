@@ -39,7 +39,7 @@ The three core principles of chart analysis, which form the foundation of modern
 
 The technical indicators that actually work in crypto are those that measure trend direction, market momentum, and support/resistance zones rather than attempting to predict exact price tops or bottoms. Some of the most reliable and widely used indicators include the Relative Strength Index (RSI) for measuring momentum, the Moving Average Convergence Divergence (MACD) for trend direction, and Exponential Moving Averages (EMAs) for tracking dynamic support and resistance levels.
 
-However, no single indicator is infallible. The most effective trading systems combine indicators to find confluence — such as using the RSI to identify an oversold condition while the price is testing a major horizontal support level.
+However, no single indicator is infallible. The most effective trading systems combine indicators to find confluence - such as using the RSI to identify an oversold condition while the price is testing a major horizontal support level.
 
 ## Why does volume analysis dictate trend strength?
 
@@ -72,7 +72,7 @@ Yes, but you must adapt your strategy. Indicators like the MACD and EMAs are exc
 **Build your technical foundation with live market data.** Sign up for Sanddock to see Heikin Ashi swing analysis and AI explanations run on real-time BTC setups. [Try Sanddock free →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

@@ -11,7 +11,7 @@ We have successfully deleted the legacy `/demo-dashboard` workspace, renamed and
 - **Consistent Lock Colors**: Swapped yellow lock buttons and emojis for premium brand blue (`#3D5AFE`) gating markers.
 - **Cleaned Up Indicators**: Removed confusing gray dots from locked coin cards since their locked status is already represented by the card structure.
 - **Simplified Rationale Labels**: Removed the technical "Heikin Ashi Confirmation" secondary pill tags from the AI rationale headers to focus on user readability.
-- **Sidebar Upgrade Card**: Rendered a premium upgrade card in the sidebar highlighting current asset coverage (`"Free Plan — 1 of 11 coins active. Upgrade to Pro"`).
+- **Sidebar Upgrade Card**: Rendered a premium upgrade card in the sidebar highlighting current asset coverage (`"Free Plan - 1 of 11 coins active. Upgrade to Pro"`).
 - **Banner Emojis Refinement**: Replaced the rocket emoji with a lightning bolt (`⚡`) inside the main upgrade banner.
 
 ### 2. Onboarding API & RLS Policy Mitigation

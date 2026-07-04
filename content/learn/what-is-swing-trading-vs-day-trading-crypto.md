@@ -34,7 +34,7 @@ Because swing trades develop slowly, there is no need to watch charts constantly
 
 ## How do the timeframes compare between swing and day trading?
 
-Day trading uses very short timeframes—typically the 1-minute, 5-minute, and 15-minute charts—to identify intraday trends. In contrast, swing trading utilizes the 4-hour, Daily, and Weekly charts to analyze structural market support and resistance levels.
+Day trading uses very short timeframes-typically the 1-minute, 5-minute, and 15-minute charts-to identify intraday trends. In contrast, swing trading utilizes the 4-hour, Daily, and Weekly charts to analyze structural market support and resistance levels.
 
 Choosing the right timeframe changes how you view the market:
 *   **Low Timeframes (Day Trading):** These charts are filled with "market noise." A single whale selling $5 million worth of Solona can cause a sudden 2% red candle on a 5-minute chart, which looks like a major breakdown but is completely invisible on a daily chart.

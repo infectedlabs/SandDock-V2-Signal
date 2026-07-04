@@ -14,7 +14,7 @@ author: Sanddock Research Team
 
 The **Sanddock confidence score** is a numerical rating from 40% to 95% assigned to every Buy and Sell signal. It is calculated by analyzing key market indicators, including volume relative to its 20-bar average, multi-timeframe trend alignment, and swing structure history, to help traders quickly assess the probability and strength of a technical setup before entering a position.
 
-> **See it in action**: Sanddock's signal engine runs Heikin Ashi swing detection and calculates real-time confidence scores for Bitcoin — free, no card required. [Start free today →](/signup)
+> **See it in action**: Sanddock's signal engine runs Heikin Ashi swing detection and calculates real-time confidence scores for Bitcoin - free, no card required. [Start free today →](/signup)
 
 ## What is the Sanddock confidence score?
 
@@ -57,7 +57,7 @@ For example, a Buy signal that fires on the 15-minute chart will receive a signi
 
 Swing structure history refers to how cleanly the market has responded to prior swing signals, indicating whether the current asset is trading in a clean, predictable rhythm or experiencing choppy consolidation. The scoring engine evaluates the last three swing groups; if these swings reached their targets or resolved with clean "commit" states, the system increases the current signal's score by 5%.
 
-If the history shows rapid, alternating "signal flips"—where a Buy signal is immediately cancelled by a Sell signal within a few bars—it suggests a trendless, volatile range. The engine recognizes this pattern and lowers the confidence score to prevent traders from getting chopped up in sideways markets.
+If the history shows rapid, alternating "signal flips"-where a Buy signal is immediately cancelled by a Sell signal within a few bars-it suggests a trendless, volatile range. The engine recognizes this pattern and lowers the confidence score to prevent traders from getting chopped up in sideways markets.
 
 ## Why is the confidence score not a guarantee of winning?
 
@@ -84,7 +84,7 @@ No. Leverage increases your risk proportionally. A higher confidence score means
 **Want to see how our engine scores live setups?** Get real-time Bitcoin signals with full AI explanations and confidence scores completely free. [Start free →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

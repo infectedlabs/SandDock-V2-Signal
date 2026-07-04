@@ -42,15 +42,15 @@ For busy professionals who cannot dedicate time each day to technical analysis, 
 | **Strategy Type** | Passive investment | Active trading |
 | **Execution Schedule**| Fixed recurring intervals (weekly/monthly) | Dynamic based on technical setups |
 | **Time Horizon** | Long-term (months to years) | Medium-term (days to weeks) |
-| **Required Effort** | Very Low — set and forget | Moderate — requires daily chart analysis |
-| **Psychological Stress**| Low — market drops are seen as discount buys | High — requires managing drawdowns and stop losses |
+| **Required Effort** | Very Low - set and forget | Moderate - requires daily chart analysis |
+| **Psychological Stress**| Low - market drops are seen as discount buys | High - requires managing drawdowns and stop losses |
 | **Primary Tool** | Auto-buy schedules, order history | Technical charts, indicators, risk calculators |
 
 ## What are the differences in risk profiles between the two strategies?
 
 The risk profiles of the two strategies differ in how they exposure your capital to market drawdowns. DCA reduces your exposure to timing risk (buying at a local top) by spreading purchases out over time, but it leaves you fully exposed to the asset's long-term trend. If you DCA into an underperforming altcoin that eventually drops to zero, you will still lose your capital.
 
-Swing trading, on the other hand, uses stop-loss orders to cap your risk per trade to a small percentage (such as 1% to 2% of your account balance), but it exposes you to execution risk — where a series of stopped-out trades during a choppy market can lead to a significant drawdown of your capital.
+Swing trading, on the other hand, uses stop-loss orders to cap your risk per trade to a small percentage (such as 1% to 2% of your account balance), but it exposes you to execution risk - where a series of stopped-out trades during a choppy market can lead to a significant drawdown of your capital.
 
 ## Which strategy yields higher historical returns in crypto?
 
@@ -83,7 +83,7 @@ Sanddock simplifies swing trading by automating the chart analysis process. Our 
 **Optimize your crypto strategy with data-driven execution.** Sign up for Sanddock to access real-time swing alerts and public track record metrics. [Start free →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

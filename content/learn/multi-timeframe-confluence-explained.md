@@ -12,7 +12,7 @@ author: Sanddock Research Team
 
 # Multi-Timeframe Confluence Explained: How to Filter Crypto Noise
 
-In cryptocurrency trading, **multi-timeframe confluence** occurs when indicators or trend directions on different time horizons — such as the 15-minute, 1-hour, and 4-hour charts — align in the same direction. By requiring agreement across short-term and long-term charts, traders can filter out false breakouts and ensure they are trading in the direction of the dominant market trend.
+In cryptocurrency trading, **multi-timeframe confluence** occurs when indicators or trend directions on different time horizons - such as the 15-minute, 1-hour, and 4-hour charts - align in the same direction. By requiring agreement across short-term and long-term charts, traders can filter out false breakouts and ensure they are trading in the direction of the dominant market trend.
 
 > **Filter out the noise automatically**: Sanddock's AI engine calculates multi-timeframe trend confluence on 50+ coins in real time. [Start free today →](/signup)
 
@@ -71,7 +71,7 @@ We recommend aligning at least two timeframes (such as the 15m and 1h, or the 1h
 **Ready to trade with the trend?** Sign up for Sanddock to see multi-timeframe confluence analysis automatically applied to every BTC signal. [Start free →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

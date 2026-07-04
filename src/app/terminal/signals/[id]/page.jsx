@@ -38,14 +38,14 @@ const Icons = {
 };
 
 function formatPrice(val) {
-  if (val == null) return '—';
+  if (val == null) return '-';
   return new Intl.NumberFormat('en-US', {
     style: 'currency', currency: 'USD', minimumFractionDigits: 2,
   }).format(parseFloat(val));
 }
 
 function formatLogDate(isoString) {
-  if (!isoString) return '—';
+  if (!isoString) return '-';
   const d = new Date(isoString);
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -299,7 +299,7 @@ export default function SignalDetailPage() {
 
   // Smart Context-Rich Rationale Generation
   const absorbText = isBuy ? 'strong bullish absorption pattern suggesting seller exhaustion' : 'strong bearish absorption pattern suggesting buyer exhaustion';
-  const detailedRationale = `${coinLabel} Heikin Ashi ${isBuy ? 'low' : 'high'} at ${formatPrice(signal.entry_price)} is the ${isBuy ? 'lowest' : 'highest'} point in the last 10 bars, confirming a swing ${isBuy ? 'bottom' : 'top'}. Volume on this bar is 31% above the 20-bar average, adding confluence. The previous swing ${isBuy ? 'top was committed 4' : 'bottom was committed 5'} bars ago, establishing a clean alternating structure. The HA candle body is entirely ${isBuy ? 'above' : 'below'} the prior 3 candles — ${absorbText}.`;
+  const detailedRationale = `${coinLabel} Heikin Ashi ${isBuy ? 'low' : 'high'} at ${formatPrice(signal.entry_price)} is the ${isBuy ? 'lowest' : 'highest'} point in the last 10 bars, confirming a swing ${isBuy ? 'bottom' : 'top'}. Volume on this bar is 31% above the 20-bar average, adding confluence. The previous swing ${isBuy ? 'top was committed 4' : 'bottom was committed 5'} bars ago, establishing a clean alternating structure. The HA candle body is entirely ${isBuy ? 'above' : 'below'} the prior 3 candles - ${absorbText}.`;
 
   // Context Stats Card
   const market24h = isBuy ? '-2.3%' : '+1.8%';
@@ -450,7 +450,7 @@ export default function SignalDetailPage() {
                 onClick={() => handleOpenModal("Unlock Parameters", "Upgrade to the Pro Plan to immediately reveal exact Stop Loss and Take Profit levels, pair live Telegram notifications, and trade altcoins.")}
                 className="mt-2 border border-dashed border-[#3D5AFE]/30 bg-[#3D5AFE]/5 p-2.5 text-center text-[11px] text-[#3D5AFE] font-bold uppercase cursor-pointer hover:bg-[#3D5AFE]/10 transition-colors"
               >
-                🔒 Unlock stop loss & take profit levels — Upgrade to Pro &rarr;
+                🔒 Unlock stop loss & take profit levels - Upgrade to Pro &rarr;
               </div>
             )}
 
@@ -525,7 +525,7 @@ export default function SignalDetailPage() {
                 onClick={() => handleOpenModal("Unlock Extended Analysis", "Reveals multi-factor orderflow confluence validation, divergence detection indices, and institutional liquidity pool scanning details.")}
                 className="text-[11px] text-slate-400 hover:text-white cursor-pointer font-bold uppercase tracking-wider flex items-center pt-1.5 border-t border-slate-800/60"
               >
-                <Icons.Lock /> Deeper multi-factor orderflow analysis locked — Pro
+                <Icons.Lock /> Deeper multi-factor orderflow analysis locked - Pro
               </div>
             )}
           </div>
@@ -570,7 +570,7 @@ export default function SignalDetailPage() {
                     onClick={() => handleOpenModal("Unlock Timeframe Alignment", "View alignment confluences across higher timeframes (1H & 4H) to prevent contrarian swing entries.")}
                     className="text-[10px] text-[#3D5AFE] hover:underline cursor-pointer flex items-center font-bold"
                   >
-                    <Icons.Lock /> Locked — Pro
+                    <Icons.Lock /> Locked - Pro
                   </span>
                 ) : (
                   <span className={`font-bold ${isBuy ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -585,7 +585,7 @@ export default function SignalDetailPage() {
                     onClick={() => handleOpenModal("Unlock Timeframe Alignment", "View alignment confluences across higher timeframes (1H & 4H) to prevent contrarian swing entries.")}
                     className="text-[10px] text-[#3D5AFE] hover:underline cursor-pointer flex items-center font-bold"
                   >
-                    <Icons.Lock /> Locked — Pro
+                    <Icons.Lock /> Locked - Pro
                   </span>
                 ) : (
                   <span className={`font-bold ${isBuy ? 'text-emerald-400' : 'text-rose-400'}`}>

@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- Sanddock — Signal Engine Tables (idempotent migration)
+-- Sanddock - Signal Engine Tables (idempotent migration)
 -- Migration: 20260628000000_signal_tables.sql
 --
 -- IMPORTANT: The signals table already exists from 20260627230000_create_schema.sql
@@ -92,7 +92,7 @@ CREATE INDEX IF NOT EXISTS idx_signals_action
 
 
 -- ─────────────────────────────────────────────────
--- OHLCV cache — new table for HA candle data
+-- OHLCV cache - new table for HA candle data
 -- Written by signal_engine.py, read by chart API
 -- ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.ohlcv_cache (
@@ -117,7 +117,7 @@ CREATE INDEX IF NOT EXISTS idx_ohlcv_symbol_interval_time
 
 
 -- ─────────────────────────────────────────────────
--- Backtest results — pre-computed historical trades
+-- Backtest results - pre-computed historical trades
 -- ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.backtest_results (
     id              BIGSERIAL PRIMARY KEY,

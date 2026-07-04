@@ -12,7 +12,7 @@ author: Sanddock Research Team
 
 # What Is a Confidence Score in Trading Signals?
 
-A **confidence score** in trading signals is a numerical metric (often expressed as a percentage or scale from 1 to 10) that represents the statistical probability of a trade setup succeeding. Calculated by signal algorithms, it weights multiple supporting factors—such as volume, trend alignment, and volatility—to score the strength of the trade.
+A **confidence score** in trading signals is a numerical metric (often expressed as a percentage or scale from 1 to 10) that represents the statistical probability of a trade setup succeeding. Calculated by signal algorithms, it weights multiple supporting factors-such as volume, trend alignment, and volatility-to score the strength of the trade.
 
 > **Get Heikin Ashi alerts live**: Sanddock detects swing reversals on 50+ coins in real time. [Start free today →](/signup)
 
@@ -157,7 +157,7 @@ A signal may have a low score if the technical indicators are conflicting. For e
           "name": "Why does a signal have a low confidence score?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "A low score occurs when indicators conflict—such as a bullish reversal occurring on low volume, or counter to the prevailing higher-timeframe trend."
+            "text": "A low score occurs when indicators conflict-such as a bullish reversal occurring on low volume, or counter to the prevailing higher-timeframe trend."
           }
         }
       ]

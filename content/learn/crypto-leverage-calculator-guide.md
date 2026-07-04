@@ -12,7 +12,7 @@ author: Sanddock Research Team
 
 # Crypto Leverage Guide: How to Calculate Risk and Position Size
 
-This **crypto leverage guide** provides a complete mathematical framework for calculating position sizes, managing collateral, and determining your liquidation price. Trading with leverage allows you to control larger positions with a smaller deposit, but it also increases your risk exposure — making precise calculations essential for protecting your trading account.
+This **crypto leverage guide** provides a complete mathematical framework for calculating position sizes, managing collateral, and determining your liquidation price. Trading with leverage allows you to control larger positions with a smaller deposit, but it also increases your risk exposure - making precise calculations essential for protecting your trading account.
 
 > **Keep your risk calculated**: Sanddock provides recommended stop-loss and take-profit targets based on structural support, helping you size your leverage trades safely. [Start free today →](/signup)
 
@@ -73,7 +73,7 @@ No. Beginners should never use leverage above 2x or 3x. High leverage leaves a t
 **Master your risk math with live technical signals.** Join Sanddock to receive Buy and Sell alerts with optimal stop-loss and position targets calculated automatically. [Start free →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

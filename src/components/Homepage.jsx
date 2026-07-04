@@ -34,7 +34,7 @@ const testimonials = [
     segments: [
       { text: '"Been using Sanddock for 3 months. The ', bold: false },
       { text: 'AI explanation on every signal', bold: true },
-      { text: ' is a game-changer — I actually understand why I\'m entering a trade now. First signal tool that doesn\'t make me feel confused."', bold: false }
+      { text: ' is a game-changer - I actually understand why I\'m entering a trade now. First signal tool that doesn\'t make me feel confused."', bold: false }
     ],
     author: "Alex Rivera",
     role: "Senior Software Engineer"
@@ -105,7 +105,7 @@ const testimonials = [
 const faqItems = [
   {
     q: "What is Sanddock?",
-    a: "Sanddock is an AI-powered crypto trading signal tool that monitors Bitcoin and 50+ other cryptocurrencies in real time. Using a Heikin Ashi swing detection engine and AI analysis, it fires Buy and Sell signals to your web dashboard and Telegram — with a plain-English explanation, confidence score, entry price, stop-loss, and take-profit on every alert.",
+    a: "Sanddock is an AI-powered crypto trading signal tool that monitors Bitcoin and 50+ other cryptocurrencies in real time. Using a Heikin Ashi swing detection engine and AI analysis, it fires Buy and Sell signals to your web dashboard and Telegram - with a plain-English explanation, confidence score, entry price, stop-loss, and take-profit on every alert.",
   },
   {
     q: "Is the free plan really free?",
@@ -117,7 +117,7 @@ const faqItems = [
   },
   {
     q: "How accurate are the signals?",
-    a: "Our current verified win rate is 67.3% across 4,218+ signals — you can verify this yourself on our public Track Record page. Every signal, win and loss, is timestamped and public. We never delete signals. We never show screenshots. Just the data.",
+    a: "Our current verified win rate is 67.3% across 4,218+ signals - you can verify this yourself on our public Track Record page. Every signal, win and loss, is timestamped and public. We never delete signals. We never show screenshots. Just the data.",
   },
   {
     q: "Can I trust these signals enough to trade real money?",
@@ -133,11 +133,11 @@ const faqItems = [
   },
   {
     q: "Does Sanddock place trades for me?",
-    a: "No. Sanddock is a signal tool — it alerts you when and where to consider entering or exiting. It does not connect to your exchange or execute trades. If you want auto-execution, you can connect our webhook output (Master plan) to tools like Cornix or 3Commas.",
+    a: "No. Sanddock is a signal tool - it alerts you when and where to consider entering or exiting. It does not connect to your exchange or execute trades. If you want auto-execution, you can connect our webhook output (Master plan) to tools like Cornix or 3Commas.",
   },
   {
     q: "What is the Lifetime plan?",
-    a: "A one-time payment of $999 that gives you Master-level access to Sanddock forever, including all current and future features without compromise. Available only during the launch window — limited to 500 GrandMaster members.",
+    a: "A one-time payment of $999 that gives you Master-level access to Sanddock forever, including all current and future features without compromise. Available only during the launch window - limited to 500 GrandMaster members.",
   },
 ];
 
@@ -412,7 +412,7 @@ export default function Homepage() {
         </svg>
       </div>
 
-      {/* SECTION 1 — HERO SECTION */}
+      {/* SECTION 1 - HERO SECTION */}
       <section className="relative pt-16 pb-20 max-w-7xl mx-auto px-6 border-b border-black">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
@@ -574,7 +574,7 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 2 — LIVE SIGNAL TICKER (Styled to Light Swiss theme) */}
+      {/* SECTION 2 - LIVE SIGNAL TICKER (Styled to Light Swiss theme) */}
       <section className="border-b border-black bg-[#f8f9fa]/80 py-3 overflow-hidden select-none">
         
         {/* Ticker Row 1 (scrolls left) */}
@@ -639,7 +639,7 @@ export default function Homepage() {
 
       </section>
 
-      {/* SECTION 3 — WHY SANDDOCK (Outcome-First Comparison) */}
+      {/* SECTION 3 - WHY SANDDOCK (Outcome-First Comparison) */}
       <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black bg-white reveal-on-scroll">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16 items-start">
           <div className="lg:col-span-6 space-y-4 text-left">
@@ -743,7 +743,7 @@ export default function Homepage() {
                   <div>
                     <span className="block text-black font-bold mb-1">Verifiable Public Ledger</span>
                     <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
-                      Every past signal — win or loss — remains permanently logged on our public, immutable track record.
+                      Every past signal - win or loss - remains permanently logged on our public, immutable track record.
                     </span>
                   </div>
                 </li>
@@ -765,19 +765,19 @@ export default function Homepage() {
         {/* Outcomes bottom grid */}
         <div className="border-t border-black pt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-2">
-            <h4 className="text-lg font-bold uppercase text-black font-sans">01 — Time Freedom</h4>
+            <h4 className="text-lg font-bold uppercase text-black font-sans">01 - Time Freedom</h4>
             <p className="text-text-secondary text-base leading-relaxed">
               Spend less than 5 minutes placing trades. Let our automated scanners watch the charts for you day and night.
             </p>
           </div>
           <div className="space-y-2">
-            <h4 className="text-lg font-bold uppercase text-black font-sans">02 — Emotional Shield</h4>
+            <h4 className="text-lg font-bold uppercase text-black font-sans">02 - Emotional Shield</h4>
             <p className="text-text-secondary text-base leading-relaxed">
               Trade with high-confidence statistical confluence. No more second-guessing, hesitation, or FOMO-induced losses.
             </p>
           </div>
           <div className="space-y-2">
-            <h4 className="text-lg font-bold uppercase text-black font-sans">03 — Account Protection</h4>
+            <h4 className="text-lg font-bold uppercase text-black font-sans">03 - Account Protection</h4>
             <p className="text-text-secondary text-base leading-relaxed">
               Pre-calculated risk limits defend your capital. Never experience catastrophic account liquidations or major drawdowns.
             </p>
@@ -785,7 +785,7 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 4 — HOW IT WORKS (Image 2 Card Grids Redesign) */}
+      {/* SECTION 4 - HOW IT WORKS (Image 2 Card Grids Redesign) */}
       <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-left">
         <div className="text-left mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
@@ -795,7 +795,7 @@ export default function Homepage() {
             How the signal engine works &rarr;
           </h2>
           <p className="text-text-secondary text-base md:text-lg max-w-md">
-            No charts to watch. No Pine Script to learn. Sanddock handles the analysis — you handle the decision.
+            No charts to watch. No Pine Script to learn. Sanddock handles the analysis - you handle the decision.
           </p>
         </div>
 
@@ -811,9 +811,9 @@ export default function Homepage() {
               </svg>
             </div>
             <div>
-              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">01 — Market Scan</h3>
+              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">01 - Market Scan</h3>
               <p className="text-text-secondary text-base leading-relaxed">
-                Sanddock monitors Heikin Ashi candles across all your tracked coins, 24/7. The signal engine detects swing tops and bottoms with precision — filtering out the noise that trips up other tools.
+                Sanddock monitors Heikin Ashi candles across all your tracked coins, 24/7. The signal engine detects swing tops and bottoms with precision - filtering out the noise that trips up other tools.
               </p>
             </div>
           </div>
@@ -827,7 +827,7 @@ export default function Homepage() {
               </svg>
             </div>
             <div>
-              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">02 — AI Explanation</h3>
+              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">02 - AI Explanation</h3>
               <p className="text-text-secondary text-base leading-relaxed">
                 When a Buy or Sell signal fires, the AI generates a plain-English explanation of what it saw, why it's confident, and what to watch for. No black boxes. No &ldquo;just trust us.&rdquo;
               </p>
@@ -843,9 +843,9 @@ export default function Homepage() {
               </svg>
             </div>
             <div>
-              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">03 — Phone Alert</h3>
+              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">03 - Phone Alert</h3>
               <p className="text-text-secondary text-base leading-relaxed">
-                Your signal lands in Telegram within seconds. Entry price, stop-loss, take-profit, and a confidence score — everything you need to decide in one message.
+                Your signal lands in Telegram within seconds. Entry price, stop-loss, take-profit, and a confidence score - everything you need to decide in one message.
               </p>
             </div>
           </div>
@@ -853,7 +853,7 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 5 — AI EXPLAINABILITY SHOWCASE (Image 3 Accordion Layout Redesign) */}
+      {/* SECTION 5 - AI EXPLAINABILITY SHOWCASE (Image 3 Accordion Layout Redesign) */}
       <section id="explainability" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-on-scroll">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           
@@ -1165,7 +1165,7 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 6 — THE SANDDOCK LEDGER */}
+      {/* SECTION 6 - THE SANDDOCK LEDGER */}
       <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-right">
         <div className="text-left mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
@@ -1183,13 +1183,13 @@ export default function Homepage() {
           <div className="bg-[#f4f6fa] p-8 rounded-none flex flex-col justify-between space-y-16 border border-transparent hover:border-black transition-all">
             <div className="space-y-4">
               <span className="inline-block text-[10px] font-bold px-2 py-0.5 border border-black text-black bg-white uppercase">
-                FREE — No card needed
+                FREE - No card needed
               </span>
               <h3 className="text-3xl font-extrabold uppercase tracking-tight text-black max-w-sm">
                 Start swing trading with Bitcoin
               </h3>
               <p className="text-text-secondary text-base leading-relaxed">
-                Your free plan gives you real, live AI signals on the world&apos;s most traded cryptocurrency — forever. No credit card. No expiry. Just signals.
+                Your free plan gives you real, live AI signals on the world&apos;s most traded cryptocurrency - forever. No credit card. No expiry. Just signals.
               </p>
             </div>
 
@@ -1245,7 +1245,7 @@ export default function Homepage() {
                 Unlock 50+ altcoins on the market
               </h3>
               <p className="text-text-secondary text-base leading-relaxed">
-                Upgrade to unlock real-time AI signals across the top 50 cryptocurrencies by market cap — ETH, SOL, BNB, XRP, ADA, DOGE, AVAX, and dozens more. New coins added monthly.
+                Upgrade to unlock real-time AI signals across the top 50 cryptocurrencies by market cap - ETH, SOL, BNB, XRP, ADA, DOGE, AVAX, and dozens more. New coins added monthly.
               </p>
             </div>
 
@@ -1272,8 +1272,8 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 9 — SOCIAL WALL / SUCCESS STORIES (Image 5 Testimonial Slider Redesign) */}
-      {/* SECTION 7 — COIN COVERAGE */}
+      {/* SECTION 9 - SOCIAL WALL / SUCCESS STORIES (Image 5 Testimonial Slider Redesign) */}
+      {/* SECTION 7 - COIN COVERAGE */}
       <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black overflow-hidden relative reveal-scale">
         
         {/* Header with fraction counter aligned right */}
@@ -1341,8 +1341,8 @@ export default function Homepage() {
 
       </section>
 
-      {/* SECTION 6 — PUBLIC TRACK RECORD (Editorial Swiss Layout) */}
-      {/* SECTION 8 — TRACK RECORD */}
+      {/* SECTION 6 - PUBLIC TRACK RECORD (Editorial Swiss Layout) */}
+      {/* SECTION 8 - TRACK RECORD */}
       <section id="track-record" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-left">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16 items-end">
           <div className="lg:col-span-7 space-y-4 text-left">
@@ -1354,7 +1354,7 @@ export default function Homepage() {
             </h2>
           </div>
           <div className="lg:col-span-5 text-base md:text-lg text-text-secondary leading-relaxed">
-            Most crypto signal services show you screenshots of their best calls. We show you everything — wins, losses, breakevens, and open signals — in a public, timestamped ledger. No cherry-picking. No deleted signals. Just data.
+            Most crypto signal services show you screenshots of their best calls. We show you everything - wins, losses, breakevens, and open signals - in a public, timestamped ledger. No cherry-picking. No deleted signals. Just data.
           </div>
         </div>
 
@@ -1444,8 +1444,8 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 8 — LIFETIME ACCESS SHOWCASE (GrandMaster Deal) */}
-      {/* SECTION 9 — PRICING SUMMARY */}
+      {/* SECTION 8 - LIFETIME ACCESS SHOWCASE (GrandMaster Deal) */}
+      {/* SECTION 9 - PRICING SUMMARY */}
       <section id="pricing" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-on-scroll">
         <div className="text-left max-w-3xl mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
@@ -1490,7 +1490,7 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 10 — FAQ SECTION */}
+      {/* SECTION 10 - FAQ SECTION */}
       <section id="faq" className="py-24 max-w-4xl mx-auto px-6 border-b border-black reveal-right">
         <div className="text-left mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
@@ -1527,7 +1527,7 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* SECTION 11 — FINAL CTA BANNER */}
+      {/* SECTION 11 - FINAL CTA BANNER */}
       <section className="py-24 max-w-7xl mx-auto px-6 reveal-scale">
         <div className="relative rounded-none border border-black bg-[#f4f6fa] p-12 text-left overflow-hidden">
           

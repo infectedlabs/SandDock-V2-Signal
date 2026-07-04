@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 
 /**
- * usePerformance — fetches aggregated performance stats from /api/performance/summary.
+ * usePerformance - fetches aggregated performance stats from /api/performance/summary.
  *
  * @param {string} symbol
  * @param {string} interval

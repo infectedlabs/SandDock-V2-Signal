@@ -12,7 +12,7 @@ author: Sanddock Research Team
 
 # Crypto Margin Trading for Beginners: Risks, Rewards, and Risk Management
 
-For new traders, **crypto margin trading for beginners** is a method of buying or selling digital assets using borrowed capital from an exchange to leverage position sizes. While this technique allows you to amplify potential returns on small price movements, it also introduces substantial risks — including the possibility of losing your entire collateral through liquidation.
+For new traders, **crypto margin trading for beginners** is a method of buying or selling digital assets using borrowed capital from an exchange to leverage position sizes. While this technique allows you to amplify potential returns on small price movements, it also introduces substantial risks - including the possibility of losing your entire collateral through liquidation.
 
 > **Manage your leverage risk**: Sanddock calculates optimal stop-loss and take-profit targets to keep your leverage trades calculated, not speculative. [Try it free today →](/signup)
 
@@ -31,7 +31,7 @@ Because you are trading with borrowed funds, margin trading is significantly mor
 
 ## How does leverage work and what are the rewards?
 
-Leverage is the ratio of your position size to your initial collateral, allowing you to multiply your purchasing power. For example, using 5x leverage means that a $1,000 collateral deposit allows you to control a $5,000 position. If the price of the asset moves in your favor by 2%, your $5,000 position gains 2% ($100), which represents a 10% return on your actual $1,000 collateral — effectively multiplying your profit rate by five.
+Leverage is the ratio of your position size to your initial collateral, allowing you to multiply your purchasing power. For example, using 5x leverage means that a $1,000 collateral deposit allows you to control a $5,000 position. If the price of the asset moves in your favor by 2%, your $5,000 position gains 2% ($100), which represents a 10% return on your actual $1,000 collateral - effectively multiplying your profit rate by five.
 
 This capability is the primary reward of margin trading, as it allows traders to generate meaningful profits from small, daily price fluctuations without needing a large capital base.
 
@@ -72,7 +72,7 @@ Funding fees are periodic payments exchanged between long and short traders, typ
 **magnify your trade execution with complete risk parameters.** Join Sanddock to receive live swing alerts with pre-calculated stop-loss levels. [Start free →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

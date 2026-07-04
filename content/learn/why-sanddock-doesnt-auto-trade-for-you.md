@@ -24,10 +24,10 @@ By keeping the final execution decision in your hands, Sanddock acts as an analy
 
 | Feature Area | Decision Support (Sanddock) | Auto-Trading Bot |
 |---|---|---|
-| **Security Risk** | Extremely Low — No exchange API permissions required | High — Must share write/trade API keys with third party |
-| **Control** | Absolute — You review, size, and place every trade manually | Muted — Bot executes trades automatically based on rules |
-| **Market Crisis Response** | Active — Humans can pause, adjust, or skip trades during chaos | Passive — Bots can trade into illiquid spreads or flash crashes |
-| **Learning Curve** | High — Promotes learning and understanding of technical indicators | Low — Encourages hands-off behavior, hiding trading mechanics |
+| **Security Risk** | Extremely Low - No exchange API permissions required | High - Must share write/trade API keys with third party |
+| **Control** | Absolute - You review, size, and place every trade manually | Muted - Bot executes trades automatically based on rules |
+| **Market Crisis Response** | Active - Humans can pause, adjust, or skip trades during chaos | Passive - Bots can trade into illiquid spreads or flash crashes |
+| **Learning Curve** | High - Promotes learning and understanding of technical indicators | Low - Encourages hands-off behavior, hiding trading mechanics |
 
 ## What are the security risks of granting trade-execution API keys?
 
@@ -72,7 +72,7 @@ Yes. Since you execute trades manually, we highly recommend typing our signal pa
 **Keep your exchange keys private and secure.** Get explained BTC signals on our dashboard and execute them at your own pace. [Try Sanddock free today →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

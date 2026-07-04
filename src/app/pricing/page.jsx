@@ -15,7 +15,7 @@ const PLANS_DATA = {
     badge: null,
     highlight: false,
     features: [
-      { text: "BTC/USDT signals — 15m, 1h & 4h timeframes",  available: true },
+      { text: "BTC/USDT signals - 15m, 1h & 4h timeframes",  available: true },
       { text: "Real-time web dashboard",                       available: true },
       { text: "AI explanation & confidence score",            available: true },
       { text: "Full BTC signal history (log + performance)",  available: true },
@@ -105,7 +105,7 @@ const FEATURE_TABLE = [
 const FAQS = [
   {
     q: "How does the 7-day free trial work?",
-    a: "When you sign up, you get 7 days of full BTC/USDT signal access across all 3 timeframes (15m, 1h, 4h) with AI explanations, signal history, and the Heikin Ashi chart — completely free with no credit card required. After 7 days, live active signals are paused and you'll see only closed/historical signals until you upgrade.",
+    a: "When you sign up, you get 7 days of full BTC/USDT signal access across all 3 timeframes (15m, 1h, 4h) with AI explanations, signal history, and the Heikin Ashi chart - completely free with no credit card required. After 7 days, live active signals are paused and you'll see only closed/historical signals until you upgrade.",
   },
   {
     q: "What happens after my trial expires?",
@@ -113,7 +113,7 @@ const FAQS = [
   },
   {
     q: "How does monthly vs yearly billing work?",
-    a: "Yearly plans are billed as one upfront payment — $228/year for Pro ($19/mo equivalent) or $588/year for Master ($49/mo equivalent), saving up to 38% vs monthly billing. You can cancel before your renewal date.",
+    a: "Yearly plans are billed as one upfront payment - $228/year for Pro ($19/mo equivalent) or $588/year for Master ($49/mo equivalent), saving up to 38% vs monthly billing. You can cancel before your renewal date.",
   },
   {
     q: "Can I cancel at any time?",
@@ -121,7 +121,7 @@ const FAQS = [
   },
   {
     q: "What is the GrandMaster Lifetime Deal?",
-    a: "A one-time payment of $799 grants permanent Master-level access — forever. No recurring fees, upsells, or surprises. All future coins, features, and updates are included. Comes with a 30-day money-back guarantee.",
+    a: "A one-time payment of $799 grants permanent Master-level access - forever. No recurring fees, upsells, or surprises. All future coins, features, and updates are included. Comes with a custom Binance Pair.",
   },
   {
     q: "Do you offer refunds?",
@@ -132,7 +132,7 @@ const FAQS = [
 const TESTIMONIALS = [
   {
     category: "SIGNAL QUALITY",
-    text: '"The AI explanation on every signal is a game-changer — I actually understand why I\'m entering a trade now. First signal tool that doesn\'t make me feel confused."',
+    text: '"The AI explanation on every signal is a game-changer - I actually understand why I\'m entering a trade now. First signal tool that doesn\'t make me feel confused."',
     author: "Alex Rivera",
     role: "Senior Software Engineer",
   },
@@ -356,12 +356,12 @@ export default function PricingPage() {
       {/* ── TRIAL EXPIRY BANNER (logged in, expired) ───────────────────────── */}
       {user && trialExpired && (
         <div className="bg-red-600 text-white px-6 py-3 text-center text-[13px] font-bold uppercase tracking-wider">
-          ⚠ Your 7-day free trial has expired — upgrade to restore live signals &amp; full access.
+          ⚠ Your 7-day free trial has expired - upgrade to restore live signals &amp; full access.
         </div>
       )}
       {user && isFreePlan && !trialExpired && trialDaysLeft !== null && trialDaysLeft <= 3 && (
         <div className="bg-amber-500 text-black px-6 py-2 text-center text-[12px] font-bold uppercase tracking-wider">
-          ⏱ Your free trial expires in {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} — upgrade to keep your signals.
+          ⏱ Your free trial expires in {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} - upgrade to keep your signals.
         </div>
       )}
 
@@ -423,23 +423,23 @@ export default function PricingPage() {
           <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-brand-orange/15 to-transparent pointer-events-none" />
           <div className="space-y-3 text-left max-w-2xl">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-orange text-white text-[10px] font-bold uppercase tracking-wider">
-              ⚡ Founding Member Offer — One-Time Payment
+              ⚡ Founding Member Offer - One-Time Payment
             </div>
             <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-black font-sans leading-none">
-              GrandMaster Lifetime Access — $799
+              GrandMaster Lifetime Access - $799
             </h2>
             <p className="text-sm text-zinc-600 leading-relaxed">
-              Permanent Master-level access to Sanddock forever. All future coins, features &amp; updates included — no recurring fees.
+              Permanent Master-level access to Sanddock forever. All future coins, features &amp; updates included - no recurring fees.
             </p>
             <ul className="space-y-1.5 text-[12px] text-zinc-700 font-semibold">
-              {["All 15 coins, all timeframes — permanently", "Unlimited Telegram alerts & channels", "All future features included automatically", "GrandMaster certification badge", "30-day money-back guarantee"].map((f) => (
+              {["All 15 coins, all timeframes - permanently", "Unlimited Telegram alerts & channels", "All future features included automatically", "GrandMaster certification badge", "Custom Binance Pair"].map((f) => (
                 <li key={f} className="flex items-center gap-2">
                   <span className="text-brand-orange font-mono text-sm">•</span> {f}
                 </li>
               ))}
             </ul>
             <div className="text-brand-orange font-mono text-[11px] font-bold uppercase tracking-wide">
-              🔥 Only 188 spots left at this price — 312 of 500 claimed
+              🔥 Only 188 spots left at this price - 312 of 500 claimed
             </div>
           </div>
           <button
@@ -602,7 +602,7 @@ export default function PricingPage() {
         <div className="relative rounded-none border border-black bg-[#f4f6fa] p-10 text-left overflow-hidden">
           <div className="max-w-xl space-y-4 relative z-10">
             <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
-              Not sure? Start free — no card required.
+              Not sure? Start free - no card required.
             </h2>
             <p className="text-sm text-zinc-600 leading-relaxed">
               Join traders who get AI-powered Buy and Sell signals with a verified public track record. Start free for 7 days on BTC.

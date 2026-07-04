@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 /**
- * Supabase Admin Client — uses the service role key.
+ * Supabase Admin Client - uses the service role key.
  * Only import this in server-side code (API routes, webhooks).
  * NEVER expose this to the client/browser.
  */

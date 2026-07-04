@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- Sanddock — RLS Policies for Signal Engine Tables (idempotent)
+-- Sanddock - RLS Policies for Signal Engine Tables (idempotent)
 -- Migration: 20260628000001_signal_rls.sql
 --
 -- signals table already has RLS enabled + public read policy from the original
@@ -8,7 +8,7 @@
 
 
 -- ─────────────────────────────────────────────────
--- ohlcv_cache — new table
+-- ohlcv_cache - new table
 -- Chart data is available to all authenticated users (including free plan).
 -- The Python signal engine writes using the service role key (bypasses RLS).
 -- ─────────────────────────────────────────────────
@@ -48,7 +48,7 @@ END $$;
 
 
 -- ─────────────────────────────────────────────────
--- backtest_results — new table
+-- backtest_results - new table
 -- All authenticated users can read.
 -- ─────────────────────────────────────────────────
 ALTER TABLE public.backtest_results ENABLE ROW LEVEL SECURITY;
@@ -87,7 +87,7 @@ END $$;
 
 
 -- ─────────────────────────────────────────────────
--- signals — also add INSERT/UPDATE policies for the
+-- signals - also add INSERT/UPDATE policies for the
 -- signal engine service role (needed to write new signals
 -- and close them with UPDATE).
 -- ─────────────────────────────────────────────────

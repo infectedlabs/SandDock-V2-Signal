@@ -32,7 +32,7 @@ Rather than simply executing a trade when a technical indicator triggers, an AI 
 
 Agentic AI trading means employing software agents that use Large Language Models (LLMs) and specialized reasoning loops to act as independent decision-makers. Instead of following rigid code, they are given high-level goals (e.g., "maximize yield while keeping drawdown under 5%") and determine the steps required to achieve them.
 
-At its core, "agentic" implies agency—the capacity to act independently. Traditional trading systems, even those utilizing basic machine learning, are passive reactors to data feeds. They require a human developer to structure the pipeline, build the features, and define the action space.
+At its core, "agentic" implies agency-the capacity to act independently. Traditional trading systems, even those utilizing basic machine learning, are passive reactors to data feeds. They require a human developer to structure the pipeline, build the features, and define the action space.
 
 An agentic AI system operates on a goal-directed architecture. The agent receives a prompt or objective from the user. It then uses its internal reasoning framework (like Chain-of-Thought processing) to break down that objective into a sequence of tasks: researching assets, evaluating liquidity, verifying smart contract code safety, assessing volatility, and selecting execution routes. The agent acts, observes the results, and adapts its plan dynamically.
 
@@ -45,7 +45,7 @@ AI agents differ from standard trading bots in their reasoning, tool usage, and 
 Comparing these systems side-by-side illustrates the technological leap:
 
 * **Task Execution**: A standard bot is programmed to run a Grid trading strategy on BTC. It cannot suddenly decide to stop Grid trading and start farming yields on a new DeFi protocol. An AI agent, noticing that BTC volume is drying up, can analyze DeFi yields, write a script to interact with a new liquidity pool, and move funds automatically.
-* **Tool Usage**: Standard bots only interact with exchange APIs. AI agents can use "tools"—they can call web search APIs to verify news, write and run Python scripts in a local sandbox to verify data, interact with blockchain explorers, and read PDF whitepapers.
+* **Tool Usage**: Standard bots only interact with exchange APIs. AI agents can use "tools"-they can call web search APIs to verify news, write and run Python scripts in a local sandbox to verify data, interact with blockchain explorers, and read PDF whitepapers.
 * **Error Correction**: If a standard bot receives an API error, it stalls or alerts the user. An AI agent can read the error code, search the exchange documentation to find the issue, rewrite its own request payload, and try again.
 
 ---
@@ -117,7 +117,7 @@ In the near future, the barrier between professional hedge funds and retail trad
 * **Agent B**: Acts as the security auditor, reading the code of new DeFi smart contracts before allocating capital.
 * **Agent C**: Acts as the execution specialist, routing orders across liquidity pools to minimize slippage.
 
-The human's job will be to serve as the chief risk officer—setting hard capital limits, reviewing the agents' daily logs, and establishing the top-level parameters that define the system's risk profile.
+The human's job will be to serve as the chief risk officer-setting hard capital limits, reviewing the agents' daily logs, and establishing the top-level parameters that define the system's risk profile.
 
 ---
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 
 /**
- * useSignalLog — paginated signal history from /api/signals/log.
+ * useSignalLog - paginated signal history from /api/signals/log.
  *
  * @param {object} opts - { plan, symbol, page, pageSize }
  * @returns {{ signals: Array, loading: boolean, error: string|null }}

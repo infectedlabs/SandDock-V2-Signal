@@ -1,4 +1,4 @@
-# backtest_worker.py — Pre-compute historical signal performance
+# backtest_worker.py - Pre-compute historical signal performance
 # Run once on first deployment, then weekly via cron.
 # Uses the same detect_swings() function as live signals for consistency.
 # Never import this file from the Next.js frontend.

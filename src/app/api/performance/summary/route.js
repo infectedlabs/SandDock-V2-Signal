@@ -74,7 +74,7 @@ export async function GET(request) {
 
     const positiveSum = pnlValues.filter(p => p > 0).reduce((sum, p) => sum + p, 0);
     const negativeSum = Math.abs(pnlValues.filter(p => p < 0).reduce((sum, p) => sum + p, 0));
-    const profitFactor = negativeSum > 0 ? (positiveSum / negativeSum).toFixed(2) : positiveSum > 0 ? 'Infinite' : '—';
+    const profitFactor = negativeSum > 0 ? (positiveSum / negativeSum).toFixed(2) : positiveSum > 0 ? 'Infinite' : '-';
 
     const payload = {
       total_signals: entrySwings.length,
@@ -128,7 +128,7 @@ export async function GET(request) {
 
         const positiveSum = pnlValues.filter(p => p > 0).reduce((sum, p) => sum + p, 0);
         const negativeSum = Math.abs(pnlValues.filter(p => p < 0).reduce((sum, p) => sum + p, 0));
-        const profitFactor = negativeSum > 0 ? (positiveSum / negativeSum).toFixed(2) : positiveSum > 0 ? 'Infinite' : '—';
+        const profitFactor = negativeSum > 0 ? (positiveSum / negativeSum).toFixed(2) : positiveSum > 0 ? 'Infinite' : '-';
 
         const dbPayload = {
           total_signals: dbSignals.length,
@@ -170,7 +170,7 @@ export async function GET(request) {
     return NextResponse.json({
       total_signals: 0, completed_trades: 0, wins: 0, losses: 0,
       open_signals: 0, win_rate_pct: null, avg_pnl: null,
-      best_trade: null, worst_trade: null, profit_factor: '—'
+      best_trade: null, worst_trade: null, profit_factor: '-'
     }, {
       status: 200,
       headers: {

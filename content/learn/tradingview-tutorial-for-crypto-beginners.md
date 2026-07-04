@@ -12,7 +12,7 @@ author: Sanddock Research Team
 
 # How to Use TradingView for Crypto: A Beginner's Tutorial
 
-Learning **how to use TradingView for crypto** charting is a fundamental skill for any technical analyst. TradingView is the most popular charting and social network platform for retail and professional traders worldwide — providing powerful, free tools to track real-time crypto prices, apply indicators, draw market structures, and set customized price alerts.
+Learning **how to use TradingView for crypto** charting is a fundamental skill for any technical analyst. TradingView is the most popular charting and social network platform for retail and professional traders worldwide - providing powerful, free tools to track real-time crypto prices, apply indicators, draw market structures, and set customized price alerts.
 
 > **Simplify your charting process**: Sanddock runs Heikin Ashi swing detection automatically, giving you high-probability setups without the need to manage TradingView templates. [Start free today →](/signup)
 
@@ -72,7 +72,7 @@ To quickly clear your chart of all indicators and drawings, click the trash can 
 **Get explained setups without setting up Pine Script.** Sign up for Sanddock to access live, AI-explained swing signals run on optimized Heikin Ashi charts. [Start free →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

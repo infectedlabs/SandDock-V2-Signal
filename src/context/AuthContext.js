@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
   const [isMock, setIsMock] = useState(!isSupabaseConfigured);
   const router = useRouter();
 
-  // ── Expiry check — runs on every app load instead of a cron ──────────────
+  // ── Expiry check - runs on every app load instead of a cron ──────────────
   // Called after profile is loaded. If the user's paid subscription or free
   // trial has expired, silently calls the server-side expiry-check endpoint
   // which downgrades the plan in Supabase, then re-fetches the profile.
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
         profileData?.subscription_status !== 'expired';
 
       if (paidExpired || trialExpired) {
-        console.log('[AuthContext] Subscription/trial expired — updating plan…');
+        console.log('[AuthContext] Subscription/trial expired - updating plan…');
         // Update directly in Supabase (no CRON_SECRET needed from browser)
         const updates = paidExpired
           ? { plan: 'free', subscription_status: 'expired', current_period_end: null, trial_ends_at: new Date(now - 1).toISOString() }
@@ -68,7 +68,7 @@ export function AuthProvider({ children }) {
         }
       }
     } catch (err) {
-      // Non-fatal — silently ignore
+      // Non-fatal - silently ignore
       console.warn('[AuthContext] Expiry check failed (non-fatal):', err.message);
     }
   };
@@ -83,7 +83,7 @@ export function AuthProvider({ children }) {
         .single();
       if (data) {
         setProfile(data);
-        // Run expiry check on every login/load — replaces cron
+        // Run expiry check on every login/load - replaces cron
         await checkExpiry(uid, data);
       } else {
         // Safe creation of profile record if trigger failed or table is empty

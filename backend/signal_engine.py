@@ -14,7 +14,7 @@ import json
 from datetime import datetime, timezone
 
 # ──────────────────────────────────────────────────────────────────────────────
-# CONFIG  — edit here or set environment variables
+# CONFIG  - edit here or set environment variables
 # ──────────────────────────────────────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = "7537318580:AAGxtZh4h4BlgHw-HTdkmdfLfGU3-zzFGWw"
 TELEGRAM_CHAT_ID   = "1412689228"
@@ -375,7 +375,7 @@ def format_sl_hit(
     direction = "rose above" if signal_type == "bot" else "fell below"
     loss      = abs(hit_price - entry_price)
     return (
-        f"🚨 SL HIT — {side} trade stopped out!\n"
+        f"🚨 SL HIT - {side} trade stopped out!\n"
         f"{symbol} · 15m HA\n"
         f"Entry : {entry_price:.2f}\n"
         f"SL    : {sl_price:.2f}\n"
@@ -393,7 +393,7 @@ def format_flip_close(
     pnl   = (close_price - entry_price) if signal_type == "bot" else (entry_price - close_price)
     emoji = "✅" if pnl >= 0 else "❌"
     return (
-        f"🔄 {side} trade closed — direction flip\n"
+        f"🔄 {side} trade closed - direction flip\n"
         f"{symbol} · 15m HA\n"
         f"Entry : {entry_price:.2f}\n"
         f"Close : {close_price:.2f}\n"

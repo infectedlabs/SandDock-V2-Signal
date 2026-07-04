@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 /**
- * useCandles — fetches Heikin Ashi candle data from /api/chart/candles.
+ * useCandles - fetches Heikin Ashi candle data from /api/chart/candles.
  * Polls every 60 seconds to pick up new bars from the signal engine.
  *
  * @param {string} symbol   - e.g. 'BTCUSDT'

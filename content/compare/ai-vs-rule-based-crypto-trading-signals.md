@@ -55,7 +55,7 @@ Because the rules are static, they are highly transparent. A trader can look at 
 
 ## How do AI-driven crypto trading signals work?
 
-AI-driven crypto trading signals work by processing structured and unstructured data through machine learning models—such as neural networks, decision trees, or reinforcement learning agents—which have been trained on historical datasets to identify complex, multi-dimensional correlations that precede price movements.
+AI-driven crypto trading signals work by processing structured and unstructured data through machine learning models-such as neural networks, decision trees, or reinforcement learning agents-which have been trained on historical datasets to identify complex, multi-dimensional correlations that precede price movements.
 
 An AI signal pipeline typically involves several complex layers:
 
@@ -175,7 +175,7 @@ Trading cryptocurrencies involves substantial risk of loss and is not suitable f
           "name": "How do AI-driven crypto trading signals work?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "AI-driven crypto trading signals work by processing structured and unstructured data through machine learning models—such as neural networks, decision trees, or reinforcement learning agents—which have been trained on historical datasets to identify complex, multi-dimensional correlations that precede price movements."
+            "text": "AI-driven crypto trading signals work by processing structured and unstructured data through machine learning models-such as neural networks, decision trees, or reinforcement learning agents-which have been trained on historical datasets to identify complex, multi-dimensional correlations that precede price movements."
           }
         },
         {

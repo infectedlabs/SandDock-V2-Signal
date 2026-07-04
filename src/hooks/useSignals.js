@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 /**
- * useSignals — fetches live signals from /api/signals/live.
+ * useSignals - fetches live signals from /api/signals/live.
  * Polls every 30 seconds for fresh data.
  * WebSocket push can be added on top once the Python FastAPI server is deployed.
  *

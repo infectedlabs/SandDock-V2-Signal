@@ -67,7 +67,7 @@ Pionex's flagship tools include the Grid Trading Bot (ideal for sideways markets
 
 ## Why is HaasOnline favored by advanced algorithmic traders?
 
-HaasOnline is favored by advanced algorithmic traders because it offers HaasScript—a highly powerful, proprietary scripting language that enables traders to write, backtest, and execute complex, multi-exchange trading strategies with complete local server control.
+HaasOnline is favored by advanced algorithmic traders because it offers HaasScript-a highly powerful, proprietary scripting language that enables traders to write, backtest, and execute complex, multi-exchange trading strategies with complete local server control.
 
 Unlike cloud-based platforms, HaasOnline offers the **Haas Local Server**, which runs on your own hardware or a private VPS. This gives you absolute control over your API keys and trading history, keeping your proprietary strategies private.
 
@@ -187,7 +187,7 @@ Trading cryptocurrencies involves substantial risk of loss and is not suitable f
           "name": "Why is HaasOnline favored by advanced algorithmic traders?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "HaasOnline is favored by advanced algorithmic traders because it offers HaasScript—a highly powerful, proprietary scripting language that enables traders to write, backtest, and execute complex, multi-exchange trading strategies with complete local server control."
+            "text": "HaasOnline is favored by advanced algorithmic traders because it offers HaasScript-a highly powerful, proprietary scripting language that enables traders to write, backtest, and execute complex, multi-exchange trading strategies with complete local server control."
           }
         },
         {

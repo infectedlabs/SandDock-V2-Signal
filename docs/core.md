@@ -1,7 +1,7 @@
-# Sanddock — Complete Product & Build Specification
+# Sanddock - Complete Product & Build Specification
 ### For Antigravity Development Team | Version 1.0
 
-> **Purpose of this document:** Everything Antigravity needs to design, build, and launch Sanddock — from visual design system to page-by-page flows, onboarding, pricing, features, SEO content, and the $10k MRR plan. Read it top to bottom before writing a single line of code.
+> **Purpose of this document:** Everything Antigravity needs to design, build, and launch Sanddock - from visual design system to page-by-page flows, onboarding, pricing, features, SEO content, and the $10k MRR plan. Read it top to bottom before writing a single line of code.
 
 ---
 
@@ -10,12 +10,12 @@
 1. [Product Overview](#1-product-overview)
 2. [Visual Design System](#2-visual-design-system)
 3. [Page Architecture & User Flows](#3-page-architecture--user-flows)
-4. [Homepage — Full SEO & AI-Optimized Content](#4-homepage--full-seo--ai-optimized-content)
+4. [Homepage - Full SEO & AI-Optimized Content](#4-homepage--full-seo--ai-optimized-content)
 5. [Auth Flow](#5-auth-flow)
 6. [Personalized Onboarding](#6-personalized-onboarding)
 7. [Dashboard & Core App](#7-dashboard--core-app)
 8. [Feature Specification by Plan](#8-feature-specification-by-plan)
-9. [Pricing Plans — Exact Numbers & Limitations](#9-pricing-plans--exact-numbers--limitations)
+9. [Pricing Plans - Exact Numbers & Limitations](#9-pricing-plans--exact-numbers--limitations)
 10. [Telegram Integration](#10-telegram-integration)
 11. [Technical Requirements](#11-technical-requirements)
 12. [SEO & Marketing Infrastructure](#12-seo--marketing-infrastructure)
@@ -31,7 +31,7 @@
 | **Product Name** | Sanddock |
 | **Tagline** | AI signals. Honest track record. |
 | **Type** | SaaS web app + Telegram alert delivery |
-| **Target User** | Retail crypto traders — beginners to intermediate |
+| **Target User** | Retail crypto traders - beginners to intermediate |
 | **Core Technology** | Heikin Ashi swing detection + AI confidence scoring + Telegram delivery |
 | **Primary Exchange** | Binance (expand to Bybit, OKX in v2) |
 | **Launch Pairs** | BTC/USDT (free plan), 50+ coins on paid plans |
@@ -41,16 +41,16 @@
 
 Sanddock monitors crypto price data in real-time using Heikin Ashi (HA) candles, detects high-probability swing tops and bottoms via a proprietary state machine, and fires Buy/Sell alerts to users through a web dashboard and Telegram. Every signal includes an AI-generated plain-English explanation, a confidence score (0–100%), and recommended entry price, stop-loss, and take-profit levels.
 
-Unlike other signal services that hide losses and curate screenshots, Sanddock maintains a fully public, immutable, timestamped track record of every signal ever fired — wins and losses both.
+Unlike other signal services that hide losses and curate screenshots, Sanddock maintains a fully public, immutable, timestamped track record of every signal ever fired - wins and losses both.
 
 ### The 5 Core Differentiators
 
 | # | Differentiator | Why It Matters |
 |---|---|---|
-| 1 | **Radical transparency** | Public, verifiable track record — not curated screenshots. This alone separates Sanddock from 90% of the market. |
+| 1 | **Radical transparency** | Public, verifiable track record - not curated screenshots. This alone separates Sanddock from 90% of the market. |
 | 2 | **AI explainability** | Every signal explains *why* it fired, not just what to do. Builds understanding and trust. |
 | 3 | **Heikin Ashi engine** | Proven noise-reduction technique. Fewer false signals than raw OHLC detection. |
-| 4 | **Slide-not-spam** | When a swing extends to a better price, the existing Telegram message is edited — not spammed with new alerts. |
+| 4 | **Slide-not-spam** | When a swing extends to a better price, the existing Telegram message is edited - not spammed with new alerts. |
 | 5 | **Beginner-first UX** | Designed for people who don't know Pine Script or backtesting. No jargon without explanation. |
 
 ### What Sanddock Is NOT
@@ -73,7 +73,7 @@ Take **Fogo's visual language** as the aesthetic foundation:
 - Scrolling ticker strips
 - Strong section rhythm
 
-Apply it to a **trust-first, data-forward signal SaaS** — not a blockchain protocol. The hero image is always the product UI, never a mascot or abstract illustration.
+Apply it to a **trust-first, data-forward signal SaaS** - not a blockchain protocol. The hero image is always the product UI, never a mascot or abstract illustration.
 
 ---
 
@@ -97,14 +97,14 @@ Apply it to a **trust-first, data-forward signal SaaS** — not a blockchain pro
 | Border Default | Subtle Navy | `#1e2a3a` | Card borders, dividers, hairlines |
 | Border Hover | Mid Navy | `#2d3d52` | Hovered card borders |
 
-> **Critical rule for all developers:** `#00e676` Green is **exclusively** for Buy signals and positive numbers. `#ff1744` Red is **exclusively** for Sell signals and negative numbers. Never use these for any other UI purpose. `#ff5722` Orange is the brand accent only — **never** used for signal colors.
+> **Critical rule for all developers:** `#00e676` Green is **exclusively** for Buy signals and positive numbers. `#ff1744` Red is **exclusively** for Sell signals and negative numbers. Never use these for any other UI purpose. `#ff5722` Orange is the brand accent only - **never** used for signal colors.
 
 ---
 
 ### Typography
 
 **Font Stack:**
-- **Primary (all UI):** Space Grotesk — geometric, modern, excellent legibility at large display sizes
+- **Primary (all UI):** Space Grotesk - geometric, modern, excellent legibility at large display sizes
 - **Fallback:** DM Sans → Inter → system-ui
 - **Monospace (prices, numbers, code):** JetBrains Mono
 
@@ -161,7 +161,7 @@ Transition: `0.15s ease` on all color/shadow changes
 - Hover state: border shifts to `#2d3d52`
 - Transition: `border-color 0.15s ease`
 
-**Signal Alert Cards (critical component — appears throughout app):**
+**Signal Alert Cards (critical component - appears throughout app):**
 
 ```
 ┌─────────────────────────────────────────────────┐  ← border-left: 3px solid #00e676 (Buy)
@@ -169,7 +169,7 @@ Transition: `0.15s ease` on all color/shadow changes
 │                                                 │
 │ Entry  $67,432.00    SL  $65,800    TP $70,850 │
 │                                                 │
-│ "HA low is lowest in 10 bars — swing bottom     │
+│ "HA low is lowest in 10 bars - swing bottom     │
 │  confirmed. Volume 23% above average."          │
 │                                                 │
 │ 14 minutes ago                      [Expand ↓] │
@@ -223,32 +223,32 @@ Transition: `0.15s ease` on all color/shadow changes
   /settings/telegram
   /settings/alerts
   /settings/api ───────── Master plan only
-/upgrade ───────────── Upgrade page (protected — shown when free user hits a gate)
+/upgrade ───────────── Upgrade page (protected - shown when free user hits a gate)
 /affiliates ────────── Affiliate program (public)
 ```
 
 ---
 
-### Flow 1 — New Visitor → Free Account
+### Flow 1 - New Visitor → Free Account
 
 ```
 Landing on Homepage
         ↓
 Clicks "Get Free Signals →" or "Start Free"
         ↓
-/signup — email + password (or Google OAuth)
+/signup - email + password (or Google OAuth)
         ↓
 Email verification sent → User clicks link in email
         ↓
-/onboarding — Step 1: Experience level
+/onboarding - Step 1: Experience level
         ↓
-/onboarding — Step 2: Coins of interest
+/onboarding - Step 2: Coins of interest
         ↓
-/onboarding — Step 3: Risk style
+/onboarding - Step 3: Risk style
         ↓
-/onboarding — Step 4: Alert delivery preference
+/onboarding - Step 4: Alert delivery preference
         ↓
-/onboarding — Step 5: Primary goal
+/onboarding - Step 5: Primary goal
         ↓ (if Telegram selected in Step 4)
 Telegram Connect screen (3-step pairing flow)
         ↓
@@ -259,7 +259,7 @@ First signal appears → user sees live BTC Buy/Sell alert
 
 ---
 
-### Flow 2 — Free User → Upgrade
+### Flow 2 - Free User → Upgrade
 
 ```
 Free user takes one of these actions:
@@ -284,7 +284,7 @@ Success toast: "Welcome to Pro! You now have access to 10 coins + Telegram alert
 
 ---
 
-### Flow 3 — Returning User
+### Flow 3 - Returning User
 
 ```
 Visits sanddock.com (any page) or direct /login
@@ -296,35 +296,35 @@ Session restored → /dashboard (last position)
 
 ---
 
-### Flow 4 — No-Auth Pages (Visitor, Not Logged In)
+### Flow 4 - No-Auth Pages (Visitor, Not Logged In)
 
 Pages accessible without login that show product value and drive signups:
 
-**Homepage (`/`)** — Full homepage with live scrolling ticker, track record preview, pricing summary
+**Homepage (`/`)** - Full homepage with live scrolling ticker, track record preview, pricing summary
 
-**Track Record (`/track-record`)** — Full public signal history table, filterable. No login required. This is intentional — it's a trust-building page that should be indexed and shareable.
+**Track Record (`/track-record`)** - Full public signal history table, filterable. No login required. This is intentional - it's a trust-building page that should be indexed and shareable.
 
-**Pricing (`/pricing`)** — Full pricing comparison. No login required.
+**Pricing (`/pricing`)** - Full pricing comparison. No login required.
 
-**Blog (`/blog/[slug]`)** — All blog posts public. No login. Full SEO content.
+**Blog (`/blog/[slug]`)** - All blog posts public. No login. Full SEO content.
 
 > All these pages have a sticky top CTA bar: "Get free Bitcoin signals → Start free, no card needed" when scrolling down past the hero.
 
 ---
 
-## 4. Homepage — Full SEO & AI-Optimized Content
+## 4. Homepage - Full SEO & AI-Optimized Content
 
 ### Technical SEO Metadata
 
 ```html
-<title>Sanddock — AI Crypto Trading Signals | Heikin Ashi Buy & Sell Alerts</title>
+<title>Sanddock - AI Crypto Trading Signals | Heikin Ashi Buy & Sell Alerts</title>
 
-<meta name="description" content="Real-time AI-powered Buy and Sell signals for Bitcoin and 50+ crypto coins. Heikin Ashi-based alerts with AI explanation delivered to Telegram and your dashboard. Verified track record. Start free — no credit card needed." />
+<meta name="description" content="Real-time AI-powered Buy and Sell signals for Bitcoin and 50+ crypto coins. Heikin Ashi-based alerts with AI explanation delivered to Telegram and your dashboard. Verified track record. Start free - no credit card needed." />
 
 <link rel="canonical" href="https://sanddock.com/" />
 
 <!-- Open Graph -->
-<meta property="og:title" content="Sanddock — AI Crypto Trading Signals" />
+<meta property="og:title" content="Sanddock - AI Crypto Trading Signals" />
 <meta property="og:description" content="Get AI-powered Buy/Sell signals with a verified track record. Every signal explained. Start free with Bitcoin." />
 <meta property="og:image" content="https://sanddock.com/og-image.png" />
 <!-- OG image: dashboard screenshot showing a BTC Buy signal with AI explanation panel. 1200×630px. -->
@@ -332,10 +332,10 @@ Pages accessible without login that show product value and drive signups:
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Sanddock — AI Crypto Signals with Verified Track Record" />
+<meta name="twitter:title" content="Sanddock - AI Crypto Signals with Verified Track Record" />
 ```
 
-**Schema Markup (JSON-LD — embed in `<head>`):**
+**Schema Markup (JSON-LD - embed in `<head>`):**
 
 ```json
 {
@@ -370,7 +370,7 @@ Pages accessible without login that show product value and drive signups:
         {
           "@type": "Question",
           "name": "Is the free plan really free?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Yes. The free plan gives you real, live AI signals on Bitcoin (BTC/USDT) forever — no credit card required. Telegram alerts, additional coins, and advanced features require a paid plan." }
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. The free plan gives you real, live AI signals on Bitcoin (BTC/USDT) forever - no credit card required. Telegram alerts, additional coins, and advanced features require a paid plan." }
         },
         {
           "@type": "Question",
@@ -410,7 +410,7 @@ Pages accessible without login that show product value and drive signups:
 
 ---
 
-#### SECTION 1 — HERO
+#### SECTION 1 - HERO
 
 **Eyebrow text (orange, uppercase, 12px):**
 `AI-Powered · Heikin Ashi · Verified Track Record`
@@ -425,7 +425,7 @@ Not blindly.
 ```
 Real-time Buy and Sell signals powered by AI and Heikin Ashi analysis.
 Every signal comes with a reason. Every result is on the public record.
-Start free — Bitcoin signals, forever.
+Start free - Bitcoin signals, forever.
 ```
 
 **CTA Row:**
@@ -442,7 +442,7 @@ A product screenshot / animated mockup showing:
 - Right panel: Signal card with confidence score bar, AI rationale text, Entry/SL/TP
 - Phone overlay (floating): Telegram message with the same signal
 
-> Dev note: Use a real screenshot of the actual dashboard when built. For launch, use a high-fidelity Figma mockup exported as PNG/WebP. Consider a subtle "live" animation — the confidence bar filling up, then a Telegram ping sound effect animation.
+> Dev note: Use a real screenshot of the actual dashboard when built. For launch, use a high-fidelity Figma mockup exported as PNG/WebP. Consider a subtle "live" animation - the confidence bar filling up, then a Telegram ping sound effect animation.
 
 **Stats Row (3 columns, below hero visual):**
 
@@ -456,7 +456,7 @@ A product screenshot / animated mockup showing:
 
 ---
 
-#### SECTION 2 — LIVE SIGNAL TICKER
+#### SECTION 2 - LIVE SIGNAL TICKER
 
 Full-width scrolling strip(s), placed directly below the hero.
 
@@ -471,51 +471,51 @@ Non-BTC coins in Strip 2 are slightly blurred (CSS `filter: blur(4px)`) with a s
 
 ---
 
-#### SECTION 3 — SOCIAL PROOF (EXCHANGE LOGOS)
+#### SECTION 3 - SOCIAL PROOF (EXCHANGE LOGOS)
 
 **Eyebrow:** `Signals from the world's most trusted exchanges`
 
 **Logo row (horizontal scroll on mobile):**
 Binance · Bybit · OKX · KuCoin · Coinbase
 
-> Use grayscale logos that brighten on hover. Not clickable — decorative trust signal.
+> Use grayscale logos that brighten on hover. Not clickable - decorative trust signal.
 
 ---
 
-#### SECTION 4 — HOW IT WORKS
+#### SECTION 4 - HOW IT WORKS
 
 **Eyebrow:** `Three steps`
 
 **Section headline:** `From signal to trade in under 60 seconds`
 
 **Sub-copy (center, max-width 560px, muted gray):**
-No charts to watch. No Pine Script to learn. Sanddock handles the analysis — you handle the decision.
+No charts to watch. No Pine Script to learn. Sanddock handles the analysis - you handle the decision.
 
 **Steps (numbered cards, 01 / 02 / 03 layout):**
 
-**01 — AI scans the market**
+**01 - AI scans the market**
 Icon: Candlestick chart
-Body: Sanddock monitors Heikin Ashi candles across all your tracked coins, 24/7. The signal engine detects swing tops and bottoms with precision — filtering out the noise that trips up other tools.
+Body: Sanddock monitors Heikin Ashi candles across all your tracked coins, 24/7. The signal engine detects swing tops and bottoms with precision - filtering out the noise that trips up other tools.
 
-**02 — Every signal is explained**
+**02 - Every signal is explained**
 Icon: Brain / AI chip
 Body: When a Buy or Sell signal fires, the AI generates a plain-English explanation of what it saw, why it's confident, and what to watch for. No black boxes. No "just trust us."
 
-**03 — Alert arrives on your phone**
+**03 - Alert arrives on your phone**
 Icon: Telegram logo or phone
-Body: Your signal lands in Telegram within seconds. Entry price, stop-loss, take-profit, and a confidence score — everything you need to decide in one message.
+Body: Your signal lands in Telegram within seconds. Entry price, stop-loss, take-profit, and a confidence score - everything you need to decide in one message.
 
 ---
 
-#### SECTION 5 — AI EXPLAINABILITY SHOWCASE
+#### SECTION 5 - AI EXPLAINABILITY SHOWCASE
 
 **Eyebrow:** `The Sanddock difference`
 
 **Section headline:** `Every signal tells you why`
 
-**Layout:** Two columns — left is the signal card mockup, right is copy.
+**Layout:** Two columns - left is the signal card mockup, right is copy.
 
-**Left — Signal Card Mockup (styled as a real UI component):**
+**Left - Signal Card Mockup (styled as a real UI component):**
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -538,7 +538,7 @@ Body: Your signal lands in Telegram within seconds. Entry price, stop-loss, take
 └──────────────────────────────────────────────────────┘
 ```
 
-**Right — Copy:**
+**Right - Copy:**
 
 **Headline:** No black box. No guesswork.
 
@@ -551,14 +551,14 @@ Most signal services tell you what to trade. We tell you *why*.
 
 ---
 
-#### SECTION 6 — PUBLIC TRACK RECORD
+#### SECTION 6 - PUBLIC TRACK RECORD
 
 **Eyebrow:** `Nothing to hide`
 
 **Section headline:** `Every signal. Win or loss. On the record.`
 
 **Sub-copy (center, max-width 580px):**
-Most crypto signal services show you screenshots of their best calls. We show you everything — wins, losses, breakevens, and open signals — in a public, timestamped ledger. No cherry-picking. No deleted signals. Just data.
+Most crypto signal services show you screenshots of their best calls. We show you everything - wins, losses, breakevens, and open signals - in a public, timestamped ledger. No cherry-picking. No deleted signals. Just data.
 
 **Stats Row (4 metric cards):**
 
@@ -587,7 +587,7 @@ Most crypto signal services show you screenshots of their best calls. We show yo
 
 ---
 
-#### SECTION 7 — COIN COVERAGE
+#### SECTION 7 - COIN COVERAGE
 
 **Eyebrow:** `What you get`
 
@@ -595,35 +595,35 @@ Most crypto signal services show you screenshots of their best calls. We show yo
 
 **Layout:** Two-column split
 
-**Left column — FREE:**
-Badge: `FREE — No card needed`
+**Left column - FREE:**
+Badge: `FREE - No card needed`
 Headline: Start with Bitcoin
 
-Body: Your free plan gives you real AI signals on the world's most traded cryptocurrency — forever. No credit card. No expiry. Just signals.
+Body: Your free plan gives you real AI signals on the world's most traded cryptocurrency - forever. No credit card. No expiry. Just signals.
 
 Visual: BTC coin logo, large and clear. Below it, a grid of 8–10 other coin logos, blurred with lock icons and "Pro" labels.
 
 CTA: "Get free BTC signals →"
 
-**Right column — PRO & MASTER:**
+**Right column - PRO & MASTER:**
 Badge: `PRO & MASTER`
 Headline: 50+ coins unlocked
 
-Body: Upgrade to unlock real-time AI signals across the top 50 cryptocurrencies by market cap — ETH, SOL, BNB, XRP, ADA, DOGE, AVAX, and dozens more. New coins added monthly.
+Body: Upgrade to unlock real-time AI signals across the top 50 cryptocurrencies by market cap - ETH, SOL, BNB, XRP, ADA, DOGE, AVAX, and dozens more. New coins added monthly.
 
-Visual: Grid of coin logos — ETH, BNB, SOL, XRP, ADA, DOGE, AVAX, MATIC, DOT, LINK, LTC, UNI, ATOM, NEAR, and more — all visible, no blur.
+Visual: Grid of coin logos - ETH, BNB, SOL, XRP, ADA, DOGE, AVAX, MATIC, DOT, LINK, LTC, UNI, ATOM, NEAR, and more - all visible, no blur.
 
 CTA: "See all coins →" + "Upgrade to Pro →"
 
 ---
 
-#### SECTION 8 — PRICING SUMMARY
+#### SECTION 8 - PRICING SUMMARY
 
 **Eyebrow:** `Simple pricing`
 
 **Section headline:** `Start free. Upgrade when you're ready.`
 
-**Toggle:** Monthly / Yearly — default to Monthly. Show "Save up to 38%" badge next to Yearly toggle.
+**Toggle:** Monthly / Yearly - default to Monthly. Show "Save up to 38%" badge next to Yearly toggle.
 
 Display 3 plan cards in a row: Free | Pro | Master.
 
@@ -638,7 +638,7 @@ Each card shows: plan name, price, 3 headline features, CTA button.
 
 ---
 
-#### SECTION 9 — SOCIAL WALL
+#### SECTION 9 - SOCIAL WALL
 
 **Eyebrow:** `What traders are saying`
 
@@ -650,17 +650,17 @@ Embed real tweets via Twitter oEmbed API when available. Fallback to styled HTML
 
 **Example content (replace with real posts as they come in):**
 
-> "Been using Sanddock for 3 months. The AI explanation on every signal is a game changer — I actually understand *why* I'm entering a trade now. First signal tool that doesn't make me feel dumb." — @trader_handle
+> "Been using Sanddock for 3 months. The AI explanation on every signal is a game changer - I actually understand *why* I'm entering a trade now. First signal tool that doesn't make me feel dumb." - @trader_handle
 
-> "The public track record is what sold me. They show the losses. Every other signal group hides that. Instant trust from day one." — @crypto_handle
+> "The public track record is what sold me. They show the losses. Every other signal group hides that. Instant trust from day one." - @crypto_handle
 
-> "BTC signal hit +5.2% last night. Got the Telegram alert while I was asleep, set my entry limit and woke up in profit. This is the way." — @handle
+> "BTC signal hit +5.2% last night. Got the Telegram alert while I was asleep, set my entry limit and woke up in profit. This is the way." - @handle
 
-> "Switched from [competitor] to Sanddock. No more signal spam. One clean alert with an explanation. Pro plan is worth every penny." — @handle
+> "Switched from [competitor] to Sanddock. No more signal spam. One clean alert with an explanation. Pro plan is worth every penny." - @handle
 
 ---
 
-#### SECTION 10 — FAQ
+#### SECTION 10 - FAQ
 
 **Eyebrow:** `Questions`
 
@@ -671,7 +671,7 @@ Embed real tweets via Twitter oEmbed API when available. Fallback to styled HTML
 ---
 
 **Q: What is Sanddock?**
-Sanddock is an AI-powered crypto trading signal tool that monitors Bitcoin and 50+ other cryptocurrencies in real time. Using a Heikin Ashi swing detection engine and AI analysis, it fires Buy and Sell signals to your web dashboard and Telegram — with a plain-English explanation, confidence score, entry price, stop-loss, and take-profit on every alert.
+Sanddock is an AI-powered crypto trading signal tool that monitors Bitcoin and 50+ other cryptocurrencies in real time. Using a Heikin Ashi swing detection engine and AI analysis, it fires Buy and Sell signals to your web dashboard and Telegram - with a plain-English explanation, confidence score, entry price, stop-loss, and take-profit on every alert.
 
 **Q: Is the free plan really free?**
 Yes, completely. The free plan gives you real, live AI signals on Bitcoin (BTC/USDT) forever. No credit card required, no time limit. Telegram alerts, additional coins, and advanced analytics require a paid plan.
@@ -680,7 +680,7 @@ Yes, completely. The free plan gives you real, live AI signals on Bitcoin (BTC/U
 Heikin Ashi is a Japanese candlestick technique that reduces price noise by averaging candle data. This makes swing highs and lows much easier to identify accurately than on raw price charts. Our signal engine detects when a coin hits a verified swing top (Sell) or bottom (Buy) on Heikin Ashi candles, then runs it through an AI confidence model before any alert fires.
 
 **Q: How accurate are the signals?**
-Our current verified win rate is 67.3% across 4,218+ signals — you can verify this yourself on our public Track Record page. Every signal, win and loss, is timestamped and public. We never delete signals. We never show screenshots. Just the data.
+Our current verified win rate is 67.3% across 4,218+ signals - you can verify this yourself on our public Track Record page. Every signal, win and loss, is timestamped and public. We never delete signals. We never show screenshots. Just the data.
 
 **Q: Can I trust these signals enough to trade real money?**
 Sanddock signals are educational tools, not financial advice. They are based on technical analysis and historical patterns, which do not guarantee future results. Always use risk management and never risk more than you can afford to lose. Most users treat signals as one input alongside their own analysis.
@@ -692,16 +692,16 @@ After signing up, go to Settings → Telegram and follow the 3-step pairing wiza
 Yes. Cancel in one click from account settings. No cancellation fees. No "email us to cancel" friction. Your access continues until the end of your billing period.
 
 **Q: Does Sanddock place trades for me?**
-No. Sanddock is a signal tool — it alerts you when and where to consider entering or exiting. It does not connect to your exchange or execute trades. If you want auto-execution, you can connect our webhook output (Master plan) to tools like Cornix or 3Commas.
+No. Sanddock is a signal tool - it alerts you when and where to consider entering or exiting. It does not connect to your exchange or execute trades. If you want auto-execution, you can connect our webhook output (Master plan) to tools like Cornix or 3Commas.
 
 **Q: What is the Lifetime plan?**
-A one-time payment that gives you Master-level access to Sanddock forever, including all future feature updates. Available only during the launch window — limited to 500 founding members.
+A one-time payment that gives you Master-level access to Sanddock forever, including all future feature updates. Available only during the launch window - limited to 500 founding members.
 
 ---
 
-#### SECTION 11 — FINAL CTA BANNER
+#### SECTION 11 - FINAL CTA BANNER
 
-**Background:** Dark navy with subtle orange radial glow (top-right corner, very subtle — not a gradient, just a glow effect)
+**Background:** Dark navy with subtle orange radial glow (top-right corner, very subtle - not a gradient, just a glow effect)
 
 **Headline:**
 ```
@@ -751,12 +751,12 @@ Right: Social icons: Twitter/X · Telegram · YouTube
 - Sub: "Start with Bitcoin signals. No credit card needed."
 
 **Form fields:**
-1. Full name — text input, placeholder "Your name"
-2. Email address — email input, placeholder "you@email.com"
-3. Password — password input, 8+ chars, show/hide toggle (eye icon)
-4. "Create account" — orange primary button, full width
+1. Full name - text input, placeholder "Your name"
+2. Email address - email input, placeholder "you@email.com"
+3. Password - password input, 8+ chars, show/hide toggle (eye icon)
+4. "Create account" - orange primary button, full width
 5. Divider: `── or ──`
-6. "Continue with Google" — white button, Google SVG icon, full width
+6. "Continue with Google" - white button, Google SVG icon, full width
 
 **Below form:**
 `By creating an account, you agree to our Terms of Service and Privacy Policy.`
@@ -793,7 +793,7 @@ On click of verification link → user redirected to `/onboarding`
 **Form:**
 1. Email address
 2. Password + "Forgot password?" (right-aligned link, 13px)
-3. "Login" — orange primary button, full width
+3. "Login" - orange primary button, full width
 4. Divider: `── or ──`
 5. "Continue with Google"
 
@@ -804,7 +804,7 @@ On click of verification link → user redirected to `/onboarding`
 ### Forgot Password Flow
 
 Step 1: Enter email → orange button "Send reset link"
-Step 2: "Reset link sent — check your inbox"
+Step 2: "Reset link sent - check your inbox"
 Step 3: Click link → "Enter new password" + "Confirm password" → "Reset password"
 Step 4: ✅ "Password updated" → Auto-redirect to `/login` after 3 seconds
 
@@ -818,14 +818,14 @@ The onboarding runs once, immediately after email verification on first login. I
 - Full-screen dark background (`#080d1a`)
 - Centered card, max-width 640px, no close button
 - Progress bar at top: `●●○○○  Step 1 of 5` (orange filled dots)
-- "Skip for now" ghost text link (bottom right) — sets all preferences to defaults
+- "Skip for now" ghost text link (bottom right) - sets all preferences to defaults
 - "← Back" ghost button on steps 2–5 (bottom left)
 - "Next →" orange primary button (bottom right)
 - Subtle entrance animation: card slides up + fades in on each step
 
 ---
 
-### Onboarding Step 1 — Experience Level
+### Onboarding Step 1 - Experience Level
 
 **Progress:** Step 1 of 5
 
@@ -846,7 +846,7 @@ The onboarding runs once, immediately after email verification on first login. I
 
 🎯  Experienced trader
     I know what I'm doing. I just want clean
-    signals and data — skip the hand-holding.
+    signals and data - skip the hand-holding.
 ```
 
 **Card selected state:** Orange border `2px solid #ff5722`, slight orange background tint.
@@ -861,13 +861,13 @@ The onboarding runs once, immediately after email verification on first login. I
 
 ---
 
-### Onboarding Step 2 — Coins of Interest
+### Onboarding Step 2 - Coins of Interest
 
 **Progress:** Step 2 of 5
 
 **Headline:** "Which coins do you want to track?"
 
-**Sub-copy:** BTC is always included on your free plan. Select any others you're interested in — you'll see them on your dashboard (they unlock as you upgrade).
+**Sub-copy:** BTC is always included on your free plan. Select any others you're interested in - you'll see them on your dashboard (they unlock as you upgrade).
 
 **Layout:** Grid of coin selector pills with official logos (multi-select)
 
@@ -889,14 +889,14 @@ The onboarding runs once, immediately after email verification on first login. I
 | LTC | 🔒 Pro badge | ✅ | ✅ |
 | + 38 more | | | ✅ |
 
-**Free user behavior:** BTC is pre-selected and locked (cannot deselect). Other coins can be selected — they appear as "locked preview" cards on the dashboard with an upgrade prompt. Selecting them does NOT charge the user — it just configures which locked preview cards they see.
+**Free user behavior:** BTC is pre-selected and locked (cannot deselect). Other coins can be selected - they appear as "locked preview" cards on the dashboard with an upgrade prompt. Selecting them does NOT charge the user - it just configures which locked preview cards they see.
 
 **Inline note when non-BTC selected:**
-`You've added ETH — unlock real-time ETH signals on Pro ($29/mo).`
+`You've added ETH - unlock real-time ETH signals on Pro ($29/mo).`
 
 ---
 
-### Onboarding Step 3 — Risk Style
+### Onboarding Step 3 - Risk Style
 
 **Progress:** Step 3 of 5
 
@@ -929,7 +929,7 @@ The onboarding runs once, immediately after email verification on first login. I
 
 ---
 
-### Onboarding Step 4 — Alert Delivery
+### Onboarding Step 4 - Alert Delivery
 
 **Progress:** Step 4 of 5
 
@@ -937,7 +937,7 @@ The onboarding runs once, immediately after email verification on first login. I
 
 **Sub-copy:** Choose how Sanddock reaches you when a new signal fires.
 
-**Options (multi-select — user can choose one or both):**
+**Options (multi-select - user can choose one or both):**
 
 ```
 📊  Web dashboard                        [SELECT]
@@ -961,7 +961,7 @@ Show inline notice below the Telegram card:
 
 ---
 
-### Onboarding Step 5 — Primary Goal
+### Onboarding Step 5 - Primary Goal
 
 **Progress:** Step 5 of 5
 
@@ -1045,7 +1045,7 @@ Show inline notice below the Telegram card:
 
 ---
 
-### Tab 1 — Signals (Live Feed) — Default
+### Tab 1 - Signals (Live Feed) - Default
 
 **Header row:**
 Filters: All Signals | Buy Only | Sell Only
@@ -1089,13 +1089,13 @@ confirmed swing is detected.
 
 ---
 
-### Tab 2 — Chart View
+### Tab 2 - Chart View
 
 **Layout:**
 - Full-width Heikin Ashi candlestick chart (TradingView Lightweight Charts)
 - Top bar: Coin selector dropdown + Timeframe tabs (15m | 1H | 4H)
 - Chart area: HA candles + signal triangle overlays
-- Right panel (320px): selected signal detail — AI rationale, SL/TP, confidence, timestamp
+- Right panel (320px): selected signal detail - AI rationale, SL/TP, confidence, timestamp
 
 **Free plan restriction:**
 - BTC only. Other coins show blurred placeholder + "Pro" overlay.
@@ -1108,7 +1108,7 @@ confirmed swing is detected.
 
 ---
 
-### Tab 3 — History
+### Tab 3 - History
 
 Table of all signals the account has received:
 
@@ -1120,16 +1120,16 @@ Table of all signals the account has received:
 | Timeframe | 15m / 1H / 4H |
 | Entry Price | Monospace |
 | Status | Open / Closed / Expired |
-| Result | +5.0% ✅ / -1.4% ❌ / — (if open) |
+| Result | +5.0% ✅ / -1.4% ❌ / - (if open) |
 | Confidence | Score at time of signal |
 
 **Controls:** Sortable columns, date range filter, coin filter, type filter
 
-**Export:** "Export CSV" button (Pro+ only — locked on Free with upgrade prompt)
+**Export:** "Export CSV" button (Pro+ only - locked on Free with upgrade prompt)
 
 ---
 
-### Tab 4 — Track Record
+### Tab 4 - Track Record
 
 Two sub-tabs:
 
@@ -1149,12 +1149,12 @@ Two sub-tabs:
 
 | Trigger | Modal Headline | Body |
 |---|---|---|
-| Clicks non-BTC signal | "Unlock ETH signals on Pro" | "Get real-time Buy/Sell signals for ETH, SOL, BNB, and 7 more coins — from $29/mo." |
+| Clicks non-BTC signal | "Unlock ETH signals on Pro" | "Get real-time Buy/Sell signals for ETH, SOL, BNB, and 7 more coins - from $29/mo." |
 | Goes to Telegram settings on Free | "Telegram alerts are on Pro" | "Get signals pushed to your phone within seconds of firing. Set up in 2 minutes." |
 | Clicks CSV export | "Export your signal history" | "Download your full signal history as CSV on Pro and Master." |
 | Clicks 1H/4H timeframe tab | "Multi-timeframe signals on Pro" | "Unlock 1-hour and 4-hour Heikin Ashi signals for stronger confluence." |
 | Hovers SL/TP on Free | "See Stop Loss & Take Profit levels" | "Know your risk before every trade. SL/TP included on Pro and Master." |
-| 7 days as free user (banner) | "You've been with us a week 👋" | "Ready for more than BTC? Unlock 10 coins, Telegram alerts, and SL/TP — from $19/mo on the annual plan." |
+| 7 days as free user (banner) | "You've been with us a week 👋" | "Ready for more than BTC? Unlock 10 coins, Telegram alerts, and SL/TP - from $19/mo on the annual plan." |
 
 All upgrade modals include:
 - Plan name + price
@@ -1224,21 +1224,21 @@ All upgrade modals include:
 
 ---
 
-## 9. Pricing Plans — Exact Numbers & Limitations
+## 9. Pricing Plans - Exact Numbers & Limitations
 
 ### Pricing Table
 
 | | Free | Pro | Master | Lifetime |
 |---|---|---|---|---|
 | **Monthly price** | $0 | **$29/mo** | **$79/mo** | **$799 one-time** |
-| **Annual price** | $0 | **$19/mo** ($228/yr) | **$49/mo** ($588/yr) | — |
-| **Annual saving** | — | Save 34% ($120/yr) | Save 38% ($360/yr) | — |
+| **Annual price** | $0 | **$19/mo** ($228/yr) | **$49/mo** ($588/yr) | - |
+| **Annual saving** | - | Save 34% ($120/yr) | Save 38% ($360/yr) | - |
 | **Best for** | Testing the product | Active retail traders | Power users, community admins | Committed long-term users |
-| **Equivalent value** | — | — | — | ~13 months of Master |
+| **Equivalent value** | - | - | - | ~13 months of Master |
 
 ---
 
-### Free Plan — $0/mo (Forever)
+### Free Plan - $0/mo (Forever)
 
 **Purpose:** Top-of-funnel trust builder. Show enough value that upgrading feels like a no-brainer.
 
@@ -1246,7 +1246,7 @@ All upgrade modals include:
 
 **Included:**
 - BTC/USDT signals only (15m timeframe only)
-- Real-time signals (not delayed — respect the user)
+- Real-time signals (not delayed - respect the user)
 - Web dashboard access
 - Full AI explanation text on every signal
 - Confidence score visible
@@ -1278,7 +1278,7 @@ All upgrade modals include:
 
 ---
 
-### Pro Plan — $29/mo | $19/mo (billed annually at $228/yr)
+### Pro Plan - $29/mo | $19/mo (billed annually at $228/yr)
 
 **Purpose:** Main revenue driver. Everything an actively trading retail user needs.
 
@@ -1301,7 +1301,7 @@ All upgrade modals include:
 
 ---
 
-### Master Plan — $79/mo | $49/mo (billed annually at $588/yr)
+### Master Plan - $79/mo | $49/mo (billed annually at $588/yr)
 
 **Purpose:** Power users, serious traders, people running their own signal communities on Telegram.
 
@@ -1322,7 +1322,7 @@ All upgrade modals include:
 
 ---
 
-### Lifetime Deal — $799 one-time
+### Lifetime Deal - $799 one-time
 
 **Purpose:** Generate launch-stage cash flow, reward early believers, create loyal permanent advocates.
 
@@ -1356,7 +1356,7 @@ as a monthly/annual subscription only.
 1. **Hero:** "Simple pricing. No surprises."
    Sub: "Start free on Bitcoin. Upgrade when the signals prove themselves."
 
-2. **Toggle:** Monthly / Yearly — default Yearly to maximize annual subscriptions (show "Save 38%" badge)
+2. **Toggle:** Monthly / Yearly - default Yearly to maximize annual subscriptions (show "Save 38%" badge)
 
 3. **Three plan cards in a row:** Free | Pro | Master
    - Pro card: `2px solid #ff5722` border + "Most popular" badge
@@ -1371,7 +1371,7 @@ as a monthly/annual subscription only.
 6. **FAQ section**
    "Can I switch plans?", "What happens if I cancel?", "Do you offer refunds?", "Is the Lifetime deal really forever?", "What coins are on Pro vs Master?"
 
-7. **Final CTA:** "Not sure? Start free — no card needed →"
+7. **Final CTA:** "Not sure? Start free - no card needed →"
 
 ---
 
@@ -1379,7 +1379,7 @@ as a monthly/annual subscription only.
 
 | | Monthly | Annual | Lifetime |
 |---|---|---|---|
-| Cancel | Anytime, 1 click | Anytime, access until period end | No cancel — permanent |
+| Cancel | Anytime, 1 click | Anytime, access until period end | No cancel - permanent |
 | Refund | No refund on current period | 14-day money-back, no questions | 30-day money-back, no questions |
 | Price lock | No (can change with notice) | Locked for the paid year | Locked forever |
 | Cancellation method | 1 click in account settings | 1 click in account settings | N/A |
@@ -1431,7 +1431,7 @@ in 10 bars. Previous swing bottom committed.
 sanddock.com
 ```
 
-### Master Plan — Multi-Group Delivery
+### Master Plan - Multi-Group Delivery
 
 - User adds multiple Telegram groups/channels via the settings UI
 - Each group can be configured with filters:
@@ -1518,7 +1518,7 @@ users (
 
 ---
 
-### AI Confidence Model (MVP — v1 Rule-Based)
+### AI Confidence Model (MVP - v1 Rule-Based)
 
 Ship a rule-based heuristic for launch. Replace with ML model in v2.
 
@@ -1587,7 +1587,7 @@ def generate_rationale(signal, score, volume_data, trend_aligned):
 
 ## 12. SEO & Marketing Infrastructure
 
-### SEO Blog Posts — Launch Backlog
+### SEO Blog Posts - Launch Backlog
 
 | URL | Target Keyword | Monthly Volume Est. | Type | Priority |
 |---|---|---|---|---|
@@ -1626,22 +1626,22 @@ def generate_rationale(signal, score, volume_data, trend_aligned):
 
 **Primary affiliate targets:**
 - Telegram community admins with 1k+ members in crypto groups
-- YouTube creators covering crypto trading (any size — micro-influencers convert well)
+- YouTube creators covering crypto trading (any size - micro-influencers convert well)
 - Twitter/X accounts posting crypto technical analysis
 - Crypto blog owners (SEO-focused)
 
 **Affiliate outreach message:**
-> "Hey [name] — I built Sanddock, an AI crypto signal tool with a public verified track record. We pay 40% recurring commission. If your audience trades crypto, this converts well. Want a free Master account to test it first?"
+> "Hey [name] - I built Sanddock, an AI crypto signal tool with a public verified track record. We pay 40% recurring commission. If your audience trades crypto, this converts well. Want a free Master account to test it first?"
 
 ---
 
 ### Free Telegram Channel (Top-of-Funnel Engine)
 
-- Channel: `Sanddock Signals (Free)` — public Telegram channel
+- Channel: `Sanddock Signals (Free)` - public Telegram channel
 - Posts: BTC signals only (same as free plan), in real-time
 - Pinned post: upgrade message explaining what Pro/Master adds
 - Posting format: same as Telegram alert format above
-- Weekly post: "This week's Sanddock results — [X wins, Y losses, Z% win rate]"
+- Weekly post: "This week's Sanddock results - [X wins, Y losses, Z% win rate]"
 - Growth target: 2,000 members by month 3, 5,000 by month 6
 
 ---
@@ -1669,7 +1669,7 @@ Need to acquire ~15 new paid subs/month just to stay flat.
 
 ---
 
-### Phase 1 — Months 0–3: Prove the Signal
+### Phase 1 - Months 0–3: Prove the Signal
 
 **Goal:** Build trust infrastructure before selling anything.
 
@@ -1677,7 +1677,7 @@ Need to acquire ~15 new paid subs/month just to stay flat.
 |---|---|
 | Launch free Telegram channel | Post real BTC signals publicly, no signup required |
 | Launch web app (free plan only) | Full dashboard, no paid plan yet |
-| Post weekly track record | Twitter/X + Telegram every Sunday — wins AND losses |
+| Post weekly track record | Twitter/X + Telegram every Sunday - wins AND losses |
 | Build first 3 SEO blog posts | Target long-tail keywords |
 | DO NOT push paid plans yet | Wait for 60-day track record before monetizing |
 
@@ -1689,7 +1689,7 @@ Need to acquire ~15 new paid subs/month just to stay flat.
 
 ---
 
-### Phase 2 — Months 3–6: Convert
+### Phase 2 - Months 3–6: Convert
 
 **Goal:** Turn free users into paying subscribers.
 
@@ -1710,7 +1710,7 @@ Need to acquire ~15 new paid subs/month just to stay flat.
 
 ---
 
-### Phase 3 — Months 6–12: Scale to $10k MRR
+### Phase 3 - Months 6–12: Scale to $10k MRR
 
 **Goal:** Hit the MRR target through affiliate scale + SEO + annual plan push.
 
@@ -1737,7 +1737,7 @@ Need to acquire ~15 new paid subs/month just to stay flat.
 | Tactic | Detail |
 |---|---|
 | Monthly signal performance email | "Your Sanddock signals in October: 8 wins, 3 losses, +31% if risked 1% each" |
-| Annual plan discount at 3 months | Email monthly subs: "Lock in your rate and save 34% — switch to annual" |
+| Annual plan discount at 3 months | Email monthly subs: "Lock in your rate and save 34% - switch to annual" |
 | In-app achievement badges | "100 signals tracked", "First winning streak of 5", "1-year member" |
 | Win notification emails | "Your BTC signal from yesterday just hit take-profit (+5.1%) 🎯" |
 | Re-engagement at 7 days inactive | "We've had 12 signals since your last visit. Here's what you missed." |

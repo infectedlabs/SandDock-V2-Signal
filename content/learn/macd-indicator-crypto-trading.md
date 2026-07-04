@@ -74,7 +74,7 @@ Yes, but you will experience more false crossovers due to short-term market nois
 **Filter out lagging indicators with real-time swing alerts.** Sign up for Sanddock to see Heikin Ashi swing reversals and momentum confluence calculated automatically. [Start free →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

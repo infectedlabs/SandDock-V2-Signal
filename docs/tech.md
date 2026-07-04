@@ -1,4 +1,4 @@
-# Sanddock — Technical Implementation Guide
+# Sanddock - Technical Implementation Guide
 ## Live Data, Charts, Signal Engine, Backtesting & Dashboard Tabs
 ### For Antigravity Development Team | Version 1.0
 
@@ -8,7 +8,7 @@
 
 1. [Architecture Overview](#1-architecture-overview)
 2. [Database Schema](#2-database-schema)
-3. [Backend — Signal Engine Service](#3-backend--signal-engine-service)
+3. [Backend - Signal Engine Service](#3-backend--signal-engine-service)
 4. [REST API Endpoints](#4-rest-api-endpoints)
 5. [WebSocket Layer](#5-websocket-layer)
 6. [Live Signals Tab](#6-live-signals-tab)
@@ -62,10 +62,10 @@
 ```
 
 ### Key Principles
-- The signal engine runs as a **separate persistent Python process** — not inside the API server
+- The signal engine runs as a **separate persistent Python process** - not inside the API server
 - All signal events are written to PostgreSQL **first**, then pushed to the frontend via WebSocket
-- The frontend **never calls Binance directly** — all data goes through your backend
-- Backtesting runs **server-side** using the same `detect_swings()` function as live signals — guarantees consistency
+- The frontend **never calls Binance directly** - all data goes through your backend
+- Backtesting runs **server-side** using the same `detect_swings()` function as live signals - guarantees consistency
 
 ---
 
@@ -73,7 +73,7 @@
 
 ```sql
 -- ─────────────────────────────────────────────────
--- OHLCV cache — raw candle data from Binance
+-- OHLCV cache - raw candle data from Binance
 -- ─────────────────────────────────────────────────
 CREATE TABLE ohlcv_cache (
     id          BIGSERIAL PRIMARY KEY,
@@ -98,7 +98,7 @@ CREATE INDEX idx_ohlcv_symbol_interval_time
 
 
 -- ─────────────────────────────────────────────────
--- Signals — every event from detect_swings()
+-- Signals - every event from detect_swings()
 -- ─────────────────────────────────────────────────
 CREATE TABLE signals (
     id              BIGSERIAL PRIMARY KEY,
@@ -132,7 +132,7 @@ CREATE INDEX idx_signals_action       ON signals (action, created_at DESC);
 
 
 -- ─────────────────────────────────────────────────
--- Backtest results — pre-computed historical analysis
+-- Backtest results - pre-computed historical analysis
 -- ─────────────────────────────────────────────────
 CREATE TABLE backtest_results (
     id              BIGSERIAL PRIMARY KEY,
@@ -160,14 +160,14 @@ CREATE INDEX idx_backtest_symbol ON backtest_results (symbol, interval, entry_ti
 
 ---
 
-## 3. Backend — Signal Engine Service
+## 3. Backend - Signal Engine Service
 
 ### 3a. Enhance live-signal.py → signal_engine.py
 
 The existing `live-signal.py` sends Telegram alerts. Extend it to also **write every event to PostgreSQL** and **push updates via WebSocket**.
 
 ```python
-# signal_engine.py — enhanced version of live-signal.py
+# signal_engine.py - enhanced version of live-signal.py
 
 import os
 import uuid
@@ -502,7 +502,7 @@ def get_chart_signals(
 
 
 # ── GET /api/v1/signals/log ───────────────────────────────────────────────────
-# Signal Log tab — paginated history of all signals.
+# Signal Log tab - paginated history of all signals.
 @router.get("/signals/log")
 def get_signal_log(
     symbol: Optional[str] = None,
@@ -531,7 +531,7 @@ def get_signal_log(
 
 
 # ── GET /api/v1/performance/summary ──────────────────────────────────────────
-# Performance tab — aggregated stats.
+# Performance tab - aggregated stats.
 @router.get("/performance/summary")
 def get_performance_summary(
     symbol: str = "BTCUSDT",
@@ -868,8 +868,8 @@ export function HAChart({ symbol = "BTCUSDT", interval = "15m" }) {
 
     // ── Add HA candlestick series ─────────────────────────────────────────
     const candleSeries = chart.addCandlestickSeries({
-      upColor:          "#00e676",  // bullish HA candle — green
-      downColor:        "#ff1744",  // bearish HA candle — red
+      upColor:          "#00e676",  // bullish HA candle - green
+      downColor:        "#ff1744",  // bearish HA candle - red
       borderUpColor:    "#00e676",
       borderDownColor:  "#ff1744",
       wickUpColor:      "#00e676",
@@ -965,7 +965,7 @@ The backtesting engine runs `detect_swings()` on historical data and simulates t
 ```
 Historical bars (e.g. 6 months of 15m candles)
          ↓
-detect_swings() — same function as live signals
+detect_swings() - same function as live signals
          ↓
 For every "new" event:
     → Record as entry (use bar's ha_price as entry price)
@@ -1081,7 +1081,7 @@ def simulate_trades(df, ha, events):
             }
 
         elif ev["action"] == "commit" and open_trade:
-            # Close the previous trade — but first check if SL or TP was hit
+            # Close the previous trade - but first check if SL or TP was hit
             # between the entry bar and this commit bar
             entry_bar_idx = open_trade.get("bar_index")
             commit_bar_idx = bar_times.index(ev["bar"]) if ev["bar"] in bar_times else None
@@ -1201,7 +1201,7 @@ if __name__ == "__main__":
 2. Weekly cron job to keep results fresh with recent data
 3. On-demand via API endpoint (Master plan users only)
 
-# crontab — run every Sunday at 2am UTC
+# crontab - run every Sunday at 2am UTC
 0 2 * * 0 cd /app && python backtest_worker.py
 ```
 
@@ -1230,7 +1230,7 @@ The Signal Log shows every signal ever fired, paginated, with its outcome.
 The signal engine needs to monitor open signals and close them when SL/TP is hit.
 
 ```python
-# In signal_engine.py main loop — add this check every iteration
+# In signal_engine.py main loop - add this check every iteration
 
 def check_and_close_open_signals(conn, symbol, current_price):
     """
@@ -1432,9 +1432,9 @@ NEXT_PUBLIC_WS_URL=wss://api.sanddock.com
 ### Security Notes
 
 - The Telegram bot token in the current `live-signal.py` is **hardcoded and exposed**. Move it to an environment variable immediately before any deployment.
-- The internal broadcast endpoint (`/internal/broadcast`) must be protected with a secret header — it should only be callable from the signal engine process, not from the public internet.
+- The internal broadcast endpoint (`/internal/broadcast`) must be protected with a secret header - it should only be callable from the signal engine process, not from the public internet.
 - All `/api/v1/*` endpoints must validate the user's JWT token and check plan entitlements before returning data.
-- Never expose raw Binance API calls from the frontend — always proxy through your backend.
+- Never expose raw Binance API calls from the frontend - always proxy through your backend.
 
 ---
 

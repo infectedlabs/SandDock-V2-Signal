@@ -240,7 +240,7 @@ export default function OnboardingPage() {
     {
       id: 'experienced',
       label: 'Experienced trader',
-      desc: "I know what I'm doing. I just want clean signals and data — skip the hand-holding.",
+      desc: "I know what I'm doing. I just want clean signals and data - skip the hand-holding.",
       preview: "What this means: Full data mode with direct signals feed and advanced metrics.",
       icon: (
         <svg className="w-8 h-8 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

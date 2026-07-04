@@ -4,7 +4,7 @@ This is a genuine architectural problem that will hit you hard once you get more
 
 ## Why REST polling breaks at scale
 
-Currently the signal engine calls `fetch_klines()` every 15 seconds — that's 4 Binance API requests per minute just for the engine. Every user viewing the HA chart triggers additional REST calls for chart data. Binance's rate limit is 1,200 weighted requests per minute per IP. With 300 concurrent users each refreshing chart data, you hit the limit in under 30 seconds and Binance starts returning 429 errors. The engine stops receiving price data. Signals stop firing. Users see broken charts.
+Currently the signal engine calls `fetch_klines()` every 15 seconds - that's 4 Binance API requests per minute just for the engine. Every user viewing the HA chart triggers additional REST calls for chart data. Binance's rate limit is 1,200 weighted requests per minute per IP. With 300 concurrent users each refreshing chart data, you hit the limit in under 30 seconds and Binance starts returning 429 errors. The engine stops receiving price data. Signals stop firing. Users see broken charts.
 
 The deeper problem is that REST polling is inherently wrong for this use case. You're asking Binance "what happened?" every 15 seconds when Binance is already broadcasting "here's what's happening right now" continuously via WebSocket. You're ignoring a free push stream and instead hammering a rate-limited pull endpoint.
 
@@ -47,11 +47,11 @@ Binance Futures uses a different domain from spot: `fstream.binance.com`. You ca
 wss://fstream.binance.com/stream?streams=btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h/btcusdt@aggTrade/ethusdt@kline_15m/...
 ```
 
-Binance allows up to 1,024 streams per connection. Your full Pro/Master coin coverage — 50 coins × 3 timeframes = 150 streams — fits in a single connection with room to spare.
+Binance allows up to 1,024 streams per connection. Your full Pro/Master coin coverage - 50 coins × 3 timeframes = 150 streams - fits in a single connection with room to spare.
 
 ---
 
-## The stream subscriber service — full implementation
+## The stream subscriber service - full implementation
 
 ```python
 # stream_subscriber.py
@@ -73,7 +73,7 @@ REDIS_URL  = os.getenv("REDIS_URL", "redis://localhost:6379")
 DB_URL     = os.getenv("DATABASE_URL")
 
 # All symbol+interval combinations to subscribe to
-# Add or remove coins here — the WebSocket handles them all in one connection
+# Add or remove coins here - the WebSocket handles them all in one connection
 SUBSCRIPTIONS = [
     # Free plan
     ("BTCUSDT", "15m"), ("BTCUSDT", "1h"), ("BTCUSDT", "4h"),
@@ -158,7 +158,7 @@ async def handle_kline(data, redis_client, db_conn):
     await redis_client.setex(current_key, 90, json.dumps(payload))
 
     # Publish to the channel so connected WebSocket clients get the update
-    # (every tick, not just on close — this is what makes the chart update smoothly)
+    # (every tick, not just on close - this is what makes the chart update smoothly)
     await redis_client.publish(f"chart:{symbol}:{interval}", json.dumps({
         "type":      "candle_update",
         "symbol":    symbol,
@@ -188,7 +188,7 @@ async def handle_mark_price(data, redis_client):
     symbol = data["s"]
     price  = float(data["p"])
 
-    # Store live price in Redis — used by the dashboard's live price display
+    # Store live price in Redis - used by the dashboard's live price display
     await redis_client.setex(f"price:{symbol}", 30, str(price))
 
     # Publish price tick to all subscribers
@@ -271,12 +271,12 @@ if __name__ == "__main__":
 
 ---
 
-## Signal engine — stop calling Binance, read from DB instead
+## Signal engine - stop calling Binance, read from DB instead
 
 The only change needed in `signal_engine.py` is replacing `fetch_klines()` with a database read, and replacing the polling loop with an event-driven trigger:
 
 ```python
-# signal_engine.py — modified sections only
+# signal_engine.py - modified sections only
 
 import redis
 import json
@@ -347,7 +347,7 @@ def main():
             continue
 
         try:
-            # Read fresh data from DB — no Binance call
+            # Read fresh data from DB - no Binance call
             df = fetch_klines_from_db(symbol, interval, limit=200)
             if df is None:
                 continue
@@ -368,7 +368,7 @@ def main():
 
 ---
 
-## Frontend chart — zero Binance calls, all from Sanddock
+## Frontend chart - zero Binance calls, all from Sanddock
 
 ```typescript
 // hooks/useChart.ts
@@ -378,7 +378,7 @@ export function useChart(symbol: string, interval: string) {
   const seriesRef = useRef(null)
 
   useEffect(() => {
-    // Step 1: Load historical HA candles from YOUR database — no Binance call
+    // Step 1: Load historical HA candles from YOUR database - no Binance call
     fetch(`/api/v1/chart/candles?symbol=${symbol}&interval=${interval}&limit=300`)
       .then(r => r.json())
       .then(candles => {
@@ -404,7 +404,7 @@ export function useChart(symbol: string, interval: string) {
       const msg = JSON.parse(event.data)
 
       if (msg.type === "candle_update") {
-        // Update the live bar on the chart — whether candle is open or closed
+        // Update the live bar on the chart - whether candle is open or closed
         seriesRef.current?.update({
           time:  msg.time,
           open:  msg.open,
@@ -432,7 +432,7 @@ export function useChart(symbol: string, interval: string) {
 
 ---
 
-## Sanddock's user-facing WebSocket server — routes Redis pub/sub to connected clients
+## Sanddock's user-facing WebSocket server - routes Redis pub/sub to connected clients
 
 ```python
 # api/websocket_chart.py
@@ -504,11 +504,11 @@ async def chart_websocket(websocket: WebSocket, user=Depends(get_current_user)):
 
 ---
 
-## Scaling numbers — what this architecture actually handles
+## Scaling numbers - what this architecture actually handles
 
 | Metric | Current (REST polling) | New (WebSocket + Redis pub/sub) |
 |---|---|---|
-| Binance API calls per minute | 4 × N users + 4 engine calls | 0 — none, ever |
+| Binance API calls per minute | 4 × N users + 4 engine calls | 0 - none, ever |
 | Binance connections | 1 per poll cycle | 1 per stream (permanent) |
 | Max concurrent users before Binance rate limit | ~100 | Unlimited |
 | Chart data latency | 15 seconds | Under 1 second |
@@ -543,7 +543,7 @@ redis:
 The `ohlcv_cache` table needs to be seeded with historical data before the WebSocket subscriber takes over, since the WebSocket only gives you data from connection time forward. Run this once at deployment:
 
 ```python
-# bootstrap_history.py — run ONCE at initial deployment, then never again
+# bootstrap_history.py - run ONCE at initial deployment, then never again
 # Uses REST API to backfill historical candles into ohlcv_cache
 
 def bootstrap_history(symbol, interval, days=180):

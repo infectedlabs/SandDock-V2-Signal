@@ -85,7 +85,7 @@ A robust diversification model includes:
 
 Leverage multiplies trading risk by using borrowed funds from the exchange to increase position sizes, which narrows the distance to your liquidation price. A minor price movement against a highly leveraged position will result in a total loss of the margin collateral.
 
-When you use 10x leverage, you are borrowing $9 for every $1 of your own capital. While this means a 10% price increase will yield a 100% profit, it also means a 10% price drop will result in **liquidation** — the exchange will forcefully close your position and seize your collateral to repay the loan.
+When you use 10x leverage, you are borrowing $9 for every $1 of your own capital. While this means a 10% price increase will yield a 100% profit, it also means a 10% price drop will result in **liquidation** - the exchange will forcefully close your position and seize your collateral to repay the loan.
 
 The table below demonstrates how leverage dramatically narrows your margin of safety:
 
@@ -98,7 +98,7 @@ The table below demonstrates how leverage dramatically narrows your margin of sa
 | **20x** | 5.0% |
 | **50x** | 2.0% |
 
-At 20x leverage, a minor 5% market fluctuation will wipe out your capital completely. Because crypto exchanges experience frequent "liquidation cascades"—where forced liquidations trigger further price drops—using high leverage is a mathematically guaranteed way to lose your account over time. Beginners should stick to spot trading.
+At 20x leverage, a minor 5% market fluctuation will wipe out your capital completely. Because crypto exchanges experience frequent "liquidation cascades"-where forced liquidations trigger further price drops-using high leverage is a mathematically guaranteed way to lose your account over time. Beginners should stick to spot trading.
 
 ## Frequently asked questions
 

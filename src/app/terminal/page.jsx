@@ -83,14 +83,14 @@ const ALL_COINS = [
 ];
 
 function formatPrice(val) {
-  if (val == null) return '—';
+  if (val == null) return '-';
   return new Intl.NumberFormat('en-US', {
     style: 'currency', currency: 'USD', minimumFractionDigits: 2,
   }).format(parseFloat(val));
 }
 
 function formatRelativeTime(isoString) {
-  if (!isoString) return '—';
+  if (!isoString) return '-';
   const diffMs   = Date.now() - new Date(isoString).getTime();
   const diffMins = Math.floor(diffMs / 60_000);
   if (diffMins < 1)  return 'just now';
@@ -105,7 +105,7 @@ function formatSymbol(sym) {
 }
 
 function formatLogDate(isoString) {
-  if (!isoString) return '—';
+  if (!isoString) return '-';
   const d = new Date(isoString);
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -238,13 +238,13 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
       {/* 4. Stop Loss */}
       <div className="w-full md:w-[12%] flex flex-col justify-center">
         <span className="block text-[9px] text-zinc-500 font-mono uppercase tracking-widest">Stop Loss</span>
-        <span className="font-mono text-xs text-zinc-400 mt-0.5 block">{sig.sl_price ? formatPrice(sig.sl_price) : '—'}</span>
+        <span className="font-mono text-xs text-zinc-400 mt-0.5 block">{sig.sl_price ? formatPrice(sig.sl_price) : '-'}</span>
       </div>
 
       {/* 5. Take Profit */}
       <div className="w-full md:w-[12%] flex flex-col justify-center">
         <span className="block text-[9px] text-zinc-500 font-mono uppercase tracking-widest">Take Profit</span>
-        <span className="font-mono text-xs text-zinc-400 mt-0.5 block">{sig.tp_price ? formatPrice(sig.tp_price) : '—'}</span>
+        <span className="font-mono text-xs text-zinc-400 mt-0.5 block">{sig.tp_price ? formatPrice(sig.tp_price) : '-'}</span>
       </div>
 
       {/* 6. Confidence */}
@@ -445,7 +445,7 @@ function DetailDrawer({ sig, isFreePlan, experienceLevel, onClose, onUpgrade }) 
                           </span>
                         </td>
                         <td className="p-3">{formatPrice(item.entry_price)}</td>
-                        <td className="p-3">{closed ? formatPrice(item.close_price) : '—'}</td>
+                        <td className="p-3">{closed ? formatPrice(item.close_price) : '-'}</td>
                         <td className="p-3 text-zinc-400 capitalize">{item.close_reason ? item.close_reason.replace('_', ' ') : 'Open'}</td>
                         <td className="p-3">
                           {!closed ? (
@@ -722,7 +722,7 @@ export default function TerminalPage() {
 
     const positiveSum = pnlValues.filter(p => p > 0).reduce((sum, p) => sum + p, 0);
     const negativeSum = Math.abs(pnlValues.filter(p => p < 0).reduce((sum, p) => sum + p, 0));
-    const profitFactor = negativeSum > 0 ? (positiveSum / negativeSum).toFixed(2) : positiveSum > 0 ? 'Infinite' : '—';
+    const profitFactor = negativeSum > 0 ? (positiveSum / negativeSum).toFixed(2) : positiveSum > 0 ? 'Infinite' : '-';
 
     return {
       total_signals: completed.length,
@@ -832,7 +832,7 @@ export default function TerminalPage() {
 
     const totalTrades = mapped.length;
     const wins = mapped.filter(p => p > 0).length;
-    const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '—';
+    const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '-';
     const sumPnl = mapped.reduce((sum, p) => sum + p, 0);
     
     return {
@@ -977,7 +977,7 @@ export default function TerminalPage() {
                 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                 : 'bg-brand-orange text-white'
             }`}>
-              {isTrialExpired ? 'Trial Expired' : isFreePlan ? `Trial${trialDaysRemaining !== null ? ` — ${trialDaysRemaining}d` : ''}` : `${profile.plan} Plan`}
+              {isTrialExpired ? 'Trial Expired' : isFreePlan ? `Trial${trialDaysRemaining !== null ? ` - ${trialDaysRemaining}d` : ''}` : `${profile.plan} Plan`}
             </span>
             {isFreePlan && !isTrialExpired && trialDaysRemaining !== null && trialDaysRemaining <= 3 && (
               <span className="text-[10px] font-bold text-amber-400 animate-pulse font-mono uppercase">⚠ Expiring</span>
@@ -1107,7 +1107,7 @@ export default function TerminalPage() {
                 <div className="bg-[#111827] border border-zinc-800 p-3 space-y-2.5 text-left">
                   <div className="space-y-0.5">
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-[#3D5AFE]">Console Plan</span>
-                    <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Free — 1 of 11 coins active.</p>
+                    <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Free - 1 of 11 coins active.</p>
                   </div>
                   <button
                     onClick={() => triggerUpgradeGate('Upgrade to Pro', 'Full access to all signals and Telegram alerts.')}
@@ -1154,7 +1154,7 @@ export default function TerminalPage() {
                   <div className="space-y-1">
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 font-mono">Today's Win Rate</span>
                     <span className="block text-3xl font-extrabold font-mono text-white">
-                      {todayStats.winRate !== '—' ? `${todayStats.winRate}%` : '—'}
+                      {todayStats.winRate !== '-' ? `${todayStats.winRate}%` : '-'}
                     </span>
                   </div>
                   <div className="space-y-1">
@@ -1195,7 +1195,7 @@ export default function TerminalPage() {
                 {isFreePlan && !isTrialExpired && bannerVisible && (
                   <div className="bg-brand-orange text-white px-4 py-2.5 flex justify-between items-center text-[12px] font-bold uppercase tracking-wider">
                     <span>
-                      ⚡ Free Trial — {trialDaysRemaining !== null ? `${trialDaysRemaining} day${trialDaysRemaining !== 1 ? 's' : ''} left` : 'BTC signals only'}. Unlock ETH, BNB, SL/TP &amp; Telegram alerts.{' '}
+                      ⚡ Free Trial - {trialDaysRemaining !== null ? `${trialDaysRemaining} day${trialDaysRemaining !== 1 ? 's' : ''} left` : 'BTC signals only'}. Unlock ETH, BNB, SL/TP &amp; Telegram alerts.{' '}
                       <a href="/pricing"
                         className="underline font-extrabold hover:text-zinc-200 ml-1">
                         Upgrade →
@@ -1259,7 +1259,7 @@ export default function TerminalPage() {
                         <div>
                           <h3 className="font-bold text-[13px] uppercase tracking-wider text-white">Scanning market parameters...</h3>
                           <p className="text-[12px] text-zinc-400 normal-case leading-relaxed">
-                            Watch the engine detect the next BTC signal — usually within a few hours.
+                            Watch the engine detect the next BTC signal - usually within a few hours.
                           </p>
                         </div>
                       </div>
@@ -1441,7 +1441,7 @@ export default function TerminalPage() {
                           {closedSignals.length} CLOSED
                         </span>
                       </div>
-                      <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider hidden sm:block">Historical — read only</span>
+                      <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider hidden sm:block">Historical - read only</span>
                     </div>
                     <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
                       {closedSignals.map((sig) => (
@@ -1726,7 +1726,7 @@ export default function TerminalPage() {
                                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">Trading Accuracy</h3>
                               </div>
                               <span className="p-2 rounded-lg text-xs font-mono font-bold bg-cyan-500/10 text-cyan-400">
-                                {computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '—'}
+                                {computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '-'}
                               </span>
                             </div>
                             
@@ -1767,7 +1767,7 @@ export default function TerminalPage() {
                                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">Profit Factor</h3>
                               </div>
                               <span className="p-2 rounded-lg text-xs font-mono font-bold bg-[#3D5AFE]/10 text-[#3D5AFE]">
-                                {computedStats?.profit_factor ?? '—'}
+                                {computedStats?.profit_factor ?? '-'}
                               </span>
                             </div>
                             
@@ -1858,12 +1858,12 @@ export default function TerminalPage() {
                           {/* 2x3 Mini Metrics Cards */}
                           <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
                             {[
-                              { label: 'Total Signals', val: computedStats?.total_signals ?? '—', note: `Complete Swings` },
-                              { label: 'Average Outcome', val: computedStats?.avg_pnl != null ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${computedStats.avg_pnl}%` : '—', note: 'Per closed trade' },
+                              { label: 'Total Signals', val: computedStats?.total_signals ?? '-', note: `Complete Swings` },
+                              { label: 'Average Outcome', val: computedStats?.avg_pnl != null ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${computedStats.avg_pnl}%` : '-', note: 'Per closed trade' },
                               { label: 'Open Indicators', val: openSignalsCount, note: 'Current active swings' },
-                              { label: 'Best Outcome', val: computedStats?.best_trade != null ? `+${computedStats.best_trade}%` : '—', note: 'Maximum trade gain' },
-                              { label: 'Max Drawdown', val: computedStats?.worst_trade != null ? `${computedStats.worst_trade}%` : '—', note: 'Maximum trade loss' },
-                              { label: 'Trade Split', val: computedStats ? `${computedStats.wins}W - ${computedStats.losses}L` : '—', note: 'Total win/loss ratio' },
+                              { label: 'Best Outcome', val: computedStats?.best_trade != null ? `+${computedStats.best_trade}%` : '-', note: 'Maximum trade gain' },
+                              { label: 'Max Drawdown', val: computedStats?.worst_trade != null ? `${computedStats.worst_trade}%` : '-', note: 'Maximum trade loss' },
+                              { label: 'Trade Split', val: computedStats ? `${computedStats.wins}W - ${computedStats.losses}L` : '-', note: 'Total win/loss ratio' },
                             ].map((s, i) => (
                               <div key={i} className="bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-4 rounded-xl text-left space-y-1.5 group hover:border-[#3D5AFE]/30 transition-all duration-300">
                                 <span className="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">{s.label}</span>

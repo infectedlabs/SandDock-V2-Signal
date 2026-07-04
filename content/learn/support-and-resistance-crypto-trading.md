@@ -12,7 +12,7 @@ author: Sanddock Research Team
 
 # Crypto Support and Resistance: How to Find Key Price Levels
 
-Identifying **crypto support and resistance** levels is the foundation of technical market structure analysis. Support represents a price level or zone where buying demand is strong enough to halt a downward trend, while resistance is a price ceiling where selling pressure typically overcomes buying interest — giving traders clear markers for setting entries, stop losses, and take-profit targets.
+Identifying **crypto support and resistance** levels is the foundation of technical market structure analysis. Support represents a price level or zone where buying demand is strong enough to halt a downward trend, while resistance is a price ceiling where selling pressure typically overcomes buying interest - giving traders clear markers for setting entries, stop losses, and take-profit targets.
 
 > **Automate your risk levels**: Sanddock's engine identifies key support and resistance zones to calculate optimal stop-loss levels for you. [Start free today →](/signup)
 
@@ -70,7 +70,7 @@ Horizontal support and resistance are general areas where price has historically
 **Trade with structural clarity, not guesswork.** Join Sanddock to receive live Heikin Ashi signals with stop losses calculated from verified support levels. [Start free →](/signup)
 
 <!-- ============================================ -->
-<!-- SCHEMA MARKUP — for Antigravity to embed in <head> -->
+<!-- SCHEMA MARKUP - for Antigravity to embed in <head> -->
 <!-- ============================================ -->
 ```json
 {

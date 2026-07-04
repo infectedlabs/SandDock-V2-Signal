@@ -44,7 +44,7 @@ Crypto signals work by generating buy or sell recommendations through technical 
 
 The typical lifecycle of a crypto signal involves three distinct phases:
 
-1. **Generation**: The signal provider—which could be a veteran human analyst, a team of researchers, or an algorithmic scanner like Sanddock—identifies a high-probability trade setup. For instance, the scanner might detect a bullish divergence on the Relative Strength Index (RSI) combined with a Heikin Ashi reversal candle on the 4-hour chart.
+1. **Generation**: The signal provider-which could be a veteran human analyst, a team of researchers, or an algorithmic scanner like Sanddock-identifies a high-probability trade setup. For instance, the scanner might detect a bullish divergence on the Relative Strength Index (RSI) combined with a Heikin Ashi reversal candle on the 4-hour chart.
 2. **Transmission**: The signal is formatted and sent to subscribers. A typical signal looks like this:
    * **Asset**: BTC/USDT
    * **Action**: BUY (Long)

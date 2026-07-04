@@ -24,8 +24,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Sanddock — AI Crypto Trading Signals | Heikin Ashi Buy & Sell Alerts",
-  description: "Real-time AI-powered Buy and Sell signals for Bitcoin and 50+ crypto coins. Heikin Ashi-based alerts with AI explanation delivered to Telegram and your dashboard. Verified track record. Start free — no credit card needed.",
+  title: "Sanddock - AI Crypto Trading Signals | Heikin Ashi Buy & Sell Alerts",
+  description: "Real-time AI-powered Buy and Sell signals for Bitcoin and 50+ crypto coins. Heikin Ashi-based alerts with AI explanation delivered to Telegram and your dashboard. Verified track record. Start free - no credit card needed.",
 };
 
 export default function RootLayout({ children }) {
