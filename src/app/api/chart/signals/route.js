@@ -30,21 +30,76 @@ export async function GET(request) {
     const entrySwings = swings.filter(s => s.action === 'new');
 
     const mapped = entrySwings.map((s, idx) => {
-      let pnl = null;
-      if (idx < entrySwings.length - 1) {
-        // PnL from this signal's entry price to next signal's entry price
+      const isBuy = s.type === 'bot';
+      let closePrice = null;
+      let closeReason = null;
+      let closedAt = null;
+
+      // Find index in raw Heikin Ashi candles
+      const sIdx = ha.findIndex(c => c.open_time === s.bar_time);
+      if (sIdx !== -1) {
+        const nextSig = idx < entrySwings.length - 1 ? entrySwings[idx + 1] : null;
+        const nextSigTime = nextSig ? new Date(nextSig.bar_time).getTime() : Infinity;
+
+        // Loop through subsequent candles to check for SL/TP hits
+        for (let k = sIdx + 1; k < ha.length; k++) {
+          const c = ha[k];
+          const cTime = new Date(c.open_time).getTime();
+          if (cTime >= nextSigTime) break;
+
+          if (isBuy) {
+            if (s.sl_price && c.low <= s.sl_price) {
+              closePrice = s.sl_price;
+              closeReason = 'sl_hit';
+              closedAt = c.open_time;
+              break;
+            }
+            if (s.tp2_price && c.high >= s.tp2_price) {
+              closePrice = s.tp2_price;
+              closeReason = 'tp_hit';
+              closedAt = c.open_time;
+              break;
+            }
+          } else {
+            if (s.sl_price && c.high >= s.sl_price) {
+              closePrice = s.sl_price;
+              closeReason = 'sl_hit';
+              closedAt = c.open_time;
+              break;
+            }
+            if (s.tp2_price && c.low <= s.tp2_price) {
+              closePrice = s.tp2_price;
+              closeReason = 'tp_hit';
+              closedAt = c.open_time;
+              break;
+            }
+          }
+        }
+      }
+
+      // If no SL/TP hit occurred but a next signal exists, close by direction flip
+      if (!closeReason && idx < entrySwings.length - 1) {
         const nextSig = entrySwings[idx + 1];
-        const change = ((nextSig.price - s.price) / s.price) * 100;
-        pnl = s.type === 'bot' ? change : -change;
+        closePrice = nextSig.price;
+        closeReason = 'direction_flip';
+        closedAt = nextSig.bar_time;
+      }
+
+      let pnl = null;
+      if (closeReason) {
+        const change = ((closePrice - s.price) / s.price) * 100;
+        pnl = Number((isBuy ? change : -change).toFixed(2));
       }
 
       return {
         bar_time:    s.bar_time,
-        signal_type: s.type === 'bot' ? 'buy' : 'sell',
+        signal_type: isBuy ? 'buy' : 'sell',
         entry_price: s.price,
         confidence:  Math.floor(Math.random() * 30) + 65,
         action:      s.action,
-        pnl:         pnl !== null ? Number(pnl.toFixed(2)) : null,
+        pnl:         pnl,
+        close_reason: closeReason,
+        close_price: closePrice,
       };
     });
 

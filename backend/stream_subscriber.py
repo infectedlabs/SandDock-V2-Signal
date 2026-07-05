@@ -38,9 +38,13 @@ def build_stream_url():
     # Kline streams
     for symbol, interval in SUBSCRIPTIONS:
         streams.append(f"{symbol.lower()}@kline_{interval}")
-    # Mark price streams for real-time ticker prices
+    # 24hr mini-ticker for real-time LAST TRADE PRICE.
+    # This matches TradingView BTCUSDT.P (Binance Perpetual Futures last price).
+    # NOTE: @markPrice ("p" field) is a calculated smoothed index price that
+    # diverges from the actual last trade price shown on TradingView by several
+    # dollars. @miniTicker ("c" field) is the true last executed trade price.
     for symbol in SYMBOLS:
-        streams.append(f"{symbol.lower()}@markPrice")
+        streams.append(f"{symbol.lower()}@miniTicker")
     return "wss://fstream.binance.com/market/stream?streams=" + "/".join(streams)
 
 # ── Heikin Ashi helpers ───────────────────────────────────────────────────────
@@ -95,24 +99,35 @@ def fetch_rest_candles(symbol, interval, limit=1000):
     } for r in rows]
 
 def compute_ha_list(candles):
+    """Compute Heikin Ashi for a list of regular candles.
+    
+    Formula (correct):
+        ha_open[0]  = (open[0] + close[0]) / 2
+        ha_open[i]  = (ha_open[i-1] + ha_close[i-1]) / 2
+        ha_close[i] = (open + high + low + close) / 4
+        ha_high[i]  = max(high, ha_open, ha_close)
+        ha_low[i]   = min(low,  ha_open, ha_close)
+    """
     ha = []
     if not candles:
         return ha
-    prev_open = (candles[0]["open"] + candles[0]["close"]) / 2
-    for c in candles:
+    for i, c in enumerate(candles):
         ha_close = (c["open"] + c["high"] + c["low"] + c["close"]) / 4
-        ha_open = (prev_open + (ha[-1]["ha_close"] if ha else prev_open)) / 2
+        # BUG FIX: was using stale prev_open variable; use previous HA candle values directly
+        if i == 0:
+            ha_open = (c["open"] + c["close"]) / 2
+        else:
+            ha_open = (ha[i - 1]["ha_open"] + ha[i - 1]["ha_close"]) / 2
         ha_high = max(c["high"], ha_open, ha_close)
-        ha_low = min(c["low"],  ha_open, ha_close)
-        
+        ha_low  = min(c["low"],  ha_open, ha_close)
+
         ha.append({
             **c,
-            "ha_open":  round(ha_open, 8),
-            "ha_high":  round(ha_high, 8),
-            "ha_low":   round(ha_low, 8),
+            "ha_open":  round(ha_open,  8),
+            "ha_high":  round(ha_high,  8),
+            "ha_low":   round(ha_low,   8),
             "ha_close": round(ha_close, 8),
         })
-        prev_open = ha_open
     return ha
 
 def store_candles_in_db(symbol, interval, ha_candles, db_conn):
@@ -144,24 +159,21 @@ def store_candles_in_db(symbol, interval, ha_candles, db_conn):
 
 # ── Self-Bootstrapping History ────────────────────────────────────────────────
 def bootstrap_history(db_conn):
-    log.info("Starting historical data self-bootstrapping...")
+    """Upsert the latest 1000 Binance candles into the DB for all pairs.
+    
+    Previously this skipped pairs already having 500+ rows, which meant a
+    10-hour outage left 10 hours of missing candles and stale HA seeds in the
+    DB.  Now we ALWAYS upsert the latest 1000 candles so the DB is current
+    on every startup, regardless of existing row count.
+    """
+    log.info("Starting historical data self-bootstrapping (always upsert latest candles)...")
     for symbol, interval in SUBSCRIPTIONS:
         try:
-            with db_conn.cursor() as cur:
-                cur.execute(
-                    "SELECT COUNT(*) FROM ohlcv_cache WHERE symbol=%s AND interval=%s",
-                    (symbol, interval)
-                )
-                count = cur.fetchone()[0]
-                
-            if count < 500:
-                log.info(f"Seeding {symbol} {interval} history (current count: {count})...")
-                candles = fetch_rest_candles(symbol, interval, limit=1000)
-                ha_candles = compute_ha_list(candles)
-                store_candles_in_db(symbol, interval, ha_candles, db_conn)
-                log.info(f"Successfully bootstrapped {len(ha_candles)} candles for {symbol} {interval}.")
-            else:
-                log.info(f"Skipping bootstrap for {symbol} {interval} (already has {count} candles).")
+            log.info(f"Fetching latest 1000 candles for {symbol} {interval} from Binance...")
+            candles = fetch_rest_candles(symbol, interval, limit=1000)
+            ha_candles = compute_ha_list(candles)
+            store_candles_in_db(symbol, interval, ha_candles, db_conn)
+            log.info(f"Upserted {len(ha_candles)} candles for {symbol} {interval}.")
         except Exception as e:
             log.error(f"Failed to bootstrap history for {symbol} {interval}: {e}")
     log.info("Bootstrapping phase complete.")
@@ -190,16 +202,23 @@ async def handle_kline(data, redis_client, db_conn):
     payload = {**candle, **ha, "symbol": symbol, "interval": interval}
     await redis_client.setex(current_key, 90, json.dumps(payload))
 
-    # Publish kline update to subscribers
+    # Publish kline update to subscribers.
+    # Chart display uses HA values (same as TradingView HA mode).
     await redis_client.publish(f"chart:{symbol}:{interval}", json.dumps({
         "type":      "candle_update",
         "symbol":    symbol,
         "interval":  interval,
         "time":      k["t"] // 1000,
+        # HA values — what the chart renders (matches TradingView HA mode)
         "open":      ha["ha_open"],
         "high":      ha["ha_high"],
         "low":       ha["ha_low"],
         "close":     ha["ha_close"],
+        # Raw OHLC kept alongside for signal engine consumers
+        "raw_open":  candle["open"],
+        "raw_high":  candle["high"],
+        "raw_low":   candle["low"],
+        "raw_close": candle["close"],
         "volume":    candle["volume"],
         "is_closed": is_closed,
     }))
@@ -236,19 +255,25 @@ async def handle_kline(data, redis_client, db_conn):
         }))
         log.info(f"Persisted closed candle and triggered signal engine: {symbol} {interval}")
 
-async def handle_mark_price(data, redis_client):
+async def handle_mini_ticker(data, redis_client):
+    """Handle 24hrMiniTicker stream events.
+    
+    Uses data["c"] = last TRADE price, which matches TradingView BTCUSDT.P.
+    This replaces the old @markPrice handler that used data["p"] (mark price),
+    a calculated index price that can differ from last trade price by $5-30.
+    """
     symbol = data["s"]
-    price  = float(data["p"])
+    price  = float(data["c"])  # "c" = last trade price (NOT mark price)
 
-    # Cache mark price in Redis
+    # Cache last trade price in Redis
     await redis_client.setex(f"price:{symbol}", 30, str(price))
 
-    # Publish price ticks in real-time
+    # Publish price tick in real-time
     await redis_client.publish(f"price:{symbol}", json.dumps({
         "type":   "price_tick",
         "symbol": symbol,
         "price":  price,
-        "time":   data["T"],
+        "time":   data.get("E", 0),  # event time
     }))
 
 # ── Main Loop ─────────────────────────────────────────────────────────────────
@@ -272,23 +297,40 @@ async def run():
     # Run historical data bootstrap
     bootstrap_history(db_conn)
     
-    # Always seed Heikin Ashi cache in Redis from database on startup
-    log.info("Seeding Heikin Ashi previous closed candle cache from database...")
+    # ── Seed ha:prev from FRESH Binance data — not stale DB rows ────────────────
+    #
+    # ROOT CAUSE OF SPIKE (fixed here):
+    # After a long outage the DB contains HA values that are many hours old.
+    # Seeding ha:prev from those stale rows causes the first live WebSocket
+    # candle to compute ha_open = (stale_ha_open + stale_ha_close) / 2, which
+    # is completely wrong and creates a visible price spike on the chart.
+    #
+    # Fix: always fetch the latest 200 candles directly from Binance REST,
+    # compute the full HA chain, and use the LAST result as the seed.
+    # This produces the exact same HA values the frontend already displays
+    # (which also fetches fresh Binance data via /api/chart/candles).
+    log.info("Seeding ha:prev Redis keys from FRESH Binance REST data...")
+    seeded = 0
+    failed = 0
     for symbol, interval in SUBSCRIPTIONS:
         prev_key = f"ha:prev:{symbol}:{interval}"
-        with db_conn.cursor() as cur:
-            cur.execute("""
-                SELECT ha_open, ha_close 
-                FROM ohlcv_cache 
-                WHERE symbol = %s AND interval = %s 
-                ORDER BY open_time DESC 
-                LIMIT 1
-            """, (symbol, interval))
-            row = cur.fetchone()
-        if row:
-            ha = {"ha_open": float(row[0]), "ha_close": float(row[1])}
-            await redis_client.set(prev_key, json.dumps(ha))
-    log.info("Finished seeding Heikin Ashi previous closed candle cache.")
+        try:
+            # 200 candles is enough to get a stable HA seed for any interval
+            candles = fetch_rest_candles(symbol, interval, limit=200)
+            ha_list = compute_ha_list(candles)
+            if ha_list:
+                last = ha_list[-1]
+                ha_seed = {"ha_open": last["ha_open"], "ha_close": last["ha_close"]}
+                await redis_client.set(prev_key, json.dumps(ha_seed))
+                seeded += 1
+                log.debug(f"  Seeded {symbol} {interval}: ha_open={last['ha_open']}, ha_close={last['ha_close']}")
+            else:
+                log.warning(f"  No HA candles computed for {symbol} {interval} — first live candle will use raw seed")
+                failed += 1
+        except Exception as seed_err:
+            log.error(f"  Failed to seed ha:prev for {symbol} {interval}: {seed_err}")
+            failed += 1
+    log.info(f"ha:prev seeding complete: {seeded} succeeded, {failed} failed out of {len(SUBSCRIPTIONS)} pairs.")
     
     stream_url = build_stream_url()
     log.info(f"Connecting to Binance Futures WebSocket URL: {stream_url}")
@@ -316,8 +358,9 @@ async def run():
 
                         if event_type == "kline":
                             await handle_kline(data, redis_client, db_conn)
-                        elif event_type == "markPriceUpdate":
-                            await handle_mark_price(data, redis_client)
+                        elif event_type == "24hrMiniTicker":
+                            # Last trade price — matches TradingView BTCUSDT.P
+                            await handle_mini_ticker(data, redis_client)
 
                     except Exception as e:
                         log.error(f"Error handling message: {e}")

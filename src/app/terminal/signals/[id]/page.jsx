@@ -119,6 +119,11 @@ export default function SignalDetailPage() {
               tp_price: dbData.tp_price ? parseFloat(dbData.tp_price) : null,
               confidence: dbData.confidence || 88,
               created_at: dbData.bar_time,
+              close_price: dbData.close_price ? parseFloat(dbData.close_price) : null,
+              close_reason: dbData.close_reason,
+              closed_at: dbData.closed_at,
+              pnl_pct: dbData.pnl_pct ? parseFloat(dbData.pnl_pct) : null,
+              is_win: dbData.is_win,
             };
           }
         }
@@ -144,6 +149,11 @@ export default function SignalDetailPage() {
                   tp_price: found.tp_price ? parseFloat(found.tp_price) : null,
                   confidence: found.confidence || 88,
                   created_at: found.bar_time,
+                  close_price: found.close_price ? parseFloat(found.close_price) : null,
+                  close_reason: found.close_reason,
+                  closed_at: found.closed_at,
+                  pnl_pct: found.pnl_pct ? parseFloat(found.pnl_pct) : null,
+                  is_win: found.is_win,
                 };
                 break;
               }
@@ -168,6 +178,11 @@ export default function SignalDetailPage() {
                     tp_price: found.tp_price ? parseFloat(found.tp_price) : null,
                     confidence: found.confidence || 88,
                     created_at: found.bar_time,
+                    close_price: found.close_price ? parseFloat(found.close_price) : null,
+                    close_reason: found.close_reason,
+                    closed_at: found.closed_at,
+                    pnl_pct: found.pnl_pct ? parseFloat(found.pnl_pct) : null,
+                    is_win: found.is_win,
                   };
                   break;
                 }
@@ -191,35 +206,23 @@ export default function SignalDetailPage() {
     fetchSignal();
   }, [params.id, user, loading, profile, router]);
 
-  // Fetch live price with simulation fallback
+  // Fetch initial price once, then rely on WebSocket ticks to update in real-time
   useEffect(() => {
     if (!signal) return;
-    const fetchLivePrice = async () => {
+    const fetchInitialPrice = async () => {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        const res = await fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${signal.symbol}`, {
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
+        const res = await fetch(`/api/chart/candles?symbol=${signal.symbol}&interval=${signal.interval}&limit=1`);
         if (res.ok) {
-          const data = await res.json();
-          setLivePrice(parseFloat(data.price));
-        } else {
-          throw new Error('Fetch failed');
+          const candles = await res.json();
+          if (candles && candles.length > 0) {
+            setLivePrice(parseFloat(candles[candles.length - 1].close));
+          }
         }
       } catch (e) {
-        setLivePrice(prev => {
-          if (prev !== null) {
-            return prev + (Math.random() - 0.5) * (prev * 0.0004);
-          }
-          return parseFloat(signal.entry_price) + (Math.random() - 0.5) * (parseFloat(signal.entry_price) * 0.006);
-        });
+        console.warn("Failed to fetch initial price:", e);
       }
     };
-    fetchLivePrice();
-    const interval = setInterval(fetchLivePrice, 5000);
-    return () => clearInterval(interval);
+    fetchInitialPrice();
   }, [signal]);
 
   // Fetch closed signals history for chart & stats
@@ -282,18 +285,21 @@ export default function SignalDetailPage() {
   const timeAgoText = `Fired ${hoursAgo}h ${minutesAgo}m ago`;
   const timeOnly = new Date(signal.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-  // P&L calculation
-  const priceDiff = livePrice && signal.entry_price ? ((livePrice - signal.entry_price) / signal.entry_price) * 100 : 0;
-  const directionalDiff = isBuy ? priceDiff : -priceDiff;
+  // P&L and Close calculation
+  const isClosed = signal.close_price !== null || signal.close_reason !== null;
+  const finalPrice = isClosed ? signal.close_price : livePrice;
+
+  const priceDiff = finalPrice && signal.entry_price ? ((finalPrice - signal.entry_price) / signal.entry_price) * 100 : 0;
+  const directionalDiff = isClosed && signal.pnl_pct !== null ? signal.pnl_pct : (isBuy ? priceDiff : -priceDiff);
   const pnlFormatted = (directionalDiff >= 0 ? '+' : '') + directionalDiff.toFixed(2) + '%';
 
   // Math for Visual Position Bar
   const slVal = signal.sl_price || (isBuy ? signal.entry_price * 0.95 : signal.entry_price * 1.05);
   const tpVal = signal.tp_price || (isBuy ? signal.entry_price * 1.05 : signal.entry_price * 0.95);
   let progressPct = 50;
-  if (livePrice) {
+  if (finalPrice) {
     const totalRange = Math.abs(tpVal - slVal);
-    const distance = isBuy ? (livePrice - slVal) : (slVal - livePrice);
+    const distance = isBuy ? (finalPrice - slVal) : (slVal - finalPrice);
     progressPct = Math.max(0, Math.min(100, (distance / totalRange) * 100));
   }
 
@@ -384,7 +390,7 @@ export default function SignalDetailPage() {
           {/* Price Position Tracker */}
           <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-none space-y-4 glass shadow-xl text-left">
             <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
-              Live Price Tracking & Progress
+              {isClosed ? `Trade Settled & Closed (${signal.close_reason ? signal.close_reason.replace('_', ' ') : 'settled'})` : 'Live Price Tracking & Progress'}
             </span>
 
             {/* Price values header */}
@@ -394,13 +400,13 @@ export default function SignalDetailPage() {
                 <span className="font-bold text-white font-mono">{formatPrice(signal.entry_price)}</span>
               </div>
               <div className="text-center">
-                <span className="block text-[9px] text-slate-400 font-bold uppercase">CURRENT NOW</span>
+                <span className="block text-[9px] text-slate-400 font-bold uppercase">{isClosed ? 'EXIT PRICE' : 'CURRENT NOW'}</span>
                 <span className={`font-bold font-mono ${directionalDiff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {formatPrice(livePrice)} {directionalDiff >= 0 ? '▲' : '▼'}
+                  {formatPrice(finalPrice)} {directionalDiff >= 0 ? '▲' : '▼'}
                 </span>
               </div>
               <div className="text-right">
-                <span className="block text-[9px] text-slate-400 font-bold uppercase">P&L REALTIME</span>
+                <span className="block text-[9px] text-slate-400 font-bold uppercase">{isClosed ? 'FINAL P&L' : 'P&L REALTIME'}</span>
                 <span className={`font-bold font-mono px-2 py-0.5 text-xs sm:text-sm ${directionalDiff >= 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
                   {pnlFormatted}
                 </span>
@@ -656,7 +662,7 @@ export default function SignalDetailPage() {
               Interactive Signal Performance Chart
             </span>
             <div className="w-full overflow-hidden">
-              <HAChart symbol={signal.symbol} interval={signal.interval} isFreePlan={isFreePlan} theme="dark" hideSymbolSelector={true} />
+              <HAChart symbol={signal.symbol} interval={signal.interval} isFreePlan={isFreePlan} theme="dark" hideSymbolSelector={true} onPriceTick={(price) => setLivePrice(price)} />
             </div>
           </div>
 

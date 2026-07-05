@@ -31,8 +31,11 @@ export default function HAChart({
   
   // Floating HTML signal cards state
   const [signalCards, setSignalCards] = useState([]);
-  const sigsRef = useRef([]);
-  const livePriceRef = useRef(null);
+  const sigsRef         = useRef([]);
+  const livePriceRef    = useRef(null);
+  // Holds the Lightweight Charts price-line that displays REAL last-trade
+  // price on the right axis. HA close ≠ real price; this line overrides it.
+  const realPriceLineRef = useRef(null);
 
   const PRO_SYMBOLS = [
     'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT', 
@@ -109,14 +112,33 @@ export default function HAChart({
       chartRef.current = chart;
 
       const candleSeries = chart.addSeries(CandlestickSeries, {
-        upColor:         '#10b981',
-        downColor:       '#ef4444',
-        borderUpColor:   '#10b981',
-        borderDownColor: '#ef4444',
-        wickUpColor:     '#10b981',
-        wickDownColor:   '#ef4444',
+        upColor:          '#10b981',
+        downColor:        '#ef4444',
+        borderUpColor:    '#10b981',
+        borderDownColor:  '#ef4444',
+        wickUpColor:      '#10b981',
+        wickDownColor:    '#ef4444',
+        // Hide the HA-close label from the right axis. We replace it with a
+        // real-price line below so the axis shows actual last-trade price
+        // (matching TradingView BTCUSDT.P) instead of the HA-smoothed close.
+        lastValueVisible: false,
       });
       seriesRef.current = candleSeries;
+
+      // ── Real-price axis label (matches TradingView price scale) ────────────
+      // Lightweight Charts by default shows the last series value (HA close)
+      // on the right axis. HA close = (O+H+L+C)/4 and is always offset from
+      // the real last-trade price by ~$10-40 for BTC. We create a price line
+      // instead that gets updated from live price_tick events.
+      const realPriceLine = candleSeries.createPriceLine({
+        price:               0,
+        color:               '#ef4444',
+        lineWidth:           1,
+        lineStyle:           0,   // Solid
+        axisLabelVisible:    true,
+        title:               '',
+      });
+      realPriceLineRef.current = realPriceLine;
 
       setLoading(true);
       setNoData(false);
@@ -135,10 +157,17 @@ export default function HAChart({
           return;
         }
 
+        // Compute a stable timezone offset for this chart session.
+        // Server sends UTC Unix seconds; we shift to local time so the
+        // TradingView time scale labels match the user's clock.
+        // IMPORTANT: computed ONCE here and reused for both historical
+        // candles AND live WebSocket updates — applying it twice was the
+        // root cause of the time-mismatch spike after a restart.
         const offsetSeconds = -new Date().getTimezoneOffset() * 60;
 
         const candleData = candles.map((c) => ({
           time:  Math.floor(new Date(c.open_time).getTime() / 1000) + offsetSeconds,
+          // Heikin Ashi values — same as TradingView when using HA chart mode
           open:  parseFloat(c.ha_open),
           high:  parseFloat(c.ha_high),
           low:   parseFloat(c.ha_low),
@@ -147,6 +176,25 @@ export default function HAChart({
         candleSeries.setData(candleData);
 
         let lastCandle = candleData[candleData.length - 1];
+
+        // Seed the real-price axis label with the last candle's actual close
+        // (raw Binance last-trade price, not HA-smoothed) so it shows a correct
+        // price immediately on load before the first price_tick arrives.
+        const lastRawClose = parseFloat(candles[candles.length - 1]?.close ?? 0);
+        if (realPriceLineRef.current && lastRawClose > 0) {
+          realPriceLineRef.current.applyOptions({ price: lastRawClose });
+        }
+
+
+        // Compute interval duration in seconds so we can sanity-check
+        // incoming WebSocket candles against the last historical candle.
+        const intervalSeconds = (() => {
+          const n = parseInt(selectedInterval);
+          if (selectedInterval.endsWith('m')) return n * 60;
+          if (selectedInterval.endsWith('h')) return n * 3600;
+          if (selectedInterval.endsWith('d')) return n * 86400;
+          return 900; // default 15 min
+        })();
 
         // ── Load signal markers (arrows on canvas, cards in React) ──────────
         const sigRes  = await fetch(
@@ -188,7 +236,8 @@ export default function HAChart({
             const isVisible = x !== null && x >= 0 && x <= containerRef.current.clientWidth && y !== null && y >= 0 && y <= 460;
 
             let displayPnl = s.pnl;
-            if (isLatest && currentPrice) {
+            const isClosed = s.pnl !== null;
+            if (!isClosed && isLatest && currentPrice) {
               const rawPnl = ((currentPrice - s.entry_price) / s.entry_price) * 100;
               displayPnl = s.signal_type === 'buy' ? rawPnl : -rawPnl;
             }
@@ -236,8 +285,23 @@ export default function HAChart({
             const msg = JSON.parse(event.data);
             
             if (msg.type === "candle_update" && msg.symbol === selectedSymbol && msg.interval === selectedInterval) {
-              const offsetSeconds = -new Date().getTimezoneOffset() * 60;
+              // Use the stable offsetSeconds from the outer scope — DO NOT
+              // re-declare it here.  Re-computing it inside the message handler
+              // was causing a double-shift that placed the live candle on a
+              // different time slot, creating a visible spike on the chart.
               const candleTime = msg.time + offsetSeconds;
+
+              // ── Stale-candle guard ────────────────────────────────────────
+              // After a restart Redis may serve a cached candle that's many
+              // intervals old.  If the incoming candle's time is more than
+              // 2 intervals BEFORE the last loaded candle, it's stale — drop
+              // it silently rather than letting it spike or corrupt the chart.
+              if (candleTime < lastCandle.time - intervalSeconds * 2) {
+                console.warn(
+                  `[HAChart] Dropping stale WebSocket candle: time=${candleTime} lastCandle=${lastCandle.time} gap=${lastCandle.time - candleTime}s`
+                );
+                return;
+              }
               
               candleSeries.update({
                 time: candleTime,
@@ -247,8 +311,7 @@ export default function HAChart({
                 close: msg.close,
               });
               
-              livePriceRef.current = msg.close;
-              onPriceTick?.(msg.close);
+
               
               if (msg.is_closed) {
                 lastCandle = {
@@ -263,8 +326,21 @@ export default function HAChart({
             }
             
             if (msg.type === "price_tick" && msg.symbol === selectedSymbol) {
-              livePriceRef.current = msg.price;
-              onPriceTick?.(msg.price);
+              const realPrice = msg.price;
+              livePriceRef.current = realPrice;
+              onPriceTick?.(realPrice);
+
+              // Update the real-price axis label color based on direction
+              if (realPriceLineRef.current) {
+                const prevPrice = lastCandle?.close ?? realPrice;
+                const isUp = realPrice >= prevPrice;
+                const lineColor = isUp ? '#10b981' : '#ef4444';
+                realPriceLineRef.current.applyOptions({
+                  price:           realPrice,
+                  color:           lineColor,
+                  axisLabelColor:  lineColor,
+                });
+              }
               updateCardPositions();
             }
           } catch (err) {
@@ -455,9 +531,11 @@ export default function HAChart({
         {!loading && !noData && signalCards.map((card) => {
           const isBuy = card.signal_type === 'buy';
           const pnlVal = card.displayPnl;
+          const isClosed = card.pnl !== null;
           const formattedPnl = pnlVal !== null 
-            ? `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(2)}%${card.isLatest ? ' Live' : ''}` 
+            ? `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(2)}%${(card.isLatest && !isClosed) ? ' Live' : ''}` 
             : 'LIVE';
+
 
           return (
             <div
@@ -503,7 +581,7 @@ export default function HAChart({
 
       {/* Modern Legend */}
       {!noData && !loading && (
-        <div className="flex flex-wrap items-center gap-6 p-4 rounded-xl border border-slate-800/50 bg-[#0f172a]/30 backdrop-blur-sm text-xs font-mono tracking-wider text-slate-400 animate-slide-up shadow-lg">
+        <div className={`flex flex-wrap items-center gap-6 p-4 rounded-xl border border-slate-800/50 bg-[#0f172a]/30 backdrop-blur-sm text-xs font-mono tracking-wider text-slate-400 animate-slide-up shadow-lg`}>
           <span className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-[#10b981] shadow shadow-[#10b981]/50" /> Bullish HA
           </span>
@@ -511,10 +589,10 @@ export default function HAChart({
             <span className="w-3 h-3 rounded-full bg-[#ef4444] shadow shadow-[#ef4444]/50" /> Bearish HA
           </span>
           <span className="flex items-center gap-2 text-[#10b981] font-bold">
-            ▲ BUY (Dynamic PnL)
+            ▲ BUY Signal
           </span>
           <span className="flex items-center gap-2 text-[#ef4444] font-bold">
-            ▼ SELL (Dynamic PnL)
+            ▼ SELL Signal
           </span>
         </div>
       )}

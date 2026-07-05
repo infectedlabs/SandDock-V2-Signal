@@ -131,6 +131,25 @@ export async function GET(request) {
             // We only care about active/latest signal events
             if (s.action === 'new' || s.action === 'slide') {
               const barIndex = ha.findIndex(c => c.open_time === s.bar_time);
+              
+              // Verify if the active signal was stopped out or hit TP targets in subsequent candles
+              let isStoppedOrHit = false;
+              if (barIndex !== -1) {
+                const isBuy = s.type === 'bot';
+                for (let k = barIndex + 1; k < candles.length; k++) {
+                  const c = candles[k];
+                  if (isBuy) {
+                    if (s.sl_price && c.low <= s.sl_price) { isStoppedOrHit = true; break; }
+                    if (s.tp2_price && c.high >= s.tp2_price) { isStoppedOrHit = true; break; }
+                  } else {
+                    if (s.sl_price && c.high >= s.sl_price) { isStoppedOrHit = true; break; }
+                    if (s.tp2_price && c.low <= s.tp2_price) { isStoppedOrHit = true; break; }
+                  }
+                }
+              }
+              
+              if (isStoppedOrHit) return;
+
               const conf = computeConfidence(ha, barIndex >= 0 ? barIndex : ha.length - 1);
               const rat = generateRationale(sym, s.type, tf, barIndex >= 0 ? barIndex : ha.length - 1, ha);
 

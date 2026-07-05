@@ -77,21 +77,37 @@ async def chart_websocket(websocket: WebSocket):
                     subscribed_channels.add(price_ch)
                     log.info(f"Subscribed client to: {channel} & {price_ch}")
 
-                    # Immediately send current open candle from Redis cache to chart
+                    # Immediately send current open candle from Redis cache to chart.
+                    # open_time in Redis is the raw Binance ms timestamp (integer).
+                    # Guard against it being stored as a string (e.g. ISO format).
                     current = await redis_client.get(
                         f"candle:current:{symbol}:{interval}"
                     )
                     if current:
                         data = json.loads(current)
+                        raw_ot = data.get("open_time", 0)
+                        if isinstance(raw_ot, str):
+                            # ISO-format string — convert to unix ms
+                            from datetime import datetime
+                            raw_ot = int(datetime.fromisoformat(
+                                raw_ot.replace("Z", "+00:00")
+                            ).timestamp() * 1000)
                         await websocket.send_json({
-                            "type":  "candle_update",
-                            "symbol": symbol,
-                            "interval": interval,
-                            "time":  data["open_time"] // 1000,
-                            "open":  data["ha_open"],
-                            "high":  data["ha_high"],
-                            "low":   data["ha_low"],
-                            "close": data["ha_close"],
+                            "type":      "candle_update",
+                            "symbol":    symbol,
+                            "interval":  interval,
+                            "time":      raw_ot // 1000,
+                            # HA values — matches chart's historical HA candles
+                            "open":      data["ha_open"],
+                            "high":      data["ha_high"],
+                            "low":       data["ha_low"],
+                            "close":     data["ha_close"],
+                            # Raw OHLC alongside for signal engine consumers
+                            "raw_open":  data["open"],
+                            "raw_high":  data["high"],
+                            "raw_low":   data["low"],
+                            "raw_close": data["close"],
+                            "is_closed": False,  # current open candle
                         })
 
                 # Start the background listening task if not running

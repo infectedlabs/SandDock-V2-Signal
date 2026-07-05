@@ -36,59 +36,13 @@ async function upsertSignalsSafe(supabaseAdmin, dbPayload) {
   const sym = dbPayload[0].symbol;
   const tf = dbPayload[0].interval;
 
-  const { data: existing, error } = await supabaseAdmin
+  const { error } = await supabaseAdmin
     .from('signals')
-    .select('bar_time, entry_price, close_price')
-    .eq('symbol', sym)
-    .eq('interval', tf);
+    .upsert(dbPayload, { onConflict: 'id' });
 
   if (error) {
+    console.warn(`[Sync-Upsert] Upsert error for ${sym} ${tf}:`, error.message);
     throw error;
-  }
-
-  const existingMap = new Map();
-  if (existing) {
-    existing.forEach(row => {
-      const key = new Date(row.bar_time).getTime();
-      existingMap.set(key, row);
-    });
-  }
-
-  const toInsert = [];
-  const toUpdate = [];
-
-  dbPayload.forEach(item => {
-    const itemKey = new Date(item.bar_time).getTime();
-    if (!existingMap.has(itemKey)) {
-      toInsert.push(item);
-    } else {
-      const existingRow = existingMap.get(itemKey);
-      if (item.close_price !== existingRow.close_price) {
-        toUpdate.push(item);
-      }
-    }
-  });
-
-  if (toInsert.length > 0) {
-    const { error: insErr } = await supabaseAdmin.from('signals').insert(toInsert);
-    if (insErr) console.warn(`[Sync-Upsert] Insert error for ${sym} ${tf}:`, insErr.message);
-  }
-
-  if (toUpdate.length > 0) {
-    for (const item of toUpdate) {
-      await supabaseAdmin
-        .from('signals')
-        .update({
-          close_price: item.close_price,
-          close_reason: item.close_reason,
-          closed_at: item.closed_at,
-          pnl_pct: item.pnl_pct,
-          is_win: item.is_win
-        })
-        .eq('symbol', sym)
-        .eq('interval', tf)
-        .eq('bar_time', item.bar_time);
-    }
   }
 }
 
@@ -111,13 +65,60 @@ async function runBackgroundSync() {
           let isWin = null;
           let closedAt = null;
 
-          if (idx < entrySwings.length - 1) {
+          // Find the index of this signal candle in the raw candles
+          const sTime = new Date(s.bar_time).getTime();
+          const sIdx = candles.findIndex(c => new Date(c.open_time).getTime() === sTime);
+          
+          if (sIdx !== -1) {
+            const nextSig = idx < entrySwings.length - 1 ? entrySwings[idx + 1] : null;
+            const nextSigTime = nextSig ? new Date(nextSig.bar_time).getTime() : Infinity;
+            
+            // Loop through subsequent candles to check for SL/TP hits
+            for (let k = sIdx + 1; k < candles.length; k++) {
+              const c = candles[k];
+              const cTime = new Date(c.open_time).getTime();
+              if (cTime >= nextSigTime) break; // Reached the next signal
+              
+              if (isBuy) {
+                if (s.sl_price && c.low <= s.sl_price) {
+                  closePrice = s.sl_price;
+                  closeReason = 'sl_hit';
+                  closedAt = c.open_time;
+                  break;
+                }
+                if (s.tp2_price && c.high >= s.tp2_price) {
+                  closePrice = s.tp2_price;
+                  closeReason = 'tp_hit';
+                  closedAt = c.open_time;
+                  break;
+                }
+              } else {
+                if (s.sl_price && c.high >= s.sl_price) {
+                  closePrice = s.sl_price;
+                  closeReason = 'sl_hit';
+                  closedAt = c.open_time;
+                  break;
+                }
+                if (s.tp2_price && c.low <= s.tp2_price) {
+                  closePrice = s.tp2_price;
+                  closeReason = 'tp_hit';
+                  closedAt = c.open_time;
+                  break;
+                }
+              }
+            }
+          }
+
+          // If no SL/TP hit occurred but a next signal exists, close by direction flip
+          if (!closeReason && idx < entrySwings.length - 1) {
             const nextSig = entrySwings[idx + 1];
             closePrice = nextSig.price;
             closeReason = 'direction_flip';
             closedAt = nextSig.bar_time;
-            
-            let change = ((nextSig.price - s.price) / s.price) * 100;
+          }
+
+          if (closeReason) {
+            let change = ((closePrice - s.price) / s.price) * 100;
             pnlPct = Number((isBuy ? change : -change).toFixed(4));
             isWin = pnlPct >= 0;
           }
@@ -158,13 +159,15 @@ async function runBackgroundSync() {
   console.log('[Background Sync] Completed validation and sync.');
 }
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const bypass = searchParams.get('bypass') === 'true';
     const now = Date.now();
     const lastSync = memoryCache.lastSyncTime || 0;
     
     // Cooldown check (5 minutes = 300,000ms)
-    if (now - lastSync < 300000) {
+    if (!bypass && now - lastSync < 300000) {
       const remainingSeconds = Math.ceil((300000 - (now - lastSync)) / 1000);
       return NextResponse.json({ 
         status: 'throttled', 
