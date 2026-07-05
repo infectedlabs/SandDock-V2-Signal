@@ -662,18 +662,16 @@ export default function TerminalPage() {
           throw new Error(`Binance response error: ${res.status}`);
         }
       } catch (e) {
-        console.warn('Live price poll failed, using simulated price:', e.message);
+        console.warn('Live price poll failed, seeding from active signals:', e.message);
         setLivePrices(prev => {
           const updated = { ...prev };
-          const basePrices = {
-            BTCUSDT: 67000, ETHUSDT: 3500, BNBUSDT: 580, XRPUSDT: 0.55, SOLUSDT: 145,
-            TRXUSDT: 0.12, DOGEUSDT: 0.14, HBARUSDT: 0.08, UNIUSDT: 7.5, SUIUSDT: 1.8,
-            AVAXUSDT: 28, AAVEUSDT: 85, JUPUSDT: 0.95, PUMPUSDT: 0.000005, ARBUSDT: 0.75
-          };
-          Object.keys(basePrices).forEach(sym => {
-            const current = prev[sym] || basePrices[sym];
-            updated[sym] = current + (Math.random() - 0.5) * (current * 0.001);
-          });
+          if (cleanLiveSignals && cleanLiveSignals.length > 0) {
+            cleanLiveSignals.forEach(sig => {
+              if (updated[sig.symbol] === undefined) {
+                updated[sig.symbol] = parseFloat(sig.entry_price);
+              }
+            });
+          }
           return updated;
         });
       }
@@ -1140,7 +1138,7 @@ export default function TerminalPage() {
                   <div className="space-y-1">
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 font-mono">Active Signals</span>
                     <span className="block text-3xl font-extrabold font-mono text-white">
-                      {openSignalsCount}
+                      {activeSignals.length}
                     </span>
                   </div>
                   <div className="space-y-1">

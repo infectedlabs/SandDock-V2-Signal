@@ -18,7 +18,8 @@ export default function HAChart({
   onPriceTick,
   plan = 'free',
   onUpgradeGate,
-  hideSymbolSelector = false
+  hideSymbolSelector = false,
+  activeSignal = null
 }) {
   const { session } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -36,6 +37,10 @@ export default function HAChart({
   // Holds the Lightweight Charts price-line that displays REAL last-trade
   // price on the right axis. HA close ≠ real price; this line overrides it.
   const realPriceLineRef = useRef(null);
+  const pnlTrackerSeriesRef = useRef(null);
+  const signalBarTimeRef    = useRef(null);
+  const lastCandleTimeRef   = useRef(null);
+  const pnlTrackerLineRef   = useRef(null);
 
   const PRO_SYMBOLS = [
     'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT', 
@@ -185,7 +190,6 @@ export default function HAChart({
           realPriceLineRef.current.applyOptions({ price: lastRawClose });
         }
 
-
         // Compute interval duration in seconds so we can sanity-check
         // incoming WebSocket candles against the last historical candle.
         const intervalSeconds = (() => {
@@ -196,6 +200,203 @@ export default function HAChart({
           return 900; // default 15 min
         })();
 
+        // ── S/R Level Detector (Layer 5) ──
+        const detectSRLevels = (haData, lookback = 10) => {
+          const highs = haData.map(c => c.high);
+          const lows = haData.map(c => c.low);
+          const levels = [];
+
+          for (let i = lookback; i < haData.length - lookback; i++) {
+            const sliceHighs = highs.slice(i - lookback, i + lookback + 1);
+            const sliceLows = lows.slice(i - lookback, i + lookback + 1);
+            
+            if (highs[i] === Math.max(...sliceHighs)) {
+              levels.push({ price: highs[i], type: 'resistance' });
+            }
+            if (lows[i] === Math.min(...sliceLows)) {
+              levels.push({ price: lows[i], type: 'support' });
+            }
+          }
+
+          const significant = [];
+          levels.forEach(level => {
+            const cluster = levels.filter(l => Math.abs(l.price - level.price) / level.price < 0.003);
+            if (cluster.length >= 2) {
+              const avgPrice = cluster.reduce((sum, c) => sum + c.price, 0) / cluster.length;
+              if (!significant.some(s => Math.abs(s.price - avgPrice) / avgPrice < 0.003)) {
+                significant.push({ price: Number(avgPrice.toFixed(2)), type: level.type });
+              }
+            }
+          });
+
+          return significant;
+        };
+
+        const srLevels = detectSRLevels(candleData, 10);
+        srLevels.forEach(level => {
+          candleSeries.createPriceLine({
+            price: level.price,
+            color: level.type === 'resistance' ? 'rgba(255, 23, 68, 0.35)' : 'rgba(0, 230, 118, 0.35)',
+            lineWidth: 1,
+            lineStyle: lwc.LineStyle.Dotted,
+            axisLabelVisible: false,
+            title: level.type === 'resistance' ? 'R' : 'S',
+          });
+        });
+
+        // ── Active Signal-Specific Layers (Layer 1, 3, 6, 7) ──
+        let signalBarTime = null;
+        if (activeSignal) {
+          const entryVal = parseFloat(activeSignal.entry_price);
+          const slVal = parseFloat(activeSignal.sl_price);
+          const tpVal = parseFloat(activeSignal.tp_price);
+          
+          signalBarTime = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000) + offsetSeconds;
+          signalBarTimeRef.current = signalBarTime;
+          lastCandleTimeRef.current = lastCandle.time;
+
+          const tpPct = (((tpVal - entryVal) / entryVal) * 100).toFixed(1);
+          const slPct = (((slVal - entryVal) / entryVal) * 100).toFixed(1);
+
+          // Force price scale Y-axis range to fit all three levels (SL, Entry, TP) with padding
+          const rangeBuffer = Math.abs(tpVal - slVal) * 0.15;
+          chart.priceScale('right').applyOptions({
+            priceRange: {
+              minValue: Math.min(slVal, entryVal, tpVal) - rangeBuffer,
+              maxValue: Math.max(slVal, entryVal, tpVal) + rangeBuffer,
+            },
+          });
+
+          // Center time scale around the signal bar index (45 bars of history, 15 bars forward)
+          const signalBarIndex = candleData.findIndex(c => c.time === signalBarTime);
+          if (signalBarIndex !== -1) {
+            setTimeout(() => {
+              chart.timeScale().setVisibleLogicalRange({
+                from: Math.max(0, signalBarIndex - 45),
+                to: Math.min(candleData.length - 1, signalBarIndex + 15),
+              });
+            }, 50);
+          }
+
+          // Layer 1: Three price lines
+          candleSeries.createPriceLine({
+            price: entryVal,
+            color: 'rgba(255,255,255,0.6)',
+            lineWidth: 1,
+            lineStyle: lwc.LineStyle.Dashed,
+            axisLabelVisible: true,
+            title: `Entry $${entryVal.toLocaleString(undefined, {minimumFractionDigits:2})}`,
+          });
+
+          candleSeries.createPriceLine({
+            price: slVal,
+            color: '#ff1744',
+            lineWidth: 1.5,
+            lineStyle: lwc.LineStyle.Solid,
+            axisLabelVisible: true,
+            title: `SL $${slVal.toLocaleString(undefined, {minimumFractionDigits:2})} (${slPct >= 0 ? '+' : ''}${slPct}%)`,
+          });
+
+          candleSeries.createPriceLine({
+            price: tpVal,
+            color: '#00e676',
+            lineWidth: 1.5,
+            lineStyle: lwc.LineStyle.Solid,
+            axisLabelVisible: true,
+            title: `TP $${tpVal.toLocaleString(undefined, {minimumFractionDigits:2})} (${tpPct >= 0 ? '+' : ''}${tpPct}%)`,
+          });
+
+          // Layer 1: Baseline fills for green profit and red risk zones (bound to right scale)
+          const profitZone = chart.addSeries(lwc.BaselineSeries, {
+            baseValue: { type: 'price', price: entryVal },
+            topLineColor: 'transparent',
+            bottomLineColor: 'transparent',
+            topFillColor1: 'rgba(0, 230, 118, 0.06)',
+            topFillColor2: 'rgba(0, 230, 118, 0.02)',
+            bottomFillColor1: 'transparent',
+            bottomFillColor2: 'transparent',
+            lastValueVisible: false,
+            priceLineVisible: false,
+            priceScaleId: 'right',
+          });
+
+          const riskZone = chart.addSeries(lwc.BaselineSeries, {
+            baseValue: { type: 'price', price: slVal }, // set baseline to SL
+            topLineColor: 'transparent',
+            bottomLineColor: 'transparent',
+            topFillColor1: 'rgba(255, 23, 68, 0.06)', // use top fill to draw strictly between SL and Entry!
+            topFillColor2: 'rgba(255, 23, 68, 0.02)',
+            bottomFillColor1: 'transparent',
+            bottomFillColor2: 'transparent',
+            lastValueVisible: false,
+            priceLineVisible: false,
+            priceScaleId: 'right',
+          });
+
+          profitZone.setData(candleData.map(c => ({ time: c.time, value: tpVal })));
+          riskZone.setData(candleData.map(c => ({ time: c.time, value: entryVal }))); // set data to Entry price
+
+          // Layer 7: Live P&L tracking line
+          const pnlTracker = chart.addSeries(lwc.LineSeries, {
+            color: lastRawClose > entryVal ? '#00e676' : '#ff1744',
+            lineWidth: 1.5,
+            lineStyle: lwc.LineStyle.Dashed,
+            crosshairMarkerVisible: false,
+            lastValueVisible: false,
+          });
+          pnlTracker.setData([
+            { time: signalBarTime, value: entryVal },
+            { time: lastCandle.time, value: lastRawClose }
+          ]);
+          pnlTrackerSeriesRef.current = pnlTracker;
+
+          // Layer 7: Live P&L floating title label price line
+          const directionalChange = ((lastRawClose - entryVal) / entryVal) * 100;
+          const livePnlPct = activeSignal.signal_type === 'buy' ? directionalChange : -directionalChange;
+          const pnlLine = pnlTracker.createPriceLine({
+            price: lastRawClose,
+            color: lastRawClose > entryVal ? '#00e676' : '#ff1744',
+            lineWidth: 1,
+            lineStyle: lwc.LineStyle.Dotted,
+            axisLabelVisible: true,
+            title: `Live: ${livePnlPct >= 0 ? '+' : ''}${livePnlPct.toFixed(2)}%`,
+          });
+          pnlTrackerLineRef.current = pnlLine;
+        }
+
+        // Layer 6: Volume bars with signal bar highlighted and separate pane
+        const volumeSeries = chart.addSeries(lwc.HistogramSeries, {
+          color: 'rgba(255, 255, 255, 0.12)',
+          priceFormat: { type: 'volume' },
+          priceScaleId: 'volume-scale', 
+        });
+        chart.priceScale('volume-scale').applyOptions({
+          visible: false, // hide volume Y-axis label numbers entirely
+          scaleMargins: {
+            top: 0.8,
+            bottom: 0,
+          },
+        });
+
+        const volumeData = candles.map((c) => {
+          const t = Math.floor(new Date(c.open_time).getTime() / 1000) + offsetSeconds;
+          const isSignal = signalBarTime && t === signalBarTime;
+          let barColor = 'rgba(255, 255, 255, 0.12)';
+          if (isSignal) {
+            barColor = 'rgba(61, 90, 254, 0.8)';
+          } else {
+            barColor = parseFloat(c.ha_close) >= parseFloat(c.ha_open)
+              ? 'rgba(0, 230, 118, 0.2)'
+              : 'rgba(255, 23, 68, 0.2)';
+          }
+          return {
+            time: t,
+            value: parseFloat(c.volume),
+            color: barColor,
+          };
+        });
+        volumeSeries.setData(volumeData);
+
         // ── Load signal markers (arrows on canvas, cards in React) ──────────
         const sigRes  = await fetch(
           `/api/chart/signals?symbol=${selectedSymbol}&interval=${selectedInterval}`
@@ -205,17 +406,35 @@ export default function HAChart({
 
         sigsRef.current = sigData || [];
 
-        // Canvas markers are clean (no text to avoid congestion)
+        // Layer 2 & 4: Render signal markers with text labels on exact firing bar
         if (sigData && sigData.length > 0) {
-          const markers = sigData
-            .filter(s => s.action === 'new')
-            .map((s) => ({
+          const entrySignals = sigData.filter(s => s.action === 'new');
+          const sorted = [...entrySignals].sort((a, b) => new Date(b.bar_time).getTime() - new Date(a.bar_time).getTime());
+          const markers = sorted.map((s, i) => {
+            const isCurrent = activeSignal 
+              ? (new Date(s.bar_time).getTime() === new Date(activeSignal.created_at || activeSignal.bar_time).getTime()) 
+              : (i === 0);
+            const isBuyType = s.signal_type === 'buy';
+            let markerText = '';
+            if (isCurrent) {
+              markerText = `${isBuyType ? 'BUY' : 'SELL'} fired · ${s.confidence}%`;
+            } else if (s.pnl !== null) {
+              markerText = `${isBuyType ? 'BUY' : 'SELL'} ${s.pnl >= 0 ? '+' : ''}${s.pnl}% · closed`;
+            } else {
+              markerText = isBuyType ? 'BUY' : 'SELL';
+            }
+
+            return {
               time:       Math.floor(new Date(s.bar_time).getTime() / 1000) + offsetSeconds,
-              position:   s.signal_type === 'buy' ? 'belowBar' : 'aboveBar',
-              color:      s.signal_type === 'buy' ? '#10b981'  : '#ef4444',
-              shape:      s.signal_type === 'buy' ? 'arrowUp'  : 'arrowDown',
-              text:       '', // Keep canvas clean
-            }));
+              position:   isBuyType ? 'belowBar' : 'aboveBar',
+              color:      isBuyType
+                ? (isCurrent ? '#00e676' : 'rgba(0,230,118,0.45)')
+                : (isCurrent ? '#ff1744' : 'rgba(255,23,68,0.45)'),
+              shape:      isBuyType ? 'arrowUp' : 'arrowDown',
+              text:       markerText,
+              size:       isCurrent ? 2.5 : 1.5,
+            };
+          });
 
           createSeriesMarkers(candleSeries, markers);
         }
@@ -255,8 +474,49 @@ export default function HAChart({
           setSignalCards(updated);
         };
 
-        // Hook coordinate update listeners
+        // ── Lookback Window canvas overlay (Layer 3) ──
+        const drawLookbackWindow = () => {
+          if (!activeSignal || !chartLocal) return;
+          const canvas = document.getElementById('chart-overlay');
+          if (!canvas) return;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+
+          // Match backing buffer resolution to container size
+          canvas.width = canvas.clientWidth;
+          canvas.height = canvas.clientHeight;
+
+          const signalBarTimeVal = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000) + offsetSeconds;
+          const windowStartTime = signalBarTimeVal - (10 * intervalSeconds);
+          const windowEndTime = signalBarTimeVal;
+
+          const x1 = chartLocal.timeScale().timeToCoordinate(windowStartTime);
+          const x2 = chartLocal.timeScale().timeToCoordinate(windowEndTime);
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          if (x1 !== null && x2 !== null) {
+            const chartHeight = canvas.height * 0.8; // upper 80% (above volume pane)
+            
+            ctx.fillStyle = 'rgba(61, 90, 254, 0.025)';
+            ctx.fillRect(x1, 0, x2 - x1, chartHeight);
+
+            ctx.strokeStyle = 'rgba(61, 90, 254, 0.2)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.strokeRect(x1, 0, x2 - x1, chartHeight);
+
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.8)';
+            ctx.font = 'bold 9px monospace';
+            ctx.setLineDash([]);
+            ctx.fillText('AI scan window · 10 bars', x1 + 6, 14);
+          }
+        };
+
+        // Hook coordinate update and canvas draw listeners
         chart.timeScale().subscribeVisibleTimeRangeChange(updateCardPositions);
+        chart.timeScale().subscribeVisibleTimeRangeChange(drawLookbackWindow);
+        setTimeout(drawLookbackWindow, 100);
         
         // ── Live ticking WebSocket (real-time price & candle updates) ────────
         const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -341,6 +601,29 @@ export default function HAChart({
                   axisLabelColor:  lineColor,
                 });
               }
+
+              // Update Layer 7: Live P&L tracking line
+              if (pnlTrackerSeriesRef.current && signalBarTimeRef.current) {
+                const entryVal = parseFloat(activeSignal.entry_price);
+                pnlTrackerSeriesRef.current.setData([
+                  { time: signalBarTimeRef.current, value: entryVal },
+                  { time: lastCandleTimeRef.current || lastCandle.time, value: realPrice }
+                ]);
+                pnlTrackerSeriesRef.current.applyOptions({
+                  color: realPrice > entryVal ? '#00e676' : '#ff1744'
+                });
+
+                if (pnlTrackerLineRef.current) {
+                  const directionalChange = ((realPrice - entryVal) / entryVal) * 100;
+                  const livePnlPct = activeSignal.signal_type === 'buy' ? directionalChange : -directionalChange;
+                  pnlTrackerLineRef.current.applyOptions({
+                    price: realPrice,
+                    color: realPrice > entryVal ? '#00e676' : '#ff1744',
+                    title: `Live: ${livePnlPct >= 0 ? '+' : ''}${livePnlPct.toFixed(2)}%`,
+                  });
+                }
+              }
+
               updateCardPositions();
             }
           } catch (err) {
@@ -576,7 +859,39 @@ export default function HAChart({
           );
         })}
 
-        <div ref={containerRef} className="w-full h-[460px]" style={{ visibility: loading || noData ? 'hidden' : 'visible' }} />
+        <div className="relative w-full h-[460px]">
+          <div ref={containerRef} className="absolute inset-0 z-10" style={{ visibility: loading || noData ? 'hidden' : 'visible' }} />
+          {activeSignal && !loading && !noData && (
+            <>
+              <canvas 
+                id="chart-overlay" 
+                className="absolute inset-0 pointer-events-none z-20"
+                style={{ width: '100%', height: '100%' }}
+              />
+              <div className="absolute right-24 top-6 z-30 bg-[#0b1224]/90 border border-slate-800/80 rounded px-3 py-2 font-mono text-[10px] shadow-2xl text-left select-none pointer-events-none select-none">
+                <div className="text-zinc-500 font-extrabold uppercase tracking-wider">Risk : Reward</div>
+                <div className="text-[#00e676] font-black text-[13px] mt-0.5">
+                  1 : {(Math.abs(parseFloat(activeSignal.tp_price) - parseFloat(activeSignal.entry_price)) / Math.abs(parseFloat(activeSignal.entry_price) - parseFloat(activeSignal.sl_price)) || 1.0).toFixed(1)}
+                </div>
+                <div className="text-zinc-400 mt-0.5 font-bold">
+                  +{(((parseFloat(activeSignal.tp_price) - parseFloat(activeSignal.entry_price)) / parseFloat(activeSignal.entry_price)) * 100).toFixed(1)}% / {(((parseFloat(activeSignal.sl_price) - parseFloat(activeSignal.entry_price)) / parseFloat(activeSignal.entry_price)) * 100).toFixed(1)}%
+                </div>
+              </div>
+              {livePriceRef.current && (
+                <div className="absolute left-6 top-6 z-30 bg-[#0b1224]/90 border border-slate-800/80 rounded px-3 py-2 font-mono text-[10px] shadow-2xl text-left select-none pointer-events-none select-none">
+                  <div className="text-zinc-500 font-extrabold uppercase tracking-wider">Live Position Gain</div>
+                  <div className={`font-black text-[13px] mt-0.5 ${livePriceRef.current >= parseFloat(activeSignal.entry_price) ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
+                    {livePriceRef.current >= parseFloat(activeSignal.entry_price) ? '+' : ''}
+                    {(((livePriceRef.current - parseFloat(activeSignal.entry_price)) / parseFloat(activeSignal.entry_price)) * 100).toFixed(2)}%
+                  </div>
+                  <div className="text-zinc-400 mt-0.5 font-bold">
+                    {livePriceRef.current >= parseFloat(activeSignal.entry_price) ? 'Profit' : 'Loss'}: ${(livePriceRef.current - parseFloat(activeSignal.entry_price)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Modern Legend */}

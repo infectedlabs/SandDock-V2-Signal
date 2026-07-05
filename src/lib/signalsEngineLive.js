@@ -35,7 +35,7 @@ export function toHeikinAshi(candles) {
   return ha;
 }
 
-export function detectSwings(ha, lookback, style = 'Intraday') {
+export function detectSwings(ha, lookback, style = 'Intraday', interval = '15m') {
   const cfg = STYLE_CONFIG[style] || STYLE_CONFIG.Intraday;
   const atr_mult = cfg.atr_mult;
   const tp1_mult = cfg.tp1_mult;
@@ -122,13 +122,23 @@ export function detectSwings(ha, lookback, style = 'Intraday') {
       }
 
       if (active_state === 1) {
-        const cur_atr = atr_arr[i];
-        const sl = cur_atr > 0 ? Number((ha[i].ha_high + cur_atr * atr_mult).toFixed(2)) : Number(ha[i].ha_high.toFixed(2));
-
         const entry = ha[i].ha_close;
-        const risk = Math.abs(entry - sl);
-        const tp1 = Number((entry - risk * tp1_mult).toFixed(2));
-        const tp2 = Number((entry - risk * tp2_mult).toFixed(2));
+        const structure_sl = ha[i].ha_high;
+        let sl = structure_sl * 1.0035; // 0.35% buffer above swing high
+        
+        let sl_pct = (Math.abs(entry - sl) / entry) * 100;
+        const MIN_SL_PCT = { "15m": 0.8, "1h": 1.5, "4h": 2.5 };
+        const min_sl = MIN_SL_PCT[interval] || 0.8;
+
+        if (sl_pct < min_sl) {
+          sl = entry * (1 + min_sl / 100);
+          sl_pct = min_sl;
+        }
+
+        const rr = 2.0; // 1:2 R:R target multiplier
+        const tp_pct = sl_pct * rr;
+        const tp2 = entry * (1 - tp_pct / 100);
+        const tp1 = entry * (1 - (tp_pct / 2) / 100);
 
         last_confirmed_high = ha[i].ha_high;
 
@@ -136,11 +146,11 @@ export function detectSwings(ha, lookback, style = 'Intraday') {
         events.push({
           bar_time:    ha[i].open_time,
           type:        'top',
-          price:       ha[i].ha_high,
+          price:       ha[i].ha_close, // entry anchor = ha_close (matches SL/TP math)
           action:      action,
-          sl_price:    sl,
-          tp1_price:   tp1,
-          tp2_price:   tp2,
+          sl_price:    Number(sl.toFixed(2)),
+          tp1_price:   Number(tp1.toFixed(2)),
+          tp2_price:   Number(tp2.toFixed(2)),
         });
 
         pending_type = 'top';
@@ -182,13 +192,23 @@ export function detectSwings(ha, lookback, style = 'Intraday') {
       }
 
       if (active_state === 2) {
-        const cur_atr = atr_arr[i];
-        const sl = cur_atr > 0 ? Number((ha[i].ha_low - cur_atr * atr_mult).toFixed(2)) : Number(ha[i].ha_low.toFixed(2));
-
         const entry = ha[i].ha_close;
-        const risk = Math.abs(entry - sl);
-        const tp1 = Number((entry + risk * tp1_mult).toFixed(2));
-        const tp2 = Number((entry + risk * tp2_mult).toFixed(2));
+        const structure_sl = ha[i].ha_low;
+        let sl = structure_sl * 0.9965; // 0.35% buffer below swing low
+        
+        let sl_pct = (Math.abs(entry - sl) / entry) * 100;
+        const MIN_SL_PCT = { "15m": 0.8, "1h": 1.5, "4h": 2.5 };
+        const min_sl = MIN_SL_PCT[interval] || 0.8;
+
+        if (sl_pct < min_sl) {
+          sl = entry * (1 - min_sl / 100);
+          sl_pct = min_sl;
+        }
+
+        const rr = 2.0; // 1:2 R:R target multiplier
+        const tp_pct = sl_pct * rr;
+        const tp2 = entry * (1 + tp_pct / 100);
+        const tp1 = entry * (1 + (tp_pct / 2) / 100);
 
         last_confirmed_low = ha[i].ha_low;
 
@@ -196,11 +216,11 @@ export function detectSwings(ha, lookback, style = 'Intraday') {
         events.push({
           bar_time:    ha[i].open_time,
           type:        'bot',
-          price:       ha[i].ha_low,
+          price:       ha[i].ha_close, // entry anchor = ha_close (matches SL/TP math)
           action:      action,
-          sl_price:    sl,
-          tp1_price:   tp1,
-          tp2_price:   tp2,
+          sl_price:    Number(sl.toFixed(2)),
+          tp1_price:   Number(tp1.toFixed(2)),
+          tp2_price:   Number(tp2.toFixed(2)),
         });
 
         pending_type = 'bot';

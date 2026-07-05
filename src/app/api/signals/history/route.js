@@ -24,7 +24,6 @@ export async function GET(request) {
     let query = supabaseAdmin
       .from('signals')
       .select('*')
-      .not('pnl_pct', 'is', null) // only closed signals with PnL
       .order('bar_time', { ascending: true }); // ascending order for chart plotting
 
     if (symbol && symbol !== 'ALL') {
@@ -77,15 +76,77 @@ export async function GET(request) {
         const filterDate = new Date(Date.now() - filterMs);
 
         resultData = logCache.filter(sig => {
-          const hasPnl = sig.pnl_pct !== null && sig.pnl_pct !== undefined;
           const sigTime = new Date(sig.bar_time || sig.created_at);
-          return hasPnl && sigTime >= filterDate;
+          return sigTime >= filterDate;
         });
 
         // Sort ascending by time for correct timeline plotting
         resultData.sort((a, b) => new Date(a.bar_time || a.created_at).getTime() - new Date(b.bar_time || b.created_at).getTime());
       }
     }
+
+    // Calculate live performance for open signals
+    const uniqueSymbols = [...new Set(resultData.map(s => s.symbol))];
+    const priceMap = {};
+    for (const sym of uniqueSymbols) {
+      try {
+        const c = await fetchFromBinance(sym, interval, 1);
+        if (c && c.length > 0) {
+          priceMap[sym] = c[c.length - 1].close;
+        }
+      } catch (e) {
+        console.warn(`Failed to fetch current price for ${sym}:`, e.message);
+        try {
+          const { data: latestCandles } = await runWithTimeout(
+            supabaseAdmin
+              .from('ohlcv_cache')
+              .select('close')
+              .eq('symbol', sym.toUpperCase())
+              .eq('interval', interval)
+              .order('open_time', { ascending: false })
+              .limit(1),
+            800
+          );
+          if (latestCandles && latestCandles.length > 0) {
+            priceMap[sym] = parseFloat(latestCandles[0].close);
+          }
+        } catch (dbErr) {
+          console.warn(`Failed to fetch fallback price from ohlcv_cache for ${sym}:`, dbErr.message);
+        }
+      }
+    }
+
+    resultData = resultData.map(s => {
+      const entry = parseFloat(s.entry_price);
+      if (s.pnl_pct !== null && s.pnl_pct !== undefined) {
+        return {
+          ...s,
+          entry_price: entry,
+          pnl_pct: parseFloat(s.pnl_pct),
+          is_win: s.is_win,
+        };
+      }
+      
+      const livePrice = priceMap[s.symbol];
+      if (livePrice !== undefined && livePrice !== null) {
+        const isBuy = s.signal_type === 'buy';
+        const change = ((livePrice - entry) / entry) * 100;
+        const livePnl = Number((isBuy ? change : -change).toFixed(4));
+        return {
+          ...s,
+          entry_price: entry,
+          pnl_pct: livePnl,
+          is_win: livePnl >= 0,
+        };
+      }
+      
+      return {
+        ...s,
+        entry_price: entry,
+        pnl_pct: 0,
+        is_win: true,
+      };
+    });
 
     // Save to memory cache
     memoryCache.history[`${symbol}_${interval}_${filter}`] = resultData;

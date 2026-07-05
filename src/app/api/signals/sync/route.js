@@ -53,7 +53,7 @@ async function runBackgroundSync() {
       try {
         const candles = await fetchFromBinance(sym, tf, 500);
         const ha = toHeikinAshi(candles);
-        const swings = detectSwings(ha, 10, 'Intraday');
+        const swings = detectSwings(ha, 10, 'Intraday', tf);
         const entrySwings = swings.filter(s => s.action === 'new');
         
         const dbPayload = [];
@@ -69,56 +69,13 @@ async function runBackgroundSync() {
           const sTime = new Date(s.bar_time).getTime();
           const sIdx = candles.findIndex(c => new Date(c.open_time).getTime() === sTime);
           
-          if (sIdx !== -1) {
-            const nextSig = idx < entrySwings.length - 1 ? entrySwings[idx + 1] : null;
-            const nextSigTime = nextSig ? new Date(nextSig.bar_time).getTime() : Infinity;
-            
-            // Loop through subsequent candles to check for SL/TP hits
-            for (let k = sIdx + 1; k < candles.length; k++) {
-              const c = candles[k];
-              const cTime = new Date(c.open_time).getTime();
-              if (cTime >= nextSigTime) break; // Reached the next signal
-              
-              if (isBuy) {
-                if (s.sl_price && c.low <= s.sl_price) {
-                  closePrice = s.sl_price;
-                  closeReason = 'sl_hit';
-                  closedAt = c.open_time;
-                  break;
-                }
-                if (s.tp2_price && c.high >= s.tp2_price) {
-                  closePrice = s.tp2_price;
-                  closeReason = 'tp_hit';
-                  closedAt = c.open_time;
-                  break;
-                }
-              } else {
-                if (s.sl_price && c.high >= s.sl_price) {
-                  closePrice = s.sl_price;
-                  closeReason = 'sl_hit';
-                  closedAt = c.open_time;
-                  break;
-                }
-                if (s.tp2_price && c.low <= s.tp2_price) {
-                  closePrice = s.tp2_price;
-                  closeReason = 'tp_hit';
-                  closedAt = c.open_time;
-                  break;
-                }
-              }
-            }
-          }
-
-          // If no SL/TP hit occurred but a next signal exists, close by direction flip
-          if (!closeReason && idx < entrySwings.length - 1) {
+          if (idx < entrySwings.length - 1) {
             const nextSig = entrySwings[idx + 1];
             closePrice = nextSig.price;
             closeReason = 'direction_flip';
             closedAt = nextSig.bar_time;
-          }
-
-          if (closeReason) {
-            let change = ((closePrice - s.price) / s.price) * 100;
+            
+            const change = ((closePrice - s.price) / s.price) * 100;
             pnlPct = Number((isBuy ? change : -change).toFixed(4));
             isWin = pnlPct >= 0;
           }
