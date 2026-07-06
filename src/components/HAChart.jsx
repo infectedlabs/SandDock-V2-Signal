@@ -145,6 +145,28 @@ export default function HAChart({
       });
       realPriceLineRef.current = realPriceLine;
 
+      // ── Start WebSocket IMMEDIATELY — before any await — so the TCP
+      // handshake runs in parallel with candle/signal data fetching.
+      // By the time the chart renders, the socket is already live.
+      // ───────────────────────────────────────────────────────────────
+      {
+        const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = process.env.NEXT_PUBLIC_WS_URL
+          ? process.env.NEXT_PUBLIC_WS_URL.replace(/^https?:\/\//, '')
+          : 'localhost:8000';
+        const wsUrl = `${wsProto}//${wsHost}/ws/chart?token=${session?.access_token || ''}`;
+        console.log(`[HAChart] Connecting WebSocket early: ${wsUrl}`);
+        ws = new WebSocket(wsUrl);
+        ws.onopen = () => {
+          console.log('[HAChart] WebSocket open — subscribing to', selectedSymbol, selectedInterval);
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ action: 'subscribe', symbol: selectedSymbol, interval: selectedInterval }));
+          }
+        };
+        ws.onerror = (err) => console.error('[HAChart] WebSocket error:', err);
+        ws.onclose = () => console.log('[HAChart] WebSocket disconnected.');
+      }
+
       setLoading(true);
       setNoData(false);
 
@@ -406,14 +428,18 @@ export default function HAChart({
 
         sigsRef.current = sigData || [];
 
-        // Layer 2 & 4: Render signal markers with text labels on exact firing bar
+        // Layer 2 & 4: Render signal markers (arrows) on the exact firing bar.
+        // LWC v5 createSeriesMarkers REQUIRES markers in ASCENDING time order —
+        // a descending sort silently drops all markers.
         if (sigData && sigData.length > 0) {
           const entrySignals = sigData.filter(s => s.action === 'new');
-          const sorted = [...entrySignals].sort((a, b) => new Date(b.bar_time).getTime() - new Date(a.bar_time).getTime());
-          const markers = sorted.map((s, i) => {
+          // Sort ascending by bar_time (oldest → newest) as required by LWC v5
+          const sorted = [...entrySignals].sort((a, b) => new Date(a.bar_time).getTime() - new Date(b.bar_time).getTime());
+          const latestBarTime = sorted.length > 0 ? sorted[sorted.length - 1].bar_time : null;
+          const markers = sorted.map((s) => {
             const isCurrent = activeSignal 
               ? (new Date(s.bar_time).getTime() === new Date(activeSignal.created_at || activeSignal.bar_time).getTime()) 
-              : (i === 0);
+              : (s.bar_time === latestBarTime);
             const isBuyType = s.signal_type === 'buy';
             let markerText = '';
             if (isCurrent) {
@@ -428,11 +454,11 @@ export default function HAChart({
               time:       Math.floor(new Date(s.bar_time).getTime() / 1000) + offsetSeconds,
               position:   isBuyType ? 'belowBar' : 'aboveBar',
               color:      isBuyType
-                ? (isCurrent ? '#00e676' : 'rgba(0,230,118,0.45)')
-                : (isCurrent ? '#ff1744' : 'rgba(255,23,68,0.45)'),
+                ? (isCurrent ? '#00e676' : 'rgba(0,230,118,0.6)')
+                : (isCurrent ? '#ff1744' : 'rgba(255,23,68,0.6)'),
               shape:      isBuyType ? 'arrowUp' : 'arrowDown',
               text:       markerText,
-              size:       isCurrent ? 2.5 : 1.5,
+              size:       isCurrent ? 2.5 : 1.8,
             };
           });
 
@@ -518,131 +544,67 @@ export default function HAChart({
         chart.timeScale().subscribeVisibleTimeRangeChange(drawLookbackWindow);
         setTimeout(drawLookbackWindow, 100);
         
-        // ── Live ticking WebSocket (real-time price & candle updates) ────────
-        const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsHost = process.env.NEXT_PUBLIC_WS_URL 
-          ? process.env.NEXT_PUBLIC_WS_URL.replace(/^https?:\/\//, '')
-          : 'localhost:8000';
-        const wsUrl = `${wsProto}//${wsHost}/ws/chart?token=${session?.access_token || ''}`;
-        
-        console.log(`Connecting to Sanddock WebSocket: ${wsUrl}`);
-        ws = new WebSocket(wsUrl);
-        
-        ws.onopen = () => {
-          console.log("WebSocket connection established. Subscribing...");
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({
-              action: "subscribe",
-              symbol: selectedSymbol,
-              interval: selectedInterval
-            }));
-          }
-        };
-        
-        ws.onmessage = (event) => {
-          if (!isMounted) return;
-          try {
-            const msg = JSON.parse(event.data);
-            
-            if (msg.type === "candle_update" && msg.symbol === selectedSymbol && msg.interval === selectedInterval) {
-              // Use the stable offsetSeconds from the outer scope — DO NOT
-              // re-declare it here.  Re-computing it inside the message handler
-              // was causing a double-shift that placed the live candle on a
-              // different time slot, creating a visible spike on the chart.
-              const candleTime = msg.time + offsetSeconds;
+        // ── Attach onmessage AFTER data loads so the handler closes over
+        // candleSeries, lastCandle, and offsetSeconds — variables that only
+        // exist once historical candles have been processed. The WebSocket
+        // itself was already opened and subscribed in the early-init block.
+        if (ws) {
+          ws.onmessage = (event) => {
+            if (!isMounted) return;
+            try {
+              const msg = JSON.parse(event.data);
 
-              // ── Stale-candle guard ────────────────────────────────────────
-              // After a restart Redis may serve a cached candle that's many
-              // intervals old.  If the incoming candle's time is more than
-              // 2 intervals BEFORE the last loaded candle, it's stale — drop
-              // it silently rather than letting it spike or corrupt the chart.
-              if (candleTime < lastCandle.time - intervalSeconds * 2) {
-                console.warn(
-                  `[HAChart] Dropping stale WebSocket candle: time=${candleTime} lastCandle=${lastCandle.time} gap=${lastCandle.time - candleTime}s`
-                );
-                return;
-              }
-              
-              candleSeries.update({
-                time: candleTime,
-                open: msg.open,
-                high: msg.high,
-                low: msg.low,
-                close: msg.close,
-              });
-              
-
-              
-              if (msg.is_closed) {
-                lastCandle = {
-                  time: candleTime,
-                  open: msg.open,
-                  high: msg.high,
-                  low: msg.low,
-                  close: msg.close
-                };
-              }
-              updateCardPositions();
-            }
-            
-            if (msg.type === "price_tick" && msg.symbol === selectedSymbol) {
-              const realPrice = msg.price;
-              livePriceRef.current = realPrice;
-              onPriceTick?.(realPrice);
-
-              // Update the real-price axis label color based on direction
-              if (realPriceLineRef.current) {
-                const prevPrice = lastCandle?.close ?? realPrice;
-                const isUp = realPrice >= prevPrice;
-                const lineColor = isUp ? '#10b981' : '#ef4444';
-                realPriceLineRef.current.applyOptions({
-                  price:           realPrice,
-                  color:           lineColor,
-                  axisLabelColor:  lineColor,
-                });
-              }
-
-              // Update Layer 7: Live P&L tracking line
-              if (pnlTrackerSeriesRef.current && signalBarTimeRef.current) {
-                const entryVal = parseFloat(activeSignal.entry_price);
-                pnlTrackerSeriesRef.current.setData([
-                  { time: signalBarTimeRef.current, value: entryVal },
-                  { time: lastCandleTimeRef.current || lastCandle.time, value: realPrice }
-                ]);
-                pnlTrackerSeriesRef.current.applyOptions({
-                  color: realPrice > entryVal ? '#00e676' : '#ff1744'
-                });
-
-                if (pnlTrackerLineRef.current) {
-                  const directionalChange = ((realPrice - entryVal) / entryVal) * 100;
-                  const livePnlPct = activeSignal.signal_type === 'buy' ? directionalChange : -directionalChange;
-                  pnlTrackerLineRef.current.applyOptions({
-                    price: realPrice,
-                    color: realPrice > entryVal ? '#00e676' : '#ff1744',
-                    title: `Live: ${livePnlPct >= 0 ? '+' : ''}${livePnlPct.toFixed(2)}%`,
-                  });
+              if (msg.type === 'candle_update' && msg.symbol === selectedSymbol && msg.interval === selectedInterval) {
+                const candleTime = msg.time + offsetSeconds;
+                // Stale-candle guard: drop candles >2 intervals behind current
+                if (candleTime < lastCandle.time - intervalSeconds * 2) {
+                  console.warn(`[HAChart] Dropping stale WS candle: ${candleTime} vs ${lastCandle.time}`);
+                  return;
                 }
+                candleSeries.update({ time: candleTime, open: msg.open, high: msg.high, low: msg.low, close: msg.close });
+                if (msg.is_closed) {
+                  lastCandle = { time: candleTime, open: msg.open, high: msg.high, low: msg.low, close: msg.close };
+                }
+                updateCardPositions();
               }
 
-              updateCardPositions();
+              if (msg.type === 'price_tick' && msg.symbol === selectedSymbol) {
+                const realPrice = msg.price;
+                livePriceRef.current = realPrice;
+                onPriceTick?.(realPrice);
+                if (realPriceLineRef.current) {
+                  const isUp = realPrice >= (lastCandle?.close ?? realPrice);
+                  const lineColor = isUp ? '#10b981' : '#ef4444';
+                  realPriceLineRef.current.applyOptions({ price: realPrice, color: lineColor, axisLabelColor: lineColor });
+                }
+                if (pnlTrackerSeriesRef.current && signalBarTimeRef.current) {
+                  const entryVal = parseFloat(activeSignal.entry_price);
+                  pnlTrackerSeriesRef.current.setData([
+                    { time: signalBarTimeRef.current, value: entryVal },
+                    { time: lastCandleTimeRef.current || lastCandle.time, value: realPrice }
+                  ]);
+                  pnlTrackerSeriesRef.current.applyOptions({ color: realPrice > entryVal ? '#00e676' : '#ff1744' });
+                  if (pnlTrackerLineRef.current) {
+                    const dc = ((realPrice - entryVal) / entryVal) * 100;
+                    const livePnlPct = activeSignal.signal_type === 'buy' ? dc : -dc;
+                    pnlTrackerLineRef.current.applyOptions({
+                      price: realPrice,
+                      color: realPrice > entryVal ? '#00e676' : '#ff1744',
+                      title: `Live: ${livePnlPct >= 0 ? '+' : ''}${livePnlPct.toFixed(2)}%`,
+                    });
+                  }
+                }
+                updateCardPositions();
+              }
+            } catch (err) {
+              console.warn('[HAChart] Error processing WS message:', err);
             }
-          } catch (err) {
-            console.warn("Error processing WebSocket message:", err);
-          }
-        };
-        
-        ws.onerror = (err) => {
-          console.error("WebSocket connection error:", err);
-        };
-        
-        ws.onclose = () => {
-          console.log("WebSocket disconnected.");
-        };
+          };
+        }
 
-        // Initial positioning delay
-        setTimeout(() => {
-          if (isMounted) updateCardPositions();
-        }, 100);
+        // Initial card positioning
+        setTimeout(() => { if (isMounted) updateCardPositions(); }, 100);
+
 
       } catch (err) {
         console.error('[HAChart] Failed to load chart data:', err);

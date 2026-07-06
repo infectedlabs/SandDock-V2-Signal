@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { memoryCache, runWithTimeout } from '@/lib/memoryCache';
+import { fetchFromBinance } from '@/lib/binanceFallback';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,

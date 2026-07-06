@@ -67,7 +67,7 @@ export async function fetchFromBinance(symbol, interval, limit = 300) {
   const url = `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${binanceInterval}&limit=${limit}`;
   
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 2500);
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   try {
     const res = await fetch(url, { 
