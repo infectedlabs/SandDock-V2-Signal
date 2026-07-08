@@ -23,7 +23,7 @@
 - [x] Use brand blue `#3D5AFE` for lock icons, "PRO ONLY" buttons, and sidebar upgrade buttons to unify visual style
 - [x] Collapse the yellow Telegram warning strip into the sidebar below the navigation menu
 - [x] Remove red/green status dot indicators from locked coin cards (ETH, SOL, BNB)
-- [x] Clean up AI rationale detail panels by removing technical "Heikin Ashi Confirmation" secondary tags
+- [x] Validate implementation with Next.js build panels by removing technical "Heikin Ashi Confirmation" secondary tags
 - [x] Add user settings dropdown and mock notification bell inside header bar
 - [x] Render locked altcoin signal cards as premium blurred teasers to improve upgrade conversion rate
 - [x] Implement live ticking relative timestamps on signal cards updating every 10 seconds in the background

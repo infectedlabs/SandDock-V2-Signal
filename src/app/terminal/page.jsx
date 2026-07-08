@@ -82,11 +82,16 @@ const ALL_COINS = [
   { value: 'ARBUSDT', label: 'Arbitrum (ARB)' }
 ];
 
-function formatPrice(val) {
+function formatPrice(val, profile) {
   if (val == null) return '-';
+  const format = profile?.price_format || 'usd';
+  const num = parseFloat(val);
+  if (format === 'usdt') {
+    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDT';
+  }
   return new Intl.NumberFormat('en-US', {
     style: 'currency', currency: 'USD', minimumFractionDigits: 2,
-  }).format(parseFloat(val));
+  }).format(num);
 }
 
 function formatRelativeTime(isoString) {
@@ -104,11 +109,20 @@ function formatSymbol(sym) {
   return sym ? sym.replace('USDT', '/USDT') : sym;
 }
 
-function formatLogDate(isoString) {
+function formatLogDate(isoString, profile) {
   if (!isoString) return '-';
+  const tz = profile?.timezone || 'UTC';
+  const tzMap = {
+    EST: 'America/New_York',
+    IST: 'Asia/Kolkata',
+    GMT: 'Europe/London',
+    PST: 'America/Los_Angeles',
+    CET: 'Europe/Paris'
+  };
+  const timeZone = tzMap[tz] || 'UTC';
   const d = new Date(isoString);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone })
+    + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone });
 }
 
 const COIN_LOGOS = {
@@ -301,7 +315,7 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
 }
 
 // ── Detail Drawer Component ──────────────────────────────────────────────────
-function DetailDrawer({ sig, isFreePlan, experienceLevel, onClose, onUpgrade }) {
+function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUpgrade }) {
   const isBuy = sig.signal_type === 'buy';
   const symbolFormatted = formatSymbol(sig.symbol);
 
@@ -334,7 +348,7 @@ function DetailDrawer({ sig, isFreePlan, experienceLevel, onClose, onUpgrade }) 
           </div>
           <div className="flex items-center gap-2.5 mt-1">
             <span className="text-[14px] text-zinc-300 font-mono">
-              Live Price: <span className="font-bold text-white">{formatPrice(sig.entry_price)}</span>
+              Live Price: <span className="font-bold text-white">{formatPrice(sig.entry_price, profile)}</span>
             </span>
             <span className="text-[11px] font-mono text-emerald-400 bg-emerald-400/10 px-1 py-0.2 rounded-xs">
               +2.3% (24h)
@@ -370,7 +384,7 @@ function DetailDrawer({ sig, isFreePlan, experienceLevel, onClose, onUpgrade }) 
           <div className="grid grid-cols-3 gap-2 bg-zinc-950 px-3 py-2.5 border border-zinc-900">
             <div>
               <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Entry Target</span>
-              <span className="text-[14px] text-white font-bold font-mono">{formatPrice(sig.entry_price)}</span>
+              <span className="text-[14px] text-white font-bold font-mono">{formatPrice(sig.entry_price, profile)}</span>
             </div>
             <div>
               <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Stop Loss</span>
@@ -381,7 +395,7 @@ function DetailDrawer({ sig, isFreePlan, experienceLevel, onClose, onUpgrade }) 
                 </button>
               ) : (
                 <span className="text-[14px] text-zinc-400 font-bold font-mono">
-                  {formatPrice(sig.sl_price)} ({sig.sl_pct}%)
+                  {formatPrice(sig.sl_price, profile)} ({sig.sl_pct}%)
                 </span>
               )}
             </div>
@@ -394,7 +408,7 @@ function DetailDrawer({ sig, isFreePlan, experienceLevel, onClose, onUpgrade }) 
                 </button>
               ) : (
                 <span className="text-[14px] text-[#00e676] font-bold font-mono">
-                  {formatPrice(sig.tp_price)} (+{sig.tp_pct}%)
+                  {formatPrice(sig.tp_price, profile)} (+{sig.tp_pct}%)
                 </span>
               )}
             </div>
@@ -452,7 +466,7 @@ function DetailDrawer({ sig, isFreePlan, experienceLevel, onClose, onUpgrade }) 
                     const closed = !!item.close_reason;
                     return (
                       <tr key={item.id} className="border-b border-[#1e2a3a]/40 last:border-0 hover:bg-zinc-900/10">
-                        <td className="p-3 text-zinc-400">{formatLogDate(item.created_at)}</td>
+                        <td className="p-3 text-zinc-400">{formatLogDate(item.created_at, profile)}</td>
                         <td className="p-3">
                           <span className={`inline-block px-1 py-0.2 text-[9px] font-bold ${
                             item.signal_type === 'buy' ? 'bg-[#00e676]/10 text-[#00e676]' : 'bg-[#ff1744]/10 text-[#ff1744]'
@@ -460,8 +474,8 @@ function DetailDrawer({ sig, isFreePlan, experienceLevel, onClose, onUpgrade }) 
                             {item.signal_type.toUpperCase()}
                           </span>
                         </td>
-                        <td className="p-3">{formatPrice(item.entry_price)}</td>
-                        <td className="p-3">{closed ? formatPrice(item.close_price) : '-'}</td>
+                        <td className="p-3">{formatPrice(item.entry_price, profile)}</td>
+                        <td className="p-3">{closed ? formatPrice(item.close_price, profile) : '-'}</td>
                         <td className="p-3 text-zinc-400 capitalize">{item.close_reason ? item.close_reason.replace('_', ' ') : 'Open'}</td>
                         <td className="p-3">
                           {!closed ? (
@@ -566,6 +580,30 @@ export default function TerminalPage() {
   const [settingsExperience,setSettingsExperience] = useState('comfortable');
   const [settingsRisk,      setSettingsRisk]       = useState('balanced');
   const [settingsGoal,      setSettingsGoal]       = useState('grow');
+
+  const [settingsAccountSize, setSettingsAccountSize] = useState(10000);
+  const [settingsRiskPerTradeType, setSettingsRiskPerTradeType] = useState('1%'); // '1%' | '1.5%' | '2%' | 'custom'
+  const [settingsCustomRiskVal, setSettingsCustomRiskVal] = useState('1.0');
+  const [settingsMinConfidence, setSettingsMinConfidence] = useState(75);
+  const [settingsDefaultTimeframe, setSettingsDefaultTimeframe] = useState('15m');
+  const [settingsDefaultView, setSettingsDefaultView] = useState('Split');
+  const [settingsTimezone, setSettingsTimezone] = useState('UTC');
+  const [settingsPriceFormat, setSettingsPriceFormat] = useState('usd');
+  const [settingsEmailSignalClosed, setSettingsEmailSignalClosed] = useState(true);
+  const [settingsEmailWeeklyDebrief, setSettingsEmailWeeklyDebrief] = useState(true);
+  const [settingsEmailSystemAlerts, setSettingsEmailSystemAlerts] = useState(true);
+
+  // local states for Telegram pairing step status
+  const [tgPairingStep, setTgPairingStep] = useState(1); // 1: disconnected, 2: pairing code input
+  const [tgPairingCode, setTgPairingCode] = useState(['', '', '', '', '', '']);
+  const [tgStatus, setTgStatus] = useState(''); // 'loading' | 'success' | 'error'
+  const [isTelegramChannelJoined, setIsTelegramChannelJoined] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsTelegramChannelJoined(localStorage.getItem('sanddock_tg_channel_joined') === 'true');
+    }
+  }, []);
   const [upgradeModal,      setUpgradeModal]       = useState(false);
   const [upgradeTriggerText,setUpgradeTriggerText] = useState({ title: '', desc: '' });
   const [profileMenuOpen,   setProfileMenuOpen]    = useState(false);
@@ -574,6 +612,16 @@ export default function TerminalPage() {
   // Lifted Chart Selectors State
   const [selectedSymbol,   setSelectedSymbol]   = useState('BTCUSDT');
   const [selectedInterval, setSelectedInterval] = useState('15m');
+  const [viewMode,         setViewMode]         = useState('Split');
+
+  useEffect(() => {
+    if (profile?.default_timeframe) {
+      setSelectedInterval(profile.default_timeframe);
+    }
+    if (profile?.default_view) {
+      setViewMode(profile.default_view);
+    }
+  }, [profile?.default_timeframe, profile?.default_view]);
 
   // Detail Drawer state
   const [selectedDrawerSignal, setSelectedDrawerSignal] = useState(null);
@@ -626,10 +674,19 @@ export default function TerminalPage() {
   const { signals: liveSignals, loading: sigLoading } = useSignals(signalFilters);
   const { signals: logSignals,  loading: logLoading  } = useSignalLog({ plan: profile?.plan || 'free', symbol: selectedSymbol, interval: selectedInterval });
   
+  const cleanLogSignals = useMemo(() => {
+    if (!logSignals) return [];
+    let filtered = logSignals;
+    if (profile?.min_confidence != null) {
+      filtered = filtered.filter(s => (s.confidence || 75) >= profile.min_confidence);
+    }
+    return filtered;
+  }, [logSignals, profile?.min_confidence]);
+  
   const openSignalsCount = useMemo(() => {
-    if (!logSignals || logSignals.length === 0) return 0;
-    return logSignals.filter(s => !s.close_reason).length;
-  }, [logSignals]);
+    if (!cleanLogSignals || cleanLogSignals.length === 0) return 0;
+    return cleanLogSignals.filter(s => !s.close_reason).length;
+  }, [cleanLogSignals]);
 
   const [headerAllTimePnl, setHeaderAllTimePnl] = useState('0.00');
 
@@ -819,6 +876,29 @@ export default function TerminalPage() {
       setSettingsExperience(profile.experience_level || 'comfortable');
       setSettingsRisk(profile.risk_style || 'balanced');
       setSettingsGoal(profile.primary_goal || 'grow');
+      setSettingsAccountSize(profile.account_size != null ? Number(profile.account_size) : 10000);
+      
+      const r = profile.risk_per_trade != null ? Number(profile.risk_per_trade) : 1.0;
+      if (r === 1.0) {
+        setSettingsRiskPerTradeType('1%');
+      } else if (r === 1.5) {
+        setSettingsRiskPerTradeType('1.5%');
+      } else if (r === 2.0) {
+        setSettingsRiskPerTradeType('2%');
+      } else {
+        setSettingsRiskPerTradeType('custom');
+        setSettingsCustomRiskVal(r.toString());
+      }
+
+      setSettingsMinConfidence(profile.min_confidence != null ? profile.min_confidence : 75);
+      setSettingsDefaultTimeframe(profile.default_timeframe || '15m');
+      setSettingsDefaultView(profile.default_view || 'Split');
+      setSettingsTimezone(profile.timezone || 'UTC');
+      setSettingsPriceFormat(profile.price_format || 'usd');
+      setSettingsEmailSignalClosed(profile.email_signal_closed !== false);
+      setSettingsEmailWeeklyDebrief(profile.email_weekly_debrief !== false);
+      setSettingsEmailSystemAlerts(profile.email_system_alerts !== false);
+
       if (profile.plan === 'free') {
         const dismissed  = localStorage.getItem('sanddock_free_banner_dismissed') === 'true';
         const viewsCount = parseInt(localStorage.getItem('sanddock_free_banner_views') || '0');
@@ -863,8 +943,12 @@ export default function TerminalPage() {
 
 
   const cleanLiveSignals = useMemo(() => {
-    return liveSignals.filter(s => s.action === 'new');
-  }, [liveSignals]);
+    let filtered = liveSignals.filter(s => s.action === 'new');
+    if (profile?.min_confidence != null) {
+      filtered = filtered.filter(s => (s.confidence || 75) >= profile.min_confidence);
+    }
+    return filtered;
+  }, [liveSignals, profile?.min_confidence]);
 
   const { activeSignals, closedSignals } = useMemo(() => {
     const active = [];
@@ -878,6 +962,14 @@ export default function TerminalPage() {
     });
     return { activeSignals: active, closedSignals: closed };
   }, [cleanLiveSignals]);
+
+  const combinedSignals = useMemo(() => {
+    return [...activeSignals, ...closedSignals].sort((a, b) => {
+      const tA = new Date(a.bar_time || a.created_at).getTime();
+      const tB = new Date(b.bar_time || b.created_at).getTime();
+      return tB - tA;
+    });
+  }, [activeSignals, closedSignals]);
 
   const todayStats = useMemo(() => {
     // eslint-disable-next-line react-hooks/purity
@@ -957,7 +1049,29 @@ export default function TerminalPage() {
   const handleUpdateSettings = async e => {
     e.preventDefault();
     try {
-      await updateProfile({ experience_level: settingsExperience, risk_style: settingsRisk, primary_goal: settingsGoal });
+      let rVal = 1.0;
+      if (settingsRiskPerTradeType === '1%') rVal = 1.0;
+      else if (settingsRiskPerTradeType === '1.5%') rVal = 1.5;
+      else if (settingsRiskPerTradeType === '2%') rVal = 2.0;
+      else {
+        rVal = parseFloat(settingsCustomRiskVal) || 1.0;
+      }
+
+      await updateProfile({
+        experience_level: settingsExperience,
+        risk_style: settingsRisk,
+        primary_goal: settingsGoal,
+        account_size: settingsAccountSize,
+        risk_per_trade: rVal,
+        min_confidence: settingsMinConfidence,
+        default_timeframe: settingsDefaultTimeframe,
+        default_view: settingsDefaultView,
+        timezone: settingsTimezone,
+        price_format: settingsPriceFormat,
+        email_signal_closed: settingsEmailSignalClosed,
+        email_weekly_debrief: settingsEmailWeeklyDebrief,
+        email_system_alerts: settingsEmailSystemAlerts
+      });
       alert('Preferences updated!');
     } catch (err) { console.error(err); }
   };
@@ -1416,7 +1530,7 @@ export default function TerminalPage() {
                   </div>
                 )}
 
-                {/* Active signals split view */}
+                {/* Active signals view layout */}
                 {!isTrialExpired && cleanLiveSignals.length > 0 && (
                   <div className="space-y-6">
                     {/* Market Regime Detector banner */}
@@ -1432,34 +1546,36 @@ export default function TerminalPage() {
                       </div>
                     )}
 
-                    {/* Active Signals Section */}
-                    {activeSignals.length > 0 && (
+                    {/* Stream View Layout */}
+                    {viewMode === 'Stream' && combinedSignals.length > 0 && (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#3D5AFE]">{"Active Setups"}</span>
+                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#3D5AFE]">{"Combined Signal Stream"}</span>
                             <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-[#3D5AFE]/15 text-[#3D5AFE] rounded border border-[#3D5AFE]/20">
-                              {activeSignals.length} RUNNING
+                              {combinedSignals.length} TOTAL
                             </span>
                           </div>
-                          <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Currently active swing positions</span>
+                          <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Chronological feed of setups</span>
                         </div>
                         
                         <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
-                          {activeSignals.map((sig) => {
+                          {combinedSignals.map((sig) => {
                             const globalIndex = cleanLiveSignals.findIndex(s => s.id === sig.id);
+                            const isLive = !sig.close_reason;
                             return (
                               <SignalCard
                                 key={sig.id}
                                 sig={sig}
+                                profile={profile}
                                 isFreePlan={isFreePlan}
                                 isExpanded={false}
                                 onToggle={() => {}}
                                 onUpgrade={triggerUpgradeGate}
                                 onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
                                 livePrice={livePrices[sig.symbol] || null}
-                                isLive={true}
-                                rank={globalIndex + 1}
+                                isLive={isLive}
+                                rank={globalIndex !== -1 ? globalIndex + 1 : null}
                                 isLatest={globalIndex === 0}
                                 nextSignal={globalIndex > 0 ? cleanLiveSignals[globalIndex - 1] : null}
                               />
@@ -1469,41 +1585,85 @@ export default function TerminalPage() {
                       </div>
                     )}
 
-                    {/* Closed Signals Section */}
-                    {closedSignals.length > 0 && (
-                      <div className="space-y-3 pt-2">
-                        <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-zinc-400">Recent Completed Setups</span>
-                            <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-zinc-800 text-zinc-400 rounded border border-zinc-700/60">
-                              {closedSignals.length} TOTAL
-                            </span>
+                    {/* Split View Layout */}
+                    {viewMode !== 'Stream' && (
+                      <>
+                        {/* Active Signals Section */}
+                        {activeSignals.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#3D5AFE]">{"Active Setups"}</span>
+                                <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-[#3D5AFE]/15 text-[#3D5AFE] rounded border border-[#3D5AFE]/20">
+                                  {activeSignals.length} RUNNING
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Currently active swing positions</span>
+                            </div>
+                            
+                            <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
+                              {activeSignals.map((sig) => {
+                                const globalIndex = cleanLiveSignals.findIndex(s => s.id === sig.id);
+                                return (
+                                  <SignalCard
+                                    key={sig.id}
+                                    sig={sig}
+                                    profile={profile}
+                                    isFreePlan={isFreePlan}
+                                    isExpanded={false}
+                                    onToggle={() => {}}
+                                    onUpgrade={triggerUpgradeGate}
+                                    onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
+                                    livePrice={livePrices[sig.symbol] || null}
+                                    isLive={true}
+                                    rank={globalIndex + 1}
+                                    isLatest={globalIndex === 0}
+                                    nextSignal={globalIndex > 0 ? cleanLiveSignals[globalIndex - 1] : null}
+                                  />
+                                );
+                              })}
+                            </div>
                           </div>
-                          <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Closed within last 24 hours</span>
-                        </div>
+                        )}
 
-                        <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
-                          {closedSignals.map((sig) => {
-                            const globalIndex = cleanLiveSignals.findIndex(s => s.id === sig.id);
-                            return (
-                              <SignalCard
-                                key={sig.id}
-                                sig={sig}
-                                isFreePlan={isFreePlan}
-                                isExpanded={false}
-                                onToggle={() => {}}
-                                onUpgrade={triggerUpgradeGate}
-                                onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
-                                livePrice={livePrices[sig.symbol] || null}
-                                isLive={false}
-                                rank={globalIndex + 1}
-                                isLatest={globalIndex === 0}
-                                nextSignal={globalIndex > 0 ? cleanLiveSignals[globalIndex - 1] : null}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
+                        {/* Closed Signals Section */}
+                        {closedSignals.length > 0 && (
+                          <div className="space-y-3 pt-2">
+                            <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] font-extrabold uppercase tracking-widest text-zinc-400">Recent Completed Setups</span>
+                                <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-zinc-800 text-zinc-400 rounded border border-zinc-700/60">
+                                  {closedSignals.length} TOTAL
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Closed within last 24 hours</span>
+                            </div>
+
+                            <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
+                              {closedSignals.map((sig) => {
+                                const globalIndex = cleanLiveSignals.findIndex(s => s.id === sig.id);
+                                return (
+                                  <SignalCard
+                                    key={sig.id}
+                                    sig={sig}
+                                    profile={profile}
+                                    isFreePlan={isFreePlan}
+                                    isExpanded={false}
+                                    onToggle={() => {}}
+                                    onUpgrade={triggerUpgradeGate}
+                                    onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
+                                    livePrice={livePrices[sig.symbol] || null}
+                                    isLive={false}
+                                    rank={globalIndex + 1}
+                                    isLatest={globalIndex === 0}
+                                    nextSignal={globalIndex > 0 ? cleanLiveSignals[globalIndex - 1] : null}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
 
                     {/* Locked/Teaser Signals Section */}
@@ -1623,7 +1783,7 @@ export default function TerminalPage() {
                   </div>
                 )}
 
-                {!logLoading && logSignals.length === 0 && (
+                {!logLoading && cleanLogSignals.length === 0 && (
                   <div className="bg-[#0d1426] border border-dashed border-[#1e2a3a] p-10 text-center space-y-3">
                     <span className="text-2xl">📋</span>
                     <p className="text-[12px] text-zinc-400 normal-case max-w-sm mx-auto leading-relaxed">
@@ -1632,7 +1792,7 @@ export default function TerminalPage() {
                   </div>
                 )}
 
-                {!logLoading && logSignals.length > 0 && (
+                {!logLoading && cleanLogSignals.length > 0 && (
                   <div className="overflow-x-auto bg-[#0d1426] border border-[#1e2a3a]">
                     <table className="w-full text-left font-mono border-collapse">
                       <thead>
@@ -1643,14 +1803,14 @@ export default function TerminalPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {logSignals.map(sig => {
+                        {cleanLogSignals.map(sig => {
                           const isBtc    = sig.symbol === 'BTCUSDT';
                           const showBlur = isFreePlan && !isBtc;
                           const isBuy    = sig.signal_type === 'buy';
                           const isClosed = sig.close_price !== null && sig.close_price !== undefined && sig.close_reason !== 'open' && sig.close_reason !== '';
                           return (
                             <tr key={sig.id} className={`border-b border-[#1e2a3a]/40 last:border-0 hover:bg-zinc-900/10 text-[12px] ${showBlur ? 'opacity-40 select-none' : ''}`}>
-                              <td className="p-3 text-zinc-400">{formatLogDate(sig.created_at)}</td>
+                              <td className="p-3 text-zinc-400">{formatLogDate(sig.created_at, profile)}</td>
                               <td className="p-3 font-bold text-white">{formatSymbol(sig.symbol)}</td>
                               <td className="p-3">
                                 <span className={`inline-block px-1.5 py-0.5 text-[10px] font-bold ${isBuy ? 'bg-[#00e676]/10 text-[#00e676]' : 'bg-[#ff1744]/10 text-[#ff1744]'}`}>
@@ -1658,10 +1818,10 @@ export default function TerminalPage() {
                                 </span>
                               </td>
                               <td className="p-3 text-zinc-400">{sig.interval}</td>
-                              <td className="p-3 text-zinc-300">{formatPrice(sig.entry_price)}</td>
+                              <td className="p-3 text-zinc-300">{formatPrice(sig.entry_price, profile)}</td>
                               <td className="p-3 text-zinc-300">
                                 {showBlur ? <span className="blur-sm">$$$,$$$.$$</span>
-                                  : isClosed ? formatPrice(sig.close_price)
+                                  : isClosed ? formatPrice(sig.close_price, profile)
                                   : <span className="text-zinc-500">Open</span>}
                               </td>
                               <td className="p-3">
@@ -2077,64 +2237,332 @@ export default function TerminalPage() {
               <div className="space-y-6 max-w-xl text-left">
                 <div className="space-y-1 border-b border-zinc-800 pb-4">
                   <h2 className="text-[18px] font-bold uppercase tracking-wider text-white">Console Settings</h2>
-                  <p className="text-[13px] text-zinc-400">Update experience profile, risk tolerance, and alert pairing.</p>
+                  <p className="text-[13px] text-zinc-400 font-mono">Update experience profile, risk tolerance, alerts, and display parameters.</p>
                 </div>
 
-                <form onSubmit={handleUpdateSettings} className="space-y-5">
-                  {[
-                    { label: 'Experience Profile', key: 'experience', val: settingsExperience, set: setSettingsExperience,
-                      opts: [
-                        { v: 'beginner',    l: '🌱 Just starting out' },
-                        { v: 'comfortable', l: '📈 Getting comfortable' },
-                        { v: 'experienced', l: '🎯 Experienced trader' },
-                      ]},
-                    { label: 'Risk Parameters', key: 'risk', val: settingsRisk, set: setSettingsRisk,
-                      opts: [
-                        { v: 'conservative', l: '🛡️ Conservative (SL -1.5% | TP +3.0%)' },
-                        { v: 'balanced',     l: '⚖️ Balanced (SL -2.5% | TP +5.0%)' },
-                        { v: 'aggressive',   l: '🚀 Aggressive (SL -4.0% | TP +10.0%)' },
-                      ]},
-                    { label: 'Primary Goal', key: 'goal', val: settingsGoal, set: setSettingsGoal,
-                      opts: [
-                        { v: 'learn',    l: '📚 Learn to trade smarter' },
-                        { v: 'grow',     l: '💰 Grow my portfolio' },
-                        { v: 'automate', l: '⚡ Automate my alerts' },
-                      ]},
-                  ].map(field => (
-                    <div key={field.key} className="space-y-1.5">
-                      <label className="block text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-400">{field.label}</label>
-                      <select value={field.val} onChange={e => field.set(e.target.value)}
-                        className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange font-mono rounded-none">
-                        {field.opts.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
-                      </select>
-                    </div>
-                  ))}
+                <form onSubmit={handleUpdateSettings} className="space-y-6">
 
-                  <div className="p-4 bg-zinc-950 border border-zinc-800 space-y-2.5 font-mono">
-                    <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Telegram Alert Integration</span>
-                    <div className="flex justify-between items-center flex-wrap gap-2">
-                      <div className="space-y-0.5">
-                        <span className="block text-[13px] font-bold text-white uppercase tracking-wider">
-                          {profile.telegram_chat_id ? 'CONNECTED' : 'DISCONNECTED'}
-                        </span>
-                        {profile.telegram_chat_id && (
-                          <span className="block text-[11px] text-zinc-400">Chat ID: {profile.telegram_chat_id}</span>
+                  {/* TRADING PROFILE */}
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                      <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      Trading Profile
+                    </h3>
+                    
+                    <div className="space-y-3 font-mono">
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Experience level</label>
+                        <select value={settingsExperience} onChange={e => setSettingsExperience(e.target.value)}
+                          className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
+                          <option value="beginner">Just starting out</option>
+                          <option value="comfortable">Getting comfortable</option>
+                          <option value="experienced">Experienced trader</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Risk style</label>
+                        <select value={settingsRisk} onChange={e => setSettingsRisk(e.target.value)}
+                          className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
+                          <option value="conservative">Conservative (SL -1.5% | TP +3.0%)</option>
+                          <option value="balanced">Balanced (SL -2.5% | TP +5.0%)</option>
+                          <option value="aggressive">Aggressive (SL -4.0% | TP +10.0%)</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Primary goal</label>
+                        <select value={settingsGoal} onChange={e => setSettingsGoal(e.target.value)}
+                          className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
+                          <option value="learn">Learn to trade smarter</option>
+                          <option value="grow">Grow my portfolio</option>
+                          <option value="automate">Automate my alerts</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Account size (USDT)</label>
+                        <input type="number" value={settingsAccountSize} onChange={e => setSettingsAccountSize(Number(e.target.value))}
+                          className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none" />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Risk per trade</label>
+                        <div className="flex gap-2">
+                          {['1%', '1.5%', '2%', 'custom'].map(type => (
+                            <button key={type} type="button" onClick={() => setSettingsRiskPerTradeType(type)}
+                              className={`px-4 py-2 text-xs font-bold uppercase transition-all border rounded-none cursor-pointer ${
+                                settingsRiskPerTradeType === type
+                                  ? 'bg-[#3D5AFE] text-white border-[#3D5AFE]'
+                                  : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white'
+                              }`}>
+                              {type}
+                            </button>
+                          ))}
+                        </div>
+                        {settingsRiskPerTradeType === 'custom' && (
+                          <div className="pt-2">
+                            <input type="number" step="0.1" placeholder="Custom risk %" value={settingsCustomRiskVal} onChange={e => setSettingsCustomRiskVal(e.target.value)}
+                              className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none" />
+                          </div>
                         )}
                       </div>
-                      {!profile.telegram_chat_id && (
-                        <button type="button"
-                          onClick={() => triggerUpgradeGate('Telegram Alerts Locked', 'Telegram alerts are available on Pro and Master tiers.')}
-                          className="py-2 px-4 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-[11px] uppercase tracking-wider transition-colors cursor-pointer border-0">
-                          Pair Bot 🔒
-                        </button>
-                      )}
                     </div>
                   </div>
 
-                  <button type="submit"
-                    className="py-2.5 px-7 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-[13px] uppercase tracking-widest transition-colors cursor-pointer border-0">
-                    Save Settings
-                  </button>
+                  {/* SIGNAL PREFERENCES */}
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                      <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Signal Preferences
+                    </h3>
+
+                    <div className="space-y-3 font-mono">
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Minimum confidence: {settingsMinConfidence}%</label>
+                        <input type="range" min="65" max="95" step="5" value={settingsMinConfidence} onChange={e => setSettingsMinConfidence(Number(e.target.value))}
+                          className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-brand-orange" />
+                        <div className="flex justify-between text-[9px] text-zinc-500">
+                          <span>65% (More noise)</span>
+                          <span>95% (Fewer setups)</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Default timeframe</label>
+                        <select value={settingsDefaultTimeframe} onChange={e => setSettingsDefaultTimeframe(e.target.value)}
+                          className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
+                          <option value="15m">15m</option>
+                          <option value="1h">1h</option>
+                          <option value="4h">4h</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Default view</label>
+                        <select value={settingsDefaultView} onChange={e => setSettingsDefaultView(e.target.value)}
+                          className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
+                          <option value="Stream">Stream</option>
+                          <option value="Split">Split</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ALERT DELIVERY */}
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                      <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                      </svg>
+                      Alert Delivery
+                    </h3>
+
+                    {/* Telegram Section */}
+                    <div className="p-4 bg-[#090e1a] border border-zinc-800 space-y-3 font-mono text-xs">
+                      <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Telegram Integration</span>
+                      
+                      {/* If Free Plan */}
+                      {isFreePlan ? (
+                        <div className="flex justify-between items-center gap-2">
+                          <span className="text-zinc-400 text-[11px]">Telegram pairing is locked.</span>
+                          <button type="button"
+                            onClick={() => triggerUpgradeGate('Telegram Alerts Locked', 'Telegram alerts are available on Pro and Master tiers.')}
+                            className="py-1.5 px-3.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0">
+                            Pair Bot 🔒
+                          </button>
+                        </div>
+                      ) : (
+                        /* Paid Plan: Two-step pairing */
+                        <div className="space-y-4">
+                          
+                          {/* Step 1: Link Account */}
+                          <div className="flex justify-between items-center gap-2 border-b border-zinc-900 pb-2">
+                            <div>
+                              <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 1: Link account</span>
+                              {profile.telegram_chat_id ? (
+                                <span className="text-[#00e676] font-bold">● Connected — @ghuruprasaath</span>
+                              ) : (
+                                <span className="text-zinc-400">○ Not linked</span>
+                              )}
+                            </div>
+                            {!profile.telegram_chat_id && tgPairingStep === 1 && (
+                              <button type="button" onClick={() => setTgPairingStep(2)}
+                                className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0">
+                                Link Telegram
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Interactive Verification code entry if in step 2 */}
+                          {!profile.telegram_chat_id && tgPairingStep === 2 && (
+                            <div className="p-3 bg-zinc-900/60 border border-zinc-800 space-y-2.5">
+                              <span className="block text-[10px] text-zinc-400 font-bold">Enter pairing code from @SanddockBot:</span>
+                              <div className="flex gap-1.5 items-center justify-between flex-wrap">
+                                <div className="flex gap-1">
+                                  {tgPairingCode.map((char, index) => (
+                                    <input key={index} id={`tg-code-${index}`} type="text" maxLength="1" value={char}
+                                      onChange={e => {
+                                        const newCode = [...tgPairingCode];
+                                        newCode[index] = e.target.value.slice(-1);
+                                        setTgPairingCode(newCode);
+                                        if (e.target.value && index < 5) {
+                                          document.getElementById(`tg-code-${index + 1}`)?.focus();
+                                        }
+                                      }}
+                                      onKeyDown={e => {
+                                        if (e.key === 'Backspace' && !tgPairingCode[index] && index > 0) {
+                                          document.getElementById(`tg-code-${index - 1}`)?.focus();
+                                        }
+                                      }}
+                                      className="w-8 h-9 bg-slate-950 border border-zinc-800 text-center text-sm font-bold text-white focus:outline-none focus:border-brand-orange" />
+                                  ))}
+                                </div>
+                                <button type="button"
+                                  onClick={() => {
+                                    setTgStatus('loading');
+                                    setTimeout(() => {
+                                      setTgStatus('success');
+                                      setTimeout(async () => {
+                                        await updateProfile({ telegram_chat_id: 'mock-tg-chat-9988' });
+                                        setTgPairingStep(1);
+                                        setTgStatus('');
+                                      }, 1000);
+                                    }, 1000);
+                                  }}
+                                  disabled={tgPairingCode.some(c => !c) || tgStatus === 'loading'}
+                                  className="py-1.5 px-3 bg-[#00e676] hover:bg-emerald-600 text-black font-bold text-[10px] uppercase tracking-widest cursor-pointer disabled:opacity-40">
+                                  {tgStatus === 'loading' ? 'Verifying...' : 'Verify'}
+                                </button>
+                              </div>
+                              {tgStatus === 'success' && <div className="text-[10px] text-emerald-400 font-bold">✅ Success! Account linked.</div>}
+                            </div>
+                          )}
+
+                          {/* Step 2: Join Channel */}
+                          <div className="flex justify-between items-center gap-2">
+                            <div>
+                              <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 2: Join channel</span>
+                              {!profile.telegram_chat_id ? (
+                                <span className="text-zinc-500">○ Waiting for Step 1</span>
+                              ) : isTelegramChannelJoined ? (
+                                <span className="text-[#00e676] font-bold">✓ Member of Sanddock {profile.plan === 'master' ? 'Master' : 'Pro'} Signals</span>
+                              ) : (
+                                <span className="text-zinc-400">○ Not joined</span>
+                              )}
+                            </div>
+                            {profile.telegram_chat_id && !isTelegramChannelJoined && (
+                              <a href={profile.plan === 'master' ? 'https://t.me/sanddock_master' : 'https://t.me/sanddock_pro'}
+                                target="_blank" rel="noopener noreferrer"
+                                onClick={() => {
+                                  setIsTelegramChannelJoined(true);
+                                  localStorage.setItem('sanddock_tg_channel_joined', 'true');
+                                }}
+                                className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0 text-center select-none no-underline">
+                                Join Channel
+                              </a>
+                            )}
+                          </div>
+
+                          {/* If fully linked and joined: show view channel and disconnect */}
+                          {profile.telegram_chat_id && isTelegramChannelJoined && (
+                            <div className="flex gap-2 pt-2 border-t border-zinc-900">
+                              <a href={profile.plan === 'master' ? 'https://t.me/sanddock_master' : 'https://t.me/sanddock_pro'}
+                                target="_blank" rel="noopener noreferrer"
+                                className="py-1.5 px-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-bold text-[10px] uppercase tracking-wider text-center select-none no-underline">
+                                View Channel &rarr;
+                              </a>
+                              <button type="button"
+                                onClick={async () => {
+                                  await updateProfile({ telegram_chat_id: null });
+                                  setIsTelegramChannelJoined(false);
+                                  localStorage.removeItem('sanddock_tg_channel_joined');
+                                }}
+                                className="py-1.5 px-3 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 font-bold text-[10px] uppercase tracking-wider cursor-pointer">
+                                Disconnect
+                              </button>
+                            </div>
+                          )}
+
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Email Notifications List */}
+                    <div className="space-y-2 font-mono text-xs">
+                      <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Email Notifications</span>
+                      
+                      {[
+                        { label: 'Signal closed (TP/SL hit)', val: settingsEmailSignalClosed, set: setSettingsEmailSignalClosed },
+                        { label: 'Weekly signal debrief', val: settingsEmailWeeklyDebrief, set: setSettingsEmailWeeklyDebrief },
+                        { label: 'System alerts', val: settingsEmailSystemAlerts, set: setSettingsEmailSystemAlerts },
+                      ].map((emailOpt, i) => (
+                        <div key={i} className="flex justify-between items-center bg-[#090e1a] border border-zinc-800/60 p-3">
+                          <span className="text-zinc-300 font-medium">{emailOpt.label}</span>
+                          <button type="button" onClick={() => emailOpt.set(!emailOpt.val)}
+                            className={`py-1 px-3 text-[10px] font-bold uppercase rounded-none cursor-pointer border ${
+                              emailOpt.val
+                                ? 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/20'
+                                : 'bg-zinc-900 text-zinc-500 border-zinc-850'
+                            }`}>
+                            {emailOpt.val ? 'ON' : 'OFF'}
+                          </button>
+                        </div>
+                      ))}
+                      <span className="block text-[9px] text-zinc-500 font-mono italic">Emails go to: {profile.email}</span>
+                    </div>
+                  </div>
+
+                  {/* DISPLAY */}
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                      <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      Display
+                    </h3>
+
+                    <div className="space-y-3 font-mono">
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Timezone</label>
+                        <select value={settingsTimezone} onChange={e => setSettingsTimezone(e.target.value)}
+                          className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
+                          <option value="UTC">UTC</option>
+                          <option value="EST">EST (New York)</option>
+                          <option value="IST">IST (India)</option>
+                          <option value="GMT">GMT (London)</option>
+                          <option value="PST">PST (Los Angeles)</option>
+                          <option value="CET">CET (Paris)</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Price format</label>
+                        <select value={settingsPriceFormat} onChange={e => setSettingsPriceFormat(e.target.value)}
+                          className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
+                          <option value="usd">USD ($62,410.00)</option>
+                          <option value="usdt">USDT (62410.00 USDT)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* BILLING SHORTCUT */}
+                  <div className="pt-4 border-t border-zinc-800 flex justify-between items-center gap-4 flex-wrap">
+                    <a href="/billing" className="text-xs text-[#3D5AFE] hover:underline font-mono uppercase tracking-wider flex items-center gap-1 font-bold no-underline">
+                      Manage Billing &amp; View Invoices &rarr;
+                    </a>
+                    
+                    <button type="submit"
+                      className="py-2.5 px-8 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-[12px] uppercase tracking-widest transition-all cursor-pointer border-0 rounded-none shadow-md">
+                      Save Settings
+                    </button>
+                  </div>
+
                 </form>
               </div>
             )}

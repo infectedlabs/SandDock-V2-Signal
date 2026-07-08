@@ -12,7 +12,6 @@ export const dynamic = 'force-dynamic';
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const plan = searchParams.get('plan') || 'free';
     const joinedAtStr = searchParams.get('joined_at');
     const interval = searchParams.get('interval');
 
@@ -20,16 +19,11 @@ export async function GET(request) {
       return NextResponse.json({ error: 'joined_at is required' }, { status: 400 });
     }
 
-    let allowedSymbols = ['BTCUSDT'];
-    if (plan === 'pro') {
-      allowedSymbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
-    } else if (plan === 'master') {
-      allowedSymbols = [
-        'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT',
-        'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT',
-        'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'
-      ];
-    }
+    const allowedSymbols = [
+      'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT',
+      'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT',
+      'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'
+    ];
 
     let cleanJoinedAt = joinedAtStr;
     const dotIdx = joinedAtStr.indexOf('.');
@@ -52,24 +46,45 @@ export async function GET(request) {
 
     const joinedAtIso = new Date(cleanJoinedAt).toISOString();
 
-    // Query all closed signals for the allowed symbols since joinedAt
-    let query = supabaseAdmin
-      .from('signals')
-      .select('pnl_pct')
-      .in('symbol', allowedSymbols)
-      .gte('bar_time', joinedAtIso)
-      .not('pnl_pct', 'is', null);
+    let signals = [];
+    let page = 0;
+    const pageSize = 1000;
+    let hasMore = true;
 
-    if (interval) {
-      query = query.eq('interval', interval);
+    while (hasMore) {
+      let pageQuery = supabaseAdmin
+        .from('signals')
+        .select('pnl_pct')
+        .in('symbol', allowedSymbols)
+        .gte('bar_time', joinedAtIso)
+        .not('pnl_pct', 'is', null)
+        .order('bar_time', { ascending: true })
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+
+      if (interval) {
+        pageQuery = pageQuery.eq('interval', interval);
+      }
+
+      const { data, error } = await pageQuery;
+
+      if (error) {
+        console.error('[alltime-pnl] DB error:', error.message);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      if (!data || data.length === 0) {
+        hasMore = false;
+      } else {
+        signals = signals.concat(data);
+        if (data.length < pageSize) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
     }
 
-    const { data: signals, error } = await query;
 
-    if (error) {
-      console.error('[alltime-pnl] DB error:', error.message);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
 
     const totalPnl = signals.reduce((sum, s) => sum + parseFloat(s.pnl_pct || 0), 0);
 

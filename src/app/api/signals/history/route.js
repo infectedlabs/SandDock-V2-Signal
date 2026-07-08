@@ -21,32 +21,11 @@ export async function GET(request) {
     symbol   = (searchParams.get('symbol')   || 'BTCUSDT').toUpperCase();
     interval = searchParams.get('interval')  || '15m';
     filter   = searchParams.get('filter') || '30d'; // '1y' | '6m' | '30d' | '1w' | 'today'
-    const plan = searchParams.get('plan') || 'free';
-
-    let allowedSymbols = ['BTCUSDT'];
-    if (plan === 'pro') {
-      allowedSymbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
-    } else if (plan === 'master') {
-      allowedSymbols = [
-        'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT',
-        'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT',
-        'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'
-      ];
-    }
-
-    let query = supabaseAdmin
-      .from('signals')
-      .select('*')
-      .order('bar_time', { ascending: true }); // ascending order for chart plotting
-
-    if (symbol && symbol !== 'ALL') {
-      query = query.eq('symbol', symbol.toUpperCase());
-    } else {
-      query = query.in('symbol', allowedSymbols);
-    }
-    if (interval) {
-      query = query.eq('interval', interval);
-    }
+    const allowedSymbols = [
+      'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT',
+      'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT',
+      'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'
+    ];
 
     // Apply date filter (using rolling millisecond windows for 100% timezone-independent queries)
     let filterMs = 30 * 24 * 60 * 60 * 1000; // default 30d
@@ -61,12 +40,45 @@ export async function GET(request) {
     }
 
     const filterDate = new Date(Date.now() - filterMs);
-    query = query.gte('bar_time', filterDate.toISOString());
 
-    const { data, error } = await runWithTimeout(query, 1500);
-    if (error) throw error;
+    let resultData = [];
+    let page = 0;
+    const pageSize = 1000;
+    let hasMore = true;
 
-    let resultData = data || [];
+    while (hasMore) {
+      let pageQuery = supabaseAdmin
+        .from('signals')
+        .select('*')
+        .order('bar_time', { ascending: true })
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+
+      if (symbol && symbol !== 'ALL') {
+        pageQuery = pageQuery.eq('symbol', symbol.toUpperCase());
+      } else {
+        pageQuery = pageQuery.in('symbol', allowedSymbols);
+      }
+      if (interval) {
+        pageQuery = pageQuery.eq('interval', interval);
+      }
+      pageQuery = pageQuery.gte('bar_time', filterDate.toISOString());
+
+      const { data, error } = await runWithTimeout(pageQuery, 2500);
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        hasMore = false;
+      } else {
+        resultData = resultData.concat(data);
+        if (data.length < pageSize) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      }
+    }
+
+
 
     // Secondary fallback: if DB returned nothing, reconstruct from memoryCache.log
     if (resultData.length === 0) {

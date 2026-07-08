@@ -37,18 +37,34 @@ const Icons = {
   )
 };
 
-function formatPrice(val) {
+function formatPrice(val, profile) {
   if (val == null) return '-';
+  const num = parseFloat(val);
+  const preference = profile?.price_format || 'usd';
+  if (preference === 'usdt') {
+    return `${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT`;
+  }
   return new Intl.NumberFormat('en-US', {
     style: 'currency', currency: 'USD', minimumFractionDigits: 2,
-  }).format(parseFloat(val));
+  }).format(num);
 }
 
-function formatLogDate(isoString) {
+function formatLogDate(isoString, profile) {
   if (!isoString) return '-';
   const d = new Date(isoString);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const tzMap = {
+    'UTC': 'UTC',
+    'EST': 'America/New_York',
+    'IST': 'Asia/Kolkata',
+    'GMT': 'Europe/London',
+    'PST': 'America/Los_Angeles',
+    'CET': 'Europe/Paris'
+  };
+  const userTz = profile?.timezone || 'UTC';
+  const timeZone = tzMap[userTz] || 'UTC';
+  const datePart = d.toLocaleDateString('en-US', { timeZone, month: 'short', day: 'numeric', year: 'numeric' });
+  const timePart = d.toLocaleTimeString('en-US', { timeZone, hour: '2-digit', minute: '2-digit', hour12: false });
+  return `${datePart} ${timePart} ${userTz}`;
 }
 
 export default function SignalDetailPage() {
@@ -69,10 +85,17 @@ export default function SignalDetailPage() {
   const [calcRiskPct, setCalcRiskPct] = useState(1.0);
 
   useEffect(() => {
-    if (profile?.risk_style) {
-      if (profile.risk_style === 'conservative') setCalcRiskPct(1.0);
-      else if (profile.risk_style === 'balanced') setCalcRiskPct(2.0);
-      else if (profile.risk_style === 'aggressive') setCalcRiskPct(3.0);
+    if (profile) {
+      if (profile.account_size != null) {
+        setCalcAccountSize(Number(profile.account_size));
+      }
+      if (profile.risk_per_trade != null) {
+        setCalcRiskPct(Number(profile.risk_per_trade));
+      } else if (profile.risk_style) {
+        if (profile.risk_style === 'conservative') setCalcRiskPct(1.0);
+        else if (profile.risk_style === 'balanced') setCalcRiskPct(2.0);
+        else if (profile.risk_style === 'aggressive') setCalcRiskPct(3.0);
+      }
     }
   }, [profile]);
 
@@ -93,6 +116,56 @@ export default function SignalDetailPage() {
   const handleOpenModal = (title, body) => {
     setModalContent({ title, body });
     setModalOpen(true);
+  };
+
+  const getNextBarCloseInfo = () => {
+    if (!signal || !signal.interval) return { timeStr: '18:00 UTC', remainingStr: 'in 24 minutes' };
+    const now = new Date();
+    const intervalStr = signal.interval;
+    let closeTime = new Date();
+
+    if (intervalStr === '15m') {
+      const minutes = now.getMinutes();
+      const next15 = Math.ceil((minutes + 0.1) / 15) * 15;
+      closeTime.setMinutes(next15, 0, 0);
+      if (next15 >= 60) {
+        closeTime.setHours(closeTime.getHours() + 1);
+      }
+    } else if (intervalStr === '1h') {
+      closeTime.setHours(closeTime.getHours() + 1, 0, 0, 0);
+    } else if (intervalStr === '4h') {
+      const utcHours = now.getUTCHours();
+      const next4 = Math.ceil((utcHours + 0.01) / 4) * 4;
+      closeTime.setUTCHours(next4, 0, 0, 0);
+    } else {
+      closeTime.setHours(closeTime.getHours() + 1, 0, 0, 0);
+    }
+
+    const diffMs = closeTime.getTime() - now.getTime();
+    const diffMinutes = Math.max(1, Math.round(diffMs / 60000));
+
+    const tzMap = {
+      'UTC': 'UTC',
+      'EST': 'America/New_York',
+      'IST': 'Asia/Kolkata',
+      'GMT': 'Europe/London',
+      'PST': 'America/Los_Angeles',
+      'CET': 'Europe/Paris'
+    };
+    const userTz = profile?.timezone || 'UTC';
+    const targetTz = tzMap[userTz] || 'UTC';
+
+    const formattedTime = closeTime.toLocaleTimeString('en-US', {
+      timeZone: targetTz,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+
+    const timeStr = `${formattedTime} ${userTz}`;
+    const remainingStr = `in ${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''}`;
+
+    return { timeStr, remainingStr };
   };
 
   // Fetch signal data
@@ -294,7 +367,18 @@ export default function SignalDetailPage() {
   const hoursAgo = Math.floor(elapsed / (1000 * 60 * 60));
   const minutesAgo = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
   const timeAgoText = `Fired ${hoursAgo}h ${minutesAgo}m ago`;
-  const timeOnly = new Date(signal.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  
+  const tzMap = {
+    'UTC': 'UTC',
+    'EST': 'America/New_York',
+    'IST': 'Asia/Kolkata',
+    'GMT': 'Europe/London',
+    'PST': 'America/Los_Angeles',
+    'CET': 'Europe/Paris'
+  };
+  const userTz = profile?.timezone || 'UTC';
+  const timeZone = tzMap[userTz] || 'UTC';
+  const timeOnly = new Date(signal.created_at).toLocaleTimeString('en-US', { timeZone, hour: '2-digit', minute: '2-digit', hour12: false }) + ` ${userTz}`;
 
   // P&L and Close calculation
   const isClosed = signal.close_price !== null || signal.close_reason !== null;
@@ -316,7 +400,7 @@ export default function SignalDetailPage() {
 
   // Smart Context-Rich Rationale Generation
   const absorbText = isBuy ? 'strong bullish absorption pattern suggesting seller exhaustion' : 'strong bearish absorption pattern suggesting buyer exhaustion';
-  const detailedRationale = `${coinLabel} Heikin Ashi ${isBuy ? 'low' : 'high'} at ${formatPrice(signal.entry_price)} is the ${isBuy ? 'lowest' : 'highest'} point in the last 10 bars, confirming a swing ${isBuy ? 'bottom' : 'top'}. Volume on this bar is 31% above the 20-bar average, adding confluence. The previous swing ${isBuy ? 'top was committed 4' : 'bottom was committed 5'} bars ago, establishing a clean alternating structure. The HA candle body is entirely ${isBuy ? 'above' : 'below'} the prior 3 candles - ${absorbText}.`;
+  const detailedRationale = `${coinLabel} Heikin Ashi ${isBuy ? 'low' : 'high'} at ${formatPrice(signal.entry_price, profile)} is the ${isBuy ? 'lowest' : 'highest'} point in the last 10 bars, confirming a swing ${isBuy ? 'bottom' : 'top'}. Volume on this bar is 31% above the 20-bar average, adding confluence. The previous swing ${isBuy ? 'top was committed 4' : 'bottom was committed 5'} bars ago, establishing a clean alternating structure. The HA candle body is entirely ${isBuy ? 'above' : 'below'} the prior 3 candles - ${absorbText}.`;
 
   // Context Stats Card
   const market24h = isBuy ? '-2.3%' : '+1.8%';
@@ -325,8 +409,8 @@ export default function SignalDetailPage() {
   const directionType = isBuy ? 'Counter-trend (buying into weakness)' : 'Trend-following (selling into breakout)';
 
   // What to Watch Targets
-  const targetConfirm = formatPrice(isBuy ? signal.entry_price * 1.004 : signal.entry_price * 0.996);
-  const targetInvalidate = formatPrice(isBuy ? signal.entry_price * 0.99 : signal.entry_price * 1.01);
+  const targetConfirm = formatPrice(isBuy ? signal.entry_price * 1.004 : signal.entry_price * 0.996, profile);
+  const targetInvalidate = formatPrice(isBuy ? signal.entry_price * 0.99 : signal.entry_price * 1.01, profile);
 
   return (
     <div className="h-screen bg-[#020617] text-white font-mono antialiased overflow-hidden flex flex-col selection:bg-[#3D5AFE]/20 selection:text-[#3D5AFE] animate-fade-in">
@@ -387,7 +471,7 @@ export default function SignalDetailPage() {
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tighter leading-none pt-1">{symbolFormatted}</h1>
                 <p className="text-slate-400 text-xs font-bold font-mono tracking-tight pt-1">
-                  {formatLogDate(signal.created_at)} &middot; <span className="text-brand-orange">{timeAgoText}</span>
+                  {formatLogDate(signal.created_at, profile)} &middot; <span className="text-brand-orange">{timeAgoText}</span>
                 </p>
               </div>
               
@@ -413,12 +497,12 @@ export default function SignalDetailPage() {
             <div className="flex justify-between items-center text-sm sm:text-base">
               <div>
                 <span className="block text-[9px] text-slate-400 font-bold uppercase">ENTRY</span>
-                <span className="font-bold text-white font-mono">{formatPrice(signal.entry_price)}</span>
+                <span className="font-bold text-white font-mono">{formatPrice(signal.entry_price, profile)}</span>
               </div>
               <div className="text-center">
                 <span className="block text-[9px] text-slate-400 font-bold uppercase">{isClosed ? 'EXIT PRICE' : 'CURRENT NOW'}</span>
                 <span className={`font-bold font-mono ${directionalDiff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {formatPrice(finalPrice)} {directionalDiff >= 0 ? '▲' : '▼'}
+                  {formatPrice(finalPrice, profile)} {directionalDiff >= 0 ? '▲' : '▼'}
                 </span>
               </div>
               <div className="text-right">
@@ -453,7 +537,7 @@ export default function SignalDetailPage() {
                 {isFreePlan ? (
                   <span className="blur-xs select-none">$57,200.00</span>
                 ) : (
-                  <span className="text-rose-400/80">{formatPrice(signal.sl_price)}</span>
+                  <span className="text-rose-400/80">{formatPrice(signal.sl_price, profile)}</span>
                 )}
               </div>
               <div className="text-center text-white/50">ENTRY POSITION</div>
@@ -462,7 +546,7 @@ export default function SignalDetailPage() {
                 {isFreePlan ? (
                   <span className="blur-xs select-none">$62,500.00</span>
                 ) : (
-                  <span className="text-emerald-400/80">{formatPrice(signal.tp_price)}</span>
+                  <span className="text-emerald-400/80">{formatPrice(signal.tp_price, profile)}</span>
                 )}
               </div>
             </div>
@@ -487,7 +571,7 @@ export default function SignalDetailPage() {
                     <Icons.Lock /> protect downside.
                   </span>
                 ) : (
-                  <span className="text-sm sm:text-base text-rose-400 font-bold font-mono">{formatPrice(signal.sl_price)}</span>
+                  <span className="text-sm sm:text-base text-rose-400 font-bold font-mono">{formatPrice(signal.sl_price, profile)}</span>
                 )}
               </div>
               <div>
@@ -500,7 +584,7 @@ export default function SignalDetailPage() {
                     <Icons.Lock /> Know exit before enter.
                   </span>
                 ) : (
-                  <span className="text-sm sm:text-base text-emerald-400 font-bold font-mono">{formatPrice(signal.tp_price)}</span>
+                  <span className="text-sm sm:text-base text-emerald-400 font-bold font-mono">{formatPrice(signal.tp_price, profile)}</span>
                 )}
               </div>
             </div>
@@ -568,7 +652,7 @@ export default function SignalDetailPage() {
               </div>
               <div className="flex items-start gap-2 pt-2 border-t border-slate-800/60 text-[11px] text-slate-500 font-bold">
                 <span>⏱</span>
-                <span>Next confirmation bar closes at 18:00 UTC (in 24 minutes)</span>
+                <span>Next confirmation bar closes at {getNextBarCloseInfo().timeStr} ({getNextBarCloseInfo().remainingStr})</span>
               </div>
             </div>
           </div>
@@ -834,10 +918,10 @@ export default function SignalDetailPage() {
                             </span>
                           </td>
                           <td className="py-3 font-semibold">
-                            {showRow ? formatPrice(h.entry_price) : <span className="blur-xs select-none">$59,100.00</span>}
+                            {showRow ? formatPrice(h.entry_price, profile) : <span className="blur-xs select-none">$59,100.00</span>}
                           </td>
                           <td className="py-3">
-                            {showRow ? formatPrice(h.close_price) : <span className="blur-xs select-none">$59,400.00</span>}
+                            {showRow ? formatPrice(h.close_price, profile) : <span className="blur-xs select-none">$59,400.00</span>}
                           </td>
                           <td className="py-3 text-right font-bold">
                             {showRow ? (
