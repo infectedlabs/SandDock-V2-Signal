@@ -477,7 +477,7 @@ export default function Homepage() {
               <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#00e676] animate-pulse" />
-                  <span className="font-mono text-[10px] text-[#00e676] font-bold tracking-widest uppercase">LIVE ALERT OUTCOME</span>
+                  <span className="font-mono text-[10px] text-[#00e676] font-bold tracking-widest uppercase">LIVE SIGNAL ALERT</span>
                 </div>
                 <span className="font-mono text-[9px] text-text-muted">PAIRED VIA TELEGRAM</span>
               </div>
@@ -504,8 +504,8 @@ export default function Homepage() {
                     <span className="text-sm font-bold font-mono text-white">$67,432.00</span>
                   </div>
                   <div>
-                    <span className="block text-[8px] text-text-muted font-mono">EXIT PRICE (TP HIT)</span>
-                    <span className="text-sm font-bold font-mono text-[#00e676]">$70,812.00</span>
+                    <span className="block text-[8px] text-text-muted font-mono">CONFIDENCE</span>
+                    <span className="text-sm font-bold font-mono text-[#00e676]">86%</span>
                   </div>
                   <div className="pt-2 border-t border-white/5">
                     <span className="block text-[8px] text-text-muted font-mono">STOP LOSS</span>
@@ -517,16 +517,12 @@ export default function Homepage() {
                   </div>
                 </div>
 
-                {/* Outcome block */}
-                <div className="flex items-center justify-between bg-[#00e676]/5 border border-[#00e676]/20 p-3 rounded-none">
-                  <div>
-                    <span className="block text-[8px] text-text-muted font-mono">SANDDOCK OUTCOME</span>
-                    <span className="text-base font-bold font-mono text-[#00e676]">+5.01% Net Return</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="block text-[8px] text-text-muted font-mono">LEVERAGE (10X)</span>
-                    <span className="text-base font-bold font-mono text-[#00e676]">+50.1% Profit</span>
-                  </div>
+                {/* AI Rationale Block */}
+                <div className="bg-white/5 border border-white/10 p-3 rounded-none">
+                  <span className="block text-[8px] text-text-muted font-mono mb-1">AI RATIONALE</span>
+                  <p className="text-xs font-mono text-white leading-relaxed">
+                    H4 structure breaker with high volume confluence. Swing-low liquidity sweep confirmed on lower timeframes.
+                  </p>
                 </div>
 
                 {/* AI verification block */}
@@ -534,7 +530,7 @@ export default function Homepage() {
                   <svg className="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                   </svg>
-                  <span>LEDGER VERIFIED TRANSACTION #SD-4218</span>
+                  <span>Logged to public track record · Jul 8, 02:30 UTC</span>
                 </div>
               </div>
             </div>

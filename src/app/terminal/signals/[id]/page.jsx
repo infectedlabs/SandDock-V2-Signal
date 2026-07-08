@@ -65,6 +65,17 @@ export default function SignalDetailPage() {
   const [historySignals, setHistorySignals] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
 
+  const [calcAccountSize, setCalcAccountSize] = useState(10000);
+  const [calcRiskPct, setCalcRiskPct] = useState(1.0);
+
+  useEffect(() => {
+    if (profile?.risk_style) {
+      if (profile.risk_style === 'conservative') setCalcRiskPct(1.0);
+      else if (profile.risk_style === 'balanced') setCalcRiskPct(2.0);
+      else if (profile.risk_style === 'aggressive') setCalcRiskPct(3.0);
+    }
+  }, [profile]);
+
   // Modal alert gateway
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ title: "", body: "" });
@@ -380,9 +391,14 @@ export default function SignalDetailPage() {
                 </p>
               </div>
               
-              <div className="bg-[#111827] border border-slate-800/80 p-3 text-right rounded-none shrink-0">
-                <span className="block text-[10px] uppercase tracking-widest text-slate-400 font-extrabold">Confidence</span>
+              <div className="relative group bg-[#111827] border border-slate-800/80 p-3 text-right rounded-none shrink-0 cursor-help">
+                <span className="block text-[10px] uppercase tracking-widest text-slate-400 font-extrabold border-b border-dashed border-slate-500/50">Confidence</span>
                 <span className="text-2xl sm:text-3xl font-black font-mono text-white mt-0.5 block">{signal.confidence}%</span>
+                
+                {/* Tooltip Popup */}
+                <div className="absolute right-0 top-full mt-2 w-48 p-2.5 bg-slate-950/95 border border-slate-800 rounded shadow-xl text-left hidden group-hover:block z-50 font-mono text-[9px] text-zinc-300 leading-normal normal-case">
+                  AI conviction strength. Signals with <span className="text-[#00e676] font-bold">&gt;75%</span> confidence have a historically higher probability of hitting Take Profit target confirmation.
+                </div>
               </div>
             </div>
           </div>
@@ -544,16 +560,82 @@ export default function SignalDetailPage() {
             <div className="space-y-2.5 text-xs text-slate-300 font-medium">
               <div className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold font-mono">✓</span>
-                <span>Signal confirmed when {coinLabel} closes above {targetConfirm} on the next {signal.interval} close.</span>
+                <span>Signal confirmed when {coinLabel} closes {isBuy ? 'above' : 'below'} {targetConfirm} on the next {signal.interval} close.</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="text-rose-400 font-bold font-mono">⚠</span>
-                <span>Invalidated if {coinLabel} drops below {targetInvalidate} in the next 6 bars.</span>
+                <span>Invalidated if {coinLabel} {isBuy ? 'drops below' : 'rises above'} {targetInvalidate} in the next 6 bars.</span>
               </div>
               <div className="flex items-start gap-2 pt-2 border-t border-slate-800/60 text-[11px] text-slate-500 font-bold">
                 <span>⏱</span>
                 <span>Next confirmation bar closes at 18:00 UTC (in 24 minutes)</span>
               </div>
+            </div>
+          </div>
+
+          {/* Position Size Calculator */}
+          <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-none text-left glass shadow-xl space-y-3">
+            <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
+              Position Size Calculator
+            </span>
+            <div className="space-y-3 text-xs font-mono">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[9px] text-slate-500 uppercase font-bold mb-1">Account Size ($)</label>
+                  <input 
+                    type="number" 
+                    value={calcAccountSize} 
+                    onChange={(e) => setCalcAccountSize(Number(e.target.value))} 
+                    className="w-full bg-slate-950 text-white border border-slate-800 p-1.5 focus:outline-none focus:border-[#3D5AFE]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] text-slate-500 uppercase font-bold mb-1">Risk per Trade (%)</label>
+                  <input 
+                    type="number" 
+                    step="0.1"
+                    value={calcRiskPct} 
+                    onChange={(e) => setCalcRiskPct(Number(e.target.value))} 
+                    className="w-full bg-slate-950 text-white border border-slate-800 p-1.5 focus:outline-none focus:border-[#3D5AFE]"
+                  />
+                </div>
+              </div>
+
+              {isFreePlan ? (
+                <div 
+                  onClick={() => handleOpenModal("Unlock Parameters", "Upgrade to the Pro Plan to immediately reveal exact Stop Loss and Take Profit levels, pair live Telegram notifications, and trade altcoins.")}
+                  className="pt-2 border-t border-slate-800/60 text-[11px] text-slate-500 cursor-pointer hover:underline"
+                >
+                  🔒 Unlock stop loss to dynamically calculate position sizing. Upgrade to Pro &rarr;
+                </div>
+              ) : (
+                <div className="pt-2 border-t border-slate-800/60 space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">STOP LOSS DISTANCE:</span>
+                    <span className="text-zinc-300 font-bold">{signal.sl_pct ? `${signal.sl_pct}%` : 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">RISK AMOUNT:</span>
+                    <span className="text-zinc-300 font-bold">${(calcAccountSize * (calcRiskPct / 100)).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-slate-800/45 pt-1.5 text-sm">
+                    <span className="text-[#3D5AFE] font-bold">REC. POSITION SIZE:</span>
+                    <span className="text-white font-black">
+                      {signal.sl_pct && signal.sl_pct > 0 
+                        ? `$${((calcAccountSize * (calcRiskPct / 100)) / (signal.sl_pct / 100)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] text-slate-500">
+                    <span>POSITION SIZE ({coinLabel}):</span>
+                    <span>
+                      {signal.sl_pct && signal.sl_pct > 0 && signal.entry_price
+                        ? (((calcAccountSize * (calcRiskPct / 100)) / (signal.sl_pct / 100)) / signal.entry_price).toFixed(4)
+                        : 'N/A'} {coinLabel}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

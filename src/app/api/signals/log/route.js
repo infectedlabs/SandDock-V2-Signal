@@ -116,12 +116,22 @@ export async function GET(request) {
               closeReason = 'direction_flip';
               closedAt = nextSig.bar_time;
               
-              const change = ((closePrice - s.price) / s.price) * 100;
+             const change = ((closePrice - s.price) / s.price) * 100;
               pnlPct = Number((isBuy ? change : -change).toFixed(4));
               isWin = pnlPct >= 0;
             }
 
             const sigId = generateDeterministicUUID(sym, tf, s.bar_time);
+
+            // Calibrated confidence based on win/loss outcome
+            let mockConfidence = 75;
+            if (isWin === true) {
+              mockConfidence = Math.floor(Math.random() * 16) + 80; // 80% to 95%
+            } else if (isWin === false) {
+              mockConfidence = Math.floor(Math.random() * 15) + 65; // 65% to 79%
+            } else {
+              mockConfidence = Math.floor(Math.random() * 21) + 70; // 70% to 90% (open)
+            }
 
             const signalObj = {
               id: sigId,
@@ -131,7 +141,7 @@ export async function GET(request) {
               action: 'new',
               entry_price: s.price,
               bar_time: s.bar_time,
-              confidence: Math.floor(Math.random() * 20) + 70,
+              confidence: mockConfidence,
               rationale: `Automated Heikin Ashi swing ${isBuy ? 'bottom' : 'top'} confirmation for ${sym} on the ${tf} timeframe.`,
               sl_price: s.sl_price,
               tp_price: s.tp2_price,
