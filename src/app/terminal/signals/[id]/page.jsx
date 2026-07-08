@@ -662,7 +662,7 @@ export default function SignalDetailPage() {
               Interactive Signal Performance Chart
             </span>
             <div className="w-full overflow-hidden">
-              <HAChart symbol={signal.symbol} interval={signal.interval} isFreePlan={isFreePlan} theme="dark" hideSymbolSelector={true} onPriceTick={(price) => setLivePrice(price)} activeSignal={signal} />
+              <HAChart symbol={signal.symbol} interval={signal.interval} isFreePlan={isFreePlan} theme="dark" hideSymbolSelector={true} onPriceTick={(price) => setLivePrice(price)} activeSignal={signal} hideSignalCards={true} />
             </div>
           </div>
 

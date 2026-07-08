@@ -14,6 +14,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const plan = searchParams.get('plan') || 'free';
     const joinedAtStr = searchParams.get('joined_at');
+    const interval = searchParams.get('interval');
 
     if (!joinedAtStr) {
       return NextResponse.json({ error: 'joined_at is required' }, { status: 400 });
@@ -52,12 +53,18 @@ export async function GET(request) {
     const joinedAtIso = new Date(cleanJoinedAt).toISOString();
 
     // Query all closed signals for the allowed symbols since joinedAt
-    const { data: signals, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('signals')
       .select('pnl_pct')
       .in('symbol', allowedSymbols)
-      .gte('created_at', joinedAtIso)
+      .gte('bar_time', joinedAtIso)
       .not('pnl_pct', 'is', null);
+
+    if (interval) {
+      query = query.eq('interval', interval);
+    }
+
+    const { data: signals, error } = await query;
 
     if (error) {
       console.error('[alltime-pnl] DB error:', error.message);

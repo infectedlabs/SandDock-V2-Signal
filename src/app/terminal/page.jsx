@@ -621,7 +621,8 @@ export default function TerminalPage() {
     if (!profile?.created_at) return;
     const fetchHeaderPnl = async () => {
       try {
-        const res = await fetch(`/api/performance/alltime-pnl?plan=${profile.plan || 'free'}&joined_at=${profile.created_at}`);
+        const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
+        const res = await fetch(`/api/performance/alltime-pnl?plan=${profile.plan || 'free'}&joined_at=${oneYearAgo}&interval=${selectedInterval}`);
         if (res.ok) {
           const data = await res.json();
           setHeaderAllTimePnl(parseFloat(data.total_pnl_pct || 0).toFixed(2));
@@ -631,7 +632,7 @@ export default function TerminalPage() {
       }
     };
     fetchHeaderPnl();
-  }, [profile?.plan, profile?.created_at]);
+  }, [profile?.plan, profile?.created_at, selectedInterval]);
 
   // Live price poll
   const [livePrices, setLivePrices] = useState({});
@@ -687,7 +688,7 @@ export default function TerminalPage() {
     const fetchPerfHistory = async () => {
       try {
         setPerfLoading(true);
-        const res = await fetch(`/api/signals/history?symbol=${perfSymbol}&interval=${selectedInterval}&filter=${perfTimeFilter}`);
+        const res = await fetch(`/api/signals/history?symbol=${perfSymbol}&interval=${selectedInterval}&filter=${perfTimeFilter}&plan=${profile?.plan || 'free'}`);
         if (res.ok) {
           const data = await res.json();
           setPerfSignals(data);
@@ -699,7 +700,7 @@ export default function TerminalPage() {
       }
     };
     fetchPerfHistory();
-  }, [perfSymbol, selectedInterval, perfTimeFilter, logLoading]);
+  }, [perfSymbol, selectedInterval, perfTimeFilter, logLoading, profile?.plan]);
 
   // Compute stats dynamically based on performance signals
   const computedStats = useMemo(() => {

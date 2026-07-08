@@ -21,6 +21,18 @@ export async function GET(request) {
     symbol   = (searchParams.get('symbol')   || 'BTCUSDT').toUpperCase();
     interval = searchParams.get('interval')  || '15m';
     filter   = searchParams.get('filter') || '30d'; // '1y' | '6m' | '30d' | '1w' | 'today'
+    const plan = searchParams.get('plan') || 'free';
+
+    let allowedSymbols = ['BTCUSDT'];
+    if (plan === 'pro') {
+      allowedSymbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
+    } else if (plan === 'master') {
+      allowedSymbols = [
+        'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT',
+        'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT',
+        'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'
+      ];
+    }
 
     let query = supabaseAdmin
       .from('signals')
@@ -29,6 +41,8 @@ export async function GET(request) {
 
     if (symbol && symbol !== 'ALL') {
       query = query.eq('symbol', symbol.toUpperCase());
+    } else {
+      query = query.in('symbol', allowedSymbols);
     }
     if (interval) {
       query = query.eq('interval', interval);

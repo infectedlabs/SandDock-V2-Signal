@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
 /**
@@ -19,7 +19,8 @@ export default function HAChart({
   plan = 'free',
   onUpgradeGate,
   hideSymbolSelector = false,
-  activeSignal = null
+  activeSignal = null,
+  hideSignalCards = false
 }) {
   const { session } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -33,6 +34,28 @@ export default function HAChart({
   // Floating HTML signal cards state
   const [signalCards, setSignalCards] = useState([]);
   const sigsRef         = useRef([]);
+
+  const signalStats = useMemo(() => {
+    if (!activeSignal) return null;
+    const entryVal = parseFloat(activeSignal.entry_price);
+    const slVal = parseFloat(activeSignal.sl_price);
+    const tpVal = parseFloat(activeSignal.tp_price);
+    const isBuySignal = activeSignal.signal_type === 'buy';
+    const rawTpPct = ((tpVal - entryVal) / entryVal) * 100;
+    const rawSlPct = ((slVal - entryVal) / entryVal) * 100;
+    const tpPctVal = isBuySignal ? rawTpPct : -rawTpPct;
+    const slPctVal = isBuySignal ? rawSlPct : -rawSlPct;
+    return {
+      tpPct: tpPctVal.toFixed(1),
+      slPct: slPctVal.toFixed(1),
+      tpPctVal,
+      slPctVal,
+      entryVal,
+      slVal,
+      tpVal,
+      isBuySignal,
+    };
+  }, [activeSignal]);
   const livePriceRef    = useRef(null);
   // Holds the Lightweight Charts price-line that displays REAL last-trade
   // price on the right axis. HA close ≠ real price; this line overrides it.
@@ -163,7 +186,7 @@ export default function HAChart({
             ws.send(JSON.stringify({ action: 'subscribe', symbol: selectedSymbol, interval: selectedInterval }));
           }
         };
-        ws.onerror = (err) => console.error('[HAChart] WebSocket error:', err);
+        ws.onerror = (err) => console.warn('[HAChart] WebSocket connection error (retry pending):', err);
         ws.onclose = () => console.log('[HAChart] WebSocket disconnected.');
       }
 
@@ -268,17 +291,12 @@ export default function HAChart({
 
         // ── Active Signal-Specific Layers (Layer 1, 3, 6, 7) ──
         let signalBarTime = null;
-        if (activeSignal) {
-          const entryVal = parseFloat(activeSignal.entry_price);
-          const slVal = parseFloat(activeSignal.sl_price);
-          const tpVal = parseFloat(activeSignal.tp_price);
+        if (activeSignal && signalStats) {
+          const { entryVal, slVal, tpVal, tpPct, slPct, tpPctVal, slPctVal } = signalStats;
           
           signalBarTime = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000) + offsetSeconds;
           signalBarTimeRef.current = signalBarTime;
           lastCandleTimeRef.current = lastCandle.time;
-
-          const tpPct = (((tpVal - entryVal) / entryVal) * 100).toFixed(1);
-          const slPct = (((slVal - entryVal) / entryVal) * 100).toFixed(1);
 
           // Force price scale Y-axis range to fit all three levels (SL, Entry, TP) with padding
           const rangeBuffer = Math.abs(tpVal - slVal) * 0.15;
@@ -316,7 +334,7 @@ export default function HAChart({
             lineWidth: 1.5,
             lineStyle: lwc.LineStyle.Solid,
             axisLabelVisible: true,
-            title: `SL $${slVal.toLocaleString(undefined, {minimumFractionDigits:2})} (${slPct >= 0 ? '+' : ''}${slPct}%)`,
+            title: `SL $${slVal.toLocaleString(undefined, {minimumFractionDigits:2})} (${slPctVal >= 0 ? '+' : ''}${slPct}%)`,
           });
 
           candleSeries.createPriceLine({
@@ -325,7 +343,7 @@ export default function HAChart({
             lineWidth: 1.5,
             lineStyle: lwc.LineStyle.Solid,
             axisLabelVisible: true,
-            title: `TP $${tpVal.toLocaleString(undefined, {minimumFractionDigits:2})} (${tpPct >= 0 ? '+' : ''}${tpPct}%)`,
+            title: `TP $${tpVal.toLocaleString(undefined, {minimumFractionDigits:2})} (${tpPctVal >= 0 ? '+' : ''}${tpPct}%)`,
           });
 
           // Layer 1: Baseline fills for green profit and red risk zones (bound to right scale)
@@ -441,14 +459,7 @@ export default function HAChart({
               ? (new Date(s.bar_time).getTime() === new Date(activeSignal.created_at || activeSignal.bar_time).getTime()) 
               : (s.bar_time === latestBarTime);
             const isBuyType = s.signal_type === 'buy';
-            let markerText = '';
-            if (isCurrent) {
-              markerText = `${isBuyType ? 'BUY' : 'SELL'} fired · ${s.confidence}%`;
-            } else if (s.pnl !== null) {
-              markerText = `${isBuyType ? 'BUY' : 'SELL'} ${s.pnl >= 0 ? '+' : ''}${s.pnl}% · closed`;
-            } else {
-              markerText = isBuyType ? 'BUY' : 'SELL';
-            }
+            const markerText = isBuyType ? 'BUY' : 'SELL';
 
             return {
               time:       Math.floor(new Date(s.bar_time).getTime() / 1000) + offsetSeconds,
@@ -645,7 +656,7 @@ export default function HAChart({
         } catch (e) {}
       }
     };
-  }, [selectedSymbol, selectedInterval]);
+  }, [selectedSymbol, selectedInterval, activeSignal, signalStats]);
 
   const formatSymbolDisplay = (s) => s.replace('USDT', '/USDT');
 
@@ -773,7 +784,7 @@ export default function HAChart({
         )}
 
         {/* Floating HTML Label Cards Overlay */}
-        {!loading && !noData && signalCards.map((card) => {
+        {!loading && !noData && !hideSignalCards && signalCards.map((card) => {
           const isBuy = card.signal_type === 'buy';
           const pnlVal = card.displayPnl;
           const isClosed = card.pnl !== null;
@@ -800,11 +811,18 @@ export default function HAChart({
             >
               {/* Card Title Header */}
               <div className="flex items-center justify-between">
-                <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
-                  isBuy ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
-                }`}>
-                  {isBuy ? 'BUY' : 'SELL'}
-                </span>
+                <div className="flex flex-col items-start gap-1">
+                  <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
+                    isBuy ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                  }`}>
+                    {isBuy ? 'BUY' : 'SELL'}
+                  </span>
+                  {isClosed && (
+                    <span className="text-[7.5px] font-extrabold px-1 py-0.5 rounded bg-zinc-800 text-zinc-400 select-none uppercase tracking-wide leading-none">
+                      closed
+                    </span>
+                  )}
+                </div>
                 <span className={`text-[10px] font-mono font-bold ${
                   pnlVal === null ? 'text-cyan-400 animate-pulse' : pnlVal >= 0 ? 'text-emerald-400' : 'text-red-400'
                 }`}>
@@ -836,19 +854,29 @@ export default function HAChart({
                   1 : {(Math.abs(parseFloat(activeSignal.tp_price) - parseFloat(activeSignal.entry_price)) / Math.abs(parseFloat(activeSignal.entry_price) - parseFloat(activeSignal.sl_price)) || 1.0).toFixed(1)}
                 </div>
                 <div className="text-zinc-400 mt-0.5 font-bold">
-                  +{(((parseFloat(activeSignal.tp_price) - parseFloat(activeSignal.entry_price)) / parseFloat(activeSignal.entry_price)) * 100).toFixed(1)}% / {(((parseFloat(activeSignal.sl_price) - parseFloat(activeSignal.entry_price)) / parseFloat(activeSignal.entry_price)) * 100).toFixed(1)}%
+                  {signalStats ? `${signalStats.tpPctVal >= 0 ? '+' : ''}${signalStats.tpPct}% / ${signalStats.slPctVal >= 0 ? '+' : ''}${signalStats.slPct}%` : ''}
                 </div>
               </div>
               {livePriceRef.current && (
                 <div className="absolute left-6 top-6 z-30 bg-[#0b1224]/90 border border-slate-800/80 rounded px-3 py-2 font-mono text-[10px] shadow-2xl text-left select-none pointer-events-none select-none">
                   <div className="text-zinc-500 font-extrabold uppercase tracking-wider">Live Position Gain</div>
-                  <div className={`font-black text-[13px] mt-0.5 ${livePriceRef.current >= parseFloat(activeSignal.entry_price) ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
-                    {livePriceRef.current >= parseFloat(activeSignal.entry_price) ? '+' : ''}
-                    {(((livePriceRef.current - parseFloat(activeSignal.entry_price)) / parseFloat(activeSignal.entry_price)) * 100).toFixed(2)}%
-                  </div>
-                  <div className="text-zinc-400 mt-0.5 font-bold">
-                    {livePriceRef.current >= parseFloat(activeSignal.entry_price) ? 'Profit' : 'Loss'}: ${(livePriceRef.current - parseFloat(activeSignal.entry_price)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                  </div>
+                  {(() => {
+                    const isBuy = activeSignal.signal_type === 'buy';
+                    const diff = livePriceRef.current - parseFloat(activeSignal.entry_price);
+                    const pnlPct = (isBuy ? (diff / parseFloat(activeSignal.entry_price)) : (-diff / parseFloat(activeSignal.entry_price))) * 100;
+                    const isProfit = pnlPct >= 0;
+                    const absVal = Math.abs(diff);
+                    return (
+                      <>
+                        <div className={`font-black text-[13px] mt-0.5 ${isProfit ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
+                          {isProfit ? '+' : ''}{pnlPct.toFixed(2)}%
+                        </div>
+                        <div className="text-zinc-400 mt-0.5 font-bold">
+                          {isProfit ? 'Profit' : 'Loss'}: {isProfit ? '' : '-'}${absVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </>
