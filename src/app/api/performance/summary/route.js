@@ -81,6 +81,18 @@ export async function GET(request) {
       best_trade: bestTrade,
       worst_trade: worstTrade,
       profit_factor: profitFactor,
+      // Quality targets (V2 optimized)
+      quality_targets: {
+        signals_per_day: '2-4',
+        daily_pnl_target: '+3%',
+        weekly_pnl_target: '+15%',
+        min_win_rate: '70%',
+        leverage: '1x',
+      },
+      quality_status: {
+        meets_win_rate: parseFloat(winRate) > 70 ? '✓ YES' : '✗ NO',
+        win_rate_pct: winRate,
+      },
     };
 
     return NextResponse.json(payload, {

@@ -1,9 +1,15 @@
-// Heikin Ashi + Swing Detection JS Translation matching python signal_engine.py
+// Heikin Ashi + Quality Filter Signal Engine (V2 - Optimized)
+// Target: 2-4 signals/day per coin, +3% daily PnL, +15% weekly, >70% win rate
 
-const STYLE_CONFIG = {
-  Scalp:    { atr_mult: 1.0, tp1_mult: 0.5, tp2_mult: 1.0 },
-  Intraday: { atr_mult: 1.5, tp1_mult: 2.0, tp2_mult: 4.0 },
-  Swing:    { atr_mult: 2.0, tp1_mult: 2.5, tp2_mult: 5.0 },
+const QUALITY_CONFIG = {
+  BB_DEVIATION: 2.0,           // Stricter Bollinger Bands
+  BB_LOOKBACK: 20,             // 20-period SMA
+  SL_PCT: 1.0,                 // Tight stop loss
+  TP_PCT: 2.0,                 // Better risk/reward ratio
+  MIN_VOLUME_PCT: 1.2,         // Volume 120%+ of average
+  MIN_RSI_DIVERGENCE: 8,       // Momentum threshold
+  MAX_SIGNALS_PER_DAY: 4,      // Quality over quantity
+  MIN_BARS_BETWEEN_SIGNALS: 3, // Space signals by 3+ bars
 };
 
 export function toHeikinAshi(candles) {
@@ -35,58 +41,97 @@ export function toHeikinAshi(candles) {
   return ha;
 }
 
+// Calculate momentum (RSI-like)
+function calculateMomentum(ha, period = 14) {
+  const momentum = new Array(ha.length).fill(0);
+  for (let i = period; i < ha.length; i++) {
+    const change = ((ha[i].close - ha[i - period].close) / ha[i - period].close) * 100;
+    momentum[i] = change;
+  }
+  return momentum;
+}
+
+// Calculate average volume
+function calculateAvgVolume(ha, period = 20) {
+  const avgVol = new Array(ha.length).fill(0);
+  for (let i = period - 1; i < ha.length; i++) {
+    const slice = ha.slice(i - period + 1, i + 1);
+    avgVol[i] = slice.reduce((sum, c) => sum + c.volume, 0) / period;
+  }
+  return avgVol;
+}
+
 export function detectSwings(ha, lookback, style = 'Intraday', interval = '15m') {
-  if (!ha || ha.length < 20) return [];
+  if (!ha || ha.length < 50) return [];
   const events = [];
-  
+
   const n = ha.length;
+  const cfg = QUALITY_CONFIG;
   const upper = new Array(n).fill(null);
   const lower = new Array(n).fill(null);
-  
-  for (let i = 19; i < n; i++) {
-    const slice = ha.slice(i - 19, i + 1);
+  const momentum = calculateMomentum(ha, 14);
+  const avgVolume = calculateAvgVolume(ha, 20);
+
+  // Calculate stricter Bollinger Bands
+  for (let i = cfg.BB_LOOKBACK - 1; i < n; i++) {
+    const slice = ha.slice(i - cfg.BB_LOOKBACK + 1, i + 1);
     const closes = slice.map(c => c.close);
-    const sum = closes.reduce((acc, c) => acc + c, 0);
-    const sma = sum / 20;
-    const variance = closes.reduce((acc, c) => acc + Math.pow(c - sma, 2), 0) / 20;
+    const sma = closes.reduce((acc, c) => acc + c, 0) / cfg.BB_LOOKBACK;
+    const variance = closes.reduce((acc, c) => acc + Math.pow(c - sma, 2), 0) / cfg.BB_LOOKBACK;
     const std = Math.sqrt(variance);
-    upper[i] = sma + std * 1.6;
-    lower[i] = sma - std * 1.6;
+    upper[i] = sma + std * cfg.BB_DEVIATION;
+    lower[i] = sma - std * cfg.BB_DEVIATION;
   }
-  
-  let position = null;
-  
-  for (let i = 19; i < n; i++) {
+
+  let lastSignalIdx = -100;
+  const signalsByDay = {};
+
+  for (let i = cfg.BB_LOOKBACK; i < n; i++) {
     const close = ha[i].close;
     const up = upper[i];
     const lo = lower[i];
+    const vol = ha[i].volume || 0;
+    const avgVol = avgVolume[i] || 1;
+    const mom = momentum[i];
+
     if (up === null || lo === null) continue;
-    
-    if (close <= lo && position !== 'LONG') {
+    if (i - lastSignalIdx < cfg.MIN_BARS_BETWEEN_SIGNALS) continue;
+
+    // Track signals per day
+    const dayKey = new Date(ha[i].open_time).toISOString().split('T')[0];
+    if (!signalsByDay[dayKey]) signalsByDay[dayKey] = 0;
+    if (signalsByDay[dayKey] >= cfg.MAX_SIGNALS_PER_DAY) continue;
+
+    // Buy: Lower BB + volume + bearish momentum
+    if (close <= lo && vol >= avgVol * cfg.MIN_VOLUME_PCT && mom < -cfg.MIN_RSI_DIVERGENCE) {
       events.push({
         bar_time:  ha[i].open_time,
         type:      'bot',
         price:     close,
         action:    'new',
-        sl_price:  Number((close * (1 - 1.5 / 100)).toFixed(8)),
-        tp1_price: Number((close * (1 + 0.75 / 100)).toFixed(8)),
-        tp2_price: Number((close * (1 + 1.5 / 100)).toFixed(8)),
+        sl_price:  Number((close * (1 - cfg.SL_PCT / 100)).toFixed(8)),
+        tp1_price: Number((close * (1 + cfg.TP_PCT / 100)).toFixed(8)),
+        tp2_price: Number((close * (1 + cfg.TP_PCT / 100)).toFixed(8)),
       });
-      position = 'LONG';
-    } else if (close >= up && position !== 'SHORT') {
+      signalsByDay[dayKey]++;
+      lastSignalIdx = i;
+    }
+    // Sell: Upper BB + volume + bullish momentum
+    else if (close >= up && vol >= avgVol * cfg.MIN_VOLUME_PCT && mom > cfg.MIN_RSI_DIVERGENCE) {
       events.push({
         bar_time:  ha[i].open_time,
         type:      'top',
         price:     close,
         action:    'new',
-        sl_price:  Number((close * (1 + 1.5 / 100)).toFixed(8)),
-        tp1_price: Number((close * (1 - 0.75 / 100)).toFixed(8)),
-        tp2_price: Number((close * (1 - 1.5 / 100)).toFixed(8)),
+        sl_price:  Number((close * (1 + cfg.SL_PCT / 100)).toFixed(8)),
+        tp1_price: Number((close * (1 - cfg.TP_PCT / 100)).toFixed(8)),
+        tp2_price: Number((close * (1 - cfg.TP_PCT / 100)).toFixed(8)),
       });
-      position = 'SHORT';
+      signalsByDay[dayKey]++;
+      lastSignalIdx = i;
     }
   }
-  
+
   return events;
 }
 
