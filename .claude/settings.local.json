@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:3000/api/performance/summary?symbol=BTCUSDT&interval=15m\" -UseBasicParsing)"
+    ]
+  }
+}
