@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 const PLAN_SYMBOLS = {
   free:   ['BTCUSDT'],
   pro:    ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
-  master: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT', 'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT', 'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'],
+  master: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
 };
 
 import { fetchFromBinance } from '@/lib/binanceFallback';
@@ -78,7 +78,7 @@ export async function GET(request) {
 
     const allSignals = [];
 
-    const timeframes = ['15m', '1h', '4h'];
+    const timeframes = ['15m', '30m', '1h', '4h'];
 
     await Promise.all(targetSymbols.flatMap((sym) =>
       timeframes.map(async (tf) => {

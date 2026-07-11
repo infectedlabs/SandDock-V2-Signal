@@ -28,17 +28,9 @@ export async function GET(request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Compute trial days remaining
+    // Trial status features are permanently disabled
     let trialDaysRemaining = null;
-    if (profile.plan === 'free' && profile.trial_ends_at) {
-      const msLeft = new Date(profile.trial_ends_at).getTime() - Date.now();
-      trialDaysRemaining = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
-    }
-
-    const isTrialExpired =
-      profile.plan === 'free' &&
-      profile.trial_ends_at &&
-      new Date() > new Date(profile.trial_ends_at);
+    const isTrialExpired = false;
 
     // Fetch recent payment history
     const { data: payments } = await supabase

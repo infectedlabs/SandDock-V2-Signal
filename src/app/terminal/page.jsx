@@ -67,19 +67,7 @@ const ALL_COINS = [
   { value: 'ALL', label: 'Overall (All Coins)' },
   { value: 'BTCUSDT', label: 'Bitcoin (BTC)' },
   { value: 'ETHUSDT', label: 'Ethereum (ETH)' },
-  { value: 'BNBUSDT', label: 'BNB (BNB)' },
-  { value: 'XRPUSDT', label: 'XRP (XRP)' },
-  { value: 'SOLUSDT', label: 'Solana (SOL)' },
-  { value: 'TRXUSDT', label: 'Tron (TRX)' },
-  { value: 'DOGEUSDT', label: 'Dogecoin (DOGE)' },
-  { value: 'HBARUSDT', label: 'Hedera (HBAR)' },
-  { value: 'UNIUSDT', label: 'Uniswap (UNI)' },
-  { value: 'SUIUSDT', label: 'Sui (SUI)' },
-  { value: 'AVAXUSDT', label: 'Avalanche (AVAX)' },
-  { value: 'AAVEUSDT', label: 'Aave (AAVE)' },
-  { value: 'JUPUSDT', label: 'Jupiter (JUP)' },
-  { value: 'PUMPUSDT', label: 'Pump.fun (PUMP)' },
-  { value: 'ARBUSDT', label: 'Arbitrum (ARB)' }
+  { value: 'BNBUSDT', label: 'BNB (BNB)' }
 ];
 
 function formatPrice(val, profile) {
@@ -599,9 +587,15 @@ export default function TerminalPage() {
   const [tgStatus, setTgStatus] = useState(''); // 'loading' | 'success' | 'error'
   const [isTelegramChannelJoined, setIsTelegramChannelJoined] = useState(false);
 
+  const [showFreeSuccessModal, setShowFreeSuccessModal] = useState(false);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsTelegramChannelJoined(localStorage.getItem('sanddock_tg_channel_joined') === 'true');
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('signup_success') === 'true') {
+        setShowFreeSuccessModal(true);
+      }
     }
   }, []);
   const [upgradeModal,      setUpgradeModal]       = useState(false);
@@ -761,7 +755,7 @@ export default function TerminalPage() {
     const fetchPerfHistory = async () => {
       try {
         setPerfLoading(true);
-        const res = await fetch(`/api/signals/history?symbol=${perfSymbol}&interval=${selectedInterval}&filter=${perfTimeFilter}&plan=${profile?.plan || 'free'}`);
+        const res = await fetch(`/api/signals/history?symbol=${perfSymbol}&interval=${selectedInterval}&filter=${perfTimeFilter}&plan=${profile?.plan || 'free'}&timezone=${profile?.timezone || 'UTC'}`);
         if (res.ok) {
           const data = await res.json();
           setPerfSignals(data);
@@ -913,13 +907,9 @@ export default function TerminalPage() {
   const isFreePlan = profile?.plan === 'free';
   const userPlan = profile?.plan || 'free';
 
-  // Trial expiry
-  const isTrialExpired = isFreePlan && profile?.trial_ends_at && new Date() > new Date(profile.trial_ends_at);
-  const trialDaysRemaining = useMemo(() => {
-    if (!isFreePlan || !profile?.trial_ends_at) return null;
-    const msLeft = new Date(profile.trial_ends_at).getTime() - Date.now();
-    return Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
-  }, [isFreePlan, profile?.trial_ends_at]);
+  // Trial features are permanently disabled
+  const isTrialExpired = false;
+  const trialDaysRemaining = null;
 
   const teaserCoins = useMemo(() => {
     if (userPlan === 'free') {
@@ -1381,38 +1371,7 @@ export default function TerminalPage() {
                   </div>
                 </div>
 
-                {/* Trial expiry fullscreen prompt */}
-                {isTrialExpired && (
-                  <div className="mx-4 mt-4 bg-gradient-to-r from-red-900/30 to-[#0b1224] border border-red-700/40 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                        <span className="text-[11px] font-mono font-bold text-red-400 uppercase tracking-widest">Free Trial Expired</span>
-                      </div>
-                      <p className="text-sm font-bold text-white">Your 7-day free trial has ended.</p>
-                      <p className="text-[12px] text-zinc-400 leading-relaxed">Upgrade to Pro to restore live signals, SL/TP levels, ETH & BNB coverage, and Telegram alerts. Closed signals below remain accessible.</p>
-                    </div>
-                    <a href="/pricing" className="shrink-0 px-5 py-2.5 bg-brand-orange text-white font-bold text-[11px] uppercase tracking-widest rounded-xl hover:bg-white hover:text-black transition-all">
-                      Upgrade Now →
-                    </a>
-                  </div>
-                )}
 
-                {isFreePlan && !isTrialExpired && bannerVisible && (
-                  <div className="bg-brand-orange text-white px-4 py-2.5 flex justify-between items-center text-[12px] font-bold uppercase tracking-wider">
-                    <span>
-                      ⚡ Free Trial - {trialDaysRemaining !== null ? `${trialDaysRemaining} day${trialDaysRemaining !== 1 ? 's' : ''} left` : 'BTC signals only'}. Unlock ETH, BNB, SL/TP &amp; Telegram alerts.{' '}
-                      <a href="/pricing"
-                        className="underline font-extrabold hover:text-zinc-200 ml-1">
-                        Upgrade →
-                      </a>
-                    </span>
-                    <button onClick={() => { setBannerVisible(false); localStorage.setItem('sanddock_free_banner_dismissed', 'true'); }}
-                      className="text-white font-bold hover:text-zinc-300 text-[16px] cursor-pointer bg-transparent border-0 p-0 ml-4">
-                      &times;
-                    </button>
-                  </div>
-                )}
 
                 {/* Filters */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 bg-[#070b16]/40 border border-slate-800/50 rounded-2xl">
@@ -1427,10 +1386,9 @@ export default function TerminalPage() {
                         </button>
                       ))}
                     </div>
-
                     <div className="flex p-0.5 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                      {['15m', '1h', '4h'].map(tf => {
-                        const locked = isFreePlan && (tf === '1h' || tf === '4h');
+                      {['15m', '30m', '1h', '4h'].map(tf => {
+                        const locked = false;
                         return (
                           <button key={tf}
                             onClick={() => locked ? triggerUpgradeGate('Timeframe Locked', '1H and 4H timeframes are Pro features.') : setSelectedInterval(tf)}
@@ -1751,14 +1709,14 @@ export default function TerminalPage() {
                   <div className="flex items-center gap-3">
                     {/* Timeframe Selector Filter */}
                     <div className="flex p-0.5 bg-slate-950/40 rounded-lg border border-[#1e2d4a]/30">
-                      {['15m', '1h', '4h'].map(tf => {
-                        const locked = isFreePlan && (tf === '1h' || tf === '4h');
+                      {['15m', '30m', '1h', '4h'].map(tf => {
+                        const locked = false;
                         return (
                           <button key={tf}
                             onClick={() => locked ? triggerUpgradeGate('Timeframe Locked', '1H and 4H timeframes are Pro features.') : setSelectedInterval(tf)}
                             className={`px-3 py-1.5 rounded-md text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer border-0 flex items-center gap-1 ${
-                              selectedInterval === tf 
-                                ? 'bg-[#3D5AFE] text-white shadow-md' 
+                              selectedInterval === tf
+                                ? 'bg-[#3D5AFE] text-white shadow-md'
                                 : 'text-zinc-500 hover:text-white bg-transparent'
                             }`}>
                             {tf} {locked && <span className="text-[#3D5AFE] text-[10px]">🔒</span>}
@@ -1896,14 +1854,14 @@ export default function TerminalPage() {
 
                         {/* Timeframe Interval Selector */}
                         <div className="flex gap-1 border-r border-slate-800/80 pr-3 mr-1">
-                          {['15m', '1h', '4h'].map(tf => {
-                            const locked = isFreePlan && (tf === '1h' || tf === '4h');
+                          {['15m', '30m', '1h', '4h'].map(tf => {
+                            const locked = false;
                             return (
                               <button key={tf}
                                 onClick={() => locked ? triggerUpgradeGate('Timeframe Locked', '1H and 4H timeframes are Pro features.') : setSelectedInterval(tf)}
                                 className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer border-0 flex items-center gap-1 ${
-                                  selectedInterval === tf 
-                                    ? 'bg-[#3D5AFE] text-white shadow-md' 
+                                  selectedInterval === tf
+                                    ? 'bg-[#3D5AFE] text-white shadow-md'
                                     : 'text-zinc-500 hover:text-white bg-transparent'
                                 }`}>
                                 {tf} {locked && <span className="text-[#3D5AFE] text-[10px]">🔒</span>}
@@ -2366,130 +2324,172 @@ export default function TerminalPage() {
                     <div className="p-4 bg-[#090e1a] border border-zinc-800 space-y-3 font-mono text-xs">
                       <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Telegram Integration</span>
                       
-                      {/* If Free Plan */}
-                      {isFreePlan ? (
-                        <div className="flex justify-between items-center gap-2">
-                          <span className="text-zinc-400 text-[11px]">Telegram pairing is locked.</span>
-                          <button type="button"
-                            onClick={() => triggerUpgradeGate('Telegram Alerts Locked', 'Telegram alerts are available on Pro and Master tiers.')}
-                            className="py-1.5 px-3.5 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0">
-                            Pair Bot 🔒
-                          </button>
+                      <div className="space-y-4">
+                        
+                        {/* Step 1: Link Account */}
+                        <div className="flex justify-between items-center gap-2 border-b border-zinc-900 pb-2">
+                          <div>
+                            <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 1: Link account</span>
+                            {profile.telegram_chat_id ? (
+                              <span className="text-[#00e676] font-bold">● Connected — @ghuruprasaath</span>
+                            ) : (
+                              <span className="text-zinc-400">○ Not linked</span>
+                            )}
+                          </div>
+                          {!profile.telegram_chat_id && tgPairingStep === 1 && (
+                            <button type="button" onClick={() => setTgPairingStep(2)}
+                              className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0">
+                              Link Telegram
+                            </button>
+                          )}
                         </div>
-                      ) : (
-                        /* Paid Plan: Two-step pairing */
-                        <div className="space-y-4">
-                          
-                          {/* Step 1: Link Account */}
-                          <div className="flex justify-between items-center gap-2 border-b border-zinc-900 pb-2">
-                            <div>
-                              <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 1: Link account</span>
-                              {profile.telegram_chat_id ? (
-                                <span className="text-[#00e676] font-bold">● Connected — @ghuruprasaath</span>
-                              ) : (
-                                <span className="text-zinc-400">○ Not linked</span>
-                              )}
-                            </div>
-                            {!profile.telegram_chat_id && tgPairingStep === 1 && (
-                              <button type="button" onClick={() => setTgPairingStep(2)}
-                                className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0">
-                                Link Telegram
+
+                        {/* Interactive Verification code entry if in step 2 */}
+                        {!profile.telegram_chat_id && tgPairingStep === 2 && (
+                          <div className="p-3 bg-zinc-900/60 border border-zinc-800 space-y-2.5">
+                            <span className="block text-[10px] text-zinc-400 font-bold">Enter pairing code from @SanddockBot:</span>
+                            <div className="flex gap-1.5 items-center justify-between flex-wrap">
+                              <div className="flex gap-1">
+                                {tgPairingCode.map((char, index) => (
+                                  <input key={index} id={`tg-code-${index}`} type="text" maxLength="1" value={char}
+                                    onChange={e => {
+                                      const newCode = [...tgPairingCode];
+                                      newCode[index] = e.target.value.slice(-1);
+                                      setTgPairingCode(newCode);
+                                      if (e.target.value && index < 5) {
+                                        document.getElementById(`tg-code-${index + 1}`)?.focus();
+                                      }
+                                    }}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Backspace' && !tgPairingCode[index] && index > 0) {
+                                        document.getElementById(`tg-code-${index - 1}`)?.focus();
+                                      }
+                                    }}
+                                    className="w-8 h-9 bg-slate-950 border border-zinc-800 text-center text-sm font-bold text-white focus:outline-none focus:border-brand-orange" />
+                                ))}
+                              </div>
+                              <button type="button"
+                                onClick={() => {
+                                  setTgStatus('loading');
+                                  setTimeout(() => {
+                                    setTgStatus('success');
+                                    setTimeout(async () => {
+                                      await updateProfile({ telegram_chat_id: 'mock-tg-chat-9988' });
+                                      setTgPairingStep(1);
+                                      setTgStatus('');
+                                    }, 1000);
+                                  }, 1000);
+                                }}
+                                disabled={tgPairingCode.some(c => !c) || tgStatus === 'loading'}
+                                className="py-1.5 px-3 bg-[#00e676] hover:bg-emerald-600 text-black font-bold text-[10px] uppercase tracking-widest cursor-pointer disabled:opacity-40">
+                                {tgStatus === 'loading' ? 'Verifying...' : 'Verify'}
                               </button>
+                            </div>
+                            {tgStatus === 'success' && <div className="text-[10px] text-emerald-400 font-bold">✅ Success! Account linked.</div>}
+                          </div>
+                        )}
+
+                        {/* Step 2: Join Channel */}
+                        <div className="flex justify-between items-center gap-2">
+                          <div>
+                            {isFreePlan ? (
+                              <>
+                                <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 2: Join Free BTC Group</span>
+                                {!profile.telegram_chat_id ? (
+                                  <span className="text-zinc-500 font-bold">Waiting for Step 1</span>
+                                ) : isTelegramChannelJoined ? (
+                                  <span className="text-[#00e676] font-bold">Member of Sanddock Free BTC Group</span>
+                                ) : (
+                                  <span className="text-zinc-400 font-bold">Not joined</span>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 2: Join {profile.plan === 'lifetime' ? 'GrandMaster' : profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)} Channel</span>
+                                {!profile.telegram_chat_id ? (
+                                  <span className="text-zinc-500 font-bold">Waiting for Step 1</span>
+                                ) : profile.telegram_invite_claimed ? (
+                                  <span className="text-[#00e676] font-bold">Private link generated (1/1 claimed)</span>
+                                ) : (
+                                  <span className="text-zinc-400 font-bold">Invite not claimed yet</span>
+                                )}
+                              </>
                             )}
                           </div>
 
-                          {/* Interactive Verification code entry if in step 2 */}
-                          {!profile.telegram_chat_id && tgPairingStep === 2 && (
-                            <div className="p-3 bg-zinc-900/60 border border-zinc-800 space-y-2.5">
-                              <span className="block text-[10px] text-zinc-400 font-bold">Enter pairing code from @SanddockBot:</span>
-                              <div className="flex gap-1.5 items-center justify-between flex-wrap">
-                                <div className="flex gap-1">
-                                  {tgPairingCode.map((char, index) => (
-                                    <input key={index} id={`tg-code-${index}`} type="text" maxLength="1" value={char}
-                                      onChange={e => {
-                                        const newCode = [...tgPairingCode];
-                                        newCode[index] = e.target.value.slice(-1);
-                                        setTgPairingCode(newCode);
-                                        if (e.target.value && index < 5) {
-                                          document.getElementById(`tg-code-${index + 1}`)?.focus();
-                                        }
-                                      }}
-                                      onKeyDown={e => {
-                                        if (e.key === 'Backspace' && !tgPairingCode[index] && index > 0) {
-                                          document.getElementById(`tg-code-${index - 1}`)?.focus();
-                                        }
-                                      }}
-                                      className="w-8 h-9 bg-slate-950 border border-zinc-800 text-center text-sm font-bold text-white focus:outline-none focus:border-brand-orange" />
-                                  ))}
-                                </div>
-                                <button type="button"
+                          {profile.telegram_chat_id && (
+                            isFreePlan ? (
+                              !isTelegramChannelJoined && (
+                                <a href="https://t.me/sanddock_free_btc"
+                                  target="_blank" rel="noopener noreferrer"
                                   onClick={() => {
-                                    setTgStatus('loading');
-                                    setTimeout(() => {
-                                      setTgStatus('success');
-                                      setTimeout(async () => {
-                                        await updateProfile({ telegram_chat_id: 'mock-tg-chat-9988' });
-                                        setTgPairingStep(1);
-                                        setTgStatus('');
-                                      }, 1000);
-                                    }, 1000);
+                                    setIsTelegramChannelJoined(true);
+                                    localStorage.setItem('sanddock_tg_channel_joined', 'true');
                                   }}
-                                  disabled={tgPairingCode.some(c => !c) || tgStatus === 'loading'}
-                                  className="py-1.5 px-3 bg-[#00e676] hover:bg-emerald-600 text-black font-bold text-[10px] uppercase tracking-widest cursor-pointer disabled:opacity-40">
-                                  {tgStatus === 'loading' ? 'Verifying...' : 'Verify'}
-                                </button>
-                              </div>
-                              {tgStatus === 'success' && <div className="text-[10px] text-emerald-400 font-bold">✅ Success! Account linked.</div>}
-                            </div>
-                          )}
-
-                          {/* Step 2: Join Channel */}
-                          <div className="flex justify-between items-center gap-2">
-                            <div>
-                              <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 2: Join channel</span>
-                              {!profile.telegram_chat_id ? (
-                                <span className="text-zinc-500">○ Waiting for Step 1</span>
-                              ) : isTelegramChannelJoined ? (
-                                <span className="text-[#00e676] font-bold">✓ Member of Sanddock {profile.plan === 'master' ? 'Master' : 'Pro'} Signals</span>
-                              ) : (
-                                <span className="text-zinc-400">○ Not joined</span>
-                              )}
-                            </div>
-                            {profile.telegram_chat_id && !isTelegramChannelJoined && (
-                              <a href={profile.plan === 'master' ? 'https://t.me/sanddock_master' : 'https://t.me/sanddock_pro'}
-                                target="_blank" rel="noopener noreferrer"
-                                onClick={() => {
+                                  className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0 text-center select-none no-underline">
+                                  Join Group
+                                </a>
+                              )
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  let link = profile.telegram_invite_link;
+                                  if (!profile.telegram_invite_claimed) {
+                                    const randSuffix = Math.random().toString(36).substring(2, 9);
+                                    link = `https://t.me/joinchat/sanddock_${profile.plan}_private_invite_${randSuffix}`;
+                                    await updateProfile({
+                                      telegram_invite_claimed: true,
+                                      telegram_invite_link: link
+                                    });
+                                  }
                                   setIsTelegramChannelJoined(true);
                                   localStorage.setItem('sanddock_tg_channel_joined', 'true');
+                                  window.open(link, '_blank');
                                 }}
-                                className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0 text-center select-none no-underline">
-                                Join Channel
-                              </a>
-                            )}
-                          </div>
-
-                          {/* If fully linked and joined: show view channel and disconnect */}
-                          {profile.telegram_chat_id && isTelegramChannelJoined && (
-                            <div className="flex gap-2 pt-2 border-t border-zinc-900">
-                              <a href={profile.plan === 'master' ? 'https://t.me/sanddock_master' : 'https://t.me/sanddock_pro'}
-                                target="_blank" rel="noopener noreferrer"
-                                className="py-1.5 px-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-bold text-[10px] uppercase tracking-wider text-center select-none no-underline">
-                                View Channel &rarr;
-                              </a>
-                              <button type="button"
-                                onClick={async () => {
-                                  await updateProfile({ telegram_chat_id: null });
-                                  setIsTelegramChannelJoined(false);
-                                  localStorage.removeItem('sanddock_tg_channel_joined');
-                                }}
-                                className="py-1.5 px-3 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 font-bold text-[10px] uppercase tracking-wider cursor-pointer">
-                                Disconnect
+                                className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0"
+                              >
+                                {profile.telegram_invite_claimed ? 'Open Channel' : 'Claim invite & Join'}
                               </button>
-                            </div>
+                            )
                           )}
-
                         </div>
-                      )}
+
+                        {/* Invitation link display for paid users */}
+                        {!isFreePlan && profile.telegram_invite_claimed && (
+                          <div className="p-2.5 bg-zinc-950 border border-zinc-800 break-all text-[11px] text-zinc-300">
+                            <span className="block text-[9px] text-zinc-500 font-bold uppercase">Your 1-time Invite Link:</span>
+                            <a href={profile.telegram_invite_link} target="_blank" rel="noopener noreferrer" className="text-[#3D5AFE] hover:underline">
+                              {profile.telegram_invite_link}
+                            </a>
+                          </div>
+                        )}
+
+                        {/* If fully linked and joined: show view and disconnect */}
+                        {profile.telegram_chat_id && (isFreePlan ? isTelegramChannelJoined : profile.telegram_invite_claimed) && (
+                          <div className="flex gap-2 pt-2 border-t border-zinc-900">
+                            <a href={isFreePlan ? 'https://t.me/sanddock_free_btc' : profile.telegram_invite_link}
+                              target="_blank" rel="noopener noreferrer"
+                              className="py-1.5 px-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-bold text-[10px] uppercase tracking-wider text-center select-none no-underline">
+                              View {isFreePlan ? 'Group' : 'Channel'} &rarr;
+                            </a>
+                            <button type="button"
+                              onClick={async () => {
+                                await updateProfile({
+                                  telegram_chat_id: null,
+                                  telegram_invite_claimed: false,
+                                  telegram_invite_link: null
+                                });
+                                setIsTelegramChannelJoined(false);
+                                localStorage.removeItem('sanddock_tg_channel_joined');
+                              }}
+                              className="py-1.5 px-3 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 font-bold text-[10px] uppercase tracking-wider cursor-pointer">
+                              Disconnect
+                            </button>
+                          </div>
+                        )}
+
+                      </div>
                     </div>
 
                     {/* Email Notifications List */}
@@ -2623,6 +2623,62 @@ export default function TerminalPage() {
               <button onClick={() => setUpgradeModal(false)}
                 className="px-4 py-3 border border-zinc-800 bg-transparent hover:bg-[#111827] hover:text-white text-[13px] font-bold text-zinc-400 uppercase tracking-widest transition-colors cursor-pointer">
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SIGNUP SUCCESS MODAL */}
+      {showFreeSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div onClick={() => {
+            setShowFreeSuccessModal(false);
+            router.replace('/terminal');
+          }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="relative w-full max-w-md bg-[#0d1426] border border-zinc-800 p-7 shadow-2xl space-y-5 z-10 text-left">
+            <button onClick={() => {
+              setShowFreeSuccessModal(false);
+              router.replace('/terminal');
+            }}
+              className="absolute top-4 right-4 text-zinc-500 hover:text-white text-[20px] font-bold font-mono bg-transparent border-0 cursor-pointer">
+              &times;
+            </button>
+            <div className="space-y-1.5 text-center">
+              <span className="text-4xl block mb-2">Success!</span>
+              <span className="text-[11px] font-mono font-bold text-brand-orange uppercase tracking-wider">Welcome to Sanddock</span>
+              <h3 className="text-[20px] font-extrabold uppercase tracking-tight text-white">Account Created Successfully!</h3>
+              <p className="text-[13px] text-zinc-400 leading-relaxed normal-case">
+                You now have unlimited access to live BTC/USDT signals, AI explanations, and chart setups.
+              </p>
+            </div>
+            
+            <div className="p-4 bg-zinc-950 border border-zinc-900 space-y-3">
+              <span className="block text-[12px] font-bold text-white uppercase tracking-wider">Join Public Alerts Group</span>
+              <p className="text-[12px] text-zinc-400 normal-case leading-relaxed">
+                Connect with our public channel to receive real-time BTC alert updates directly in Telegram.
+              </p>
+              <a
+                href="https://t.me/sanddock_free_btc"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  setIsTelegramChannelJoined(true);
+                  localStorage.setItem('sanddock_tg_channel_joined', 'true');
+                }}
+                className="block text-center py-2 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[11px] uppercase tracking-wider transition-colors cursor-pointer select-none no-underline"
+              >
+                Join Free BTC Alerts Group &rarr;
+              </a>
+            </div>
+
+            <div className="flex pt-1">
+              <button onClick={() => {
+                setShowFreeSuccessModal(false);
+                router.replace('/terminal');
+              }}
+                className="flex-1 py-3 bg-white hover:bg-zinc-200 text-black font-bold text-[11px] uppercase tracking-widest transition-colors cursor-pointer border-0">
+                Go to Dashboard
               </button>
             </div>
           </div>

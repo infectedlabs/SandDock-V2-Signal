@@ -28,14 +28,12 @@ export async function GET(request) {
     const supabase = createAdminClient();
     const now = new Date().toISOString();
 
-    // Find paid users whose subscription period has ended
+    // Find paid users whose subscription period has ended or who are explicitly marked expired
     const { data: expiredUsers, error: fetchError } = await supabase
       .from('profiles')
       .select('id, email, plan, current_period_end, subscription_status')
-      .in('plan', ['pro', 'master'])
-      .not('subscription_status', 'eq', 'lifetime')
-      .lt('current_period_end', now)
-      .not('current_period_end', 'is', null);
+      .in('plan', ['pro', 'master', 'lifetime'])
+      .or(`subscription_status.eq.expired,current_period_end.lt.${now}`);
 
     if (fetchError) {
       console.error('[Expiry Check] Fetch error:', fetchError.message);
@@ -47,9 +45,14 @@ export async function GET(request) {
       return NextResponse.json({ downgraded: 0, message: 'No expired subscriptions.' });
     }
 
-    console.log(`[Expiry Check] Found ${expiredUsers.length} expired subscription(s). Downgrading...`);
+    console.log(`[Expiry Check] Found ${expiredUsers.length} expired subscription(s). Downgrading and evicting from channels...`);
 
     const ids = expiredUsers.map((u) => u.id);
+
+    // Eviction logging
+    expiredUsers.forEach(u => {
+      console.log(`[Telegram Bot] Evicting user ${u.id} (${u.email}) from paid ${u.plan} Telegram channel due to plan expiry.`);
+    });
 
     const { error: updateError } = await supabase
       .from('profiles')
@@ -57,8 +60,10 @@ export async function GET(request) {
         plan:                'free',
         subscription_status: 'expired',
         current_period_end:  null,
-        // Set trial_ends_at in the past so they can't use trial features either
-        trial_ends_at: new Date(Date.now() - 1).toISOString(),
+        trial_ends_at:       null,
+        telegram_chat_id:    null,
+        telegram_invite_link: null,
+        telegram_invite_claimed: false
       })
       .in('id', ids);
 

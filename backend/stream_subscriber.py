@@ -25,9 +25,7 @@ DB_URL     = os.getenv("DATABASE_URL")
 
 # List of active symbols
 SYMBOLS = [
-    "BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "SOLUSDT", 
-    "TRXUSDT", "DOGEUSDT", "HBARUSDT", "UNIUSDT", "SUIUSDT", 
-    "AVAXUSDT", "AAVEUSDT", "JUPUSDT", "PUMPUSDT", "ARBUSDT"
+    "BTCUSDT", "ETHUSDT", "BNBUSDT"
 ]
 INTERVALS = ["15m", "1h", "4h"]
 

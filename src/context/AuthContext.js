@@ -33,27 +33,31 @@ export function AuthProvider({ children }) {
   const checkExpiry = async (uid, profileData) => {
     try {
       const now = Date.now();
-      const isPaidPlan = ['pro', 'master'].includes(profileData?.plan);
-      const isFreePlan = profileData?.plan === 'free';
+      const isPaidPlan = ['pro', 'master', 'lifetime'].includes(profileData?.plan);
 
+      // Check if their paid plan has expired or status is explicitly expired
       const paidExpired =
         isPaidPlan &&
-        profileData?.current_period_end &&
-        new Date(profileData.current_period_end).getTime() < now &&
-        profileData?.subscription_status !== 'lifetime';
+        (profileData?.subscription_status === 'expired' ||
+         (profileData?.current_period_end &&
+          new Date(profileData.current_period_end).getTime() < now));
 
-      const trialExpired =
-        isFreePlan &&
-        profileData?.trial_ends_at &&
-        new Date(profileData.trial_ends_at).getTime() < now &&
-        profileData?.subscription_status !== 'expired';
+      // Trial expired is permanently disabled
+      const trialExpired = false;
 
-      if (paidExpired || trialExpired) {
-        console.log('[AuthContext] Subscription/trial expired - updating plan…');
-        // Update directly in Supabase (no CRON_SECRET needed from browser)
-        const updates = paidExpired
-          ? { plan: 'free', subscription_status: 'expired', current_period_end: null, trial_ends_at: new Date(now - 1).toISOString() }
-          : { subscription_status: 'expired' };
+      if (paidExpired) {
+        console.log('[AuthContext] Paid plan expired - downgrading user and clearing Telegram alerts…');
+        console.log(`[Telegram Bot] Evicting user ${uid} from paid ${profileData.plan} Telegram channel due to plan expiry.`);
+        
+        const updates = {
+          plan: 'free',
+          subscription_status: 'expired',
+          current_period_end: null,
+          trial_ends_at: null,
+          telegram_chat_id: null,
+          telegram_invite_link: null,
+          telegram_invite_claimed: false
+        };
 
         const { data: updated } = await supabase
           .from('profiles')
@@ -64,7 +68,7 @@ export function AuthProvider({ children }) {
 
         if (updated) {
           setProfile(updated);
-          console.log('[AuthContext] Plan downgraded to free (expiry).');
+          console.log('[AuthContext] Plan downgraded to free, Telegram connection cleared.');
         }
       }
     } catch (err) {
@@ -86,15 +90,13 @@ export function AuthProvider({ children }) {
         // Run expiry check on every login/load - replaces cron
         await checkExpiry(uid, data);
       } else {
-        // Safe creation of profile record if trigger failed or table is empty
-        const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
         const defaultProfile = {
           id: uid,
           email: email || '',
           name: metadata?.full_name || email?.split('@')[0] || '',
           plan: 'free',
-          subscription_status: 'trial',
-          trial_ends_at: trialEndsAt,
+          subscription_status: 'active',
+          trial_ends_at: null,
           coins_selected: ['BTC'],
           alert_delivery: { web: true, telegram: false }
         };
@@ -119,14 +121,13 @@ export function AuthProvider({ children }) {
     if (stored) {
       setProfile(JSON.parse(stored));
     } else {
-      const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const defaultProfile = {
         id: uid,
         email: email,
         name: name || email.split('@')[0],
         plan: 'free',
-        subscription_status: 'trial',
-        trial_ends_at: trialEndsAt,
+        subscription_status: 'active',
+        trial_ends_at: null,
         experience_level: null,
         risk_style: null,
         primary_goal: null,

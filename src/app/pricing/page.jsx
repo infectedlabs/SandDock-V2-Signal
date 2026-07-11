@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 // ── Plan Definitions ────────────────────────────────────────────────────────
 const PLANS_DATA = {
   free: {
-    label: "7-Day Free Trial",
-    sublabel: "No credit card required",
+    label: "Free Plan",
+    sublabel: "Always open to BTC signals",
     monthlyPrice: 0,
     yearlyPrice: 0,
     color: "text-zinc-400",
@@ -20,9 +20,9 @@ const PLANS_DATA = {
       { text: "AI explanation & confidence score",            available: true },
       { text: "Full BTC signal history (log + performance)",  available: true },
       { text: "Basic BTC Heikin Ashi chart view",             available: true },
+      { text: "Free BTC Telegram group alerts",               available: true },
       { text: "Automated Stop Loss & Take Profit",            available: false },
-      { text: "Telegram alerts",                              available: false },
-      { text: "ETH, BNB or altcoin signals",                  available: false },
+      { text: "Pro/Master private channels alerts",           available: false },
     ],
   },
   pro: {
@@ -73,7 +73,7 @@ const FEATURE_TABLE = [
     rows: [
       { name: "Coins Available",          free: "BTC only",       pro: "BTC, ETH, BNB", master: "All 15 pairs" },
       { name: "Timeframes",               free: "15m, 1h, 4h",    pro: "15m, 1h, 4h",   master: "15m, 1h, 4h" },
-      { name: "Live Active Signals",      free: "Trial: Yes",     pro: "Yes",           master: "Yes" },
+      { name: "Live Active Signals",      free: "Yes",            pro: "Yes",           master: "Yes" },
       { name: "Historical Signal Log",    free: "BTC read-only",  pro: "3 coins",       master: "All coins" },
     ],
   },
@@ -90,8 +90,8 @@ const FEATURE_TABLE = [
     group: "Alerts & Automation",
     rows: [
       { name: "Web Dashboard",           free: "Real-time",      pro: "Real-time",     master: "Real-time" },
-      { name: "Telegram Alerts",         free: "No",             pro: "1 Chat/Group",  master: "Unlimited" },
-      { name: "AI Explanation",          free: "Trial: Yes",     pro: "Yes",           master: "Yes + Confluence" },
+      { name: "Telegram Alerts",         free: "Free BTC Group",  pro: "Pro Channel (1 invite)", master: "Master Channel (1 invite)" },
+      { name: "AI Explanation",          free: "Yes",            pro: "Yes",           master: "Yes + Confluence" },
     ],
   },
   {
@@ -104,12 +104,12 @@ const FEATURE_TABLE = [
 
 const FAQS = [
   {
-    q: "How does the 7-day free trial work?",
-    a: "When you sign up, you get 7 days of full BTC/USDT signal access across all 3 timeframes (15m, 1h, 4h) with AI explanations, signal history, and the Heikin Ashi chart - completely free with no credit card required. After 7 days, live active signals are paused and you'll see only closed/historical signals until you upgrade.",
+    q: "How does the Free Plan work?",
+    a: "When you sign up, you get permanent, unlimited access to live BTC/USDT signals across all timeframes (15m, 1h, 4h) with AI explanations, signal history, and Heikin Ashi charts. You can also join our free public BTC Telegram alert group.",
   },
   {
-    q: "What happens after my trial expires?",
-    a: "You keep access to the terminal and can view your closed historical BTC signals. Live active signals will be hidden until you upgrade to Pro or Master. Your signal history and performance data are preserved.",
+    q: "What signals require upgrading?",
+    a: "Access to premium altcoins (like ETH, BNB, SOL), automated SL/TP parameters, and our private Pro, Master, or Grandmaster Telegram channels require upgrading to a paid plan.",
   },
   {
     q: "How does monthly vs yearly billing work?",
@@ -249,7 +249,7 @@ function PricingCard({ planKey, data, isYearly, user, onUpgrade, loadingKey }) {
               href="/signup"
               className="block w-full py-3 text-center bg-white hover:bg-black text-black hover:text-white font-bold text-[12px] uppercase tracking-widest transition-all rounded-none border border-black"
             >
-              Start Free Trial →
+              Get Started Free →
             </a>
           )
         ) : (
@@ -278,13 +278,11 @@ export default function PricingPage() {
   const [openFAQ, setOpenFAQ] = useState({});
   const [loadingKey, setLoadingKey] = useState(null);
 
-  // Trial status for logged-in free users
+  // Trial features are permanently disabled
   const isFreePlan = profile?.plan === "free";
-  const trialEndsAt = profile?.trial_ends_at;
-  const trialDaysLeft = isFreePlan && trialEndsAt
-    ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : null;
-  const trialExpired = isFreePlan && trialEndsAt && new Date() > new Date(trialEndsAt);
+  const trialEndsAt = null;
+  const trialDaysLeft = null;
+  const trialExpired = false;
 
   const handleUpgrade = async (plan, billingCycle) => {
     if (!user) {
@@ -353,17 +351,6 @@ export default function PricingPage() {
         </div>
       </header>
 
-      {/* ── TRIAL EXPIRY BANNER (logged in, expired) ───────────────────────── */}
-      {user && trialExpired && (
-        <div className="bg-red-600 text-white px-6 py-3 text-center text-[13px] font-bold uppercase tracking-wider">
-          ⚠ Your 7-day free trial has expired - upgrade to restore live signals &amp; full access.
-        </div>
-      )}
-      {user && isFreePlan && !trialExpired && trialDaysLeft !== null && trialDaysLeft <= 3 && (
-        <div className="bg-amber-500 text-black px-6 py-2 text-center text-[12px] font-bold uppercase tracking-wider">
-          ⏱ Your free trial expires in {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} - upgrade to keep your signals.
-        </div>
-      )}
 
       {/* ── TITLE SECTION ──────────────────────────────────────────────────── */}
       <section className="pt-16 pb-10 max-w-7xl mx-auto px-6 border-b border-black text-left">
@@ -605,7 +592,7 @@ export default function PricingPage() {
               Not sure? Start free - no card required.
             </h2>
             <p className="text-sm text-zinc-600 leading-relaxed">
-              Join traders who get AI-powered Buy and Sell signals with a verified public track record. Start free for 7 days on BTC.
+              Join traders who get AI-powered Buy and Sell signals with a verified public track record. Always free for BTC.
             </p>
             <div className="flex flex-wrap gap-3 pt-2">
               {user ? (
@@ -614,7 +601,7 @@ export default function PricingPage() {
                 </a>
               ) : (
                 <a href="/signup" className="bg-black hover:bg-brand-orange font-bold text-white text-[12px] uppercase tracking-widest px-7 py-3.5 transition-colors rounded-none inline-block border border-black">
-                  Start Free Trial →
+                  Get Started Free →
                 </a>
               )}
               <a href="/pricing#faq" className="font-bold text-black text-[12px] uppercase tracking-widest px-7 py-3.5 border border-black hover:bg-zinc-100 transition-colors rounded-none inline-block">

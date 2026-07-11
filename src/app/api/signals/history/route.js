@@ -21,25 +21,68 @@ export async function GET(request) {
     symbol   = (searchParams.get('symbol')   || 'BTCUSDT').toUpperCase();
     interval = searchParams.get('interval')  || '15m';
     filter   = searchParams.get('filter') || '30d'; // '1y' | '6m' | '30d' | '1w' | 'today'
+    const timezone = searchParams.get('timezone') || 'UTC';
     const allowedSymbols = [
-      'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT',
-      'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT',
-      'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'
+      'BTCUSDT', 'ETHUSDT', 'BNBUSDT'
     ];
 
-    // Apply date filter (using rolling millisecond windows for 100% timezone-independent queries)
-    let filterMs = 30 * 24 * 60 * 60 * 1000; // default 30d
-    if (filter === '1y') {
-      filterMs = 365 * 24 * 60 * 60 * 1000;
-    } else if (filter === '6m') {
-      filterMs = 180 * 24 * 60 * 60 * 1000;
-    } else if (filter === '1w') {
-      filterMs = 7 * 24 * 60 * 60 * 1000;
-    } else if (filter === 'today') {
-      filterMs = 24 * 60 * 60 * 1000;
+    let filterDate;
+    if (filter === 'today') {
+      const tzMap = {
+        EST: 'America/New_York',
+        IST: 'Asia/Kolkata',
+        GMT: 'Europe/London',
+        PST: 'America/Los_Angeles',
+        CET: 'Europe/Paris'
+      };
+      const timeZone = tzMap[timezone] || 'UTC';
+      const now = new Date();
+      
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      
+      const parts = formatter.formatToParts(now);
+      const partMap = Object.fromEntries(parts.map(p => [p.type, p.value]));
+      
+      const midnightIsoStr = `${partMap.year}-${partMap.month}-${partMap.day}T00:00:00.000`;
+      const utcDate = new Date(midnightIsoStr + 'Z');
+      
+      const formatUTC = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      
+      const utcParts = formatUTC.formatToParts(utcDate);
+      const utcPartMap = Object.fromEntries(utcParts.map(p => [p.type, p.value]));
+      
+      const diffTime = new Date(`${utcPartMap.year}-${utcPartMap.month}-${utcPartMap.day}T${utcPartMap.hour}:${utcPartMap.minute}:${utcPartMap.second}.000Z`).getTime() - utcDate.getTime();
+      
+      filterDate = new Date(utcDate.getTime() - diffTime);
+    } else {
+      let filterMs = 30 * 24 * 60 * 60 * 1000; // default 30d
+      if (filter === '1y') {
+        filterMs = 365 * 24 * 60 * 60 * 1000;
+      } else if (filter === '6m') {
+        filterMs = 180 * 24 * 60 * 60 * 1000;
+      } else if (filter === '1w') {
+        filterMs = 7 * 24 * 60 * 60 * 1000;
+      }
+      filterDate = new Date(Date.now() - filterMs);
     }
-
-    const filterDate = new Date(Date.now() - filterMs);
 
     let resultData = [];
     let page = 0;
@@ -90,18 +133,6 @@ export async function GET(request) {
       if (logCache && logCache.length > 0) {
         console.log(`[/api/signals/history] DB returned empty array, reconstructing from memoryCache.log for ${symbol} ${interval}`);
         
-        let filterMs = 30 * 24 * 60 * 60 * 1000; // default 30d
-        if (filter === '1y') {
-          filterMs = 365 * 24 * 60 * 60 * 1000;
-        } else if (filter === '6m') {
-          filterMs = 180 * 24 * 60 * 60 * 1000;
-        } else if (filter === '1w') {
-          filterMs = 7 * 24 * 60 * 60 * 1000;
-        } else if (filter === 'today') {
-          filterMs = 24 * 60 * 60 * 1000;
-        }
-        const filterDate = new Date(Date.now() - filterMs);
-
         resultData = logCache.filter(sig => {
           const sigTime = new Date(sig.bar_time || sig.created_at);
           return sigTime >= filterDate;
@@ -157,13 +188,41 @@ export async function GET(request) {
       const livePrice = priceMap[s.symbol];
       if (livePrice !== undefined && livePrice !== null) {
         const isBuy = s.signal_type === 'buy';
-        const change = ((livePrice - entry) / entry) * 100;
-        const livePnl = Number((isBuy ? change : -change).toFixed(4));
+        const slPrice = parseFloat(s.sl_price);
+        const tpPrice = parseFloat(s.tp_price);
+        const slPct = parseFloat(s.sl_pct || 0);
+        const tpPct = parseFloat(s.tp_pct || 0);
+
+        let hitSl = false;
+        let hitTp = false;
+        if (slPrice > 0) {
+          if (isBuy && livePrice <= slPrice) hitSl = true;
+          if (!isBuy && livePrice >= slPrice) hitSl = true;
+        }
+        if (tpPrice > 0) {
+          if (isBuy && livePrice >= tpPrice) hitTp = true;
+          if (!isBuy && livePrice <= tpPrice) hitTp = true;
+        }
+
+        let livePnl;
+        let isWin;
+        if (hitSl) {
+          livePnl = -slPct;
+          isWin = false;
+        } else if (hitTp) {
+          livePnl = tpPct;
+          isWin = true;
+        } else {
+          const change = ((livePrice - entry) / entry) * 100;
+          livePnl = Number((isBuy ? change : -change).toFixed(4));
+          isWin = livePnl >= 0;
+        }
+
         return {
           ...s,
           entry_price: entry,
           pnl_pct: livePnl,
-          is_win: livePnl >= 0,
+          is_win: isWin,
         };
       }
       
@@ -205,18 +264,6 @@ export async function GET(request) {
     if (logCache && logCache.length > 0) {
       console.log(`[/api/signals/history] Reconstructing history from memoryCache.log for ${symbol} ${interval}`);
       
-      let filterMs = 30 * 24 * 60 * 60 * 1000; // default 30d
-      if (filter === '1y') {
-        filterMs = 365 * 24 * 60 * 60 * 1000;
-      } else if (filter === '6m') {
-        filterMs = 180 * 24 * 60 * 60 * 1000;
-      } else if (filter === '1w') {
-        filterMs = 7 * 24 * 60 * 60 * 1000;
-      } else if (filter === 'today') {
-        filterMs = 24 * 60 * 60 * 1000;
-      }
-      const filterDate = new Date(Date.now() - filterMs);
-
       const reconstructed = logCache.filter(sig => {
         const hasPnl = sig.pnl_pct !== null && sig.pnl_pct !== undefined;
         const sigTime = new Date(sig.bar_time || sig.created_at);

@@ -102,7 +102,7 @@ export default function OnboardingPage() {
         alert_delivery: { web: true, telegram: false },
         onboarding_completed_at: new Date().toISOString(),
       });
-      router.push('/terminal');
+      router.push('/terminal?signup_success=true');
     } catch (err) {
       console.error('Onboarding skip error:', err);
       setErrorMsg(err.message || "Failed to save profile. If you're using Supabase, make sure you have run the database schema migration in your SQL Editor.");
@@ -129,7 +129,7 @@ export default function OnboardingPage() {
         updates.telegram_verified_at = new Date().toISOString();
       }
       await updateProfile(updates);
-      router.push('/terminal');
+      router.push('/terminal?signup_success=true');
     } catch (err) {
       console.error('Onboarding submit error:', err);
       setErrorMsg(err.message || "Failed to save profile. If you're using Supabase, make sure you have run the database schema migration in your SQL Editor.");

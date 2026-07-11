@@ -13,9 +13,7 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 PLAN_SYMBOLS = {
     "free":   ["BTCUSDT"],
     "pro":    ["BTCUSDT", "ETHUSDT", "BNBUSDT"],
-    "master": ["BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "SOLUSDT", "TRXUSDT",
-               "DOGEUSDT", "HBARUSDT", "UNIUSDT", "SUIUSDT", "AVAXUSDT", "AAVEUSDT",
-               "JUPUSDT", "PUMPUSDT", "ARBUSDT"],
+    "master": ["BTCUSDT", "ETHUSDT", "BNBUSDT"],
 }
 
 def user_has_access(user_plan: str, symbol: str) -> bool:

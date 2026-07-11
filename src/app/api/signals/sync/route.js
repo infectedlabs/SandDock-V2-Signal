@@ -14,9 +14,7 @@ const supabaseAdmin = createClient(
 );
 
 const SYMBOLS = [
-  'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT', 
-  'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT', 
-  'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'
+  'BTCUSDT', 'ETHUSDT', 'BNBUSDT'
 ];
 const TIMEFRAMES = ['15m', '1h', '4h'];
 
@@ -69,8 +67,68 @@ async function runBackgroundSync() {
           const sTime = new Date(s.bar_time).getTime();
           const sIdx = candles.findIndex(c => new Date(c.open_time).getTime() === sTime);
           
-          if (idx < entrySwings.length - 1) {
-            const nextSig = entrySwings[idx + 1];
+          const nextSig = idx < entrySwings.length - 1 ? entrySwings[idx + 1] : null;
+          const nextSigTime = nextSig ? new Date(nextSig.bar_time).getTime() : null;
+          const nextIdx = nextSigTime ? candles.findIndex(c => new Date(c.open_time).getTime() === nextSigTime) : candles.length - 1;
+
+          if (sIdx !== -1 && s.sl_price) {
+            const slPrice = s.sl_price;
+            const tpPrice = s.tp2_price;
+            let hitSl = false;
+            let hitTp = false;
+            let hitIdx = -1;
+
+            for (let i = sIdx + 1; i <= nextIdx && i < candles.length; i++) {
+              const c = candles[i];
+              if (isBuy) {
+                if (c.low <= slPrice) {
+                  hitSl = true;
+                  hitIdx = i;
+                  break;
+                }
+                if (c.high >= tpPrice) {
+                  hitTp = true;
+                  hitIdx = i;
+                  break;
+                }
+              } else {
+                if (c.high >= slPrice) {
+                  hitSl = true;
+                  hitIdx = i;
+                  break;
+                }
+                if (c.low <= tpPrice) {
+                  hitTp = true;
+                  hitIdx = i;
+                  break;
+                }
+              }
+            }
+
+            if (hitSl) {
+              closePrice = slPrice;
+              closeReason = 'sl_hit';
+              closedAt = candles[hitIdx].open_time;
+              const slPct = Number((Math.abs(s.sl_price - s.price) / s.price * 100).toFixed(2));
+              pnlPct = -slPct;
+              isWin = false;
+            } else if (hitTp) {
+              closePrice = tpPrice;
+              closeReason = 'tp_hit';
+              closedAt = candles[hitIdx].open_time;
+              const tpPct = Number((Math.abs(s.tp2_price - s.price) / s.price * 100).toFixed(2));
+              pnlPct = tpPct;
+              isWin = true;
+            } else if (nextSig) {
+              closePrice = nextSig.price;
+              closeReason = 'direction_flip';
+              closedAt = nextSig.bar_time;
+              
+              const change = ((closePrice - s.price) / s.price) * 100;
+              pnlPct = Number((isBuy ? change : -change).toFixed(4));
+              isWin = pnlPct >= 0;
+            }
+          } else if (nextSig) {
             closePrice = nextSig.price;
             closeReason = 'direction_flip';
             closedAt = nextSig.bar_time;

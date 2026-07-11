@@ -315,7 +315,7 @@ export default function SignalDetailPage() {
     const fetchHistory = async () => {
       try {
         setHistoryLoading(true);
-        const res = await fetch(`/api/signals/history?symbol=${signal.symbol}&interval=${signal.interval}&filter=${timeFilter}`);
+        const res = await fetch(`/api/signals/history?symbol=${signal.symbol}&interval=${signal.interval}&filter=${timeFilter}&timezone=${profile?.timezone || 'UTC'}`);
         if (res.ok) {
           const data = await res.json();
           setHistorySignals(data);

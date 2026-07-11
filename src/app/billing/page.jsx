@@ -14,6 +14,7 @@ const PLAN_COLORS = {
 };
 
 const STATUS_BADGES = {
+  free:      { label: 'Free Tier',       bg: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
   trial:     { label: 'Trial Active',    bg: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
   active:    { label: 'Active Member',   bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
   cancelled: { label: 'Cancelled',       bg: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
@@ -36,16 +37,35 @@ function formatCurrency(amount, currency = 'USD') {
 }
 
 export default function BillingPage() {
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, updateProfile } = useAuth();
   const router = useRouter();
 
   const [billing, setBilling] = useState(null);
   const [billingLoading, setBillingLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(null);
 
+  // States for payment success modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successPlan, setSuccessPlan] = useState('');
+  const [tgPairingStep, setTgPairingStep] = useState(1);
+  const [tgPairingCode, setTgPairingCode] = useState(['', '', '', '', '', '']);
+  const [tgStatus, setTgStatus] = useState('');
+  const [isTelegramChannelJoined, setIsTelegramChannelJoined] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) router.push('/login');
   }, [loading, user, router]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('success') === 'true') {
+        setShowSuccessModal(true);
+        setSuccessPlan(params.get('plan') || 'pro');
+      }
+      setIsTelegramChannelJoined(localStorage.getItem('sanddock_tg_channel_joined') === 'true');
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -95,10 +115,10 @@ export default function BillingPage() {
   if (!user) return null;
 
   const plan = billing?.plan || profile?.plan || 'free';
-  const status = billing?.subscriptionStatus || 'trial';
-  const trialDays = billing?.trialDaysRemaining;
-  const isTrialExpired = billing?.isTrialExpired;
-  const statusBadge = STATUS_BADGES[status] || STATUS_BADGES.trial;
+  const status = plan === 'free' ? 'free' : (billing?.subscriptionStatus || 'active');
+  const trialDays = null;
+  const isTrialExpired = false;
+  const statusBadge = STATUS_BADGES[status] || STATUS_BADGES.active;
   const payments = billing?.payments || [];
 
   const isFreePlan = plan === 'free';
@@ -144,26 +164,6 @@ export default function BillingPage() {
                     </span>
                   </div>
 
-                  {/* Trial countdown */}
-                  {isFreePlan && !isTrialExpired && trialDays !== null && (
-                    <div className="flex items-center gap-3 pt-1">
-                      <div className="h-2 w-40 bg-slate-900 border border-slate-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-brand-orange transition-all"
-                          style={{ width: `${Math.max(5, ((7 - (7 - trialDays)) / 7) * 100)}%` }}
-                        />
-                      </div>
-                      <span className="text-[11px] font-mono font-bold text-zinc-400">
-                        {trialDays} day{trialDays !== 1 ? 's' : ''} remaining
-                      </span>
-                    </div>
-                  )}
-
-                  {isTrialExpired && (
-                    <p className="text-[12px] text-red-400 font-extrabold uppercase tracking-wider">
-                      ⚠ Trial ended - upgrade to restore live signals
-                    </p>
-                  )}
 
                   {isPaid && billing?.currentPeriodEnd && (
                     <p className="text-[12px] text-zinc-400 font-mono font-bold">
@@ -277,10 +277,10 @@ export default function BillingPage() {
                   { label: 'Signals Access', value: plan === 'free' ? 'BTC/USDT only' : plan === 'pro' ? 'BTC, ETH, BNB' : 'All 15 pairs' },
                   { label: 'Timeframes', value: 'All (15m, 1h, 4h)' },
                   { label: 'SL/TP Levels', value: plan === 'free' ? 'Locked' : 'Visible' },
-                  { label: 'Telegram Alerts', value: plan === 'free' ? 'None' : plan === 'pro' ? '1 Chat/Group' : 'Unlimited' },
-                  { label: 'AI Explanation', value: isTrialExpired ? 'Paused' : 'Full text' },
+                  { label: 'Telegram Alerts', value: plan === 'free' ? 'Free BTC Group' : plan === 'pro' ? 'Pro Channel (1 Invite)' : plan === 'master' ? 'Master Channel (1 Invite)' : 'GrandMaster Channel (1 Invite)' },
+                  { label: 'AI Explanation', value: 'Full text' },
                   { label: 'CSV Export', value: isPaid ? 'Enabled' : 'Locked' },
-                  { label: 'Live Active Signals', value: isTrialExpired ? 'Paused' : 'Active' },
+                  { label: 'Live Active Signals', value: 'Active' },
                   { label: 'Signal History', value: isPaid ? (plan === 'pro' ? '3 coins' : 'All coins') : 'BTC read-only' },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex items-center justify-between bg-slate-950/40 border border-[#1e2d4a]/50 p-3 rounded-xl">
@@ -321,6 +321,160 @@ export default function BillingPage() {
           
         </div>
       </main>
+
+      {/* UPGRADE SUCCESS MODAL */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-lg bg-[#070b16] border border-[#3D5AFE]/40 rounded-2xl p-6 sm:p-8 space-y-6 text-left shadow-2xl relative">
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                router.replace('/billing');
+              }}
+              className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors border-0 bg-transparent cursor-pointer text-lg font-mono"
+            >
+              &times;
+            </button>
+
+            <div className="text-center space-y-2">
+              <span className="text-4xl">Success!</span>
+              <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">
+                Upgrade Successful!
+              </h2>
+              <p className="text-[13px] text-zinc-400 font-mono">
+                You are now a premium Sanddock {successPlan.toUpperCase()} member.
+              </p>
+            </div>
+
+            <div className="space-y-4 font-mono text-xs">
+              <h3 className="text-xs font-bold text-[#3D5AFE] uppercase tracking-wider border-b border-zinc-800/60 pb-2 flex items-center gap-1.5 select-none">
+                Telegram Alert Delivery Setup
+              </h3>
+
+              {/* Step 1: Link Account */}
+              <div className="p-4 bg-[#090e1a] border border-zinc-850 space-y-3">
+                <div className="flex justify-between items-center gap-2">
+                  <div>
+                    <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 1: Link account</span>
+                    {profile?.telegram_chat_id ? (
+                      <span className="text-[#00e676] font-bold">Connected</span>
+                    ) : (
+                      <span className="text-zinc-400">Not linked</span>
+                    )}
+                  </div>
+                  {!profile?.telegram_chat_id && tgPairingStep === 1 && (
+                    <button type="button" onClick={() => setTgPairingStep(2)}
+                      className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0">
+                      Link Telegram
+                    </button>
+                  )}
+                </div>
+
+                {!profile?.telegram_chat_id && tgPairingStep === 2 && (
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800 space-y-2.5">
+                    <span className="block text-[10px] text-zinc-400 font-bold">Enter pairing code from @SanddockBot:</span>
+                    <div className="flex gap-1.5 items-center justify-between flex-wrap">
+                      <div className="flex gap-1">
+                        {tgPairingCode.map((char, index) => (
+                          <input key={index} id={`tg-modal-code-${index}`} type="text" maxLength="1" value={char}
+                            onChange={e => {
+                              const newCode = [...tgPairingCode];
+                              newCode[index] = e.target.value.slice(-1);
+                              setTgPairingCode(newCode);
+                              if (e.target.value && index < 5) {
+                                document.getElementById(`tg-modal-code-${index + 1}`)?.focus();
+                              }
+                            }}
+                            onKeyDown={e => {
+                              if (e.key === 'Backspace' && !tgPairingCode[index] && index > 0) {
+                                document.getElementById(`tg-modal-code-${index - 1}`)?.focus();
+                              }
+                            }}
+                            className="w-8 h-9 bg-slate-950 border border-zinc-800 text-center text-sm font-bold text-white focus:outline-none focus:border-brand-orange" />
+                        ))}
+                      </div>
+                      <button type="button"
+                        onClick={() => {
+                          setTgStatus('loading');
+                          setTimeout(() => {
+                            setTgStatus('success');
+                            setTimeout(async () => {
+                              await updateProfile({ telegram_chat_id: 'mock-tg-chat-9988' });
+                              setTgPairingStep(1);
+                              setTgStatus('');
+                            }, 1000);
+                          }, 1000);
+                        }}
+                        disabled={tgPairingCode.some(c => !c) || tgStatus === 'loading'}
+                        className="py-1.5 px-3 bg-[#00e676] hover:bg-emerald-600 text-black font-bold text-[10px] uppercase tracking-widest cursor-pointer disabled:opacity-40">
+                        {tgStatus === 'loading' ? 'Verifying...' : 'Verify'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Step 2: Join Channel */}
+              <div className="p-4 bg-[#090e1a] border border-zinc-850 space-y-3">
+                <div className="flex justify-between items-center gap-2">
+                  <div>
+                    <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 2: Join {successPlan === 'lifetime' ? 'GrandMaster' : successPlan.charAt(0).toUpperCase() + successPlan.slice(1)} Channel</span>
+                    {!profile?.telegram_chat_id ? (
+                      <span className="text-zinc-500 font-bold">Waiting for Step 1</span>
+                    ) : profile?.telegram_invite_claimed ? (
+                      <span className="text-[#00e676] font-bold">Private link generated (1/1 claimed)</span>
+                    ) : (
+                      <span className="text-zinc-400 font-bold">Invite not claimed yet</span>
+                    )}
+                  </div>
+                  {profile?.telegram_chat_id && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        let link = profile?.telegram_invite_link;
+                        if (!profile?.telegram_invite_claimed) {
+                          const randSuffix = Math.random().toString(36).substring(2, 9);
+                          link = `https://t.me/joinchat/sanddock_${successPlan}_private_invite_${randSuffix}`;
+                          await updateProfile({
+                            telegram_invite_claimed: true,
+                            telegram_invite_link: link
+                          });
+                        }
+                        setIsTelegramChannelJoined(true);
+                        localStorage.setItem('sanddock_tg_channel_joined', 'true');
+                        window.open(link, '_blank');
+                      }}
+                      className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0"
+                    >
+                      {profile?.telegram_invite_claimed ? 'Open Channel' : 'Claim invite & Join'}
+                    </button>
+                  )}
+                </div>
+                {profile?.telegram_invite_claimed && (
+                  <div className="mt-2 p-2.5 bg-zinc-950 border border-zinc-800 break-all text-[11px] text-zinc-300">
+                    <span className="block text-[9px] text-zinc-500 font-bold uppercase">Your 1-time Invite Link:</span>
+                    <a href={profile.telegram_invite_link} target="_blank" rel="noopener noreferrer" className="text-[#3D5AFE] hover:underline">
+                      {profile.telegram_invite_link}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  router.replace('/terminal');
+                }}
+                className="py-2.5 px-6 bg-white hover:bg-zinc-200 text-black font-extrabold text-[11px] uppercase tracking-widest border-0 cursor-pointer rounded-none"
+              >
+                Go to Terminal Console &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

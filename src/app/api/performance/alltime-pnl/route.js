@@ -20,9 +20,7 @@ export async function GET(request) {
     }
 
     const allowedSymbols = [
-      'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT',
-      'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT',
-      'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'
+      'BTCUSDT', 'ETHUSDT', 'BNBUSDT'
     ];
 
     let cleanJoinedAt = joinedAtStr;

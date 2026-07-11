@@ -66,9 +66,7 @@ export default function HAChart({
   const pnlTrackerLineRef   = useRef(null);
 
   const PRO_SYMBOLS = [
-    'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT', 'SOLUSDT', 
-    'TRXUSDT', 'DOGEUSDT', 'HBARUSDT', 'UNIUSDT', 'SUIUSDT', 
-    'AVAXUSDT', 'AAVEUSDT', 'JUPUSDT', 'PUMPUSDT', 'ARBUSDT'
+    'BTCUSDT', 'ETHUSDT', 'BNBUSDT'
   ];
 
   const isSymbolLocked = (sym) => {

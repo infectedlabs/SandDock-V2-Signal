@@ -94,10 +94,15 @@ export async function POST(request) {
         const userId = metadata?.user_id;
         if (!userId) break;
 
+        console.log(`[Telegram Bot] Evicting user ${userId} from paid Telegram channel due to subscription event: ${event.type}`);
+
         await supabase.from('profiles').update({
           plan:                'free',
           subscription_status: event.type === 'subscription.on_hold' ? 'on_hold' : 'expired',
           current_period_end:  null,
+          telegram_chat_id:    null,
+          telegram_invite_link: null,
+          telegram_invite_claimed: false
         }).eq('id', userId);
 
         console.log(`[Dodo Webhook] User ${userId} downgraded to free (${event.type})`);
