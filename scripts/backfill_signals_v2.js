@@ -29,14 +29,14 @@ const LOOKBACK_DAYS = 365;
 // ============================================================================
 // OPTIMIZED PARAMETERS FOR QUALITY (2-4 signals/day, >70% win rate, +3% daily)
 // ============================================================================
-const BB_DEVIATION = 2.0;          // Stricter bands (was 1.6)
+const BB_DEVIATION = 1.8;          // Balanced (between 1.6 and 2.0)
 const BB_LOOKBACK = 20;            // 20-period SMA
 const SL_PCT = 1.0;                // Tighter SL (was 1.5%)
 const TP_PCT = 2.0;                // Better risk/reward (was 1.5%)
-const MIN_VOLUME_PCT = 1.2;        // Volume must be 120%+ of average
-const MIN_RSI_DIVERGENCE = 8;      // Momentum threshold
+const MIN_VOLUME_PCT = 1.1;        // Volume must be 110%+ of average (less strict)
+const MIN_RSI_DIVERGENCE = 6;      // Momentum threshold (less strict for more signals)
 const MAX_SIGNALS_PER_DAY = 4;     // Never more than 4 per day
-const MIN_BARS_BETWEEN_SIGNALS = 3; // Space signals by 3+ bars
+const MIN_BARS_BETWEEN_SIGNALS = 2; // Space signals by 2+ bars (allows more)
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
