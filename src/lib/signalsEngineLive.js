@@ -2,14 +2,14 @@
 // Target: 2-4 signals/day per coin, +3% daily PnL, +15% weekly, >70% win rate
 
 const QUALITY_CONFIG = {
-  BB_DEVIATION: 1.55,          // Tuned for 2-4 signals/day + 70% win rate
+  BB_DEVIATION: 1.65,          // Quality-first: 70%+ win rate
   BB_LOOKBACK: 20,             // 20-period SMA
-  SL_PCT: 1.0,                 // Stop loss
-  TP_PCT: 2.0,                 // Take profit
-  MIN_VOLUME_PCT: 1.1,         // Standard volume confirmation
-  MIN_RSI_DIVERGENCE: 5,       // Momentum threshold
-  MAX_SIGNALS_PER_DAY: 4,      // Quality over quantity
-  MIN_BARS_BETWEEN_SIGNALS: 2, // Signal spacing
+  SL_PCT: 1.0,                 // Stop loss (1%)
+  TP_PCT: 2.0,                 // Take profit (2%)
+  MIN_VOLUME_PCT: 1.1,         // Volume confirmation (110%)
+  MIN_RSI_DIVERGENCE: 5,       // Momentum filter
+  MAX_SIGNALS_PER_DAY: 4,      // Max 4 signals per day per coin
+  MIN_BARS_BETWEEN_SIGNALS: 2, // Minimum 2 bars between signals
 };
 
 export function toHeikinAshi(candles) {

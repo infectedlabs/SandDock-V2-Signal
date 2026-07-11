@@ -28,16 +28,16 @@ const LOOKBACK_DAYS = 365;
 
 // ============================================================================
 // OPTIMIZED PARAMETERS FOR QUALITY (2-4 signals/day, >70% win rate, +3% daily)
-// TUNED: BB_DEVIATION 1.55 for 1.5-2x more signals than 1.65
+// PRODUCTION: BB_DEVIATION 1.65 prioritizes quality (70% WR) over volume
 // ============================================================================
-const BB_DEVIATION = 1.55;         // Tuned (between 1.5 and 1.65) - more signals
+const BB_DEVIATION = 1.65;         // Quality-first: 70%+ win rate > high volume
 const BB_LOOKBACK = 20;            // 20-period SMA
-const SL_PCT = 1.0;                // Stop loss
-const TP_PCT = 2.0;                // Take profit
-const MIN_VOLUME_PCT = 1.1;        // Standard volume confirmation (110%)
-const MIN_RSI_DIVERGENCE = 5;      // Momentum threshold
+const SL_PCT = 1.0;                // Stop loss (1%)
+const TP_PCT = 2.0;                // Take profit (2% for 1:2 ratio)
+const MIN_VOLUME_PCT = 1.1;        // Volume confirmation (110% average)
+const MIN_RSI_DIVERGENCE = 5;      // Momentum filter for quality
 const MAX_SIGNALS_PER_DAY = 4;     // Never more than 4 per day
-const MIN_BARS_BETWEEN_SIGNALS = 2; // Signal spacing (2 bars minimum)
+const MIN_BARS_BETWEEN_SIGNALS = 2; // Space signals by minimum 2 bars
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
