@@ -7,7 +7,7 @@ const QUALITY_CONFIG = {
   SL_PCT: 1.0,                 // Stop loss (1%)
   TP_PCT: 2.0,                 // Take profit (2%)
   MIN_VOLUME_PCT: 1.1,         // Volume confirmation (110%)
-  MIN_RSI_DIVERGENCE: 5,       // Momentum filter
+  MIN_RSI_DIVERGENCE: 5,       // Momentum filter (±5%)
   MAX_SIGNALS_PER_DAY: 4,      // Max 4 signals per day per coin
   MIN_BARS_BETWEEN_SIGNALS: 2, // Minimum 2 bars between signals
 };

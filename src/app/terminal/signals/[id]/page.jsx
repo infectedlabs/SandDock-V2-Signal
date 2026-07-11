@@ -214,7 +214,7 @@ export default function SignalDetailPage() {
 
         // 2. Fallback to API calculation if database entry doesn't exist yet
         if (!foundSignal) {
-          const intervals = ['15m', '1h', '4h'];
+          const intervals = ['15m'];
           
           // First, search in live signals endpoints (no symbol filter to fetch all coins)
           for (const tf of intervals) {

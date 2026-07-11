@@ -78,7 +78,8 @@ export async function GET(request) {
 
     const allSignals = [];
 
-    const timeframes = ['15m', '30m', '1h', '4h'];
+    // PRODUCTION: 15m is the only validated-quality timeframe (see backfill_signals_v2.js)
+    const timeframes = ['15m'];
 
     await Promise.all(targetSymbols.flatMap((sym) =>
       timeframes.map(async (tf) => {

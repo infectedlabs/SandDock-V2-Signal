@@ -1387,18 +1387,15 @@ export default function TerminalPage() {
                       ))}
                     </div>
                     <div className="flex p-0.5 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                      {['15m', '30m', '1h', '4h'].map(tf => {
-                        const locked = false;
-                        return (
-                          <button key={tf}
-                            onClick={() => locked ? triggerUpgradeGate('Timeframe Locked', '1H and 4H timeframes are Pro features.') : setSelectedInterval(tf)}
-                            className={`px-4 py-1.5 text-[10px] font-extrabold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all duration-200 cursor-pointer border-0 ${
-                              selectedInterval === tf ? 'bg-[#3D5AFE] text-white shadow-md' : 'text-zinc-500 hover:text-white bg-transparent'
-                            }`}>
-                            {tf} {locked && <span className="text-[#3D5AFE] text-[10px]">🔒</span>}
-                          </button>
-                        );
-                      })}
+                      {['15m'].map(tf => (
+                        <button key={tf}
+                          onClick={() => setSelectedInterval(tf)}
+                          className={`px-4 py-1.5 text-[10px] font-extrabold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all duration-200 cursor-pointer border-0 ${
+                            selectedInterval === tf ? 'bg-[#3D5AFE] text-white shadow-md' : 'text-zinc-500 hover:text-white bg-transparent'
+                          }`}>
+                          {tf}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
@@ -2295,8 +2292,6 @@ export default function TerminalPage() {
                         <select value={settingsDefaultTimeframe} onChange={e => setSettingsDefaultTimeframe(e.target.value)}
                           className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
                           <option value="15m">15m</option>
-                          <option value="1h">1h</option>
-                          <option value="4h">4h</option>
                         </select>
                       </div>
 

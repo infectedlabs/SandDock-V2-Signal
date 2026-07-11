@@ -16,7 +16,8 @@ const supabaseAdmin = createClient(
 const SYMBOLS = [
   'BTCUSDT', 'ETHUSDT', 'BNBUSDT'
 ];
-const TIMEFRAMES = ['15m', '1h', '4h'];
+// PRODUCTION: 15m is the only validated-quality timeframe (see backfill_signals_v2.js)
+const TIMEFRAMES = ['15m'];
 
 function generateDeterministicUUID(symbol, interval, barTime) {
   const hash = crypto.createHash('md5').update(`${symbol}-${interval}-${barTime}`).digest('hex');
