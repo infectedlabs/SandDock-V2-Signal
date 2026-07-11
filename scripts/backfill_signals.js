@@ -8,10 +8,10 @@
  *   node scripts/backfill_signals.js [--symbol BTCUSDT] [--days 365] [--intervals 15m,1h,4h,30m]
  */
 
-import axios from 'axios';
-import { createClient } from '@supabase/supabase-js';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+const axios = require('axios');
+const { createClient } = require('@supabase/supabase-js');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
 
 const BINANCE_API = 'https://api.binance.com/api/v3';
 const INTERVALS = ['15m', '30m', '1h', '4h'];
@@ -23,11 +23,19 @@ const BB_DEVIATION = 1.6;
 const SL_PCT = 1.5;
 const TP_PCT = 1.5;
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false } }
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Missing Supabase environment variables');
+  console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '✓' : '✗');
+  console.error('SUPABASE_SERVICE_ROLE_KEY:', supabaseKey ? '✓' : '✗');
+  process.exit(1);
+}
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseKey, {
+  auth: { persistSession: false }
+});
 
 function intervalsToMs(interval) {
   const matches = interval.match(/^(\d+)([mh])$/);
@@ -147,6 +155,7 @@ function detectSignals(ha) {
         sl_pct: SL_PCT,
         tp_pct: TP_PCT,
         confidence: 75,
+        rationale: 'Heikin Ashi swing bottom confirmation at Bollinger Band lower deviation (BB=1.6). Buy signal triggered at price bounce.',
       });
       lastSignalTime = ha[i].open_time;
     }
@@ -161,6 +170,7 @@ function detectSignals(ha) {
         sl_pct: SL_PCT,
         tp_pct: TP_PCT,
         confidence: 75,
+        rationale: 'Heikin Ashi swing top confirmation at Bollinger Band upper deviation (BB=1.6). Sell signal triggered at price rejection.',
       });
       lastSignalTime = ha[i].open_time;
     }
