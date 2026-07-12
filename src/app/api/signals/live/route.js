@@ -13,9 +13,10 @@ const supabaseAdmin = createClient(
 export const dynamic = 'force-dynamic';
 
 const PLAN_SYMBOLS = {
-  free:   ['BTCUSDT'],
-  pro:    ['BTCUSDT', 'ETHUSDT'],
-  master: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
+  free:      ['BTCUSDT'],
+  pro:       ['BTCUSDT', 'ETHUSDT'],
+  master:    ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
+  grandmaster: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
 };
 
 export async function GET(request) {

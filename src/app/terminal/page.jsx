@@ -2281,48 +2281,21 @@ export default function TerminalPage() {
                           </div>
                         )}
 
-                        {/* Step 2: Join Channel */}
-                        <div className="flex justify-between items-center gap-2">
-                          <div>
-                            {isFreePlan ? (
-                              <>
-                                <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 2: Join Free BTC Group</span>
-                                {!profile.telegram_chat_id ? (
-                                  <span className="text-zinc-500 font-bold">Waiting for Step 1</span>
-                                ) : isTelegramChannelJoined ? (
-                                  <span className="text-[#00e676] font-bold">Member of Sanddock Free BTC Group</span>
-                                ) : (
-                                  <span className="text-zinc-400 font-bold">Not joined</span>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 2: Join {profile.plan === 'lifetime' ? 'GrandMaster' : profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)} Channel</span>
-                                {!profile.telegram_chat_id ? (
-                                  <span className="text-zinc-500 font-bold">Waiting for Step 1</span>
-                                ) : profile.telegram_invite_claimed ? (
-                                  <span className="text-[#00e676] font-bold">Private link generated (1/1 claimed)</span>
-                                ) : (
-                                  <span className="text-zinc-400 font-bold">Invite not claimed yet</span>
-                                )}
-                              </>
-                            )}
-                          </div>
+                        {/* Step 2: Join Channel - MASTER+ only */}
+                        {['master', 'grandmaster'].includes(profile?.plan) && (
+                          <div className="flex justify-between items-center gap-2">
+                            <div>
+                              <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 2: Join {profile.plan === 'grandmaster' ? 'GrandMaster' : 'Master'} Private Channel</span>
+                              {!profile.telegram_chat_id ? (
+                                <span className="text-zinc-500 font-bold">Waiting for Step 1</span>
+                              ) : profile.telegram_invite_claimed ? (
+                                <span className="text-[#00e676] font-bold">Private link generated (1/1 claimed)</span>
+                              ) : (
+                                <span className="text-zinc-400 font-bold">Invite not claimed yet</span>
+                              )}
+                            </div>
 
-                          {profile.telegram_chat_id && (
-                            isFreePlan ? (
-                              !isTelegramChannelJoined && (
-                                <a href="https://t.me/sanddock_free_btc"
-                                  target="_blank" rel="noopener noreferrer"
-                                  onClick={() => {
-                                    setIsTelegramChannelJoined(true);
-                                    localStorage.setItem('sanddock_tg_channel_joined', 'true');
-                                  }}
-                                  className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0 text-center select-none no-underline">
-                                  Join Group
-                                </a>
-                              )
-                            ) : (
+                            {profile.telegram_chat_id && (
                               <button
                                 type="button"
                                 onClick={async () => {
@@ -2343,9 +2316,9 @@ export default function TerminalPage() {
                               >
                                 {profile.telegram_invite_claimed ? 'Open Channel' : 'Claim invite & Join'}
                               </button>
-                            )
-                          )}
-                        </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Invitation link display for paid users */}
                         {!isFreePlan && profile.telegram_invite_claimed && (

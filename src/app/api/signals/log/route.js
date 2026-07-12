@@ -7,9 +7,10 @@ import { fetchFromBinance } from '@/lib/binanceFallback';
 export const dynamic = 'force-dynamic';
 
 const PLAN_SYMBOLS = {
-  free:   ['BTCUSDT'],
-  pro:    ['BTCUSDT', 'ETHUSDT'],
-  master: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
+  free:      ['BTCUSDT'],
+  pro:       ['BTCUSDT', 'ETHUSDT'],
+  master:    ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
+  grandmaster: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
 };
 
 const supabaseAdmin = createClient(

@@ -72,7 +72,7 @@ export default function HAChart({
   ];
 
   const isSymbolLocked = (sym) => {
-    if (plan === 'master') return false; // MASTER: BTC, ETH, BNB
+    if (['master', 'grandmaster'].includes(plan)) return false; // MASTER/GRANDMASTER: BTC, ETH, BNB
     if (plan === 'pro') {
       return !['BTCUSDT', 'ETHUSDT'].includes(sym); // PRO: BTC, ETH
     }
