@@ -1,0 +1,483 @@
+🔍 MULTI-TIMEFRAME SIGNAL ENGINE RESEARCH
+📊 Target: 70%+ WR, +25% Monthly PnL
+🎯 Testing 8 strategies × 12 exits × 5 timeframes
+
+
+======================================================================
+⏱️  TESTING TIMEFRAME: 5m
+======================================================================
+  Fetched batch 1: 1000 candles, total: 1000
+  Fetched batch 2: 1000 candles, total: 2000
+  Fetched batch 3: 1000 candles, total: 3000
+  Fetched batch 4: 1000 candles, total: 4000
+  Fetched batch 5: 1000 candles, total: 5000
+  Fetched batch 6: 1000 candles, total: 6000
+  Fetched batch 7: 1000 candles, total: 7000
+  Fetched batch 8: 1000 candles, total: 8000
+  Fetched batch 9: 1000 candles, total: 9000
+  Fetched batch 10: 1000 candles, total: 10000
+  Fetched batch 11: 1000 candles, total: 11000
+  Fetched batch 12: 1000 candles, total: 12000
+  Fetched batch 13: 1000 candles, total: 13000
+  Fetched batch 14: 1000 candles, total: 14000
+  Fetched batch 15: 1000 candles, total: 15000
+  Fetched batch 16: 1000 candles, total: 16000
+  Fetched batch 17: 1000 candles, total: 17000
+  Fetched batch 18: 1000 candles, total: 18000
+  Fetched batch 19: 1000 candles, total: 19000
+  Fetched batch 20: 1000 candles, total: 20000
+  Fetched batch 21: 1000 candles, total: 21000
+  Fetched batch 22: 1000 candles, total: 22000
+  Fetched batch 23: 1000 candles, total: 23000
+  Fetched batch 24: 1000 candles, total: 24000
+  Fetched batch 25: 1000 candles, total: 25000
+  Fetched batch 26: 1000 candles, total: 26000
+  Fetched batch 27: 1000 candles, total: 27000
+  Fetched batch 28: 1000 candles, total: 28000
+  Fetched batch 29: 1000 candles, total: 29000
+  Fetched batch 30: 1000 candles, total: 30000
+  Fetched batch 31: 1000 candles, total: 31000
+  Fetched batch 32: 1000 candles, total: 32000
+  Fetched batch 33: 1000 candles, total: 33000
+  Fetched batch 34: 1000 candles, total: 34000
+  Fetched batch 35: 1000 candles, total: 35000
+  Fetched batch 36: 1000 candles, total: 36000
+  Fetched batch 37: 1000 candles, total: 37000
+  Fetched batch 38: 1000 candles, total: 38000
+  Fetched batch 39: 1000 candles, total: 39000
+  Fetched batch 40: 1000 candles, total: 40000
+  Fetched batch 41: 1000 candles, total: 41000
+  Fetched batch 42: 1000 candles, total: 42000
+  Fetched batch 43: 1000 candles, total: 43000
+  Fetched batch 44: 1000 candles, total: 44000
+  Fetched batch 45: 1000 candles, total: 45000
+  Fetched batch 46: 1000 candles, total: 46000
+  Fetched batch 47: 1000 candles, total: 47000
+  Fetched batch 48: 1000 candles, total: 48000
+  Fetched batch 49: 1000 candles, total: 49000
+  Fetched batch 50: 1000 candles, total: 50000
+  Fetched batch 51: 1000 candles, total: 51000
+  Fetched batch 52: 1000 candles, total: 52000
+  Fetched batch 53: 1000 candles, total: 53000
+  Fetched batch 54: 1000 candles, total: 54000
+  Fetched batch 55: 1000 candles, total: 55000
+  Fetched batch 56: 1000 candles, total: 56000
+  Fetched batch 57: 1000 candles, total: 57000
+  Fetched batch 58: 1000 candles, total: 58000
+  Fetched batch 59: 1000 candles, total: 59000
+  Fetched batch 60: 1000 candles, total: 60000
+  Fetched batch 61: 1000 candles, total: 61000
+  Fetched batch 62: 1000 candles, total: 62000
+  Fetched batch 63: 1000 candles, total: 63000
+  Fetched batch 64: 1000 candles, total: 64000
+  Fetched batch 65: 1000 candles, total: 65000
+  Fetched batch 66: 1000 candles, total: 66000
+  Fetched batch 67: 1000 candles, total: 67000
+  Fetched batch 68: 1000 candles, total: 68000
+  Fetched batch 69: 1000 candles, total: 69000
+  Fetched batch 70: 1000 candles, total: 70000
+  Fetched batch 71: 1000 candles, total: 71000
+  Fetched batch 72: 1000 candles, total: 72000
+  Fetched batch 73: 1000 candles, total: 73000
+  Fetched batch 74: 1000 candles, total: 74000
+  Fetched batch 75: 1000 candles, total: 75000
+  Fetched batch 76: 1000 candles, total: 76000
+  Fetched batch 77: 1000 candles, total: 77000
+  Fetched batch 78: 1000 candles, total: 78000
+  Fetched batch 79: 1000 candles, total: 79000
+  Fetched batch 80: 1000 candles, total: 80000
+  Fetched batch 81: 1000 candles, total: 81000
+  Fetched batch 82: 1000 candles, total: 82000
+  Fetched batch 83: 1000 candles, total: 83000
+  Fetched batch 84: 1000 candles, total: 84000
+  Fetched batch 85: 1000 candles, total: 85000
+  Fetched batch 86: 1000 candles, total: 86000
+  Fetched batch 87: 1000 candles, total: 87000
+  Fetched batch 88: 1000 candles, total: 88000
+  Fetched batch 89: 1000 candles, total: 89000
+  Fetched batch 90: 1000 candles, total: 90000
+  Fetched batch 91: 1000 candles, total: 91000
+  Fetched batch 92: 1000 candles, total: 92000
+  Fetched batch 93: 1000 candles, total: 93000
+  Fetched batch 94: 1000 candles, total: 94000
+  Fetched batch 95: 1000 candles, total: 95000
+  Fetched batch 96: 1000 candles, total: 96000
+  Fetched batch 97: 1000 candles, total: 97000
+  Fetched batch 98: 1000 candles, total: 98000
+  Fetched batch 99: 1000 candles, total: 99000
+  Fetched batch 100: 1000 candles, total: 100000
+  Fetched batch 101: 1000 candles, total: 101000
+  Fetched batch 102: 1000 candles, total: 102000
+  Fetched batch 103: 1000 candles, total: 103000
+  Fetched batch 104: 1000 candles, total: 104000
+  Fetched batch 105: 1000 candles, total: 105000
+  Fetched batch 106: 1000 candles, total: 106000
+  Fetched batch 107: 1000 candles, total: 107000
+✅ Loaded 107000 candles
+
+
+📈 BBReversal: 1893 entries
+
+📈 TrendPullback: 696 entries
+
+📈 MACDCross: 4215 entries
+
+📈 RSIExtreme: 1654 entries
+
+📈 BBConfluence: 5837 entries
+
+📈 VolBreakout: 2821 entries
+
+📈 DonchianMean: 10448 entries
+
+📈 ChannelBreak: 286 entries
+
+======================================================================
+⏱️  TESTING TIMEFRAME: 15m
+======================================================================
+  Fetched batch 1: 1000 candles, total: 1000
+  Fetched batch 2: 1000 candles, total: 2000
+  Fetched batch 3: 1000 candles, total: 3000
+  Fetched batch 4: 1000 candles, total: 4000
+  Fetched batch 5: 1000 candles, total: 5000
+  Fetched batch 6: 1000 candles, total: 6000
+  Fetched batch 7: 1000 candles, total: 7000
+  Fetched batch 8: 1000 candles, total: 8000
+  Fetched batch 9: 1000 candles, total: 9000
+  Fetched batch 10: 1000 candles, total: 10000
+  Fetched batch 11: 1000 candles, total: 11000
+  Fetched batch 12: 1000 candles, total: 12000
+  Fetched batch 13: 1000 candles, total: 13000
+  Fetched batch 14: 1000 candles, total: 14000
+  Fetched batch 15: 1000 candles, total: 15000
+  Fetched batch 16: 1000 candles, total: 16000
+  Fetched batch 17: 1000 candles, total: 17000
+  Fetched batch 18: 1000 candles, total: 18000
+  Fetched batch 19: 1000 candles, total: 19000
+  Fetched batch 20: 1000 candles, total: 20000
+  Fetched batch 21: 1000 candles, total: 21000
+  Fetched batch 22: 1000 candles, total: 22000
+  Fetched batch 23: 1000 candles, total: 23000
+  Fetched batch 24: 1000 candles, total: 24000
+  Fetched batch 25: 1000 candles, total: 25000
+  Fetched batch 26: 1000 candles, total: 26000
+  Fetched batch 27: 1000 candles, total: 27000
+  Fetched batch 28: 1000 candles, total: 28000
+  Fetched batch 29: 1000 candles, total: 29000
+  Fetched batch 30: 1000 candles, total: 30000
+  Fetched batch 31: 1000 candles, total: 31000
+  Fetched batch 32: 1000 candles, total: 32000
+  Fetched batch 33: 1000 candles, total: 33000
+  Fetched batch 34: 1000 candles, total: 34000
+  Fetched batch 35: 1000 candles, total: 35000
+  Fetched batch 36: 1000 candles, total: 36000
+  Fetched batch 37: 1000 candles, total: 37000
+✅ Loaded 37000 candles
+
+
+📈 BBReversal: 821 entries
+
+📈 TrendPullback: 244 entries
+
+📈 MACDCross: 1446 entries
+
+📈 RSIExtreme: 666 entries
+
+📈 BBConfluence: 2113 entries
+
+📈 VolBreakout: 1490 entries
+
+📈 DonchianMean: 3816 entries
+
+📈 ChannelBreak: 325 entries
+
+======================================================================
+⏱️  TESTING TIMEFRAME: 30m
+======================================================================
+  Fetched batch 1: 1000 candles, total: 1000
+  Fetched batch 2: 1000 candles, total: 2000
+  Fetched batch 3: 1000 candles, total: 3000
+  Fetched batch 4: 1000 candles, total: 4000
+  Fetched batch 5: 1000 candles, total: 5000
+  Fetched batch 6: 1000 candles, total: 6000
+  Fetched batch 7: 1000 candles, total: 7000
+  Fetched batch 8: 1000 candles, total: 8000
+  Fetched batch 9: 1000 candles, total: 9000
+  Fetched batch 10: 1000 candles, total: 10000
+  Fetched batch 11: 1000 candles, total: 11000
+  Fetched batch 12: 1000 candles, total: 12000
+  Fetched batch 13: 1000 candles, total: 13000
+  Fetched batch 14: 1000 candles, total: 14000
+  Fetched batch 15: 1000 candles, total: 15000
+  Fetched batch 16: 1000 candles, total: 16000
+  Fetched batch 17: 1000 candles, total: 17000
+  Fetched batch 18: 1000 candles, total: 18000
+  Fetched batch 19: 1000 candles, total: 19000
+✅ Loaded 19000 candles
+
+
+📈 BBReversal: 465 entries
+
+📈 TrendPullback: 117 entries
+
+📈 MACDCross: 741 entries
+
+📈 RSIExtreme: 360 entries
+
+📈 BBConfluence: 1047 entries
+
+📈 VolBreakout: 916 entries
+
+📈 DonchianMean: 1886 entries
+
+📈 ChannelBreak: 320 entries
+
+======================================================================
+⏱️  TESTING TIMEFRAME: 1h
+======================================================================
+  Fetched batch 1: 1000 candles, total: 1000
+  Fetched batch 2: 1000 candles, total: 2000
+  Fetched batch 3: 1000 candles, total: 3000
+  Fetched batch 4: 1000 candles, total: 4000
+  Fetched batch 5: 1000 candles, total: 5000
+  Fetched batch 6: 1000 candles, total: 6000
+  Fetched batch 7: 1000 candles, total: 7000
+  Fetched batch 8: 1000 candles, total: 8000
+  Fetched batch 9: 1000 candles, total: 9000
+  Fetched batch 10: 1000 candles, total: 10000
+✅ Loaded 10000 candles
+
+
+📈 BBReversal: 295 entries
+
+📈 TrendPullback: 64 entries
+
+📈 MACDCross: 378 entries
+
+📈 RSIExtreme: 221 entries
+
+📈 BBConfluence: 491 entries
+
+📈 VolBreakout: 556 entries
+
+📈 DonchianMean: 947 entries
+
+📈 ChannelBreak: 191 entries
+
+======================================================================
+⏱️  TESTING TIMEFRAME: 4h
+======================================================================
+  Fetched batch 1: 1000 candles, total: 1000
+  Fetched batch 2: 1000 candles, total: 2000
+  Fetched batch 3: 1000 candles, total: 3000
+  Fetched batch 4: 1000 candles, total: 4000
+✅ Loaded 4000 candles
+
+
+📈 BBReversal: 121 entries
+
+📈 TrendPullback: 19 entries
+
+📈 MACDCross: 139 entries
+
+📈 RSIExtreme: 85 entries
+
+📈 BBConfluence: 255 entries
+
+📈 VolBreakout: 237 entries
+
+📈 DonchianMean: 386 entries
+
+📈 ChannelBreak: 127 entries
+
+======================================================================
+📊 RESULTS SUMMARY - CONFIGURATIONS MEETING TARGETS
+======================================================================
+
+❌ No configurations found meeting 70% WR + 25% monthly PnL
+Recommending best per-timeframe configs below:
+
+  Fetched batch 1: 1000 candles, total: 1000
+  Fetched batch 2: 1000 candles, total: 2000
+  Fetched batch 3: 1000 candles, total: 3000
+  Fetched batch 4: 1000 candles, total: 4000
+  Fetched batch 5: 1000 candles, total: 5000
+  Fetched batch 6: 1000 candles, total: 6000
+  Fetched batch 7: 1000 candles, total: 7000
+  Fetched batch 8: 1000 candles, total: 8000
+  Fetched batch 9: 1000 candles, total: 9000
+  Fetched batch 10: 1000 candles, total: 10000
+  Fetched batch 11: 1000 candles, total: 11000
+  Fetched batch 12: 1000 candles, total: 12000
+  Fetched batch 13: 1000 candles, total: 13000
+  Fetched batch 14: 1000 candles, total: 14000
+  Fetched batch 15: 1000 candles, total: 15000
+  Fetched batch 16: 1000 candles, total: 16000
+  Fetched batch 17: 1000 candles, total: 17000
+  Fetched batch 18: 1000 candles, total: 18000
+  Fetched batch 19: 1000 candles, total: 19000
+  Fetched batch 20: 1000 candles, total: 20000
+  Fetched batch 21: 1000 candles, total: 21000
+  Fetched batch 22: 1000 candles, total: 22000
+  Fetched batch 23: 1000 candles, total: 23000
+  Fetched batch 24: 1000 candles, total: 24000
+  Fetched batch 25: 1000 candles, total: 25000
+  Fetched batch 26: 1000 candles, total: 26000
+  Fetched batch 27: 1000 candles, total: 27000
+  Fetched batch 28: 1000 candles, total: 28000
+  Fetched batch 29: 1000 candles, total: 29000
+  Fetched batch 30: 1000 candles, total: 30000
+  Fetched batch 31: 1000 candles, total: 31000
+  Fetched batch 32: 1000 candles, total: 32000
+  Fetched batch 33: 1000 candles, total: 33000
+  Fetched batch 34: 1000 candles, total: 34000
+  Fetched batch 35: 1000 candles, total: 35000
+  Fetched batch 36: 1000 candles, total: 36000
+  Fetched batch 37: 1000 candles, total: 37000
+  Fetched batch 38: 1000 candles, total: 38000
+  Fetched batch 39: 1000 candles, total: 39000
+  Fetched batch 40: 1000 candles, total: 40000
+  Fetched batch 41: 1000 candles, total: 41000
+  Fetched batch 42: 1000 candles, total: 42000
+  Fetched batch 43: 1000 candles, total: 43000
+  Fetched batch 44: 1000 candles, total: 44000
+  Fetched batch 45: 1000 candles, total: 45000
+  Fetched batch 46: 1000 candles, total: 46000
+  Fetched batch 47: 1000 candles, total: 47000
+  Fetched batch 48: 1000 candles, total: 48000
+  Fetched batch 49: 1000 candles, total: 49000
+  Fetched batch 50: 1000 candles, total: 50000
+  Fetched batch 51: 1000 candles, total: 51000
+  Fetched batch 52: 1000 candles, total: 52000
+  Fetched batch 53: 1000 candles, total: 53000
+  Fetched batch 54: 1000 candles, total: 54000
+  Fetched batch 55: 1000 candles, total: 55000
+  Fetched batch 56: 1000 candles, total: 56000
+  Fetched batch 57: 1000 candles, total: 57000
+  Fetched batch 58: 1000 candles, total: 58000
+  Fetched batch 59: 1000 candles, total: 59000
+  Fetched batch 60: 1000 candles, total: 60000
+  Fetched batch 61: 1000 candles, total: 61000
+  Fetched batch 62: 1000 candles, total: 62000
+  Fetched batch 63: 1000 candles, total: 63000
+  Fetched batch 64: 1000 candles, total: 64000
+  Fetched batch 65: 1000 candles, total: 65000
+  Fetched batch 66: 1000 candles, total: 66000
+  Fetched batch 67: 1000 candles, total: 67000
+  Fetched batch 68: 1000 candles, total: 68000
+  Fetched batch 69: 1000 candles, total: 69000
+  Fetched batch 70: 1000 candles, total: 70000
+  Fetched batch 71: 1000 candles, total: 71000
+  Fetched batch 72: 1000 candles, total: 72000
+  Fetched batch 73: 1000 candles, total: 73000
+  Fetched batch 74: 1000 candles, total: 74000
+  Fetched batch 75: 1000 candles, total: 75000
+  Fetched batch 76: 1000 candles, total: 76000
+  Fetched batch 77: 1000 candles, total: 77000
+  Fetched batch 78: 1000 candles, total: 78000
+  Fetched batch 79: 1000 candles, total: 79000
+  Fetched batch 80: 1000 candles, total: 80000
+  Fetched batch 81: 1000 candles, total: 81000
+  Fetched batch 82: 1000 candles, total: 82000
+  Fetched batch 83: 1000 candles, total: 83000
+  Fetched batch 84: 1000 candles, total: 84000
+  Fetched batch 85: 1000 candles, total: 85000
+  Fetched batch 86: 1000 candles, total: 86000
+  Fetched batch 87: 1000 candles, total: 87000
+  Fetched batch 88: 1000 candles, total: 88000
+  Fetched batch 89: 1000 candles, total: 89000
+  Fetched batch 90: 1000 candles, total: 90000
+  Fetched batch 91: 1000 candles, total: 91000
+  Fetched batch 92: 1000 candles, total: 92000
+  Fetched batch 93: 1000 candles, total: 93000
+  Fetched batch 94: 1000 candles, total: 94000
+  Fetched batch 95: 1000 candles, total: 95000
+  Fetched batch 96: 1000 candles, total: 96000
+  Fetched batch 97: 1000 candles, total: 97000
+  Fetched batch 98: 1000 candles, total: 98000
+  Fetched batch 99: 1000 candles, total: 99000
+  Fetched batch 100: 1000 candles, total: 100000
+  Fetched batch 101: 1000 candles, total: 101000
+  Fetched batch 102: 1000 candles, total: 102000
+  Fetched batch 103: 1000 candles, total: 103000
+  Fetched batch 104: 1000 candles, total: 104000
+  Fetched batch 105: 1000 candles, total: 105000
+  Fetched batch 106: 1000 candles, total: 106000
+  Fetched batch 107: 1000 candles, total: 107000
+5m: BBReversal → WR=52.1% Monthly=0%
+  Fetched batch 1: 1000 candles, total: 1000
+  Fetched batch 2: 1000 candles, total: 2000
+  Fetched batch 3: 1000 candles, total: 3000
+  Fetched batch 4: 1000 candles, total: 4000
+  Fetched batch 5: 1000 candles, total: 5000
+  Fetched batch 6: 1000 candles, total: 6000
+  Fetched batch 7: 1000 candles, total: 7000
+  Fetched batch 8: 1000 candles, total: 8000
+  Fetched batch 9: 1000 candles, total: 9000
+  Fetched batch 10: 1000 candles, total: 10000
+  Fetched batch 11: 1000 candles, total: 11000
+  Fetched batch 12: 1000 candles, total: 12000
+  Fetched batch 13: 1000 candles, total: 13000
+  Fetched batch 14: 1000 candles, total: 14000
+  Fetched batch 15: 1000 candles, total: 15000
+  Fetched batch 16: 1000 candles, total: 16000
+  Fetched batch 17: 1000 candles, total: 17000
+  Fetched batch 18: 1000 candles, total: 18000
+  Fetched batch 19: 1000 candles, total: 19000
+  Fetched batch 20: 1000 candles, total: 20000
+  Fetched batch 21: 1000 candles, total: 21000
+  Fetched batch 22: 1000 candles, total: 22000
+  Fetched batch 23: 1000 candles, total: 23000
+  Fetched batch 24: 1000 candles, total: 24000
+  Fetched batch 25: 1000 candles, total: 25000
+  Fetched batch 26: 1000 candles, total: 26000
+  Fetched batch 27: 1000 candles, total: 27000
+  Fetched batch 28: 1000 candles, total: 28000
+  Fetched batch 29: 1000 candles, total: 29000
+  Fetched batch 30: 1000 candles, total: 30000
+  Fetched batch 31: 1000 candles, total: 31000
+  Fetched batch 32: 1000 candles, total: 32000
+  Fetched batch 33: 1000 candles, total: 33000
+  Fetched batch 34: 1000 candles, total: 34000
+  Fetched batch 35: 1000 candles, total: 35000
+  Fetched batch 36: 1000 candles, total: 36000
+  Fetched batch 37: 1000 candles, total: 37000
+15m: TrendPullback → WR=56.3% Monthly=2.3%
+  Fetched batch 1: 1000 candles, total: 1000
+  Fetched batch 2: 1000 candles, total: 2000
+  Fetched batch 3: 1000 candles, total: 3000
+  Fetched batch 4: 1000 candles, total: 4000
+  Fetched batch 5: 1000 candles, total: 5000
+  Fetched batch 6: 1000 candles, total: 6000
+  Fetched batch 7: 1000 candles, total: 7000
+  Fetched batch 8: 1000 candles, total: 8000
+  Fetched batch 9: 1000 candles, total: 9000
+  Fetched batch 10: 1000 candles, total: 10000
+  Fetched batch 11: 1000 candles, total: 11000
+  Fetched batch 12: 1000 candles, total: 12000
+  Fetched batch 13: 1000 candles, total: 13000
+  Fetched batch 14: 1000 candles, total: 14000
+  Fetched batch 15: 1000 candles, total: 15000
+  Fetched batch 16: 1000 candles, total: 16000
+  Fetched batch 17: 1000 candles, total: 17000
+  Fetched batch 18: 1000 candles, total: 18000
+  Fetched batch 19: 1000 candles, total: 19000
+30m: TrendPullback → WR=58% Monthly=1.2%
+  Fetched batch 1: 1000 candles, total: 1000
+  Fetched batch 2: 1000 candles, total: 2000
+  Fetched batch 3: 1000 candles, total: 3000
+  Fetched batch 4: 1000 candles, total: 4000
+  Fetched batch 5: 1000 candles, total: 5000
+  Fetched batch 6: 1000 candles, total: 6000
+  Fetched batch 7: 1000 candles, total: 7000
+  Fetched batch 8: 1000 candles, total: 8000
+  Fetched batch 9: 1000 candles, total: 9000
+  Fetched batch 10: 1000 candles, total: 10000
+1h: TrendPullback → WR=58.3% Monthly=0.8%
+  Fetched batch 1: 1000 candles, total: 1000
+  Fetched batch 2: 1000 candles, total: 2000
+  Fetched batch 3: 1000 candles, total: 3000
+  Fetched batch 4: 1000 candles, total: 4000
+4h: TrendPullback → WR=52.6% Monthly=0.1%
+
+✅ Research complete. Deploy top configs to production.

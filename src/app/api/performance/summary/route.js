@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { memoryCache, runWithTimeout } from '@/lib/memoryCache';
-import { toHeikinAshi, detectSwings } from '@/lib/signalsEngineLive';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -17,7 +16,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const symbol   = searchParams.get('symbol')   || 'BTCUSDT';
-    const interval = searchParams.get('interval') || '15m';
+    const interval = searchParams.get('interval') || '30m'; // PRODUCTION: 30m only
 
     const { data: dbSignals, error: dbError } = await supabaseAdmin
       .from('signals')

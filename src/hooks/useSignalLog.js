@@ -23,7 +23,7 @@ export function useSignalLog({ plan = 'free', symbol, interval, page = 1, pageSi
 
     fetch(`/api/signals/log?${params.toString()}`)
       .then(r => r.json())
-      .then(data => { if (!cancelled) { setSignals(data); setError(null); } })
+      .then(data => { if (!cancelled) { setSignals(data.data || []); setError(null); } })
       .catch(err => { if (!cancelled) setError(err.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
 

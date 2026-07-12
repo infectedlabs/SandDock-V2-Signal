@@ -1,7 +1,42 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:3000/api/performance/summary?symbol=BTCUSDT&interval=15m\" -UseBasicParsing)"
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:3000/api/performance/summary?symbol=BTCUSDT&interval=15m\" -UseBasicParsing)",
+      "Bash(node scripts/diagnose_database.js)",
+      "Bash(curl -s \"http://localhost:3000/api/performance/summary?symbol=BTCUSDT&interval=15m\")",
+      "Bash(npx next *)",
+      "Bash(timeout 7200 node scripts/find_optimal_engine_multitf.js)",
+      "Bash(tee strategy_research_results.log)",
+      "Bash(timeout 3600 node scripts/aggressive_signal_engine.js)",
+      "Bash(timeout 1800 node scripts/realistic_25pct_strategy.js)",
+      "Bash(timeout 1800 node -e ' *)",
+      "Bash(node -e ' *)",
+      "Bash(timeout 2400 node -e ' *)",
+      "Bash(timeout 3600 node -e ' *)",
+      "Bash(cp /tmp/backtest_1year.js \"/c/Users/GHURU PRASAATH/Desktop/sanddock/scripts/backtest_1year.js\")",
+      "Bash(timeout 3600 node scripts/backtest_1year.js)",
+      "Bash(curl -s \"http://localhost:3000/api/signals/live?plan=pro&limit=2\")",
+      "Bash(curl -s \"http://localhost:3000/api/signals/live?plan=pro&limit=1\")",
+      "Bash(curl -s \"http://localhost:3000/api/signals/log?plan=pro&page_size=1\")",
+      "Bash(curl -s \"http://localhost:3000/api/signals/live?plan=pro\")",
+      "Bash(curl -s \"http://localhost:3000/terminal\")",
+      "PowerShell(curl -s \"http://localhost:3000/terminal\" 2>&1)",
+      "PowerShell(grep -o \"30m\")",
+      "PowerShell(head -5)",
+      "Bash(curl -s \"http://localhost:3000/api/signals/log?plan=pro&page_size=3\")",
+      "Bash(curl -s \"http://localhost:3000/api/signals/log?plan=pro&page_size=20\")",
+      "PowerShell(cd \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\"; for \\($i=1; $i -le 3; $i++\\) { Write-Host \"=== RUN $i ===\" ; node scripts/backfill_faster.js ; Start-Sleep -Milliseconds 500 })",
+      "Bash(node scripts/verify_backfill.js)",
+      "Bash(node scripts/check_signal_history.js)",
+      "PowerShell(cd \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\"; for \\($i=1; $i -le 4; $i++\\) { Write-Host \"=== RUN $i ===\" ; node scripts/backfill_faster.js ; Start-Sleep -Milliseconds 500 })",
+      "PowerShell(cd \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\"; for \\($i=1; $i -le 2; $i++\\) { node scripts/backfill_faster.js; Write-Host \"Run $i complete\"; Start-Sleep -Milliseconds 300 })",
+      "Bash(node scripts/verify_btc_only.js)",
+      "Bash(node \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\\\\scripts\\\\verify_30d_btc.js\")",
+      "mcp__Claude_Browser__preview_start",
+      "Bash(node scripts/diagnose_30m_vs_15m.js)",
+      "Bash(npm run *)",
+      "Bash(node scripts/fix_signal_closes_proper.js)",
+      "Bash(node scripts/fix_live_signals_db.js)"
     ]
   }
 }

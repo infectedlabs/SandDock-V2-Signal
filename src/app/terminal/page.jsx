@@ -573,7 +573,7 @@ export default function TerminalPage() {
   const [settingsRiskPerTradeType, setSettingsRiskPerTradeType] = useState('1%'); // '1%' | '1.5%' | '2%' | 'custom'
   const [settingsCustomRiskVal, setSettingsCustomRiskVal] = useState('1.0');
   const [settingsMinConfidence, setSettingsMinConfidence] = useState(75);
-  const [settingsDefaultTimeframe, setSettingsDefaultTimeframe] = useState('15m');
+  const [settingsDefaultTimeframe, setSettingsDefaultTimeframe] = useState('30m');
   const [settingsDefaultView, setSettingsDefaultView] = useState('Split');
   const [settingsTimezone, setSettingsTimezone] = useState('UTC');
   const [settingsPriceFormat, setSettingsPriceFormat] = useState('usd');
@@ -605,17 +605,16 @@ export default function TerminalPage() {
 
   // Lifted Chart Selectors State
   const [selectedSymbol,   setSelectedSymbol]   = useState('BTCUSDT');
-  const [selectedInterval, setSelectedInterval] = useState('15m');
+  const [selectedInterval, setSelectedInterval] = useState('30m'); // PRODUCTION: 30m only
   const [viewMode,         setViewMode]         = useState('Split');
 
   useEffect(() => {
-    if (profile?.default_timeframe) {
-      setSelectedInterval(profile.default_timeframe);
-    }
+    // Always use 30m - ignore user's default_timeframe setting
+    setSelectedInterval('30m');
     if (profile?.default_view) {
       setViewMode(profile.default_view);
     }
-  }, [profile?.default_timeframe, profile?.default_view]);
+  }, [profile?.default_view]);
 
   // Detail Drawer state
   const [selectedDrawerSignal, setSelectedDrawerSignal] = useState(null);
@@ -885,7 +884,7 @@ export default function TerminalPage() {
       }
 
       setSettingsMinConfidence(profile.min_confidence != null ? profile.min_confidence : 75);
-      setSettingsDefaultTimeframe(profile.default_timeframe || '15m');
+      setSettingsDefaultTimeframe('30m'); // PRODUCTION: 30m only
       setSettingsDefaultView(profile.default_view || 'Split');
       setSettingsTimezone(profile.timezone || 'UTC');
       setSettingsPriceFormat(profile.price_format || 'usd');
@@ -1387,7 +1386,7 @@ export default function TerminalPage() {
                       ))}
                     </div>
                     <div className="flex p-0.5 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                      {['15m'].map(tf => (
+                      {['30m'].map(tf => (
                         <button key={tf}
                           onClick={() => setSelectedInterval(tf)}
                           className={`px-4 py-1.5 text-[10px] font-extrabold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all duration-200 cursor-pointer border-0 ${
@@ -1706,7 +1705,7 @@ export default function TerminalPage() {
                   <div className="flex items-center gap-3">
                     {/* Timeframe Selector Filter */}
                     <div className="flex p-0.5 bg-slate-950/40 rounded-lg border border-[#1e2d4a]/30">
-                      {['15m', '30m', '1h', '4h'].map(tf => {
+                      {['30m'].map(tf => {
                         const locked = false;
                         return (
                           <button key={tf}
@@ -1765,7 +1764,7 @@ export default function TerminalPage() {
                           const isClosed = sig.close_price !== null && sig.close_price !== undefined && sig.close_reason !== 'open' && sig.close_reason !== '';
                           return (
                             <tr key={sig.id} className={`border-b border-[#1e2a3a]/40 last:border-0 hover:bg-zinc-900/10 text-[12px] ${showBlur ? 'opacity-40 select-none' : ''}`}>
-                              <td className="p-3 text-zinc-400">{formatLogDate(sig.created_at, profile)}</td>
+                              <td className="p-3 text-zinc-400">{formatLogDate(sig.bar_time, profile)}</td>
                               <td className="p-3 font-bold text-white">{formatSymbol(sig.symbol)}</td>
                               <td className="p-3">
                                 <span className={`inline-block px-1.5 py-0.5 text-[10px] font-bold ${isBuy ? 'bg-[#00e676]/10 text-[#00e676]' : 'bg-[#ff1744]/10 text-[#ff1744]'}`}>
@@ -1851,7 +1850,7 @@ export default function TerminalPage() {
 
                         {/* Timeframe Interval Selector */}
                         <div className="flex gap-1 border-r border-slate-800/80 pr-3 mr-1">
-                          {['15m', '30m', '1h', '4h'].map(tf => {
+                          {['30m'].map(tf => {
                             const locked = false;
                             return (
                               <button key={tf}
@@ -2291,7 +2290,7 @@ export default function TerminalPage() {
                         <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Default timeframe</label>
                         <select value={settingsDefaultTimeframe} onChange={e => setSettingsDefaultTimeframe(e.target.value)}
                           className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
-                          <option value="15m">15m</option>
+                          <option value="30m">30m</option>
                         </select>
                       </div>
 
@@ -2605,7 +2604,7 @@ export default function TerminalPage() {
               <span className="block text-[13px] font-bold text-white uppercase tracking-wider">Pro Plan Benefits</span>
               <ul className="space-y-1 text-[12px] text-zinc-400 list-disc list-inside normal-case">
                 <li>10+ major crypto coins tracked</li>
-                <li>Multiple timeframes (15m, 1H, 4H)</li>
+                <li>30-minute timeframe (swing high/low detection)</li>
                 <li>Entry targets, Stop Loss, and Take Profit</li>
                 <li>Automated Telegram push integrations</li>
               </ul>

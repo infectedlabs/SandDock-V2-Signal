@@ -8,9 +8,9 @@ import { useAuth } from '@/context/AuthContext';
  * Features live ticking price updates, dynamic cumulative PnL calculations,
  * and floating premium HTML label cards that auto-expand on hover.
  */
-export default function HAChart({ 
-  symbol: selectedSymbol = 'BTCUSDT', 
-  interval: selectedInterval = '15m', 
+export default function HAChart({
+  symbol: selectedSymbol = 'BTCUSDT',
+  interval: selectedInterval = '30m', 
   isFreePlan = true, 
   theme = 'dark',
   onSymbolChange,
@@ -30,7 +30,9 @@ export default function HAChart({
 
   const [loading, setLoading] = useState(true);
   const [noData,  setNoData]  = useState(false);
-  
+  const [hideOldSignals, setHideOldSignals] = useState(false);
+  const hideOldSignalsRef = useRef(false);
+
   // Floating HTML signal cards state
   const [signalCards, setSignalCards] = useState([]);
   const sigsRef         = useRef([]);
@@ -443,6 +445,14 @@ export default function HAChart({
         const sigData = await sigRes.json();
 
         sigsRef.current = sigData || [];
+        console.log('[HAChart] Loaded signals:', sigsRef.current.length);
+
+        // Immediately draw arrows on canvas
+        if (sigsRef.current.length > 0) {
+          setTimeout(() => {
+            if (isMounted) drawSignalArrows();
+          }, 50);
+        }
 
         // Layer 2 & 4: Render signal markers (arrows) on the exact firing bar.
         // LWC v5 createSeriesMarkers REQUIRES markers in ASCENDING time order —
@@ -481,6 +491,9 @@ export default function HAChart({
           const activeSeries = seriesRef.current;
           const currentPrice = livePriceRef.current;
 
+          const today = new Date();
+          today.setUTCHours(0, 0, 0, 0);
+
           const updated = sigsRef.current.map((s, idx, arr) => {
             const timeMs = Math.floor(new Date(s.bar_time).getTime() / 1000) + offsetSeconds;
             const x = timeScale.timeToCoordinate(timeMs);
@@ -489,24 +502,152 @@ export default function HAChart({
             const isLatest = idx === arr.length - 1;
             const isVisible = x !== null && x >= 0 && x <= containerRef.current.clientWidth && y !== null && y >= 0 && y <= 460;
 
-            let displayPnl = s.pnl;
-            const isClosed = s.pnl !== null;
-            if (!isClosed && isLatest && currentPrice) {
-              const rawPnl = ((currentPrice - s.entry_price) / s.entry_price) * 100;
-              displayPnl = s.signal_type === 'buy' ? rawPnl : -rawPnl;
+            // Calculate displayPnl - for live signals, always use current price
+            const hasOpposite = s.close_reason === 'swing_opposite';
+            const isClosed = s.pnl !== null && hasOpposite;
+
+            let displayPnl;
+            if (!isClosed) {
+              // Live signal - always calculate from current price, ignore stored pnl
+              if (isLatest && currentPrice) {
+                const rawPnl = ((currentPrice - s.entry_price) / s.entry_price) * 100;
+                displayPnl = s.signal_type === 'buy' ? rawPnl : -rawPnl;
+              } else {
+                displayPnl = null;
+              }
+            } else {
+              // Closed signal - use stored pnl
+              displayPnl = s.pnl;
             }
+
+            // Check if signal is from today (compare UTC dates)
+            const barDate = new Date(s.bar_time);
+            const barYear = barDate.getUTCFullYear();
+            const barMonth = barDate.getUTCMonth();
+            const barDay = barDate.getUTCDate();
+            const todayYear = today.getUTCFullYear();
+            const todayMonth = today.getUTCMonth();
+            const todayDay = today.getUTCDate();
+            const isToday = (barYear === todayYear && barMonth === todayMonth && barDay === todayDay);
+
+            // Show if: (1) not hiding old signals, OR (2) signal is from today
+            const shouldShow = !hideOldSignalsRef.current || isToday;
 
             return {
               ...s,
               x,
               y,
-              isVisible,
+              isVisible: isVisible && shouldShow,
               isLatest,
               displayPnl,
+              isToday,
             };
           }).filter(c => c.isVisible);
 
           setSignalCards(updated);
+        };
+
+        // ── Draw signal arrows on canvas overlay ──
+        const drawSignalArrows = () => {
+          if (!chartLocal) {
+            console.log('[drawSignalArrows] No chartLocal');
+            return;
+          }
+          if (!sigsRef.current || sigsRef.current.length === 0) {
+            console.log('[drawSignalArrows] No signals');
+            return;
+          }
+
+          const canvas = document.getElementById('chart-overlay');
+          if (!canvas) {
+            console.log('[drawSignalArrows] No canvas');
+            return;
+          }
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            console.log('[drawSignalArrows] No context');
+            return;
+          }
+
+          // Ensure canvas has proper dimensions
+          if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+          }
+
+          console.log('[drawSignalArrows] Drawing', sigsRef.current.length, 'signals on canvas', canvas.width, 'x', canvas.height);
+
+          const timeScale = chartLocal.timeScale();
+          const candleSeries = seriesRef.current;
+          if (!candleSeries) {
+            console.log('[drawSignalArrows] No candleSeries');
+            return;
+          }
+
+          // Filter signals based on hideOldSignals toggle
+          const today = new Date();
+          today.setUTCHours(0, 0, 0, 0);
+          const sigsToRender = sigsRef.current.filter(sig => {
+            if (!hideOldSignalsRef.current) return true; // Show all
+            // Show only today's signals
+            const barDate = new Date(sig.bar_time);
+            const barYear = barDate.getUTCFullYear();
+            const barMonth = barDate.getUTCMonth();
+            const barDay = barDate.getUTCDate();
+            const todayYear = today.getUTCFullYear();
+            const todayMonth = today.getUTCMonth();
+            const todayDay = today.getUTCDate();
+            return (barYear === todayYear && barMonth === todayMonth && barDay === todayDay);
+          });
+
+          let drawnCount = 0;
+          sigsToRender.forEach((sig) => {
+            try {
+              const barTimeSeconds = Math.floor(new Date(sig.bar_time).getTime() / 1000) + offsetSeconds;
+              const x = timeScale.timeToCoordinate(barTimeSeconds);
+              const y = candleSeries.priceToCoordinate(sig.entry_price);
+
+              if (x === null || y === null) return;
+              if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) return;
+
+              const isBuy = sig.signal_type === 'buy';
+              const arrowSize = 14;
+              const color = isBuy ? '#00e676' : '#ff1744';
+
+              // Draw arrow with stroke outline
+              ctx.fillStyle = color;
+              ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+              ctx.lineWidth = 1;
+
+              if (isBuy) {
+                // Arrow pointing UP (below the entry price)
+                const arrowBaseY = y + 20;
+                ctx.beginPath();
+                ctx.moveTo(x, arrowBaseY - arrowSize);
+                ctx.lineTo(x - arrowSize / 2, arrowBaseY);
+                ctx.lineTo(x + arrowSize / 2, arrowBaseY);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+                drawnCount++;
+              } else {
+                // Arrow pointing DOWN (above the entry price)
+                const arrowBaseY = y - 20;
+                ctx.beginPath();
+                ctx.moveTo(x, arrowBaseY + arrowSize);
+                ctx.lineTo(x - arrowSize / 2, arrowBaseY);
+                ctx.lineTo(x + arrowSize / 2, arrowBaseY);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+                drawnCount++;
+              }
+            } catch (e) {
+              console.log('[drawSignalArrows] Error drawing signal:', e.message);
+            }
+          });
+          console.log('[drawSignalArrows] Drew', drawnCount, 'arrows');
         };
 
         // ── Lookback Window canvas overlay (Layer 3) ──
@@ -532,7 +673,7 @@ export default function HAChart({
 
           if (x1 !== null && x2 !== null) {
             const chartHeight = canvas.height * 0.8; // upper 80% (above volume pane)
-            
+
             ctx.fillStyle = 'rgba(61, 90, 254, 0.025)';
             ctx.fillRect(x1, 0, x2 - x1, chartHeight);
 
@@ -546,12 +687,35 @@ export default function HAChart({
             ctx.setLineDash([]);
             ctx.fillText('AI scan window · 10 bars', x1 + 6, 14);
           }
+
+          // Draw signal arrows after drawing the lookback window
+          drawSignalArrows();
         };
 
         // Hook coordinate update and canvas draw listeners
-        chart.timeScale().subscribeVisibleTimeRangeChange(updateCardPositions);
-        chart.timeScale().subscribeVisibleTimeRangeChange(drawLookbackWindow);
-        setTimeout(drawLookbackWindow, 100);
+        const redrawCanvas = () => {
+          const canvas = document.getElementById('chart-overlay');
+          if (canvas) {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+          }
+          if (activeSignal) {
+            drawLookbackWindow();
+          } else {
+            drawSignalArrows();
+          }
+        };
+
+        const updateWithArrows = () => {
+          updateCardPositions();
+          redrawCanvas();
+        };
+
+        chart.timeScale().subscribeVisibleTimeRangeChange(updateWithArrows);
+        setTimeout(() => updateWithArrows(), 100);
+
+        // Force redraw on data load
+        setTimeout(() => drawSignalArrows(), 500);
         
         // ── Attach onmessage AFTER data loads so the handler closes over
         // candleSeries, lastCandle, and offsetSeconds — variables that only
@@ -656,6 +820,72 @@ export default function HAChart({
     };
   }, [selectedSymbol, selectedInterval, activeSignal, signalStats]);
 
+  // Keep hideOldSignalsRef in sync
+  useEffect(() => {
+    hideOldSignalsRef.current = hideOldSignals;
+  }, [hideOldSignals]);
+
+  // Re-filter signals when hideOldSignals toggle changes
+  useEffect(() => {
+    if (!chartRef.current || !seriesRef.current || !containerRef.current || sigsRef.current.length === 0) return;
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const timeScale = chartRef.current.timeScale();
+    const activeSeries = seriesRef.current;
+    const currentPrice = livePriceRef.current;
+
+    const updated = sigsRef.current.map((s, idx, arr) => {
+      const timeMs = Math.floor(new Date(s.bar_time).getTime() / 1000) + (new Date(s.bar_time).getTimezoneOffset() * 60);
+      const x = timeScale.timeToCoordinate(timeMs);
+      const y = activeSeries.priceToCoordinate(s.entry_price);
+
+      const isLatest = idx === arr.length - 1;
+      const isVisible = x !== null && x >= 0 && x <= containerRef.current.clientWidth && y !== null && y >= 0 && y <= 460;
+
+      // Calculate displayPnl same as in updateCardPositions
+      const hasOpposite = s.close_reason === 'swing_opposite';
+      const isClosed = s.pnl !== null && hasOpposite;
+
+      let displayPnl;
+      if (!isClosed) {
+        // Live signal - always calculate from current price, ignore stored pnl
+        if (isLatest && currentPrice) {
+          const rawPnl = ((currentPrice - s.entry_price) / s.entry_price) * 100;
+          displayPnl = s.signal_type === 'buy' ? rawPnl : -rawPnl;
+        } else {
+          displayPnl = null; // No live price available yet
+        }
+      } else {
+        // Closed signal - use stored pnl
+        displayPnl = s.pnl;
+      }
+
+      const barDate = new Date(s.bar_time);
+      const barYear = barDate.getUTCFullYear();
+      const barMonth = barDate.getUTCMonth();
+      const barDay = barDate.getUTCDate();
+      const todayYear = today.getUTCFullYear();
+      const todayMonth = today.getUTCMonth();
+      const todayDay = today.getUTCDate();
+      const isToday = (barYear === todayYear && barMonth === todayMonth && barDay === todayDay);
+
+      const shouldShow = !hideOldSignalsRef.current || isToday;
+
+      return {
+        ...s,
+        x,
+        y,
+        isVisible: isVisible && shouldShow,
+        isLatest,
+        isToday,
+        displayPnl,
+      };
+    }).filter(c => c.isVisible);
+
+    setSignalCards(updated);
+  }, [hideOldSignals]);
+
   const formatSymbolDisplay = (s) => s.replace('USDT', '/USDT');
 
   return (
@@ -728,7 +958,7 @@ export default function HAChart({
 
           {/* Timeframe Selector */}
           <div className="flex p-1 bg-slate-950/40 rounded-lg border border-slate-800/50 shadow-inner">
-            {['15m', '1h', '4h'].map(tf => {
+            {['30m'].map(tf => {
               const active = selectedInterval === tf;
               return (
                 <button
@@ -745,6 +975,19 @@ export default function HAChart({
               );
             })}
           </div>
+
+          {/* Hide Old Signals Toggle */}
+          <button
+            onClick={() => setHideOldSignals(!hideOldSignals)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono tracking-wider transition-all duration-300 cursor-pointer border ${
+              hideOldSignals
+                ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-amber-500/20 shadow-sm'
+                : 'bg-slate-950/40 text-slate-400 border-slate-800/50 hover:text-slate-300'
+            }`}
+            title="Show only today's signals"
+          >
+            {hideOldSignals ? '📅 TODAY ONLY' : '📅 ALL SIGNALS'}
+          </button>
         </div>
 
         <div className="flex items-center gap-3 px-3 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-sm shadow-emerald-500/5 transition-all">
@@ -785,9 +1028,10 @@ export default function HAChart({
         {!loading && !noData && !hideSignalCards && signalCards.map((card) => {
           const isBuy = card.signal_type === 'buy';
           const pnlVal = card.displayPnl;
-          const isClosed = card.pnl !== null;
-          const formattedPnl = pnlVal !== null 
-            ? `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(2)}%${(card.isLatest && !isClosed) ? ' Live' : ''}` 
+          const hasOpposite = card.close_reason === 'swing_opposite';
+          const isClosed = card.pnl !== null && hasOpposite;
+          const formattedPnl = pnlVal !== null
+            ? `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(2)}%${(card.isLatest && !isClosed) ? ' Live' : ''}`
             : 'LIVE';
 
 
@@ -815,9 +1059,13 @@ export default function HAChart({
                   }`}>
                     {isBuy ? 'BUY' : 'SELL'}
                   </span>
-                  {isClosed && (
+                  {isClosed ? (
                     <span className="text-[7.5px] font-extrabold px-1 py-0.5 rounded bg-zinc-800 text-zinc-400 select-none uppercase tracking-wide leading-none">
                       closed
+                    </span>
+                  ) : (
+                    <span className="text-[7.5px] font-extrabold px-1 py-0.5 rounded bg-cyan-900/40 text-cyan-400 select-none uppercase tracking-wide leading-none">
+                      live
                     </span>
                   )}
                 </div>
@@ -829,9 +1077,33 @@ export default function HAChart({
               </div>
               
               {/* Expandable Body Content on Hover */}
-              <div className="max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 transition-all duration-300 ease-out border-t border-slate-800/40 pt-1.5 mt-1 space-y-1 font-mono text-[9px] text-slate-400">
-                <div>Entry: <span className="text-white font-bold">${card.entry_price.toLocaleString()}</span></div>
+              <div className="max-h-0 opacity-0 group-hover:max-h-64 group-hover:opacity-100 transition-all duration-300 ease-out border-t border-slate-800/40 pt-1.5 mt-1 space-y-1 font-mono text-[8.5px] text-slate-400 overflow-y-auto">
+                <div>Entry: <span className="text-white font-bold">${card.entry_price?.toLocaleString()}</span></div>
                 <div>Time: <span className="text-slate-300">{new Date(card.bar_time).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false})}</span></div>
+                {isClosed && card.close_price !== null && card.close_price !== undefined && (
+                  <>
+                    <div className="border-t border-slate-800/40 pt-1 mt-1">
+                      <div>Exit: <span className="text-white font-bold">${card.close_price?.toLocaleString()}</span></div>
+                      <div>Method: <span className={`font-bold ${
+                        card.close_reason === 'swing_opposite' ? 'text-cyan-400' :
+                        card.close_reason === 'tp_hit' ? 'text-emerald-400' :
+                        card.close_reason === 'sl_hit' ? 'text-red-400' :
+                        'text-orange-400'
+                      }`}>
+                        {card.close_reason?.replace(/_/g, ' ').toUpperCase()}
+                      </span></div>
+                      {card.closed_at && (
+                        <div>Exit Time: <span className="text-slate-300">{new Date(card.closed_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false})}</span></div>
+                      )}
+                    </div>
+                  </>
+                )}
+                {!isClosed && (
+                  <div className="border-t border-slate-800/40 pt-1 mt-1">
+                    <div className="text-cyan-400 font-bold">⏳ Awaiting Opposite Signal</div>
+                    <div className="text-slate-500 text-[7.5px] mt-1">Live PnL updates as price moves</div>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -839,13 +1111,19 @@ export default function HAChart({
 
         <div className="relative w-full h-[460px]">
           <div ref={containerRef} className="absolute inset-0 z-10" style={{ visibility: loading || noData ? 'hidden' : 'visible' }} />
+
+          {/* Canvas overlay - always render for signal arrows */}
+          {!loading && !noData && (
+            <canvas
+              id="chart-overlay"
+              className="absolute inset-0 pointer-events-none z-20"
+              style={{ width: '100%', height: '100%' }}
+            />
+          )}
+
           {activeSignal && !loading && !noData && (
             <>
-              <canvas 
-                id="chart-overlay" 
-                className="absolute inset-0 pointer-events-none z-20"
-                style={{ width: '100%', height: '100%' }}
-              />
+
               <div className="absolute right-24 top-6 z-30 bg-[#0b1224]/90 border border-slate-800/80 rounded px-3 py-2 font-mono text-[10px] shadow-2xl text-left select-none pointer-events-none select-none">
                 <div className="text-zinc-500 font-extrabold uppercase tracking-wider">Risk : Reward</div>
                 <div className="text-[#00e676] font-black text-[13px] mt-0.5">

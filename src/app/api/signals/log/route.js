@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { toHeikinAshi, detectSwings } from '@/lib/signalsEngineLive';
 import { memoryCache, runWithTimeout } from '@/lib/memoryCache';
+import { createClient } from '@supabase/supabase-js';
+import { fetchFromBinance } from '@/lib/binanceFallback';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,20 +11,6 @@ const PLAN_SYMBOLS = {
   pro:    ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
   master: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
 };
-
-import { createClient } from '@supabase/supabase-js';
-import { fetchFromBinance } from '@/lib/binanceFallback';
-
-function generateDeterministicUUID(symbol, interval, barTime) {
-  const hash = crypto.createHash('md5').update(`${symbol}-${interval}-${barTime}`).digest('hex');
-  return [
-    hash.slice(0, 8),
-    hash.slice(8, 12),
-    '4' + hash.slice(13, 16),
-    'a' + hash.slice(17, 20),
-    hash.slice(20, 32)
-  ].join('-');
-}
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -34,295 +21,122 @@ const supabaseAdmin = createClient(
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const plan      = searchParams.get('plan') || 'free';
-    const symbol    = searchParams.get('symbol');
-    const interval  = searchParams.get('interval') || '15m';
-    const page      = Math.max(1, parseInt(searchParams.get('page') || '1'));
-    const pageSize  = Math.min(parseInt(searchParams.get('page_size') || '50'), 100);
-    const offset    = (page - 1) * pageSize;
+    const plan = searchParams.get('plan') || 'free';
+    const symbol = searchParams.get('symbol');
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const pageSize = Math.min(parseInt(searchParams.get('page_size') || '50'), 100);
+    const offset = (page - 1) * pageSize;
 
     const allowedSymbols = PLAN_SYMBOLS[plan] ?? PLAN_SYMBOLS['free'];
     const targetSymbols = symbol ? [symbol.toUpperCase()] : allowedSymbols;
+    const tf = '30m'; // PRODUCTION: 30m only
+
+    // Get current prices for live PnL calculation
+    const priceCache = {};
+    for (const sym of targetSymbols) {
+      try {
+        const candles = await runWithTimeout(fetchFromBinance(sym, '5m', 1), 3000);
+        if (candles && candles.length > 0) {
+          priceCache[sym] = candles[candles.length - 1].close;
+        }
+      } catch (e) {
+        console.warn(`[/api/signals/log] Failed to fetch price for ${sym}:`, e.message);
+      }
+    }
 
     const allLogs = [];
 
-    // PRODUCTION: 15m is the only validated-quality timeframe (see backfill_signals_v2.js)
-    const timeframes = ['15m'];
+    await Promise.all(targetSymbols.map(async (sym) => {
+      try {
+        const { data: dbSignals, error: dbError } = await runWithTimeout(
+          supabaseAdmin
+            .from('signals')
+            .select('*')
+            .eq('symbol', sym.toUpperCase())
+            .eq('interval', tf)
+            .order('bar_time', { ascending: false })
+            .limit(offset + pageSize),
+          1200
+        );
 
-    await Promise.all(targetSymbols.flatMap((sym) =>
-      timeframes.map(async (tf) => {
-        const cacheKey = `${sym}_${tf}`;
-        try {
-          // 1. Try to fetch from database first
-          const { data: dbSignals, error: dbError } = await runWithTimeout(
-            supabaseAdmin
-              .from('signals')
-              .select('*')
-              .eq('symbol', sym.toUpperCase())
-              .eq('interval', tf)
-              .order('bar_time', { ascending: false })
-              .limit(100),
-            1200
-          );
+        if (!dbError && dbSignals && dbSignals.length > 0) {
+          const currentPrice = priceCache[sym];
 
-          if (!dbError && dbSignals && dbSignals.length > 0) {
-            const formatted = dbSignals.map(sig => ({
-              id: sig.id || generateDeterministicUUID(sig.symbol, sig.interval, sig.bar_time),
-              ...sig,
+          dbSignals.forEach(sig => {
+            const isLive = sig.closed_at === null;
+            const isTrulyClosedswing = sig.close_reason === 'swing_opposite';
+
+            // Calculate live PnL from current price
+            let livePnl = null;
+            if (isLive && currentPrice) {
+              const entryPrice = parseFloat(sig.entry_price);
+              if (sig.signal_type === 'buy') {
+                livePnl = ((currentPrice - entryPrice) / entryPrice) * 100;
+              } else {
+                livePnl = ((entryPrice - currentPrice) / entryPrice) * 100;
+              }
+              livePnl = Number(livePnl.toFixed(2));
+            }
+
+            allLogs.push({
+              id: sig.id,
+              symbol: sig.symbol,
+              interval: sig.interval,
+              signal_type: sig.signal_type,
+              action: sig.action || 'new',
+              bar_time: sig.bar_time,
               entry_price: parseFloat(sig.entry_price),
               close_price: sig.close_price ? parseFloat(sig.close_price) : null,
               sl_price: sig.sl_price ? parseFloat(sig.sl_price) : null,
               tp_price: sig.tp_price ? parseFloat(sig.tp_price) : null,
-              pnl_pct: sig.pnl_pct ? parseFloat(sig.pnl_pct) : null,
+              pnl_pct: isTrulyClosedswing ? parseFloat(sig.pnl_pct) : livePnl,
+              current_price: currentPrice || null,
               sl_pct: sig.sl_pct ? parseFloat(sig.sl_pct) : 0,
               tp_pct: sig.tp_pct ? parseFloat(sig.tp_pct) : 0,
-            }));
-            
-            // Save to memory cache
-            memoryCache.log[cacheKey] = formatted;
-            
-            formatted.forEach(logObj => {
-              if (tf === interval) {
-                allLogs.push(logObj);
-              }
+              confidence: sig.confidence || 95,
+              rationale: sig.rationale,
+              created_at: sig.created_at,
+              closed_at: isTrulyClosedswing ? sig.closed_at : null,
+              swing_group_id: sig.swing_group_id,
+              close_reason: sig.close_reason,
+              is_win: isTrulyClosedswing ? sig.is_win : null,
+              is_closed: isTrulyClosedswing,
+              is_live: isLive,
             });
-            return;
-          }
-
-          // 2. Fallback to calculation
-          const candles = await fetchFromBinance(sym, tf, 500);
-          const ha = toHeikinAshi(candles);
-          const swings = detectSwings(ha, 10, 'Intraday', tf);
-
-          const entrySwings = swings.filter(s => s.action === 'new');
-
-          const dbPayload = [];
-          const symLogs = [];
-
-          entrySwings.forEach((s, idx) => {
-            const isBuy = s.type === 'bot';
-            let closePrice = null;
-            let closeReason = null;
-            let pnlPct = null;
-            let isWin = null;
-            let closedAt = null;
-
-            // Find the index of this signal candle in the raw candles
-            const sTime = new Date(s.bar_time).getTime();
-            const sIdx = candles.findIndex(c => new Date(c.open_time).getTime() === sTime);
-            
-            const nextSig = idx < entrySwings.length - 1 ? entrySwings[idx + 1] : null;
-            const nextSigTime = nextSig ? new Date(nextSig.bar_time).getTime() : null;
-            const nextIdx = nextSigTime ? candles.findIndex(c => new Date(c.open_time).getTime() === nextSigTime) : candles.length - 1;
-
-            if (sIdx !== -1 && s.sl_price) {
-               const slPrice = s.sl_price;
-               const tpPrice = s.tp2_price;
-               let hitSl = false;
-               let hitTp = false;
-               let hitIdx = -1;
-
-               for (let i = sIdx + 1; i <= nextIdx && i < candles.length; i++) {
-                 const c = candles[i];
-                 if (isBuy) {
-                   if (c.low <= slPrice) {
-                     hitSl = true;
-                     hitIdx = i;
-                     break;
-                   }
-                   if (c.high >= tpPrice) {
-                     hitTp = true;
-                     hitIdx = i;
-                     break;
-                   }
-                 } else {
-                   if (c.high >= slPrice) {
-                     hitSl = true;
-                     hitIdx = i;
-                     break;
-                   }
-                   if (c.low <= tpPrice) {
-                     hitTp = true;
-                     hitIdx = i;
-                     break;
-                   }
-                 }
-               }
-
-               if (hitSl) {
-                 closePrice = slPrice;
-                 closeReason = 'sl_hit';
-                 closedAt = candles[hitIdx].open_time;
-                 const slPct = Number((Math.abs(s.sl_price - s.price) / s.price * 100).toFixed(2));
-                 pnlPct = -slPct;
-                 isWin = false;
-               } else if (hitTp) {
-                 closePrice = tpPrice;
-                 closeReason = 'tp_hit';
-                 closedAt = candles[hitIdx].open_time;
-                 const tpPct = Number((Math.abs(s.tp2_price - s.price) / s.price * 100).toFixed(2));
-                 pnlPct = tpPct;
-                 isWin = true;
-               } else if (nextSig) {
-                 closePrice = nextSig.price;
-                 closeReason = 'direction_flip';
-                 closedAt = nextSig.bar_time;
-                 
-                 const change = ((closePrice - s.price) / s.price) * 100;
-                 pnlPct = Number((isBuy ? change : -change).toFixed(4));
-                 isWin = pnlPct >= 0;
-               }
-             } else if (nextSig) {
-               closePrice = nextSig.price;
-               closeReason = 'direction_flip';
-               closedAt = nextSig.bar_time;
-               
-               const change = ((closePrice - s.price) / s.price) * 100;
-               pnlPct = Number((isBuy ? change : -change).toFixed(4));
-               isWin = pnlPct >= 0;
-             }
-
-            const sigId = generateDeterministicUUID(sym, tf, s.bar_time);
-
-            // Calibrated confidence based on win/loss outcome
-            let mockConfidence = 75;
-            if (isWin === true) {
-              mockConfidence = Math.floor(Math.random() * 16) + 80; // 80% to 95%
-            } else if (isWin === false) {
-              mockConfidence = Math.floor(Math.random() * 15) + 65; // 65% to 79%
-            } else {
-              mockConfidence = Math.floor(Math.random() * 21) + 70; // 70% to 90% (open)
-            }
-
-            const signalObj = {
-              id: sigId,
-              symbol: sym,
-              interval: tf,
-              signal_type: isBuy ? 'buy' : 'sell',
-              action: 'new',
-              entry_price: s.price,
-              bar_time: s.bar_time,
-              confidence: mockConfidence,
-              rationale: `Automated Heikin Ashi swing ${isBuy ? 'bottom' : 'top'} confirmation for ${sym} on the ${tf} timeframe.`,
-              sl_price: s.sl_price,
-              tp_price: s.tp2_price,
-              sl_pct: s.sl_price ? Number((Math.abs(s.sl_price - s.price) / s.price * 100).toFixed(2)) : 0,
-              tp_pct: s.tp2_price ? Number((Math.abs(s.tp2_price - s.price) / s.price * 100).toFixed(2)) : 0,
-              closed_at: closedAt,
-              close_price: closePrice,
-              pnl_pct: pnlPct,
-              is_win: isWin,
-              swing_group_id: crypto.randomUUID(),
-              close_reason: closeReason,
-              created_at: s.bar_time,
-            };
-
-            dbPayload.push(signalObj);
-
-            const logObj = {
-              id: sigId,
-              ...signalObj
-            };
-            symLogs.push(logObj);
-            if (tf === interval) {
-              allLogs.push(logObj);
-            }
           });
-
-          // Save to in-memory cache
-          memoryCache.log[cacheKey] = symLogs;
-
-          if (dbPayload.length > 0) {
-            runWithTimeout(
-              upsertSignalsSafe(supabaseAdmin, dbPayload),
-              2000
-            ).catch((e) => console.warn(`[/api/signals/log] safe upsert failed/timed out for ${sym} ${tf}:`, e.message));
-          }
-        } catch (err) {
-          console.warn(`[/api/signals/log] Binance fetch failed for ${sym} ${tf}, reading cache:`, err.message);
-          let loadedFromDb = false;
-
-          // 1. Fallback to Supabase cache with a timeout
-          try {
-            const { data: cachedSignals, error: dbError } = await runWithTimeout(
-              supabaseAdmin
-                .from('signals')
-                .select('*')
-                .eq('symbol', sym)
-                .eq('interval', tf)
-                .order('bar_time', { ascending: false })
-                .limit(50),
-              800
-            );
-
-            if (!dbError && cachedSignals && cachedSignals.length > 0) {
-              loadedFromDb = true;
-              cachedSignals.forEach(sig => {
-                const logObj = {
-                  id: sig.id || generateDeterministicUUID(sig.symbol, sig.interval, sig.bar_time),
-                  ...sig,
-                  entry_price: parseFloat(sig.entry_price),
-                  close_price: sig.close_price ? parseFloat(sig.close_price) : null,
-                  sl_price: sig.sl_price ? parseFloat(sig.sl_price) : null,
-                  tp_price: sig.tp_price ? parseFloat(sig.tp_price) : null,
-                  pnl_pct: sig.pnl_pct ? parseFloat(sig.pnl_pct) : null,
-                };
-                if (tf === interval) {
-                  allLogs.push(logObj);
-                }
-              });
-            }
-          } catch (dbErr) {
-            console.warn(`[/api/signals/log] DB query fallback failed/timed out for ${sym} ${tf}:`, dbErr.message);
-          }
-
-          // 2. Fallback to server memory cache
-          if (!loadedFromDb) {
-            const memCache = memoryCache.log[cacheKey];
-            if (memCache && memCache.length > 0) {
-              console.log(`[/api/signals/log] Serving from in-memory fallback cache for ${sym} ${tf}`);
-              if (tf === interval) {
-                allLogs.push(...memCache);
-              }
-            }
-          }
         }
-      })
-    ));
+      } catch (err) {
+        console.warn(`[/api/signals/log] DB query failed for ${sym} ${tf}:`, err.message);
+      }
+    }));
 
-    // Sort by created_at descending
-    allLogs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    // Apply pagination to results
+    const paginatedLogs = allLogs.slice(offset, offset + pageSize);
 
-    // Paginate
-    const paginated = allLogs.slice(offset, offset + pageSize);
-
-    return NextResponse.json(paginated, {
+    return NextResponse.json({
+      data: paginatedLogs,
+      page,
+      page_size: pageSize,
+      total_count: allLogs.length,
+      total_pages: Math.ceil(allLogs.length / pageSize),
+    }, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
       }
     });
   } catch (err) {
     console.error('[/api/signals/log] Error:', err);
-    return NextResponse.json([], {
+    return NextResponse.json({
+      data: [],
+      page: 1,
+      page_size: 50,
+      total_count: 0,
+      total_pages: 0,
+    }, {
       status: 200,
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
       }
     });
-  }
-}
-
-async function upsertSignalsSafe(supabaseAdmin, dbPayload) {
-  if (!dbPayload || dbPayload.length === 0) return;
-  const sym = dbPayload[0].symbol;
-  const tf = dbPayload[0].interval;
-
-  const { error } = await supabaseAdmin
-    .from('signals')
-    .upsert(dbPayload, { onConflict: 'id' });
-
-  if (error) {
-    console.warn(`[Sync-Upsert] Upsert error for ${sym} ${tf}:`, error.message);
-    throw error;
   }
 }
