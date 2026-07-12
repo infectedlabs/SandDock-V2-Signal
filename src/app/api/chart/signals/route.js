@@ -14,7 +14,13 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get('symbol') || 'BTCUSDT';
+    const plan = searchParams.get('plan') || 'free';
     const tf = '30m'; // PRODUCTION: 30m only
+
+    // Plan-based gating:
+    const minConfidence = plan === 'free' ? 90 : 80;
+    const delayMinutes = plan === 'free' ? 5 : 0;
+    const fiveMinutesAgo = new Date(Date.now() - delayMinutes * 60 * 1000);
 
     const { data: recentDesc, error: dbError } = await runWithTimeout(
       supabaseAdmin
@@ -45,7 +51,19 @@ export async function GET(request) {
       });
     }
 
-    const mapped = dbSignals.map(s => ({
+    // Apply plan-based gating before mapping
+    const filtered = dbSignals.filter(s => {
+      const sigConfidence = s.confidence || 95;
+      const sigBarTime = new Date(s.bar_time);
+
+      // Filter by confidence
+      if (sigConfidence < minConfidence) return false;
+      // Filter by time delay for free plan
+      if (plan === 'free' && sigBarTime > fiveMinutesAgo) return false;
+      return true;
+    });
+
+    const mapped = filtered.map(s => ({
       id: s.id,
       bar_time: s.bar_time,
       signal_type: s.signal_type,

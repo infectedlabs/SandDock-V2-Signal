@@ -22,9 +22,16 @@ export async function GET(request) {
     interval = searchParams.get('interval')  || '15m';
     filter   = searchParams.get('filter') || '30d'; // '1y' | '6m' | '30d' | '1w' | 'today'
     const timezone = searchParams.get('timezone') || 'UTC';
+    const plan = searchParams.get('plan') || 'free';
+
     const allowedSymbols = [
       'BTCUSDT', 'ETHUSDT', 'BNBUSDT'
     ];
+
+    // Plan-based gating:
+    const minConfidence = plan === 'free' ? 90 : 80;
+    const delayMinutes = plan === 'free' ? 5 : 0;
+    const fiveMinutesAgo = new Date(Date.now() - delayMinutes * 60 * 1000);
 
     let filterDate;
     if (filter === 'today') {
@@ -174,7 +181,19 @@ export async function GET(request) {
       }
     }
 
-    resultData = resultData.map(s => {
+    // Apply plan-based gating before mapping
+    const gatedData = resultData.filter(s => {
+      const sigConfidence = s.confidence || 95;
+      const sigBarTime = new Date(s.bar_time);
+
+      // Filter by confidence
+      if (sigConfidence < minConfidence) return false;
+      // Filter by time delay for free plan
+      if (plan === 'free' && sigBarTime > fiveMinutesAgo) return false;
+      return true;
+    });
+
+    const mappedData = gatedData.map(s => {
       const entry = parseFloat(s.entry_price);
       if (s.pnl_pct !== null && s.pnl_pct !== undefined) {
         return {
@@ -233,6 +252,8 @@ export async function GET(request) {
         is_win: true,
       };
     });
+
+    resultData = mappedData;
 
     // Save to memory cache
     memoryCache.history[`${symbol}_${interval}_${filter}`] = resultData;

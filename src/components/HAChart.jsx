@@ -439,7 +439,7 @@ export default function HAChart({
 
         // ── Load signal markers (arrows on canvas, cards in React) ──────────
         const sigRes  = await fetch(
-          `/api/chart/signals?symbol=${selectedSymbol}&interval=${selectedInterval}`
+          `/api/chart/signals?symbol=${selectedSymbol}&interval=${selectedInterval}&plan=${plan}`
         );
         if (!isMounted) return;
         const sigData = await sigRes.json();

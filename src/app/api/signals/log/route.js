@@ -32,6 +32,14 @@ export async function GET(request) {
     const targetSymbols = symbol ? [symbol.toUpperCase()] : allowedSymbols;
     const tf = '30m'; // PRODUCTION: 30m only
 
+    // Plan-based gating:
+    // FREE: high-confidence only (90%+) + 5min delay
+    // PRO: all signals (80%+) + real-time
+    // MASTER: all signals (80%+) + real-time
+    const minConfidence = plan === 'free' ? 90 : 80;
+    const delayMinutes = plan === 'free' ? 5 : 0;
+    const fiveMinutesAgo = new Date(Date.now() - delayMinutes * 60 * 1000);
+
     // Get current prices for live PnL calculation
     const priceCache = {};
     for (const sym of targetSymbols) {
@@ -66,6 +74,12 @@ export async function GET(request) {
           dbSignals.forEach(sig => {
             const isLive = sig.closed_at === null;
             const isTrulyClosedswing = sig.close_reason === 'swing_opposite';
+            const sigConfidence = sig.confidence || 95;
+            const sigBarTime = new Date(sig.bar_time);
+
+            // Plan-based gating: filter by confidence and time delay
+            if (sigConfidence < minConfidence) return; // Skip low-confidence signals on free plan
+            if (plan === 'free' && sigBarTime > fiveMinutesAgo) return; // FREE plan: 5min delay
 
             // Calculate live PnL from current price
             let livePnl = null;
