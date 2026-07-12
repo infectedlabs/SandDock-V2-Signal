@@ -314,7 +314,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
 
   // Load stats specifically for this coin
   const { stats } = usePerformance(sig.symbol, sig.interval);
-  const { signals: coinLog } = useSignalLog({ plan: isFreePlan ? 'free' : 'pro', symbol: sig.symbol, pageSize: 10 });
+  const { signals: coinLog } = useSignalLog({ plan: isFreePlan ? 'free' : 'pro', user_id: profile?.id, symbol: sig.symbol, pageSize: 10 });
 
   return (
     <div className="w-full lg:w-[55%] h-full bg-[#0d1426] border-l border-[#1e2a3a] flex flex-col z-40 relative overflow-y-auto">
@@ -537,6 +537,58 @@ const LOADING_PROMPTS = [
   { type: 'Motivation', content: 'Success in trading is the sum of small efforts, repeated day in and day out.' }
 ];
 
+// ── Custom Coins List Component ───────────────────────────────────────────────
+function CustomCoinsList({ userId, plan }) {
+  const [coins, setCoins] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId || !['master', 'grandmaster'].includes(plan)) return;
+
+    fetch(`/api/custom-coins?user_id=${userId}&plan=${plan}`)
+      .then(r => r.json())
+      .then(data => {
+        setCoins(data.custom_coins || []);
+        setLoading(false);
+      })
+      .catch(e => {
+        console.warn('Failed to fetch custom coins:', e);
+        setLoading(false);
+      });
+  }, [userId, plan]);
+
+  if (loading || coins.length === 0) return null;
+
+  return (
+    <div className="bg-[#070b16]/40 border border-slate-800/50 rounded-2xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">Custom Coins</span>
+        <span className="text-[11px] font-mono text-zinc-400">{coins.length} / 5</span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {coins.map(coin => (
+          <div key={coin} className="flex items-center gap-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5">
+            <span className="text-[11px] font-bold text-white">{coin}</span>
+            <button
+              onClick={async () => {
+                if (confirm(`Remove ${coin}?`)) {
+                  await fetch(`/api/custom-coins?user_id=${userId}&symbol=${coin}&plan=${plan}`, {
+                    method: 'DELETE'
+                  });
+                  setCoins(coins.filter(c => c !== coin));
+                }
+              }}
+              className="text-[10px] text-red-400 hover:text-red-300 cursor-pointer ml-1 bg-transparent border-0 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Terminal Page ────────────────────────────────────────────────────────
 export default function TerminalPage() {
   const { user, profile, loading, updateProfile, signOut } = useAuth();
@@ -655,7 +707,7 @@ export default function TerminalPage() {
   }), [profile?.plan, signalTypeFilter, selectedInterval]);
 
   const { signals: liveSignals, loading: sigLoading } = useSignals(signalFilters);
-  const { signals: logSignals,  loading: logLoading  } = useSignalLog({ plan: profile?.plan || 'free', symbol: selectedSymbol, interval: selectedInterval });
+  const { signals: logSignals,  loading: logLoading  } = useSignalLog({ plan: profile?.plan || 'free', user_id: profile?.id, symbol: selectedSymbol, interval: selectedInterval });
   
   const cleanLogSignals = useMemo(() => {
     if (!logSignals) return [];
@@ -1387,6 +1439,53 @@ export default function TerminalPage() {
                         </button>
                       ))}
                     </div>
+
+                    {/* Custom Coins Management - MASTER only */}
+                    {['master', 'grandmaster'].includes(profile?.plan) && (
+                      <div className="flex items-center gap-2 border-l border-slate-800 pl-3">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Custom:</span>
+                        <input
+                          type="text"
+                          placeholder="e.g. SOLUSDT"
+                          id="customCoinInput"
+                          className="bg-slate-950 text-xs text-white font-mono rounded-lg border border-slate-800 px-2 py-1 focus:outline-none focus:border-[#3D5AFE]"
+                        />
+                        <button
+                          onClick={async () => {
+                            const input = document.getElementById('customCoinInput');
+                            const symbol = input?.value?.toUpperCase();
+                            if (!symbol) {
+                              alert('Enter a coin symbol (e.g., SOLUSDT)');
+                              return;
+                            }
+                            try {
+                              const res = await fetch('/api/custom-coins', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  user_id: profile?.id,
+                                  symbol,
+                                  plan: profile?.plan
+                                })
+                              });
+                              const data = await res.json();
+                              if (res.ok) {
+                                alert(`Added ${symbol}!`);
+                                if (input) input.value = '';
+                                window.location.reload();
+                              } else {
+                                alert(data.error || 'Failed to add coin');
+                              }
+                            } catch (e) {
+                              alert('Error: ' + e.message);
+                            }
+                          }}
+                          className="px-2 py-1 bg-[#3D5AFE] hover:bg-[#2943d0] text-white text-[10px] font-bold uppercase rounded-lg cursor-pointer border-0"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2 text-zinc-500 font-mono text-xs">
@@ -1396,6 +1495,11 @@ export default function TerminalPage() {
                     </span>
                   </div>
                 </div>
+
+                {/* Custom Coins List - MASTER only */}
+                {['master', 'grandmaster'].includes(profile?.plan) && (
+                  <CustomCoinsList userId={profile?.id} plan={profile?.plan} />
+                )}
 
                 {/* Empty State / Monitoring Layout with fallbacks (BTC Signals) */}
                 {!isTrialExpired && !sigLoading && cleanLiveSignals.length === 0 && (
@@ -1599,6 +1703,17 @@ export default function TerminalPage() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <h2 className="text-[16px] font-bold uppercase tracking-wider text-white">Signal History Ledger</h2>
                   <div className="flex items-center gap-3">
+                    {/* Coin Selector Filter - BTC/ETH/BNB only */}
+                    <select
+                      value={selectedSymbol}
+                      onChange={(e) => setSelectedSymbol(e.target.value)}
+                      className="bg-[#0d1426] text-xs text-white font-mono font-bold rounded-lg border border-slate-800 px-2 py-1.5 focus:outline-none focus:border-[#3D5AFE] cursor-pointer"
+                    >
+                      <option value="BTCUSDT">Bitcoin (BTC)</option>
+                      <option value="ETHUSDT">Ethereum (ETH)</option>
+                      <option value="BNBUSDT">BNB</option>
+                    </select>
+
                     {/* Timeframe Selector Filter */}
                     <div className="flex p-0.5 bg-slate-950/40 rounded-lg border border-[#1e2d4a]/30">
                       {['30m'].map(tf => {

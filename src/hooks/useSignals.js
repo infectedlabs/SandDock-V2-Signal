@@ -22,6 +22,7 @@ export function useSignals(filters = {}) {
       const tzOffset = getTimezoneOffset();
       const params = new URLSearchParams();
       if (filters.plan)         params.set('plan',        filters.plan);
+      if (filters.user_id)      params.set('user_id',     filters.user_id);
       if (filters.symbol)       params.set('symbol',      filters.symbol);
       if (filters.signal_type)  params.set('signal_type', filters.signal_type);
       if (filters.interval)     params.set('interval',    filters.interval);

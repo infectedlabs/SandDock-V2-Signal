@@ -9,7 +9,7 @@ import { getTimezoneOffset } from '@/lib/timezone';
  * @param {object} opts - { plan, symbol, page, pageSize }
  * @returns {{ signals: Array, loading: boolean, error: string|null }}
  */
-export function useSignalLog({ plan = 'free', symbol, interval, page = 1, pageSize = 50 } = {}) {
+export function useSignalLog({ plan = 'free', user_id, symbol, interval, page = 1, pageSize = 50 } = {}) {
   const [signals, setSignals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(null);
@@ -20,6 +20,7 @@ export function useSignalLog({ plan = 'free', symbol, interval, page = 1, pageSi
 
     const tzOffset = getTimezoneOffset();
     const params = new URLSearchParams({ plan, page: String(page), page_size: String(pageSize), tz_offset: String(tzOffset) });
+    if (user_id) params.set('user_id', user_id);
     if (symbol) params.set('symbol', symbol);
     if (interval) params.set('interval', interval);
 
@@ -30,7 +31,7 @@ export function useSignalLog({ plan = 'free', symbol, interval, page = 1, pageSi
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [plan, symbol, interval, page, pageSize]);
+  }, [plan, user_id, symbol, interval, page, pageSize]);
 
   return { signals, loading, error };
 }
