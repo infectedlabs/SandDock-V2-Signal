@@ -188,20 +188,13 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
   let pnlText = '';
   let pnlColorClass = '';
   
+  // API already returns correct PnL calculation for both closed and live signals
   if (sig.pnl_pct != null) {
     pnlText = `${sig.pnl_pct >= 0 ? '+' : ''}${parseFloat(sig.pnl_pct).toFixed(2)}%`;
     pnlColorClass = sig.pnl_pct >= 0 ? 'text-[#10b981] font-bold' : 'text-[#ef4444] font-bold';
-  } else if (isLive && livePrice) {
-    const pnl = ((livePrice - sig.entry_price) / sig.entry_price) * 100;
-    const finalPnl = isBuy ? pnl : -pnl;
-    pnlText = `${finalPnl >= 0 ? '+' : ''}${finalPnl.toFixed(2)}%`;
-    pnlColorClass = finalPnl >= 0 ? 'text-[#10b981] font-extrabold animate-pulse' : 'text-[#ef4444] font-extrabold animate-pulse';
-  } else if (nextSignal) {
-    const exitPrice = nextSignal.entry_price;
-    const change = ((exitPrice - sig.entry_price) / sig.entry_price) * 100;
-    const finalPnl = isBuy ? change : -change;
-    pnlText = `${finalPnl >= 0 ? '+' : ''}${finalPnl.toFixed(2)}%`;
-    pnlColorClass = finalPnl >= 0 ? 'text-[#10b981] font-bold' : 'text-[#ef4444] font-bold';
+  } else {
+    pnlText = 'LIVE';
+    pnlColorClass = 'text-cyan-400 font-extrabold animate-pulse';
   }
 
   return (
@@ -221,7 +214,7 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
               {sig.interval}
             </span>
           </div>
-          <span className="text-[10px] text-zinc-500 font-mono tracking-normal">Fired {formatRelativeTime(sig.created_at || sig.bar_time)}</span>
+          <span className="text-[10px] text-zinc-500 font-mono tracking-normal">Fired {formatRelativeTime(sig.bar_time)}</span>
         </div>
       </div>
 
@@ -450,8 +443,9 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
                 </thead>
                 <tbody>
                   {coinLog.map(item => {
-                    const isWin = item.is_win;
-                    const closed = !!item.close_reason;
+                    const isTrulyClosed = item.is_closed;
+                    const pnlValue = parseFloat(item.pnl_pct || 0);
+                    const isProfit = isTrulyClosed ? item.is_win : (pnlValue >= 0);
                     return (
                       <tr key={item.id} className="border-b border-[#1e2a3a]/40 last:border-0 hover:bg-zinc-900/10">
                         <td className="p-3 text-zinc-400">{formatLogDate(item.created_at, profile)}</td>
@@ -463,16 +457,12 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
                           </span>
                         </td>
                         <td className="p-3">{formatPrice(item.entry_price, profile)}</td>
-                        <td className="p-3">{closed ? formatPrice(item.close_price, profile) : '-'}</td>
+                        <td className="p-3">{isTrulyClosed ? formatPrice(item.close_price, profile) : '-'}</td>
                         <td className="p-3 text-zinc-400 capitalize">{item.close_reason ? item.close_reason.replace('_', ' ') : 'Open'}</td>
                         <td className="p-3">
-                          {!closed ? (
-                            <span className="text-zinc-500">Open</span>
-                          ) : (
-                            <span className={`font-bold ${isWin ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
-                              {isWin ? '+' : ''}{parseFloat(item.pnl_pct || 0).toFixed(2)}%
-                            </span>
-                          )}
+                          <span className={`font-bold ${isProfit ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
+                            {isProfit ? '+' : ''}{pnlValue.toFixed(2)}%
+                          </span>
                         </td>
                       </tr>
                     );
@@ -620,7 +610,7 @@ export default function TerminalPage() {
   const [selectedDrawerSignal, setSelectedDrawerSignal] = useState(null);
   
   // Performance chart & history states
-  const [perfTimeFilter, setPerfTimeFilter] = useState('30d');
+  const [perfTimeFilter, setPerfTimeFilter] = useState('1y');
   const [perfSymbol, setPerfSymbol] = useState('ALL');
   const [perfSignals, setPerfSignals] = useState([]);
   const [perfLoading, setPerfLoading] = useState(true);
@@ -678,7 +668,7 @@ export default function TerminalPage() {
   
   const openSignalsCount = useMemo(() => {
     if (!cleanLogSignals || cleanLogSignals.length === 0) return 0;
-    return cleanLogSignals.filter(s => !s.close_reason).length;
+    return cleanLogSignals.filter(s => s.is_live).length;
   }, [cleanLogSignals]);
 
   const [headerAllTimePnl, setHeaderAllTimePnl] = useState('0.00');
@@ -932,7 +922,7 @@ export default function TerminalPage() {
 
 
   const cleanLiveSignals = useMemo(() => {
-    let filtered = liveSignals.filter(s => s.action === 'new');
+    let filtered = liveSignals;
     if (profile?.min_confidence != null) {
       filtered = filtered.filter(s => (s.confidence || 75) >= profile.min_confidence);
     }
@@ -943,7 +933,7 @@ export default function TerminalPage() {
     const active = [];
     const closed = [];
     cleanLiveSignals.forEach(s => {
-      if (!s.close_reason) {
+      if (s.is_live) {
         active.push(s);
       } else {
         closed.push(s);
@@ -952,23 +942,12 @@ export default function TerminalPage() {
     return { activeSignals: active, closedSignals: closed };
   }, [cleanLiveSignals]);
 
-  const combinedSignals = useMemo(() => {
-    return [...activeSignals, ...closedSignals].sort((a, b) => {
-      const tA = new Date(a.bar_time || a.created_at).getTime();
-      const tB = new Date(b.bar_time || b.created_at).getTime();
-      return tB - tA;
-    });
-  }, [activeSignals, closedSignals]);
-
   const todayStats = useMemo(() => {
-    // eslint-disable-next-line react-hooks/purity
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const todaySignals = cleanLiveSignals.filter(s => new Date(s.created_at || s.bar_time) >= oneDayAgo);
-    
+    const todaySignals = cleanLiveSignals;
+
     const mapped = todaySignals.map((sig) => {
       let pnlVal = 0;
-      const isClosed = sig.close_reason !== null || sig.pnl_pct !== null;
-      if (!isClosed) {
+      if (sig.is_live) {
         const currentPrice = livePrices[sig.symbol];
         if (currentPrice) {
           const pnl = ((currentPrice - sig.entry_price) / sig.entry_price) * 100;
@@ -986,7 +965,7 @@ export default function TerminalPage() {
     const wins = mapped.filter(p => p > 0).length;
     const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '-';
     const sumPnl = mapped.reduce((sum, p) => sum + p, 0);
-    
+
     const confidences = todaySignals.map(s => s.confidence || 0).filter(c => c > 0);
     const avgConfidence = confidences.length > 0
       ? (confidences.reduce((a, b) => a + b, 0) / confidences.length).toFixed(0) + '%'
@@ -999,13 +978,6 @@ export default function TerminalPage() {
       avgConfidence
     };
   }, [cleanLiveSignals, livePrices]);
-
-  const isChopRegime = useMemo(() => {
-    if (!closedSignals || closedSignals.length < 2) return false;
-    const wins = closedSignals.filter(s => s.is_win === true).length;
-    const winRate = (wins / closedSignals.length) * 100;
-    return winRate < 50;
-  }, [closedSignals]);
 
   // Load fallback signals when live feed is empty (to prevent conversion drop)
   // Retrieve the most recent signal from the general history ledger
@@ -1020,10 +992,29 @@ export default function TerminalPage() {
 
   const recentBtcSignals = useMemo(() => {
     if (allBtcHistoryLog && allBtcHistoryLog.length > 1) {
-      return allBtcHistoryLog.slice(1, 6);
+      // Exclude signals already shown in today's Active/Closed sections above.
+      const shownIds = new Set(cleanLiveSignals.map(s => s.id));
+      return allBtcHistoryLog.slice(1, 6).filter(s => !shownIds.has(s.id));
     }
     return [];
-  }, [allBtcHistoryLog]);
+  }, [allBtcHistoryLog, cleanLiveSignals]);
+
+  // Single unified feed: today's signals (active + closed) plus recent BTC history, deduped, newest first.
+  const allRecentSignals = useMemo(() => {
+    const seen = new Set();
+    const merged = [];
+    [...cleanLiveSignals, ...recentBtcSignals].forEach(s => {
+      if (!seen.has(s.id)) {
+        seen.add(s.id);
+        merged.push(s);
+      }
+    });
+    return merged.sort((a, b) => {
+      const tA = new Date(a.bar_time || a.created_at).getTime();
+      const tB = new Date(b.bar_time || b.created_at).getTime();
+      return tB - tA;
+    });
+  }, [cleanLiveSignals, recentBtcSignals]);
 
   const triggerUpgradeGate = (title, desc) => {
     setUpgradeTriggerText({ title, desc });
@@ -1447,7 +1438,7 @@ export default function TerminalPage() {
                             onUpgrade={triggerUpgradeGate}
                             onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
                             livePrice={selectedSymbol === 'BTCUSDT' ? liveBtcPrice : null}
-                            isLive={selectedSymbol === 'BTCUSDT' && !lastBtcSignal.close_reason}
+                            isLive={lastBtcSignal.is_live}
                           />
                         </div>
                       </div>
@@ -1487,36 +1478,22 @@ export default function TerminalPage() {
                 {/* Active signals view layout */}
                 {!isTrialExpired && cleanLiveSignals.length > 0 && (
                   <div className="space-y-6">
-                    {/* Market Regime Detector banner */}
-                    {isChopRegime && (
-                      <div className="bg-yellow-500/10 border border-yellow-500/25 p-4 rounded-2xl flex items-center gap-3 text-left">
-                        <span className="text-xl">⚠️</span>
-                        <div className="space-y-0.5">
-                          <span className="block text-[10px] font-mono font-bold text-yellow-500 uppercase tracking-widest">Market Regime: Consolidation Chop</span>
-                          <p className="text-xs text-zinc-300">
-                            Expect tight ranges and signal flips. Lower position size risk.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Stream View Layout */}
-                    {viewMode === 'Stream' && combinedSignals.length > 0 && (
+                    {/* Unified Recent Signals feed: today's active + closed, plus recent BTC history */}
+                    {allRecentSignals.length > 0 && (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#3D5AFE]">{"Combined Signal Stream"}</span>
+                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#3D5AFE]">{"Recent Signals"}</span>
                             <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-[#3D5AFE]/15 text-[#3D5AFE] rounded border border-[#3D5AFE]/20">
-                              {combinedSignals.length} TOTAL
+                              {allRecentSignals.length} TOTAL
                             </span>
                           </div>
                           <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Chronological feed of setups</span>
                         </div>
-                        
+
                         <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
-                          {combinedSignals.map((sig) => {
-                            const globalIndex = cleanLiveSignals.findIndex(s => s.id === sig.id);
-                            const isLive = !sig.close_reason;
+                          {allRecentSignals.map((sig) => {
+                            const globalIndex = allRecentSignals.findIndex(s => s.id === sig.id);
                             return (
                               <SignalCard
                                 key={sig.id}
@@ -1528,96 +1505,15 @@ export default function TerminalPage() {
                                 onUpgrade={triggerUpgradeGate}
                                 onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
                                 livePrice={livePrices[sig.symbol] || null}
-                                isLive={isLive}
-                                rank={globalIndex !== -1 ? globalIndex + 1 : null}
+                                isLive={sig.is_live}
+                                rank={globalIndex + 1}
                                 isLatest={globalIndex === 0}
-                                nextSignal={globalIndex > 0 ? cleanLiveSignals[globalIndex - 1] : null}
+                                nextSignal={globalIndex > 0 ? allRecentSignals[globalIndex - 1] : null}
                               />
                             );
                           })}
                         </div>
                       </div>
-                    )}
-
-                    {/* Split View Layout */}
-                    {viewMode !== 'Stream' && (
-                      <>
-                        {/* Active Signals Section */}
-                        {activeSignals.length > 0 && (
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#3D5AFE]">{"Active Setups"}</span>
-                                <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-[#3D5AFE]/15 text-[#3D5AFE] rounded border border-[#3D5AFE]/20">
-                                  {activeSignals.length} RUNNING
-                                </span>
-                              </div>
-                              <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Currently active swing positions</span>
-                            </div>
-                            
-                            <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
-                              {activeSignals.map((sig) => {
-                                const globalIndex = cleanLiveSignals.findIndex(s => s.id === sig.id);
-                                return (
-                                  <SignalCard
-                                    key={sig.id}
-                                    sig={sig}
-                                    profile={profile}
-                                    isFreePlan={isFreePlan}
-                                    isExpanded={false}
-                                    onToggle={() => {}}
-                                    onUpgrade={triggerUpgradeGate}
-                                    onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
-                                    livePrice={livePrices[sig.symbol] || null}
-                                    isLive={true}
-                                    rank={globalIndex + 1}
-                                    isLatest={globalIndex === 0}
-                                    nextSignal={globalIndex > 0 ? cleanLiveSignals[globalIndex - 1] : null}
-                                  />
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Closed Signals Section */}
-                        {closedSignals.length > 0 && (
-                          <div className="space-y-3 pt-2">
-                            <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-extrabold uppercase tracking-widest text-zinc-400">Recent Completed Setups</span>
-                                <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-zinc-800 text-zinc-400 rounded border border-zinc-700/60">
-                                  {closedSignals.length} TOTAL
-                                </span>
-                              </div>
-                              <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Closed within last 24 hours</span>
-                            </div>
-
-                            <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
-                              {closedSignals.map((sig) => {
-                                const globalIndex = cleanLiveSignals.findIndex(s => s.id === sig.id);
-                                return (
-                                  <SignalCard
-                                    key={sig.id}
-                                    sig={sig}
-                                    profile={profile}
-                                    isFreePlan={isFreePlan}
-                                    isExpanded={false}
-                                    onToggle={() => {}}
-                                    onUpgrade={triggerUpgradeGate}
-                                    onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
-                                    livePrice={livePrices[sig.symbol] || null}
-                                    isLive={false}
-                                    rank={globalIndex + 1}
-                                    isLatest={globalIndex === 0}
-                                    nextSignal={globalIndex > 0 ? cleanLiveSignals[globalIndex - 1] : null}
-                                  />
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </>
                     )}
 
                     {/* Locked/Teaser Signals Section */}
@@ -1761,7 +1657,7 @@ export default function TerminalPage() {
                           const isBtc    = sig.symbol === 'BTCUSDT';
                           const showBlur = isFreePlan && !isBtc;
                           const isBuy    = sig.signal_type === 'buy';
-                          const isClosed = sig.close_price !== null && sig.close_price !== undefined && sig.close_reason !== 'open' && sig.close_reason !== '';
+                          const isClosed = sig.is_closed;
                           return (
                             <tr key={sig.id} className={`border-b border-[#1e2a3a]/40 last:border-0 hover:bg-zinc-900/10 text-[12px] ${showBlur ? 'opacity-40 select-none' : ''}`}>
                               <td className="p-3 text-zinc-400">{formatLogDate(sig.bar_time, profile)}</td>
@@ -1785,7 +1681,9 @@ export default function TerminalPage() {
                                     Upgrade 🔒
                                   </button>
                                 ) : !isClosed ? (
-                                  <span className="text-zinc-500 text-[11px] uppercase">Open</span>
+                                  <span className={`font-bold ${sig.pnl_pct >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
+                                    {sig.pnl_pct >= 0 ? '+' : ''}{parseFloat(sig.pnl_pct || 0).toFixed(2)}%
+                                  </span>
                                 ) : (
                                   <span className={`font-bold ${sig.is_win ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
                                     {sig.is_win ? '+' : ''}{parseFloat(sig.pnl_pct || 0).toFixed(2)}% {sig.is_win ? '✅' : '❌'}

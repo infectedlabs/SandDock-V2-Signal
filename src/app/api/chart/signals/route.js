@@ -16,13 +16,13 @@ export async function GET(request) {
     const symbol = searchParams.get('symbol') || 'BTCUSDT';
     const tf = '30m'; // PRODUCTION: 30m only
 
-    const { data: dbSignals, error: dbError } = await runWithTimeout(
+    const { data: recentDesc, error: dbError } = await runWithTimeout(
       supabaseAdmin
         .from('signals')
         .select('*')
         .eq('symbol', symbol.toUpperCase())
         .eq('interval', tf)
-        .order('bar_time', { ascending: true })
+        .order('bar_time', { ascending: false })
         .limit(500),
       1200
     );
@@ -30,6 +30,11 @@ export async function GET(request) {
     if (dbError) {
       throw new Error(dbError.message);
     }
+
+    // The chart renders a recent time window, so we need the most recent
+    // signals (not the oldest 500 of a year's worth) — re-sort ascending
+    // after taking the newest slice.
+    const dbSignals = (recentDesc || []).slice().sort((a, b) => new Date(a.bar_time) - new Date(b.bar_time));
 
     if (!dbSignals || dbSignals.length === 0) {
       return NextResponse.json([], {

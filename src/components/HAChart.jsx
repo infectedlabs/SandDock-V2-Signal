@@ -96,7 +96,7 @@ export default function HAChart({
       const lwc = await import('lightweight-charts');
       if (!isMounted) return;
 
-      const { createChart, CandlestickSeries, createSeriesMarkers } = lwc;
+      const { createChart, CandlestickSeries } = lwc;
 
       // Destroy previous instance on re-render
       if (chartRef.current) {
@@ -454,35 +454,10 @@ export default function HAChart({
           }, 50);
         }
 
-        // Layer 2 & 4: Render signal markers (arrows) on the exact firing bar.
-        // LWC v5 createSeriesMarkers REQUIRES markers in ASCENDING time order —
-        // a descending sort silently drops all markers.
-        if (sigData && sigData.length > 0) {
-          const entrySignals = sigData.filter(s => s.action === 'new');
-          // Sort ascending by bar_time (oldest → newest) as required by LWC v5
-          const sorted = [...entrySignals].sort((a, b) => new Date(a.bar_time).getTime() - new Date(b.bar_time).getTime());
-          const latestBarTime = sorted.length > 0 ? sorted[sorted.length - 1].bar_time : null;
-          const markers = sorted.map((s) => {
-            const isCurrent = activeSignal 
-              ? (new Date(s.bar_time).getTime() === new Date(activeSignal.created_at || activeSignal.bar_time).getTime()) 
-              : (s.bar_time === latestBarTime);
-            const isBuyType = s.signal_type === 'buy';
-            const markerText = isBuyType ? 'BUY' : 'SELL';
-
-            return {
-              time:       Math.floor(new Date(s.bar_time).getTime() / 1000) + offsetSeconds,
-              position:   isBuyType ? 'belowBar' : 'aboveBar',
-              color:      isBuyType
-                ? (isCurrent ? '#00e676' : 'rgba(0,230,118,0.6)')
-                : (isCurrent ? '#ff1744' : 'rgba(255,23,68,0.6)'),
-              shape:      isBuyType ? 'arrowUp' : 'arrowDown',
-              text:       markerText,
-              size:       isCurrent ? 2.5 : 1.8,
-            };
-          });
-
-          createSeriesMarkers(candleSeries, markers);
-        }
+        // Note: signal arrows are drawn once via the canvas overlay
+        // (drawSignalArrows) plus the floating React cards below — LWC's own
+        // createSeriesMarkers used to render a second, overlapping arrow+label
+        // on top of those, so it's intentionally not used here.
 
         // Helper to recalculate card coordinates on chart scroll/zoom
         updateCardPositions = () => {

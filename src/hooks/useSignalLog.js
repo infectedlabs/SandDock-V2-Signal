@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getTimezoneOffset } from '@/lib/timezone';
 
 /**
  * useSignalLog - paginated signal history from /api/signals/log.
@@ -17,7 +18,8 @@ export function useSignalLog({ plan = 'free', symbol, interval, page = 1, pageSi
     let cancelled = false;
     setLoading(true);
 
-    const params = new URLSearchParams({ plan, page: String(page), page_size: String(pageSize) });
+    const tzOffset = getTimezoneOffset();
+    const params = new URLSearchParams({ plan, page: String(page), page_size: String(pageSize), tz_offset: String(tzOffset) });
     if (symbol) params.set('symbol', symbol);
     if (interval) params.set('interval', interval);
 

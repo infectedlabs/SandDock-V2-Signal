@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { getTimezoneOffset } from '@/lib/timezone';
 
 /**
  * useSignals - fetches live signals from /api/signals/live.
@@ -18,12 +19,14 @@ export function useSignals(filters = {}) {
 
   const fetchSignals = async () => {
     try {
+      const tzOffset = getTimezoneOffset();
       const params = new URLSearchParams();
       if (filters.plan)         params.set('plan',        filters.plan);
       if (filters.symbol)       params.set('symbol',      filters.symbol);
       if (filters.signal_type)  params.set('signal_type', filters.signal_type);
       if (filters.interval)     params.set('interval',    filters.interval);
       if (filters.limit)        params.set('limit',       String(filters.limit));
+      params.set('tz_offset', String(tzOffset));
 
       const res = await fetch(`/api/signals/live?${params.toString()}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

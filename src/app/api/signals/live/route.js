@@ -24,7 +24,7 @@ export async function GET(request) {
     const plan = searchParams.get('plan') || 'free';
     const symbol = searchParams.get('symbol');
     const signal_type = searchParams.get('signal_type');
-    const tzOffset = parseInt(searchParams.get('tz_offset') || '0'); // timezone offset in minutes
+    const tzOffsetMinutes = parseInt(searchParams.get('tz_offset') || '0'); // timezone offset in minutes
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
 
     const allowedSymbols = PLAN_SYMBOLS[plan] ?? PLAN_SYMBOLS['free'];
@@ -54,7 +54,6 @@ export async function GET(request) {
             .select('*')
             .eq('symbol', sym.toUpperCase())
             .eq('interval', tf)
-            .is('closed_at', null)
             .order('bar_time', { ascending: false })
             .limit(limit),
           1200
@@ -114,9 +113,30 @@ export async function GET(request) {
       filtered = filtered.filter(s => s.signal_type === signal_type.toLowerCase());
     }
 
-    // Sort by created_at descending (latest first) and apply limit
-    filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    const result = filtered.slice(0, limit);
+    // Filter by local calendar day (today) based on timezone
+    // Apply the same timezone offset to "now" as we do to each signal's bar_time,
+    // otherwise the comparison silently reverts to UTC-day boundaries and can
+    // exclude/include signals depending on the user's offset from UTC.
+    const localNow = new Date(Date.now() + tzOffsetMinutes * 60 * 1000);
+    const todayYear = localNow.getUTCFullYear();
+    const todayMonth = localNow.getUTCMonth();
+    const todayDay = localNow.getUTCDate();
+
+    const filteredByDay = filtered.filter(sig => {
+      const barDate = new Date(sig.bar_time);
+      // Apply timezone offset
+      const localDate = new Date(barDate.getTime() + tzOffsetMinutes * 60 * 1000);
+
+      const barYear = localDate.getUTCFullYear();
+      const barMonth = localDate.getUTCMonth();
+      const barDay = localDate.getUTCDate();
+
+      return (barYear === todayYear && barMonth === todayMonth && barDay === todayDay);
+    });
+
+    // Sort by bar_time descending (latest first) and apply limit
+    filteredByDay.sort((a, b) => new Date(b.bar_time).getTime() - new Date(a.bar_time).getTime());
+    const result = filteredByDay.slice(0, limit);
 
     return NextResponse.json(result, {
       headers: {

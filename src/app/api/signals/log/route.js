@@ -26,6 +26,7 @@ export async function GET(request) {
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
     const pageSize = Math.min(parseInt(searchParams.get('page_size') || '50'), 100);
     const offset = (page - 1) * pageSize;
+    const tzOffsetMinutes = parseInt(searchParams.get('tz_offset') || '0');
 
     const allowedSymbols = PLAN_SYMBOLS[plan] ?? PLAN_SYMBOLS['free'];
     const targetSymbols = symbol ? [symbol.toUpperCase()] : allowedSymbols;
