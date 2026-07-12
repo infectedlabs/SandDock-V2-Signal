@@ -72,11 +72,11 @@ export default function HAChart({
   ];
 
   const isSymbolLocked = (sym) => {
-    if (plan === 'master') return false;
+    if (plan === 'master') return false; // MASTER: BTC, ETH, BNB
     if (plan === 'pro') {
-      return !['BTCUSDT', 'ETHUSDT', 'BNBUSDT'].includes(sym);
+      return !['BTCUSDT', 'ETHUSDT'].includes(sym); // PRO: BTC, ETH
     }
-    return sym !== 'BTCUSDT'; // free plan
+    return sym !== 'BTCUSDT'; // FREE: BTC only
   };
 
   const isLight = theme === 'light';

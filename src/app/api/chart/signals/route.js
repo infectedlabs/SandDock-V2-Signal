@@ -17,8 +17,7 @@ export async function GET(request) {
     const plan = searchParams.get('plan') || 'free';
     const tf = '30m'; // PRODUCTION: 30m only
 
-    // Plan-based gating:
-    const minConfidence = plan === 'free' ? 90 : 80;
+    // Plan-based gating: time delay only (no confidence limit)
     const delayMinutes = plan === 'free' ? 5 : 0;
     const fiveMinutesAgo = new Date(Date.now() - delayMinutes * 60 * 1000);
 
@@ -51,13 +50,9 @@ export async function GET(request) {
       });
     }
 
-    // Apply plan-based gating before mapping
+    // Apply plan-based gating before mapping (time delay only)
     const filtered = dbSignals.filter(s => {
-      const sigConfidence = s.confidence || 95;
       const sigBarTime = new Date(s.bar_time);
-
-      // Filter by confidence
-      if (sigConfidence < minConfidence) return false;
       // Filter by time delay for free plan
       if (plan === 'free' && sigBarTime > fiveMinutesAgo) return false;
       return true;

@@ -65,7 +65,10 @@
       "Bash(curl -s \"http://localhost:3000/api/signals/history?symbol=BTCUSDT&interval=30m&filter=1y&plan=free&timezone=UTC\")",
       "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('count',j.length\\); console.log\\(j[0]\\)}\\)\")",
       "Bash(curl -s \"http://localhost:3000/api/chart/signals?symbol=BTCUSDT&interval=30m\")",
-      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('count',j.length\\);console.log\\('oldest',j[0]?.bar_time\\);console.log\\('newest',j[j.length-1]?.bar_time\\)}\\)\")"
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('count',j.length\\);console.log\\('oldest',j[0]?.bar_time\\);console.log\\('newest',j[j.length-1]?.bar_time\\)}\\)\")",
+      "Bash(node scripts/reset_and_backfill_1y_all_coins.js)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

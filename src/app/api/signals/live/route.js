@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 const PLAN_SYMBOLS = {
   free:   ['BTCUSDT'],
-  pro:    ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
+  pro:    ['BTCUSDT', 'ETHUSDT'],
   master: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
 };
 
@@ -31,11 +31,9 @@ export async function GET(request) {
     const targetSymbols = symbol ? [symbol.toUpperCase()] : allowedSymbols;
     const tf = '30m'; // PRODUCTION: 30m only
 
-    // Plan-based gating:
-    // FREE: high-confidence only (90%+) + 5min delay
-    // PRO: all signals (80%+) + real-time
-    // MASTER: all signals (80%+) + real-time
-    const minConfidence = plan === 'free' ? 90 : 80;
+    // Plan-based gating: time delay only (no confidence limit)
+    // FREE: 5min delay
+    // PRO/MASTER: real-time
     const delayMinutes = plan === 'free' ? 5 : 0;
     const fiveMinutesAgo = new Date(Date.now() - delayMinutes * 60 * 1000);
 
@@ -72,11 +70,9 @@ export async function GET(request) {
 
           dbSignals.forEach(sig => {
             const isLive = sig.closed_at === null;
-            const sigConfidence = sig.confidence || 95;
             const sigBarTime = new Date(sig.bar_time);
 
-            // Plan-based gating: filter by confidence and time delay
-            if (sigConfidence < minConfidence) return; // Skip low-confidence signals on free plan
+            // Plan-based gating: time delay only
             if (plan === 'free' && sigBarTime > fiveMinutesAgo) return; // FREE plan: 5min delay
 
             // Calculate live PnL from current price
