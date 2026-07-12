@@ -23,13 +23,34 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const plan = searchParams.get('plan') || 'free';
+    const userId = searchParams.get('user_id');
     const symbol = searchParams.get('symbol');
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
     const pageSize = Math.min(parseInt(searchParams.get('page_size') || '50'), 100);
     const offset = (page - 1) * pageSize;
     const tzOffsetMinutes = parseInt(searchParams.get('tz_offset') || '0');
 
-    const allowedSymbols = PLAN_SYMBOLS[plan] ?? PLAN_SYMBOLS['free'];
+    let allowedSymbols = PLAN_SYMBOLS[plan] ?? PLAN_SYMBOLS['free'];
+
+    // For MASTER users, add custom coins
+    if (['master', 'grandmaster'].includes(plan) && userId) {
+      try {
+        const { data: customCoins, error: customError } = await runWithTimeout(
+          supabaseAdmin
+            .from('custom_coins')
+            .select('symbol')
+            .eq('user_id', userId),
+          1000
+        );
+        if (!customError && customCoins && customCoins.length > 0) {
+          const customSymbols = customCoins.map(c => c.symbol);
+          allowedSymbols = [...allowedSymbols, ...customSymbols];
+        }
+      } catch (e) {
+        console.warn(`[/api/signals/log] Failed to fetch custom coins for ${userId}:`, e.message);
+      }
+    }
+
     const targetSymbols = symbol ? [symbol.toUpperCase()] : allowedSymbols;
     const tf = '30m'; // PRODUCTION: 30m only
 

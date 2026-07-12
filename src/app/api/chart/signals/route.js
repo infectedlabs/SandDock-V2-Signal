@@ -15,7 +15,18 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const symbol = searchParams.get('symbol') || 'BTCUSDT';
     const plan = searchParams.get('plan') || 'free';
+    const userId = searchParams.get('user_id');
     const tf = '30m'; // PRODUCTION: 30m only
+
+    // Validate symbol access (custom coins only for MASTER)
+    if (!['BTCUSDT', 'ETHUSDT', 'BNBUSDT'].includes(symbol) && !['master', 'grandmaster'].includes(plan)) {
+      return NextResponse.json([], {
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        }
+      });
+    }
 
     // Plan-based gating: time delay only (no confidence limit)
     const delayMinutes = plan === 'free' ? 5 : 0;
