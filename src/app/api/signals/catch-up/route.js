@@ -251,10 +251,15 @@ async function catchUpSignals() {
       });
 
       if (matchingSignalIdx === -1) {
+        const sameDayOrNear = withCloses.filter(s => {
+          const diffHrs = Math.abs(new Date(s.bar_time).getTime() - openBarTimeMs) / 3600000;
+          return diffHrs < 6;
+        });
         results.details[symbol] = {
           status: 'no_match',
           lookingFor: `${openSignal.action.toLowerCase()} at ${openSignal.bar_time}`,
           detectedCount: withCloses.length,
+          nearby: sameDayOrNear.map(s => `${s.signal_type}@${s.bar_time}`),
           detected: withCloses.length > 0 ? withCloses.map(s => `${s.signal_type}@${s.bar_time}`).slice(0, 5) : []
         };
         console.log(`[Catch-up] ${symbol}: NO MATCH FOUND. Looking for: ${openSignal.action.toLowerCase()} at ${openSignal.bar_time}`);
