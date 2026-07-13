@@ -210,6 +210,10 @@ async function catchUpSignals() {
 
       // 3. Detect all swings from this point
       const detectedSignals = detectSwings(allCandles);
+      console.log(`[Catch-up] ${symbol}: Detected ${detectedSignals.length} swings from ${allCandles.length} candles`);
+      if (detectedSignals.length > 0) {
+        console.log(`[Catch-up] ${symbol}: First few detected: ${detectedSignals.slice(0, 3).map(s => `${s.signal_type}@${s.bar_time}`).join(', ')}`);
+      }
       if (detectedSignals.length === 0) {
         console.log(`[Catch-up] ${symbol}: No swings detected`);
         continue;
@@ -217,6 +221,7 @@ async function catchUpSignals() {
 
       // 4. Calculate closes for all detected signals
       const withCloses = calculateCloses(detectedSignals);
+      console.log(`[Catch-up] ${symbol}: Calculated closes for ${withCloses.length} signals`);
 
       // 5. Find which signal matches the open signal and close it
       // Use flexible timestamp comparison to handle timezone differences

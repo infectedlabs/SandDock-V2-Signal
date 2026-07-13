@@ -77,7 +77,11 @@
       "Bash(git commit -m 'Fix catch-up signal matching with flexible timestamp comparison *)",
       "Bash(git commit -m 'Fix catch-up to fetch candles with lookback context *)",
       "Bash(git commit -m 'Fix duplicate openBarTime variable in sync endpoint *)",
-      "Bash(git commit -m 'Fix openBarTime type mismatch in both sync and catch-up *)"
+      "Bash(git commit -m 'Fix openBarTime type mismatch in both sync and catch-up *)",
+      "Bash(taskkill /F /IM node.exe)",
+      "PowerShell(Stop-Process -Name \"node\" -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
+      "Bash(git commit -m 'Add detailed logging to catch-up for debugging signal detection *)"
     ]
   }
 }
