@@ -198,10 +198,100 @@ function dedupeByBarTime(signals) {
   });
 }
 
+// ─── CATCH-UP: CLOSE OPEN SIGNALS & GENERATE MISSED ONES ──────────────
+async function catchUpSignals() {
+  const results = { closed: 0, created: 0 };
+
+  for (const symbol of ['BTCUSDT', 'ETHUSDT', 'BNBUSDT']) {
+    try {
+      // Find the latest OPEN signal (closed_at=null)
+      const { data: openSignals } = await supabaseAdmin
+        .from('signals')
+        .select('*')
+        .eq('symbol', symbol)
+        .eq('interval', '30m')
+        .is('closed_at', null)
+        .order('bar_time', { ascending: false })
+        .limit(1);
+
+      if (!openSignals || openSignals.length === 0) continue;
+
+      const openSignal = openSignals[0];
+      console.log(`[Catch-up] ${symbol}: Found open signal at ${openSignal.bar_time}`);
+
+      // Fetch candles from open signal onwards
+      const { data: allCandles } = await supabaseAdmin
+        .from('ohlcv_cache')
+        .select('open_time, ha_high, ha_low, close, symbol')
+        .eq('symbol', symbol)
+        .eq('interval', '30m')
+        .gte('open_time', openSignal.bar_time)
+        .order('open_time', { ascending: true })
+        .limit(500);
+
+      if (!allCandles || allCandles.length === 0) continue;
+
+      // Detect swings and calculate closes
+      const detectedSignals = detectSwings(allCandles);
+      if (detectedSignals.length === 0) continue;
+
+      const withCloses = calculateCloses(detectedSignals);
+
+      // Find matching open signal
+      const matchingIdx = withCloses.findIndex(
+        s => s.bar_time === openSignal.bar_time && s.signal_type === openSignal.action.toLowerCase()
+      );
+
+      if (matchingIdx === -1) continue;
+
+      const closedSignal = withCloses[matchingIdx];
+
+      // Close the open signal
+      await supabaseAdmin
+        .from('signals')
+        .update({
+          close_price: closedSignal.close_price,
+          close_reason: closedSignal.close_reason,
+          closed_at: closedSignal.closed_at,
+          pnl_pct: closedSignal.pnl_pct,
+          is_win: closedSignal.is_win
+        })
+        .eq('id', openSignal.id);
+
+      results.closed += 1;
+      console.log(`[Catch-up] ${symbol}: Closed - ${closedSignal.close_reason} (${closedSignal.pnl_pct}%)`);
+
+      // Create missed signals after the open signal
+      const newSignals = withCloses.filter(
+        (s, idx) => idx > matchingIdx && new Date(s.bar_time) > new Date(openSignal.bar_time)
+      );
+
+      if (newSignals.length > 0) {
+        markTrailingSignalLive(newSignals);
+        await supabaseAdmin
+          .from('signals')
+          .upsert(newSignals, { onConflict: 'symbol,interval,bar_time' });
+
+        results.created += newSignals.length;
+        console.log(`[Catch-up] ${symbol}: Created ${newSignals.length} missed signals`);
+      }
+    } catch (err) {
+      console.warn(`[Catch-up] ${symbol} error: ${err.message}`);
+    }
+  }
+
+  return results;
+}
+
 // ─── BACKGROUND SYNC: GENERATE NEW SIGNALS ──────────────────────────
 async function runBackgroundSync() {
-  console.log('[Background Sync] Starting signal generation...');
+  console.log('[Background Sync] Starting...');
 
+  // First: Close any open signals and generate missed ones
+  const catchUpResults = await catchUpSignals();
+  console.log(`[Catch-up] Closed ${catchUpResults.closed}, Created ${catchUpResults.created}`);
+
+  // Then: Generate ongoing new signals
   const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
   let totalCreated = 0;
 
@@ -264,7 +354,7 @@ async function runBackgroundSync() {
         .upsert(deduped, { onConflict: 'symbol,interval,bar_time' });
 
       if (!storeError) {
-        console.log(`[Sync] ${symbol}: Created ${deduped.length} signals`);
+        console.log(`[Sync] ${symbol}: Created ${deduped.length} new signals`);
         totalCreated += deduped.length;
       }
     } catch (err) {
@@ -272,7 +362,7 @@ async function runBackgroundSync() {
     }
   }
 
-  console.log(`[Background Sync] Complete: ${totalCreated} signals created`);
+  console.log(`[Background Sync] Complete: Caught-up ${catchUpResults.closed}/${catchUpResults.created}, Created ${totalCreated} new`);
 }
 
 export async function GET(request) {
