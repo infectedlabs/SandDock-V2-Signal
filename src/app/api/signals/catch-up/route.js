@@ -285,6 +285,27 @@ async function catchUpSignals() {
       }
 
       const closedSignal = withCloses[matchingSignalIdx];
+
+      // calculateCloses() assigns EVERY detected signal a close, including the
+      // still-open/trailing one at the end of the chain — for that one it
+      // fabricates a placeholder (close_reason: 'tp_hit', closed_at = its own
+      // bar_time, pnl_pct = the fixed tp_pct) so downstream code can flag and
+      // revert it via markTrailingSignalLive(). Only a real 'swing_opposite'
+      // close reflects an actual next swing in the opposite direction — if the
+      // matched signal is the LAST one detected (no real successor yet), it's
+      // still genuinely live and must NOT be written as closed, or every
+      // sync/catch-up run fabricates a fake +tp_pct% win for the current live
+      // trade.
+      if (closedSignal.close_reason !== 'swing_opposite') {
+        results.details[symbol] = {
+          status: 'still_live',
+          bar_time: openSignal.bar_time,
+          note: 'Matched signal has no real opposite swing yet — left open, not closed'
+        };
+        console.log(`[Catch-up] ${symbol}: Signal at ${openSignal.bar_time} has no real opposite swing yet — leaving live`);
+        continue;
+      }
+
       console.log(`[Catch-up] ${symbol}: Closing signal - reason: ${closedSignal.close_reason}, pnl: ${closedSignal.pnl_pct}%`);
 
       // Update the open signal with close information

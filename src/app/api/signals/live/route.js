@@ -155,6 +155,13 @@ export async function GET(request) {
     const todayDay = localNow.getUTCDate();
 
     const filteredByDay = filtered.filter(sig => {
+      // Open signals (closed_at=null) are "live" regardless of when they were
+      // opened — a signal opened yesterday and still open must keep showing as
+      // live here, otherwise it silently vanishes from this endpoint while the
+      // chart (which has no day filter) keeps rendering it as live, and the
+      // coin looks "closed" here when it isn't.
+      if (sig.is_live) return true;
+
       const barDate = new Date(sig.bar_time);
       // Apply timezone offset
       const localDate = new Date(barDate.getTime() + tzOffsetMinutes * 60 * 1000);

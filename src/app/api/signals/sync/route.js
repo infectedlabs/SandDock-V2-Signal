@@ -267,6 +267,17 @@ async function catchUpSignals() {
 
       const closedSignal = withCloses[matchingIdx];
 
+      // Only a real 'swing_opposite' close reflects an actual next swing.
+      // If the matched signal is the last one detected (no real successor
+      // yet), calculateCloses() has fabricated a placeholder close for it —
+      // it's still genuinely live. Writing that placeholder would fake a
+      // +tp_pct% win on every sync run. See catch-up/route.js for the
+      // full explanation (this logic is duplicated here).
+      if (closedSignal.close_reason !== 'swing_opposite') {
+        console.log(`[Catch-up] ${symbol}: Signal at ${openSignal.bar_time} has no real opposite swing yet — leaving live`);
+        continue;
+      }
+
       // Close the open signal
       await supabaseAdmin
         .from('signals')
