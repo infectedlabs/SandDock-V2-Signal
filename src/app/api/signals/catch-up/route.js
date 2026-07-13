@@ -226,15 +226,24 @@ async function catchUpSignals() {
       // 5. Find which signal matches the open signal and close it
       // Use flexible timestamp comparison to handle timezone differences
       const openBarTimeMs = openBarTime.getTime();
+      console.log(`[Catch-up] ${symbol}: Looking for ${openSignal.action.toLowerCase()} signal at ${openBarTime.toISOString()} (${openBarTimeMs})`);
+
       const matchingSignalIdx = withCloses.findIndex(s => {
         const signalTime = new Date(s.bar_time).getTime();
         const actionMatch = s.signal_type === openSignal.action.toLowerCase();
         const timeMatch = Math.abs(signalTime - openBarTimeMs) < 1000; // Allow 1 second difference
+        if (actionMatch && Math.abs(signalTime - openBarTimeMs) < 60000) { // Within 1 minute
+          console.log(`[Catch-up] ${symbol}: Comparing ${s.signal_type}@${s.bar_time} - action match: ${actionMatch}, time diff: ${Math.abs(signalTime - openBarTimeMs)}ms`);
+        }
         return actionMatch && timeMatch;
       });
 
       if (matchingSignalIdx === -1) {
-        console.log(`[Catch-up] ${symbol}: No matching signal found at ${openSignal.bar_time}. Found ${withCloses.length} detected signals. First few: ${withCloses.slice(0, 3).map(s => `${s.signal_type}@${s.bar_time}`).join(', ')}`);
+        console.log(`[Catch-up] ${symbol}: NO MATCH FOUND. Looking for: ${openSignal.action.toLowerCase()} at ${openSignal.bar_time}`);
+        console.log(`[Catch-up] ${symbol}: Total detected signals: ${withCloses.length}`);
+        if (withCloses.length > 0) {
+          console.log(`[Catch-up] ${symbol}: All detected: ${withCloses.map(s => `${s.signal_type}@${s.bar_time}`).join(', ')}`);
+        }
         continue;
       }
 
