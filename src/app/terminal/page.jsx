@@ -995,7 +995,11 @@ export default function TerminalPage() {
   }, [cleanLiveSignals]);
 
   const todayStats = useMemo(() => {
-    const todaySignals = cleanLiveSignals;
+    // Scope to the currently-selected coin — cleanLiveSignals spans every coin
+    // the plan can see (needed for the Live Signals tab), but this banner is
+    // shown alongside the selected coin's chart and was silently summing
+    // PnL across all coins, e.g. labeling BTC+ETH+BNB combined as "today".
+    const todaySignals = cleanLiveSignals.filter(s => s.symbol === selectedSymbol);
 
     const mapped = todaySignals.map((sig) => {
       let pnlVal = 0;
@@ -1029,7 +1033,7 @@ export default function TerminalPage() {
       sumPnl: sumPnl.toFixed(2),
       avgConfidence
     };
-  }, [cleanLiveSignals, livePrices]);
+  }, [cleanLiveSignals, livePrices, selectedSymbol]);
 
   // Load fallback signals when live feed is empty (to prevent conversion drop)
   // Retrieve the most recent signal from the general history ledger

@@ -92,7 +92,8 @@
       "Bash(rm -f src/app/api/signals/debug-eth/route.js src/app/api/signals/debug-candles/route.js src/app/api/signals/test-candles/route.js)",
       "Bash(rmdir src/app/api/signals/debug-eth src/app/api/signals/debug-candles src/app/api/signals/test-candles)",
       "Bash(git commit -m 'Remove throwaway debug endpoints used during investigation *)",
-      "Bash(git commit -m 'Add one-time repair endpoint for fabricated-close data corruption *)"
+      "Bash(git commit -m 'Add one-time repair endpoint for fabricated-close data corruption *)",
+      "Bash(git commit -m 'Scope terminal'\\\\''s Today performance banner to the selected coin *)"
     ]
   }
 }
