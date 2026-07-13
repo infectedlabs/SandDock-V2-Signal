@@ -27,7 +27,7 @@ DB_URL     = os.getenv("DATABASE_URL")
 SYMBOLS = [
     "BTCUSDT", "ETHUSDT", "BNBUSDT"
 ]
-INTERVALS = ["15m", "1h", "4h"]
+INTERVALS = ["30m"]
 
 SUBSCRIPTIONS = [(sym, tf) for sym in SYMBOLS for tf in INTERVALS]
 
