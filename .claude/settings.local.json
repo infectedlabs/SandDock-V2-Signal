@@ -68,7 +68,12 @@
       "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\);process.stdin.on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);console.log\\('count',j.length\\);console.log\\('oldest',j[0]?.bar_time\\);console.log\\('newest',j[j.length-1]?.bar_time\\)}\\)\")",
       "Bash(node scripts/reset_and_backfill_1y_all_coins.js)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(xargs grep -l \"lookback\\\\|swing\")",
+      "Bash(xargs grep -l \"pine\\\\|script\\\\|tradingview\")",
+      "Bash(grep -r \"const LOOKBACK\\\\|LOOKBACK =\" --include=\"*.js\" --include=\"*.py\" ! -path \"./node_modules/*\" ! -path \"./.next/*\")",
+      "Bash(xargs grep -l \"insert.*signals\\\\|create.*signal\")",
+      "Bash(xargs grep -l \"signals\")"
     ]
   }
 }
