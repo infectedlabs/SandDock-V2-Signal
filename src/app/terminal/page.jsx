@@ -839,6 +839,12 @@ export default function TerminalPage() {
     const negativeSum = Math.abs(pnlValues.filter(p => p < 0).reduce((sum, p) => sum + p, 0));
     const profitFactor = negativeSum > 0 ? (positiveSum / negativeSum).toFixed(2) : positiveSum > 0 ? 'Infinite' : '-';
 
+    // Plain arithmetic sum of the % moves shown in the signal log — distinct
+    // from cumulative_r (R-multiple sum, i.e. account return assuming fixed
+    // 1% risk per signal). Kept separate on purpose: they answer different
+    // questions and shouldn't be conflated into one number.
+    const rawPnlSum = pnlValues.reduce((sum, p) => sum + p, 0);
+
     return {
       total_signals: completed.length,
       wins,
@@ -849,6 +855,7 @@ export default function TerminalPage() {
       worst_trade: worstTrade,
       profit_factor: profitFactor,
       cumulative_r: cumulativeR,
+      raw_pnl_sum: rawPnlSum,
     };
   }, [perfSignals]);
 
@@ -1945,7 +1952,19 @@ export default function TerminalPage() {
                                   : 'Net return risking a fixed 1% of balance per signal.'}
                               </span>
                             </div>
-                            
+
+                            {/* Raw PnL Sum — kept separate from the R-multiple figure above on purpose */}
+                            <div className="flex justify-between items-center pt-2 border-t border-[#1e2d4a]/60">
+                              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Raw PnL Sum</span>
+                              <span className={`text-sm font-bold font-mono ${
+                                (computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
+                              }`}>
+                                {computedStats?.raw_pnl_sum != null
+                                  ? `${(computedStats.raw_pnl_sum) >= 0 ? '+' : ''}${computedStats.raw_pnl_sum.toFixed(2)}%`
+                                  : '0.00%'}
+                              </span>
+                            </div>
+
                             {/* Visual Progress Line */}
                             <div className="w-full bg-[#162035] h-1.5 rounded-full overflow-hidden mt-1">
                               <div 
