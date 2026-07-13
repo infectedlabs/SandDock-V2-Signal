@@ -82,7 +82,8 @@
       "PowerShell(Stop-Process -Name \"node\" -Force -ErrorAction SilentlyContinue)",
       "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
       "Bash(git commit -m 'Add detailed logging to catch-up for debugging signal detection *)",
-      "Bash(git commit -m 'Add detailed matching debugging to catch-up endpoint *)"
+      "Bash(git commit -m 'Add detailed matching debugging to catch-up endpoint *)",
+      "Bash(git commit -m 'CRITICAL FIX: Fetch candles AFTER signal time for detection *)"
     ]
   }
 }

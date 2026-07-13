@@ -187,18 +187,23 @@ async function catchUpSignals() {
       const openSignal = openSignals[0];
       const openBarTime = new Date(openSignal.bar_time);
       // Lookback 5 candles * 30m = 150 minutes before signal
+      // PLUS lookback 5 after to ensure detection algorithm has context after the signal
       const lookbackStart = new Date(openBarTime.getTime() - 150 * 60 * 1000);
+      const lookbackEnd = new Date(openBarTime.getTime() + 150 * 60 * 1000); // 150 min after
 
-      console.log(`[Catch-up] ${symbol}: Found open signal at ${openSignal.bar_time}, fetching lookback context...`);
+      console.log(`[Catch-up] ${symbol}: Found open signal at ${openSignal.bar_time}, fetching context...`);
 
-      // 2. Fetch candles from BEFORE the signal (with lookback context) onwards
-      // This is critical: detectSwings() needs LOOKBACK candles before a signal to properly detect it
+      // 2. Fetch candles from BEFORE the signal onwards, PLUS after
+      // CRITICAL: detectSwings() needs:
+      //   - LOOKBACK candles BEFORE to establish the window
+      //   - LOOKBACK candles AFTER to properly identify the peak/trough
       const { data: allCandles } = await supabaseAdmin
         .from('ohlcv_cache')
         .select('open_time, ha_high, ha_low, close, symbol')
         .eq('symbol', symbol)
         .eq('interval', '30m')
         .gte('open_time', lookbackStart.toISOString())
+        .lte('open_time', lookbackEnd.toISOString())
         .order('open_time', { ascending: true })
         .limit(CONFIG.CANDLES_FETCH);
 
