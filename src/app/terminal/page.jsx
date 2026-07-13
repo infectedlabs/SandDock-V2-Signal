@@ -1935,12 +1935,14 @@ export default function TerminalPage() {
                               <span className={`block text-[22px] sm:text-2xl font-extrabold font-mono tracking-tight ${
                                 (computedStats?.cumulative_r || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
                               }`}>
-                                {computedStats?.cumulative_r != null 
-                                  ? `${(computedStats.cumulative_r) >= 0 ? '+' : ''}${computedStats.cumulative_r.toFixed(2)}% (${(computedStats.cumulative_r) >= 0 ? '+' : ''}${computedStats.cumulative_r.toFixed(2)}R)`
-                                  : '0.00%'}
+                                {computedStats?.cumulative_r != null
+                                  ? `${(computedStats.cumulative_r) >= 0 ? '+' : ''}${computedStats.cumulative_r.toFixed(2)}R`
+                                  : '0.00R'}
                               </span>
                               <span className="block text-[11px] text-zinc-400 normal-case">
-                                Net return risking a fixed 1% of balance per signal.
+                                {computedStats?.cumulative_r != null
+                                  ? `≈ ${(computedStats.cumulative_r) >= 0 ? '+' : ''}${computedStats.cumulative_r.toFixed(2)}% account return risking a fixed 1% per signal — not the raw sum of the % moves in the log.`
+                                  : 'Net return risking a fixed 1% of balance per signal.'}
                               </span>
                             </div>
                             
