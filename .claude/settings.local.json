@@ -74,7 +74,8 @@
       "Bash(grep -r \"const LOOKBACK\\\\|LOOKBACK =\" --include=\"*.js\" --include=\"*.py\" ! -path \"./node_modules/*\" ! -path \"./.next/*\")",
       "Bash(xargs grep -l \"insert.*signals\\\\|create.*signal\")",
       "Bash(xargs grep -l \"signals\")",
-      "Bash(git commit -m 'Fix catch-up signal matching with flexible timestamp comparison *)"
+      "Bash(git commit -m 'Fix catch-up signal matching with flexible timestamp comparison *)",
+      "Bash(git commit -m 'Fix catch-up to fetch candles with lookback context *)"
     ]
   }
 }
