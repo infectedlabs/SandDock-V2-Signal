@@ -242,10 +242,11 @@ async function catchUpSignals() {
       const withCloses = calculateCloses(detectedSignals);
 
       // Find matching open signal with flexible timestamp comparison
+      const openBarTimeMs = openBarTime.getTime();
       const matchingIdx = withCloses.findIndex(s => {
         const signalTime = new Date(s.bar_time).getTime();
         const actionMatch = s.signal_type === openSignal.action.toLowerCase();
-        const timeMatch = Math.abs(signalTime - openBarTime) < 1000;
+        const timeMatch = Math.abs(signalTime - openBarTimeMs) < 1000;
         return actionMatch && timeMatch;
       });
 

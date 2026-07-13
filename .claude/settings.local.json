@@ -76,7 +76,8 @@
       "Bash(xargs grep -l \"signals\")",
       "Bash(git commit -m 'Fix catch-up signal matching with flexible timestamp comparison *)",
       "Bash(git commit -m 'Fix catch-up to fetch candles with lookback context *)",
-      "Bash(git commit -m 'Fix duplicate openBarTime variable in sync endpoint *)"
+      "Bash(git commit -m 'Fix duplicate openBarTime variable in sync endpoint *)",
+      "Bash(git commit -m 'Fix openBarTime type mismatch in both sync and catch-up *)"
     ]
   }
 }

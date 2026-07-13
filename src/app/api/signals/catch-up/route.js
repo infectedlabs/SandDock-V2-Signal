@@ -220,10 +220,11 @@ async function catchUpSignals() {
 
       // 5. Find which signal matches the open signal and close it
       // Use flexible timestamp comparison to handle timezone differences
+      const openBarTimeMs = openBarTime.getTime();
       const matchingSignalIdx = withCloses.findIndex(s => {
         const signalTime = new Date(s.bar_time).getTime();
         const actionMatch = s.signal_type === openSignal.action.toLowerCase();
-        const timeMatch = Math.abs(signalTime - openBarTime) < 1000; // Allow 1 second difference
+        const timeMatch = Math.abs(signalTime - openBarTimeMs) < 1000; // Allow 1 second difference
         return actionMatch && timeMatch;
       });
 
