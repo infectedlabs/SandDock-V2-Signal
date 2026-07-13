@@ -165,9 +165,10 @@ function markTrailingSignalLive(signals) {
 
 // ─── CATCH-UP: CLOSE OPEN SIGNALS AND GENERATE MISSED ONES ──────────
 async function catchUpSignals() {
-  const results = { closed: 0, created: 0, errors: [] };
+  const results = { closed: 0, created: 0, errors: [], details: {} };
 
   for (const symbol of CONFIG.SYMBOLS) {
+    results.details[symbol] = { status: 'pending' };
     try {
       // 1. Find the latest OPEN signal (closed_at=null)
       const { data: openSignals } = await supabaseAdmin
@@ -180,6 +181,7 @@ async function catchUpSignals() {
         .limit(1);
 
       if (!openSignals || openSignals.length === 0) {
+        results.details[symbol] = { status: 'no_open_signals' };
         console.log(`[Catch-up] ${symbol}: No open signals to close`);
         continue;
       }
@@ -208,7 +210,13 @@ async function catchUpSignals() {
         .limit(CONFIG.CANDLES_FETCH);
 
       if (!allCandles || allCandles.length === 0) {
-        throw new Error(`No candles found from ${openSignal.bar_time}`);
+        results.details[symbol] = {
+          status: 'no_candles',
+          openSignal: openSignal.bar_time,
+          lookbackStart: lookbackStart.toISOString(),
+          lookbackEnd: lookbackEnd.toISOString()
+        };
+        throw new Error(`No candles found from ${lookbackStart.toISOString()} to ${lookbackEnd.toISOString()}`);
       }
 
       console.log(`[Catch-up] ${symbol}: Fetched ${allCandles.length} candles from open signal`);
@@ -244,6 +252,12 @@ async function catchUpSignals() {
       });
 
       if (matchingSignalIdx === -1) {
+        results.details[symbol] = {
+          status: 'no_match',
+          lookingFor: `${openSignal.action.toLowerCase()} at ${openSignal.bar_time}`,
+          detectedCount: withCloses.length,
+          detected: withCloses.length > 0 ? withCloses.map(s => `${s.signal_type}@${s.bar_time}`).slice(0, 5) : []
+        };
         console.log(`[Catch-up] ${symbol}: NO MATCH FOUND. Looking for: ${openSignal.action.toLowerCase()} at ${openSignal.bar_time}`);
         console.log(`[Catch-up] ${symbol}: Total detected signals: ${withCloses.length}`);
         if (withCloses.length > 0) {
