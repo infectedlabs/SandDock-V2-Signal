@@ -188,24 +188,24 @@ async function catchUpSignals() {
 
       const openSignal = openSignals[0];
       const openBarTime = new Date(openSignal.bar_time);
-      // Lookback 5 candles * 30m = 150 minutes before signal
-      // PLUS lookback 5 after to ensure detection algorithm has context after the signal
-      const lookbackStart = new Date(openBarTime.getTime() - 150 * 60 * 1000);
-      const lookbackEnd = new Date(openBarTime.getTime() + 150 * 60 * 1000); // 150 min after
+      // Fetch a WIDE window before the signal (60 candles = 30 hours) so that
+      // detectSwings() already has a prior opposite swing established (lastLow/lastHigh
+      // set) by the time it reaches the open signal's bar. Without this, the open
+      // signal is the FIRST swing found in the window and detectSwings() never emits
+      // a signal for it (it only records lastHigh/lastLow, no push), so matching
+      // always fails downstream.
+      const lookbackStart = new Date(openBarTime.getTime() - 60 * 30 * 60 * 1000);
 
-      console.log(`[Catch-up] ${symbol}: Found open signal at ${openSignal.bar_time}, fetching context...`);
+      console.log(`[Catch-up] ${symbol}: Found open signal at ${openSignal.bar_time}, fetching from ${lookbackStart.toISOString()} through now...`);
 
-      // 2. Fetch candles from BEFORE the signal onwards, PLUS after
-      // CRITICAL: detectSwings() needs:
-      //   - LOOKBACK candles BEFORE to establish the window
-      //   - LOOKBACK candles AFTER to properly identify the peak/trough
+      // 2. Fetch candles from WELL BEFORE the signal through to the LATEST candle (no upper bound)
+      // so we catch every missed signal between the open signal and today, not just a fixed window.
       const { data: allCandles } = await supabaseAdmin
         .from('ohlcv_cache')
         .select('open_time, ha_high, ha_low, close, symbol')
         .eq('symbol', symbol)
         .eq('interval', '30m')
         .gte('open_time', lookbackStart.toISOString())
-        .lte('open_time', lookbackEnd.toISOString())
         .order('open_time', { ascending: true })
         .limit(CONFIG.CANDLES_FETCH);
 
@@ -213,10 +213,9 @@ async function catchUpSignals() {
         results.details[symbol] = {
           status: 'no_candles',
           openSignal: openSignal.bar_time,
-          lookbackStart: lookbackStart.toISOString(),
-          lookbackEnd: lookbackEnd.toISOString()
+          lookbackStart: lookbackStart.toISOString()
         };
-        throw new Error(`No candles found from ${lookbackStart.toISOString()} to ${lookbackEnd.toISOString()}`);
+        throw new Error(`No candles found from ${lookbackStart.toISOString()}`);
       }
 
       console.log(`[Catch-up] ${symbol}: Fetched ${allCandles.length} candles from open signal`);
