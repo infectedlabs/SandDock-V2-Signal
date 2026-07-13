@@ -237,10 +237,14 @@ async function catchUpSignals() {
 
       const withCloses = calculateCloses(detectedSignals);
 
-      // Find matching open signal
-      const matchingIdx = withCloses.findIndex(
-        s => s.bar_time === openSignal.bar_time && s.signal_type === openSignal.action.toLowerCase()
-      );
+      // Find matching open signal with flexible timestamp comparison
+      const openBarTime = new Date(openSignal.bar_time).getTime();
+      const matchingIdx = withCloses.findIndex(s => {
+        const signalTime = new Date(s.bar_time).getTime();
+        const actionMatch = s.signal_type === openSignal.action.toLowerCase();
+        const timeMatch = Math.abs(signalTime - openBarTime) < 1000;
+        return actionMatch && timeMatch;
+      });
 
       if (matchingIdx === -1) continue;
 

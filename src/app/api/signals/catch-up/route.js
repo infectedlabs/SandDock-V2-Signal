@@ -214,12 +214,18 @@ async function catchUpSignals() {
       const withCloses = calculateCloses(detectedSignals);
 
       // 5. Find which signal matches the open signal and close it
-      const matchingSignalIdx = withCloses.findIndex(
-        s => s.bar_time === openSignal.bar_time && s.signal_type === openSignal.action.toLowerCase()
-      );
+      // Use flexible timestamp comparison to handle timezone differences
+      const openBarTime = new Date(openSignal.bar_time).getTime();
+      const matchingSignalIdx = withCloses.findIndex(s => {
+        const signalTime = new Date(s.bar_time).getTime();
+        const actionMatch = s.signal_type === openSignal.action.toLowerCase();
+        const timeMatch = Math.abs(signalTime - openBarTime) < 1000; // Allow 1 second difference
+        return actionMatch && timeMatch;
+      });
 
       if (matchingSignalIdx === -1) {
-        throw new Error(`Could not find matching signal in detected swings at ${openSignal.bar_time}`);
+        console.log(`[Catch-up] ${symbol}: No matching signal found at ${openSignal.bar_time}. Found ${withCloses.length} detected signals. First few: ${withCloses.slice(0, 3).map(s => `${s.signal_type}@${s.bar_time}`).join(', ')}`);
+        continue;
       }
 
       const closedSignal = withCloses[matchingSignalIdx];
