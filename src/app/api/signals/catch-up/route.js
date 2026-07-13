@@ -20,75 +20,82 @@ const CONFIG = {
 };
 
 // ─── SWING DETECTION ────────────────────────────────────────────────
-function detectSwings(candles, lookback = 5) {
-  const highs = candles.map(c => c.ha_high);
-  const lows = candles.map(c => c.ha_low);
-  const win = lookback + 1;
-
+// EXACT port of scripts/reset_and_backfill_1y_all_coins.js:detectSwingSignals().
+// Two things the earlier version got wrong vs. that reference:
+//   1. Must use RAW high/low (candles come from Binance klines there), not
+//      Heikin-Ashi ha_high/ha_low — those are a different price series and
+//      produce different (even opposite-direction) swings at the same bar.
+//   2. The swing window is SYMMETRIC: candles[i-LOOKBACK .. i+LOOKBACK], not
+//      a backward-only window. A backward-only window is a different,
+//      lagging detector and disagrees with the reference near local extremes.
+function detectSwings(candles, lookback = CONFIG.LOOKBACK) {
   const signals = [];
   let lastLow = null;
   let lastHigh = null;
 
   for (let i = lookback; i < candles.length - lookback; i++) {
-    const lo = Math.max(0, i - lookback);
-    const windowHigh = Math.max(...highs.slice(lo, i + 1));
-    const windowLow = Math.min(...lows.slice(lo, i + 1));
-    const windowSize = i - lo + 1;
+    const c = candles[i];
 
-    const raw_top = highs[i] === windowHigh && windowSize === win;
-    const raw_bot = lows[i] === windowLow && windowSize === win;
-
-    let is_top = raw_top;
-    let is_bot = raw_bot;
-
-    if (is_top) {
-      if (lastLow !== null) {
-        const entryPrice = lows[i];
-        const slPrice = entryPrice * 0.995;
-        const tpPrice = entryPrice * 1.015;
-
-        signals.push({
-          symbol: candles[i].symbol,
-          interval: '30m',
-          bar_time: candles[i].open_time,
-          signal_type: 'buy',
-          entry_price: entryPrice,
-          sl_price: slPrice,
-          tp_price: tpPrice,
-          sl_pct: 0.5,
-          tp_pct: 1.5,
-          confidence: 95,
-        });
-
-        lastLow = lows[i];
+    let isLow = true;
+    for (let j = i - lookback; j <= i + lookback; j++) {
+      if (j !== i && candles[j].low < c.low) {
+        isLow = false;
+        break;
       }
     }
 
-    if (is_bot) {
-      if (lastHigh !== null) {
-        const entryPrice = highs[i];
-        const slPrice = entryPrice * 1.005;
-        const tpPrice = entryPrice * 0.985;
-
-        signals.push({
-          symbol: candles[i].symbol,
-          interval: '30m',
-          bar_time: candles[i].open_time,
-          signal_type: 'sell',
-          entry_price: entryPrice,
-          sl_price: slPrice,
-          tp_price: tpPrice,
-          sl_pct: 0.5,
-          tp_pct: 1.5,
-          confidence: 95,
-        });
-
-        lastHigh = highs[i];
+    let isHigh = true;
+    for (let j = i - lookback; j <= i + lookback; j++) {
+      if (j !== i && candles[j].high > c.high) {
+        isHigh = false;
+        break;
       }
     }
 
-    if (is_top) lastHigh = highs[i];
-    if (is_bot) lastLow = lows[i];
+    if (isLow && lastHigh !== null) {
+      const entryPrice = c.low;
+      const slPrice = entryPrice * (1 - CONFIG.SL_PCT / 100);
+      const tpPrice = entryPrice * (1 + CONFIG.TP_PCT / 100);
+
+      signals.push({
+        symbol: c.symbol,
+        interval: CONFIG.TIMEFRAME,
+        bar_time: c.open_time,
+        signal_type: 'buy',
+        entry_price: entryPrice,
+        sl_price: slPrice,
+        tp_price: tpPrice,
+        sl_pct: CONFIG.SL_PCT,
+        tp_pct: CONFIG.TP_PCT,
+        confidence: 95,
+      });
+
+      lastLow = c.low;
+    }
+
+    if (isHigh && lastLow !== null) {
+      const entryPrice = c.high;
+      const slPrice = entryPrice * (1 + CONFIG.SL_PCT / 100);
+      const tpPrice = entryPrice * (1 - CONFIG.TP_PCT / 100);
+
+      signals.push({
+        symbol: c.symbol,
+        interval: CONFIG.TIMEFRAME,
+        bar_time: c.open_time,
+        signal_type: 'sell',
+        entry_price: entryPrice,
+        sl_price: slPrice,
+        tp_price: tpPrice,
+        sl_pct: CONFIG.SL_PCT,
+        tp_pct: CONFIG.TP_PCT,
+        confidence: 95,
+      });
+
+      lastHigh = c.high;
+    }
+
+    if (isLow) lastLow = c.low;
+    if (isHigh) lastHigh = c.high;
   }
 
   return signals;
@@ -202,7 +209,7 @@ async function catchUpSignals() {
       // so we catch every missed signal between the open signal and today, not just a fixed window.
       const { data: allCandles } = await supabaseAdmin
         .from('ohlcv_cache')
-        .select('open_time, ha_high, ha_low, close, symbol')
+        .select('open_time, high, low, close, symbol')
         .eq('symbol', symbol)
         .eq('interval', '30m')
         .gte('open_time', lookbackStart.toISOString())
@@ -218,10 +225,17 @@ async function catchUpSignals() {
         throw new Error(`No candles found from ${lookbackStart.toISOString()}`);
       }
 
-      console.log(`[Catch-up] ${symbol}: Fetched ${allCandles.length} candles from open signal`);
+      // Supabase returns numeric columns as strings — parse before comparing (matches `+k[2]`/`+k[3]` in the reference backfill)
+      const parsedCandles = allCandles.map(c => ({
+        ...c,
+        high: parseFloat(c.high),
+        low: parseFloat(c.low),
+      }));
+
+      console.log(`[Catch-up] ${symbol}: Fetched ${parsedCandles.length} candles from open signal`);
 
       // 3. Detect all swings from this point
-      const detectedSignals = detectSwings(allCandles);
+      const detectedSignals = detectSwings(parsedCandles);
       console.log(`[Catch-up] ${symbol}: Detected ${detectedSignals.length} swings from ${allCandles.length} candles`);
       if (detectedSignals.length > 0) {
         console.log(`[Catch-up] ${symbol}: First few detected: ${detectedSignals.slice(0, 3).map(s => `${s.signal_type}@${s.bar_time}`).join(', ')}`);
