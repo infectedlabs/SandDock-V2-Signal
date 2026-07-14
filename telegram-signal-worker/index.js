@@ -11,7 +11,15 @@ const { createClient } = require('@supabase/supabase-js');
 
 // ─── Config ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-const POLL_INTERVAL_MINUTES = parseInt(process.env.POLL_INTERVAL_MINUTES || '5', 10);
+// Polls fast enough to notice a new candle within seconds of Binance closing
+// it. This does NOT shrink the ~2.5h swing-confirmation lag (LOOKBACK=5
+// candles on both sides is structural to the algorithm) — it only shrinks
+// the gap between "Binance has the new candle" and "worker has noticed and
+// alerted." A short poll here plus the change-detection guard in
+// processSymbol (skip everything if the latest candle hasn't changed) keeps
+// this cheap: Binance gets polled constantly, but Supabase/Telegram only get
+// hit when a candle has actually changed.
+const POLL_INTERVAL_SECONDS = parseInt(process.env.POLL_INTERVAL_SECONDS || '15', 10);
 
 const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
 const INTERVAL = '30m';
@@ -41,8 +49,14 @@ function log(msg) {
 }
 
 // ─── Binance REST candle fetch ───────────────────────────────────────────
+// Futures (fapi), not spot — matches the chart's live websocket
+// (stream_subscriber.py connects to fstream.binance.com) and the app's own
+// live-price fallback (src/lib/binanceFallback.js uses fapi.binance.com).
+// The original backfill script used spot and is left untouched — this is a
+// deliberate divergence for the worker only, so its entries/closes line up
+// with what's actually shown on the live chart going forward.
 async function fetchCandles(symbol, limit = CANDLES_FETCH) {
-  const { data } = await axios.get('https://api.binance.com/api/v3/klines', {
+  const { data } = await axios.get('https://fapi.binance.com/fapi/v1/klines', {
     params: { symbol, interval: INTERVAL, limit },
     timeout: 10000,
   });
@@ -272,10 +286,19 @@ async function processSymbol(symbol) {
     return;
   }
 
+  // Skip everything below if Binance hasn't produced a new candle since we
+  // last looked — with a 15s poll this check itself runs constantly, but
+  // Supabase/Telegram only get touched once every ~30 minutes per symbol
+  // (when a candle genuinely closes), not once every 15 seconds.
+  const latestCandleTime = candles[candles.length - 1].open_time;
+  if (lastSeenCandle[symbol] === latestCandleTime) return false;
+  lastSeenCandle[symbol] = latestCandleTime;
+  log(`[${symbol}] New candle @ ${latestCandleTime}, checking for swings...`);
+
   const detected = detectSwings(candles);
   if (detected.length === 0) {
     log(`[${symbol}] No swings detected in current window.`);
-    return;
+    return true;
   }
   const withCloses = calculateCloses(detected);
   resolveTrailingSupersession(withCloses); // in place — see comment on the function
@@ -339,7 +362,7 @@ async function processSymbol(symbol) {
   const newOnes = withCloses.filter(s => new Date(s.bar_time) > lastStoredBarTime);
   if (newOnes.length === 0) {
     log(`[${symbol}] Up to date, nothing new.`);
-    return;
+    return true;
   }
 
   // Dedupe by bar_time (defensive — detectSwings shouldn't produce duplicates)
@@ -352,7 +375,7 @@ async function processSymbol(symbol) {
 
   if (insertError) {
     log(`[${symbol}] Failed to insert new signals: ${insertError.message}`);
-    return;
+    return true;
   }
 
   log(`[${symbol}] Inserted ${deduped.length} new signal(s).`);
@@ -366,12 +389,14 @@ async function processSymbol(symbol) {
       await sendTelegram(closedSignalMessage(sig));
     }
   }
+  return true;
 }
 
 // ─── Main cycle ───────────────────────────────────────────────────────────
 let isRunning = false;
 let lastRunAt = null;
 let lastRunError = null;
+const lastSeenCandle = {}; // symbol -> latest candle open_time seen so far
 
 async function runCycle() {
   if (isRunning) {
@@ -380,22 +405,27 @@ async function runCycle() {
   }
   isRunning = true;
   const start = Date.now();
+  let didWork = false;
   try {
     for (const symbol of SYMBOLS) {
       try {
-        await processSymbol(symbol);
+        if (await processSymbol(symbol)) didWork = true;
       } catch (err) {
         log(`[${symbol}] Error: ${err.message}`);
+        didWork = true; // errors are worth a completion log even if nothing changed
       }
     }
     lastRunError = null;
   } catch (err) {
     lastRunError = err.message;
     log(`Cycle error: ${err.message}`);
+    didWork = true;
   } finally {
     lastRunAt = new Date().toISOString();
     isRunning = false;
-    log(`Cycle complete in ${((Date.now() - start) / 1000).toFixed(1)}s`);
+    // At a 15s poll this fires constantly if logged unconditionally — only
+    // worth logging when a symbol actually had a new candle to process.
+    if (didWork) log(`Cycle complete in ${((Date.now() - start) / 1000).toFixed(1)}s`);
   }
 }
 
@@ -407,10 +437,11 @@ app.get('/', (req, res) => {
     status: 'ok',
     symbols: SYMBOLS,
     interval: INTERVAL,
-    pollIntervalMinutes: POLL_INTERVAL_MINUTES,
+    pollIntervalSeconds: POLL_INTERVAL_SECONDS,
     isRunning,
     lastRunAt,
     lastRunError,
+    lastSeenCandle,
     uptimeSeconds: process.uptime(),
   });
 });
@@ -420,7 +451,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.listen(PORT, () => {
   log(`Signal worker listening on port ${PORT}`);
   runCycle();
-  setInterval(runCycle, POLL_INTERVAL_MINUTES * 60 * 1000);
+  setInterval(runCycle, POLL_INTERVAL_SECONDS * 1000);
 });
 
 process.on('SIGTERM', () => { log('SIGTERM received, shutting down.'); process.exit(0); });

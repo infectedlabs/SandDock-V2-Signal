@@ -102,7 +102,10 @@
       "Bash(npm install *)",
       "Bash(node scripts/repair_stale_open_signals.js)",
       "Bash(node --check src/app/api/signals/sync/route.js)",
-      "Bash(npx --no-install eslint src/app/api/signals/sync/route.js)"
+      "Bash(npx --no-install eslint src/app/api/signals/sync/route.js)",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object -First 5 OwningProcess\")",
+      "Bash(netstat -ano)",
+      "Bash(git check-ignore *)"
     ]
   }
 }
