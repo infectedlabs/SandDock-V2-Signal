@@ -1,25 +1,40 @@
 // Sanddock Signal Worker
-// Always-on Railway service: polls Binance for BTC/ETH/BNB 30m candles,
-// closes signals on genuine opposite swings, creates new live signals,
-// writes both to Supabase, and posts Telegram alerts to a dedicated channel.
+// Always-on Railway service: listens to Binance's live kline WebSocket for
+// BTC/ETH/BNB 30m candles, closes signals on genuine opposite swings,
+// creates new live signals, writes both to Supabase, and posts Telegram
+// alerts to a dedicated channel — the instant each candle closes.
+//
+// Why WebSocket and not REST polling: a signal is only useful in the
+// Telegram channel if it lands the moment it's confirmed, not minutes (or
+// even 15s) later — polling always trades some delay for request volume.
+// Binance pushes a kline-closed event the moment it happens, so there is no
+// polling delay to trade away. It also scales to any number of symbols on a
+// single connection with zero REST rate-limit cost, unlike REST polling
+// which scales linearly with symbol count (Binance has no multi-symbol
+// klines endpoint). REST is only used here for two things: fetching the
+// LOOKBACK candle context needed to run swing detection once a close event
+// fires, and a slow safety-net sweep in case a WebSocket message is ever
+// dropped — both are cheap and don't grow with polling frequency.
 
 require('dotenv').config();
 
 const express = require('express');
 const axios = require('axios');
+const WebSocket = require('ws');
 const { createClient } = require('@supabase/supabase-js');
 
 // ─── Config ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-// Polls fast enough to notice a new candle within seconds of Binance closing
-// it. This does NOT shrink the ~2.5h swing-confirmation lag (LOOKBACK=5
-// candles on both sides is structural to the algorithm) — it only shrinks
-// the gap between "Binance has the new candle" and "worker has noticed and
-// alerted." A short poll here plus the change-detection guard in
-// processSymbol (skip everything if the latest candle hasn't changed) keeps
-// this cheap: Binance gets polled constantly, but Supabase/Telegram only get
-// hit when a candle has actually changed.
-const POLL_INTERVAL_SECONDS = parseInt(process.env.POLL_INTERVAL_SECONDS || '15', 10);
+// Backstop only — the WebSocket is the real-time trigger. This just catches
+// the rare case of a dropped WS message. Runs the same cheap change-detection
+// guard as everything else, so it costs nothing when there's no new candle.
+const SAFETY_NET_INTERVAL_SECONDS = parseInt(process.env.SAFETY_NET_INTERVAL_SECONDS || '180', 10);
+
+// Matches the exact path already proven working in production by
+// backend/stream_subscriber.py — Binance's documented `/stream?streams=` and
+// `/ws/` paths both connected but delivered zero messages when tested
+// directly against this account/region; this one delivers within ~1s.
+const BINANCE_WS_BASE = 'wss://fstream.binance.com/market/stream?streams=';
 
 const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
 const INTERVAL = '30m';
@@ -287,9 +302,9 @@ async function processSymbol(symbol) {
   }
 
   // Skip everything below if Binance hasn't produced a new candle since we
-  // last looked — with a 15s poll this check itself runs constantly, but
-  // Supabase/Telegram only get touched once every ~30 minutes per symbol
-  // (when a candle genuinely closes), not once every 15 seconds.
+  // last looked. In normal operation the WebSocket only calls this once a
+  // candle has genuinely closed, so this is mostly a no-op guard against the
+  // safety-net sweep reprocessing a candle the WebSocket already handled.
   const latestCandleTime = candles[candles.length - 1].open_time;
   if (lastSeenCandle[symbol] === latestCandleTime) return false;
   lastSeenCandle[symbol] = latestCandleTime;
@@ -392,41 +407,85 @@ async function processSymbol(symbol) {
   return true;
 }
 
-// ─── Main cycle ───────────────────────────────────────────────────────────
-let isRunning = false;
-let lastRunAt = null;
-let lastRunError = null;
+// ─── Shared state ───────────────────────────────────────────────────────
 const lastSeenCandle = {}; // symbol -> latest candle open_time seen so far
+const inFlight = {};       // symbol -> true while a processSymbol() call is running for it
+let lastEventAt = null;
+let lastEventError = null;
+let wsConnected = false;
+let wsConnectCount = 0;
 
-async function runCycle() {
-  if (isRunning) {
-    log('Cycle already in progress, skipping this tick.');
+// A symbol is processed independently of the others — one busy/slow symbol
+// must never block another symbol's candle-close event from being handled
+// immediately, so concurrency is guarded per-symbol, not globally.
+async function trigger(symbol, source) {
+  if (inFlight[symbol]) {
+    log(`[${symbol}] Already processing, dropping duplicate ${source} trigger.`);
     return;
   }
-  isRunning = true;
+  inFlight[symbol] = true;
   const start = Date.now();
-  let didWork = false;
   try {
-    for (const symbol of SYMBOLS) {
-      try {
-        if (await processSymbol(symbol)) didWork = true;
-      } catch (err) {
-        log(`[${symbol}] Error: ${err.message}`);
-        didWork = true; // errors are worth a completion log even if nothing changed
-      }
-    }
-    lastRunError = null;
+    const didWork = await processSymbol(symbol);
+    if (didWork) log(`[${symbol}] (${source}) handled in ${((Date.now() - start) / 1000).toFixed(2)}s`);
+    lastEventAt = new Date().toISOString();
+    lastEventError = null;
   } catch (err) {
-    lastRunError = err.message;
-    log(`Cycle error: ${err.message}`);
-    didWork = true;
+    lastEventError = `${symbol}: ${err.message}`;
+    log(`[${symbol}] (${source}) Error: ${err.message}`);
   } finally {
-    lastRunAt = new Date().toISOString();
-    isRunning = false;
-    // At a 15s poll this fires constantly if logged unconditionally — only
-    // worth logging when a symbol actually had a new candle to process.
-    if (didWork) log(`Cycle complete in ${((Date.now() - start) / 1000).toFixed(1)}s`);
+    inFlight[symbol] = false;
   }
+}
+
+// ─── Binance WebSocket (primary, real-time trigger) ──────────────────────
+function connectWebSocket() {
+  const streams = SYMBOLS.map(s => `${s.toLowerCase()}@kline_${INTERVAL}`).join('/');
+  const url = BINANCE_WS_BASE + streams;
+  const ws = new WebSocket(url);
+  wsConnectCount++;
+
+  ws.on('open', () => {
+    wsConnected = true;
+    log(`WebSocket connected (attempt ${wsConnectCount}): ${SYMBOLS.join(', ')} @ ${INTERVAL}`);
+  });
+
+  ws.on('message', (raw) => {
+    try {
+      const msg = JSON.parse(raw);
+      const k = msg?.data?.k;
+      if (!k) return;
+      // k.x === true means this candle has closed — that's the exact moment
+      // a signal for this bar becomes possible to confirm. Fire immediately;
+      // don't await here, so one symbol's processing can't delay another's
+      // message from being read off the socket.
+      if (k.x === true) {
+        trigger(k.s, 'websocket');
+      }
+    } catch (err) {
+      log(`WebSocket message parse error: ${err.message}`);
+    }
+  });
+
+  ws.on('error', (err) => {
+    log(`WebSocket error: ${err.message}`);
+  });
+
+  ws.on('close', (code, reason) => {
+    wsConnected = false;
+    log(`WebSocket closed (code=${code} reason=${reason || 'none'}). Reconnecting in 5s...`);
+    setTimeout(connectWebSocket, 5000);
+  });
+}
+
+// ─── REST safety net (backstop only) ──────────────────────────────────────
+// Catches the rare dropped WebSocket message. Reuses the same
+// change-detection guard in processSymbol, so this is a no-op (one cheap
+// REST call per symbol) whenever the WebSocket has already kept up.
+function startSafetyNet() {
+  setInterval(() => {
+    for (const symbol of SYMBOLS) trigger(symbol, 'safety-net');
+  }, SAFETY_NET_INTERVAL_SECONDS * 1000);
 }
 
 // ─── HTTP server (Railway health check) ──────────────────────────────────
@@ -437,10 +496,11 @@ app.get('/', (req, res) => {
     status: 'ok',
     symbols: SYMBOLS,
     interval: INTERVAL,
-    pollIntervalSeconds: POLL_INTERVAL_SECONDS,
-    isRunning,
-    lastRunAt,
-    lastRunError,
+    wsConnected,
+    wsConnectCount,
+    safetyNetIntervalSeconds: SAFETY_NET_INTERVAL_SECONDS,
+    lastEventAt,
+    lastEventError,
     lastSeenCandle,
     uptimeSeconds: process.uptime(),
   });
@@ -450,8 +510,10 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.listen(PORT, () => {
   log(`Signal worker listening on port ${PORT}`);
-  runCycle();
-  setInterval(runCycle, POLL_INTERVAL_SECONDS * 1000);
+  // Catch up on anything missed while offline, then go fully event-driven.
+  for (const symbol of SYMBOLS) trigger(symbol, 'startup');
+  connectWebSocket();
+  startSafetyNet();
 });
 
 process.on('SIGTERM', () => { log('SIGTERM received, shutting down.'); process.exit(0); });

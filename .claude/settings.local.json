@@ -105,7 +105,17 @@
       "Bash(npx --no-install eslint src/app/api/signals/sync/route.js)",
       "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object -First 5 OwningProcess\")",
       "Bash(netstat -ano)",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "Bash(mkdir -p /tmp/wstest)",
+      "Read(//tmp/**)",
+      "Bash(npm init *)",
+      "Bash(node \"C:\\\\Users\\\\GHURU PRASAATH\\\\wstest_check.js\")",
+      "Bash(node wstest_check.js)",
+      "Bash(node wstest_check2.js)",
+      "Bash(tasklist //FI \"IMAGENAME eq node.exe\")",
+      "Bash(curl -s http://localhost:3092/)",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3092 -ErrorAction SilentlyContinue | Select-Object OwningProcess\")",
+      "Bash(powershell -Command \"Stop-Process -Id 33156 -Force\")"
     ]
   }
 }
