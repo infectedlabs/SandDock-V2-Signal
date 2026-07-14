@@ -169,15 +169,51 @@ function calculateCloses(signals) {
   });
 }
 
-function markTrailingSignalLive(signals) {
-  for (const sig of signals) {
-    if (sig.close_reason !== 'swing_opposite') {
+// calculateCloses() only searches forward for the next OPPOSITE-direction
+// signal (matches the app's original backfill methodology — deliberately
+// left untouched so historical 'swing_opposite' closes/winrate never
+// change). Anything it couldn't match that way gets a placeholder close
+// (close_reason !== 'swing_opposite') that was meant to represent "still
+// open." But if several consecutive same-direction swings occur with no
+// opposite ever following any of them, EVERY one of them gets that same
+// placeholder — and reverting all of them to live at once is exactly how
+// a symbol ends up with multiple simultaneously-open rows (the BNBUSDT bug).
+//
+// Fix: only the chronologically LAST signal in the whole array can
+// genuinely still be open (nothing has happened after it yet). Every other
+// placeholder-closed signal must have been superseded by whatever
+// immediately follows it — which, by construction, has to be same-direction
+// (a real opposite would already have been matched by calculateCloses).
+// This only touches placeholder entries; anything already 'swing_opposite'
+// is left completely untouched, so no historical PnL/winrate changes.
+function resolveTrailingSupersession(withCloses) {
+  for (let i = 0; i < withCloses.length; i++) {
+    const sig = withCloses[i];
+    if (sig.close_reason === 'swing_opposite') continue;
+
+    const isLastOverall = i === withCloses.length - 1;
+    if (isLastOverall) {
       sig.closed_at = null;
       sig.pnl_pct = null;
       sig.is_win = null;
+      continue;
     }
+
+    const next = withCloses[i + 1];
+    const entryPrice = parseFloat(sig.entry_price);
+    const closePrice = parseFloat(next.entry_price);
+    const isBuy = sig.signal_type === 'buy';
+    const change = isBuy
+      ? ((closePrice - entryPrice) / entryPrice) * 100
+      : ((entryPrice - closePrice) / entryPrice) * 100;
+
+    sig.close_price = closePrice;
+    sig.close_reason = 'superseded';
+    sig.closed_at = next.bar_time;
+    sig.pnl_pct = Number(change.toFixed(2));
+    sig.is_win = sig.pnl_pct > 0;
   }
-  return signals;
+  return withCloses;
 }
 
 // ─── Telegram ─────────────────────────────────────────────────────────────
@@ -216,12 +252,15 @@ function closedSignalMessage(sig) {
   const icon = win ? '✅' : '❌';
   const dir = sig.signal_type === 'buy' ? 'BUY' : 'SELL';
   const pnlStr = `${sig.pnl_pct >= 0 ? '+' : ''}${sig.pnl_pct.toFixed(2)}%`;
+  const reasonStr = sig.close_reason === 'superseded'
+    ? 'superseded by a newer same-direction signal'
+    : 'opposite swing confirmed';
   return (
     `${icon} <b>${coinLabel(sig.symbol)}</b> ${dir} closed\n\n` +
     `Entry: ${parseFloat(sig.entry_price).toFixed(2)}\n` +
     `Close: ${sig.close_price.toFixed(2)}\n` +
     `PnL: <b>${pnlStr}</b>\n` +
-    `Reason: opposite swing confirmed`
+    `Reason: ${reasonStr}`
   );
 }
 
@@ -239,8 +278,9 @@ async function processSymbol(symbol) {
     return;
   }
   const withCloses = calculateCloses(detected);
+  resolveTrailingSupersession(withCloses); // in place — see comment on the function
 
-  // 1. Try to close the currently open signal, if a genuine opposite swing now exists.
+  // 1. Try to close the currently open signal, if it's no longer genuinely live.
   const { data: openRows } = await supabase
     .from('signals')
     .select('*')
@@ -259,7 +299,11 @@ async function processSymbol(symbol) {
       return sameAction && sameBar;
     });
 
-    if (match && match.close_reason === 'swing_opposite') {
+    // Both 'swing_opposite' (real reversal) and 'superseded' (a later
+    // same-direction signal took over) are genuine closes now — the only
+    // thing that stays live is whatever resolveTrailingSupersession left
+    // with closed_at === null (the true chronological last signal).
+    if (match && match.closed_at !== null) {
       const { error } = await supabase
         .from('signals')
         .update({
@@ -290,13 +334,13 @@ async function processSymbol(symbol) {
     .limit(1);
 
   const lastStoredBarTime = latestRows?.[0]?.bar_time ? new Date(latestRows[0].bar_time) : new Date(0);
+  // withCloses was already resolved in place above — no separate
+  // markTrailingSignalLive step needed.
   const newOnes = withCloses.filter(s => new Date(s.bar_time) > lastStoredBarTime);
   if (newOnes.length === 0) {
     log(`[${symbol}] Up to date, nothing new.`);
     return;
   }
-
-  markTrailingSignalLive(newOnes);
 
   // Dedupe by bar_time (defensive — detectSwings shouldn't produce duplicates)
   const seen = new Set();

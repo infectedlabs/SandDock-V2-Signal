@@ -684,21 +684,9 @@ export default function TerminalPage() {
     }
   }, []);
 
-  // Trigger background gap sync on mount
-  useEffect(() => {
-    const triggerSync = async () => {
-      try {
-        const res = await fetch('/api/signals/sync');
-        if (res.ok) {
-          const data = await res.json();
-          console.log('[Sync Status]:', data.message);
-        }
-      } catch (err) {
-        console.warn('Background sync trigger failed:', err.message);
-      }
-    };
-    triggerSync();
-  }, []);
+  // Signal generation (create/close) is handled entirely by the standalone
+  // Railway worker (telegram-signal-worker/) — this app is read-only with
+  // respect to the `signals` table. No sync trigger needed here.
 
   const signalFilters = useMemo(() => ({
     plan:        profile?.plan || 'free',

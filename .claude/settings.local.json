@@ -97,7 +97,12 @@
       "Bash(rm -f src/app/api/signals/repair-fake-closes/route.js)",
       "Bash(rmdir src/app/api/signals/repair-fake-closes)",
       "Bash(git commit -m 'Remove one-time repair endpoint now that corruption is fixed *)",
-      "Bash(git commit -m 'Clarify Performance hero card shows R-multiples, not raw PnL sum *)"
+      "Bash(git commit -m 'Clarify Performance hero card shows R-multiples, not raw PnL sum *)",
+      "Bash(node --check index.js)",
+      "Bash(npm install *)",
+      "Bash(node scripts/repair_stale_open_signals.js)",
+      "Bash(node --check src/app/api/signals/sync/route.js)",
+      "Bash(npx --no-install eslint src/app/api/signals/sync/route.js)"
     ]
   }
 }
