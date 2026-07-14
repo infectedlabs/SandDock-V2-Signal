@@ -71,10 +71,23 @@ function log(msg) {
 // deliberate divergence for the worker only, so its entries/closes line up
 // with what's actually shown on the live chart going forward.
 async function fetchCandles(symbol, limit = CANDLES_FETCH) {
-  const { data } = await axios.get('https://fapi.binance.com/fapi/v1/klines', {
-    params: { symbol, interval: INTERVAL, limit },
-    timeout: 10000,
-  });
+  let data;
+  try {
+    ({ data } = await axios.get('https://fapi.binance.com/fapi/v1/klines', {
+      params: { symbol, interval: INTERVAL, limit },
+      timeout: 10000,
+    }));
+  } catch (err) {
+    if (err.response?.status === 451) {
+      throw new Error(
+        `Binance returned 451 (Unavailable For Legal Reasons) — this host's IP is in a region ` +
+        `Binance blocks (binance.com/fapi is not available to US-based traffic; Binance.US has no ` +
+        `futures data). Fix: change this service's deploy region to a non-US region in Railway's ` +
+        `Settings -> Deploy -> Region.`
+      );
+    }
+    throw err;
+  }
   return data.map(k => ({
     open_time: new Date(k[0]).toISOString(),
     open: +k[1],
@@ -414,6 +427,7 @@ let lastEventAt = null;
 let lastEventError = null;
 let wsConnected = false;
 let wsConnectCount = 0;
+let lastMessageAt = null; // any WS message, not just candle-close events
 
 // A symbol is processed independently of the others — one busy/slow symbol
 // must never block another symbol's candle-close event from being handled
@@ -444,6 +458,8 @@ function connectWebSocket() {
   const url = BINANCE_WS_BASE + streams;
   const ws = new WebSocket(url);
   wsConnectCount++;
+  const connectedAt = Date.now();
+  let watchdogWarned = false;
 
   ws.on('open', () => {
     wsConnected = true;
@@ -451,6 +467,7 @@ function connectWebSocket() {
   });
 
   ws.on('message', (raw) => {
+    lastMessageAt = Date.now();
     try {
       const msg = JSON.parse(raw);
       const k = msg?.data?.k;
@@ -476,6 +493,24 @@ function connectWebSocket() {
     log(`WebSocket closed (code=${code} reason=${reason || 'none'}). Reconnecting in 5s...`);
     setTimeout(connectWebSocket, 5000);
   });
+
+  // Binance pushes a kline update on every trade for the open candle, so
+  // under any real market activity a message should arrive within seconds.
+  // A connection that "opens" but never delivers anything is the exact
+  // symptom of a geo-blocked host (handshake succeeds, Binance silently
+  // sends nothing) — the same root cause as the REST 451 error, just
+  // without an explicit status code to log. Warn once so it's diagnosable
+  // from logs alone instead of looking like a silently-idle connection.
+  const watchdog = setInterval(() => {
+    if (!wsConnected) { clearInterval(watchdog); return; }
+    if (!watchdogWarned && Date.now() - connectedAt > 90000 && (!lastMessageAt || lastMessageAt < connectedAt)) {
+      watchdogWarned = true;
+      log('[WARN] WebSocket has been open for 90s with zero messages received. This usually means ' +
+          "the connection handshake succeeded but Binance is silently not delivering data — the " +
+          'same geo-restriction that causes the REST 451 error. If REST is also failing, change ' +
+          "this service's deploy region to a non-US region in Railway's Settings -> Deploy -> Region.");
+    }
+  }, 30000);
 }
 
 // ─── REST safety net (backstop only) ──────────────────────────────────────
@@ -498,6 +533,7 @@ app.get('/', (req, res) => {
     interval: INTERVAL,
     wsConnected,
     wsConnectCount,
+    lastMessageAt: lastMessageAt ? new Date(lastMessageAt).toISOString() : null,
     safetyNetIntervalSeconds: SAFETY_NET_INTERVAL_SECONDS,
     lastEventAt,
     lastEventError,
