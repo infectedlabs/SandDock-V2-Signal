@@ -88,7 +88,23 @@ async function fetchCandles(symbol, limit = CANDLES_FETCH) {
     }
     throw err;
   }
-  return data.map(k => ({
+  // Binance's klines endpoint includes the currently-forming (not yet closed)
+  // candle as the last element by default. Its high/low keep changing in
+  // real time, and since the symmetric detection window looks at
+  // candles[i-LOOKBACK..i+LOOKBACK], including it makes detectSwings
+  // non-deterministic between consecutive calls: a bar near the tail can be
+  // "confirmed" in one run and silently "unconfirmed" in the next purely
+  // because the live partial candle's high/low shifted, with no real price
+  // action on the confirmed bar itself. That's how a signal already stored
+  // as open in the DB can stop matching anything in a later run's
+  // withCloses and sit there forever unclosed. Drop it — only fully closed
+  // candles are deterministic, matching what a historical backfill (which
+  // only ever sees closed candles) actually computes.
+  const closeTimeMs = k => k[6];
+  const now = Date.now();
+  const closed = data.filter(k => closeTimeMs(k) <= now);
+
+  return closed.map(k => ({
     open_time: new Date(k[0]).toISOString(),
     open: +k[1],
     high: +k[2],
@@ -331,18 +347,24 @@ async function processSymbol(symbol) {
   const withCloses = calculateCloses(detected);
   resolveTrailingSupersession(withCloses); // in place — see comment on the function
 
-  // 1. Try to close the currently open signal, if it's no longer genuinely live.
+  // 1. Try to close EVERY currently open signal, not just the most recent one.
+  // Checking only the latest (as this used to) means any open row that isn't
+  // the single newest becomes permanently invisible the moment a newer one
+  // exists — closing the newest one every cycle never reaches the older ones
+  // sitting underneath, so they never get another chance and just accumulate
+  // forever. Every open row deserves a fresh look each cycle.
   const { data: openRows } = await supabase
     .from('signals')
     .select('*')
     .eq('symbol', symbol)
     .eq('interval', INTERVAL)
     .is('closed_at', null)
-    .order('bar_time', { ascending: false })
-    .limit(1);
+    .order('bar_time', { ascending: true });
 
-  const openSignal = openRows?.[0];
-  if (openSignal) {
+  const rows = openRows || [];
+  for (let idx = 0; idx < rows.length; idx++) {
+    const openSignal = rows[idx];
+    const isNewestOpen = idx === rows.length - 1;
     const openBarMs = new Date(openSignal.bar_time).getTime();
     const match = withCloses.find(s => {
       const sameAction = s.signal_type === openSignal.action.toLowerCase();
@@ -350,25 +372,50 @@ async function processSymbol(symbol) {
       return sameAction && sameBar;
     });
 
-    // Both 'swing_opposite' (real reversal) and 'superseded' (a later
-    // same-direction signal took over) are genuine closes now — the only
-    // thing that stays live is whatever resolveTrailingSupersession left
-    // with closed_at === null (the true chronological last signal).
+    let closeInfo = null;
     if (match && match.closed_at !== null) {
+      // Both 'swing_opposite' (real reversal) and 'superseded' (a later
+      // same-direction signal took over) are genuine closes — the only
+      // thing that should stay live is whatever resolveTrailingSupersession
+      // left with closed_at === null (the true chronological last signal).
+      closeInfo = match;
+    } else if (!isNewestOpen) {
+      // This row is open, but a NEWER open row already exists for this
+      // symbol in the DB — by definition it can't still be live. It has no
+      // match here either because it fell outside CANDLES_FETCH, or because
+      // (as happened for real: a batch of signals were confirmed off a
+      // still-forming tail candle before fetchCandles started excluding
+      // unclosed candles) it was never a genuine swing under the corrected,
+      // deterministic algorithm at all — a phantom entry with nothing to
+      // match against. Either way, close it against whatever the next open
+      // row actually is; same supersession math resolveTrailingSupersession
+      // uses, just sourced from the DB's own sequence instead of a fresh
+      // detection match.
+      const next = rows[idx + 1];
+      const entryPrice = parseFloat(openSignal.entry_price);
+      const closePrice = parseFloat(next.entry_price);
+      const isBuy = openSignal.signal_type === 'buy';
+      const change = isBuy
+        ? ((closePrice - entryPrice) / entryPrice) * 100
+        : ((entryPrice - closePrice) / entryPrice) * 100;
+      closeInfo = {
+        close_price: closePrice,
+        close_reason: 'superseded',
+        closed_at: next.bar_time,
+        pnl_pct: Number(change.toFixed(2)),
+        is_win: Number(change.toFixed(2)) > 0,
+      };
+    }
+
+    if (closeInfo) {
       const { error } = await supabase
         .from('signals')
-        .update({
-          close_price: match.close_price,
-          close_reason: match.close_reason,
-          closed_at: match.closed_at,
-          pnl_pct: match.pnl_pct,
-          is_win: match.is_win,
-        })
+        .update(closeInfo)
         .eq('id', openSignal.id);
 
       if (!error) {
-        log(`[${symbol}] Closed ${openSignal.action} @ ${openSignal.bar_time} — pnl ${match.pnl_pct}%`);
-        await sendTelegram(closedSignalMessage({ ...openSignal, ...match }));
+        log(`[${symbol}] Closed ${openSignal.action} @ ${openSignal.bar_time} (${closeInfo.close_reason}) — pnl ${closeInfo.pnl_pct}%`);
+        await sendTelegram(closedSignalMessage({ ...openSignal, ...closeInfo }));
       } else {
         log(`[${symbol}] Failed to close signal: ${error.message}`);
       }

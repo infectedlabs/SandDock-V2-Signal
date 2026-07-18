@@ -115,7 +115,9 @@
       "Bash(tasklist //FI \"IMAGENAME eq node.exe\")",
       "Bash(curl -s http://localhost:3092/)",
       "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3092 -ErrorAction SilentlyContinue | Select-Object OwningProcess\")",
-      "Bash(powershell -Command \"Stop-Process -Id 33156 -Force\")"
+      "Bash(powershell -Command \"Stop-Process -Id 33156 -Force\")",
+      "Bash(node debug_match.js)",
+      "Bash(rm -f \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\\\\telegram-signal-worker\\\\debug_match.js\")"
     ]
   }
 }
