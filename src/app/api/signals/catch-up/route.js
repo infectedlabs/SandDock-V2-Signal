@@ -12,7 +12,7 @@ const supabaseAdmin = createClient(
 
 const CONFIG = {
   SYMBOLS: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
-  TIMEFRAME: '30m',
+  TIMEFRAME: '1h',
   LOOKBACK: 5,
   SL_PCT: 0.5,
   TP_PCT: 1.5,
@@ -20,24 +20,20 @@ const CONFIG = {
 };
 
 // ─── SWING DETECTION ────────────────────────────────────────────────
-// EXACT port of scripts/reset_and_backfill_1y_all_coins.js:detectSwingSignals().
-// Two things the earlier version got wrong vs. that reference:
-//   1. Must use RAW high/low (candles come from Binance klines there), not
-//      Heikin-Ashi ha_high/ha_low — those are a different price series and
-//      produce different (even opposite-direction) swings at the same bar.
-//   2. The swing window is SYMMETRIC: candles[i-LOOKBACK .. i+LOOKBACK], not
-//      a backward-only window. A backward-only window is a different,
-//      lagging detector and disagrees with the reference near local extremes.
+// Backside-only lookback: checks PAST bars only (no future confirmation needed)
+// This enables LIVE signals without waiting for future candles
+// Must use RAW high/low (candles come from Binance klines), not Heikin-Ashi
+// Window: candles[i-LOOKBACK .. i] (backward only)
 function detectSwings(candles, lookback = CONFIG.LOOKBACK) {
   const signals = [];
   let lastLow = null;
   let lastHigh = null;
 
-  for (let i = lookback; i < candles.length - lookback; i++) {
+  for (let i = lookback; i < candles.length; i++) {
     const c = candles[i];
 
     let isLow = true;
-    for (let j = i - lookback; j <= i + lookback; j++) {
+    for (let j = i - lookback; j <= i; j++) {
       if (j !== i && candles[j].low < c.low) {
         isLow = false;
         break;
@@ -45,7 +41,7 @@ function detectSwings(candles, lookback = CONFIG.LOOKBACK) {
     }
 
     let isHigh = true;
-    for (let j = i - lookback; j <= i + lookback; j++) {
+    for (let j = i - lookback; j <= i; j++) {
       if (j !== i && candles[j].high > c.high) {
         isHigh = false;
         break;
@@ -182,7 +178,7 @@ async function catchUpSignals() {
         .from('signals')
         .select('*')
         .eq('symbol', symbol)
-        .eq('interval', '30m')
+        .eq('interval', '1h')
         .is('closed_at', null)
         .order('bar_time', { ascending: false })
         .limit(1);
@@ -211,7 +207,7 @@ async function catchUpSignals() {
         .from('ohlcv_cache')
         .select('open_time, high, low, close, symbol')
         .eq('symbol', symbol)
-        .eq('interval', '30m')
+        .eq('interval', '1h')
         .gte('open_time', lookbackStart.toISOString())
         .order('open_time', { ascending: true })
         .limit(CONFIG.CANDLES_FETCH);

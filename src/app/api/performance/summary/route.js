@@ -16,7 +16,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const symbol   = searchParams.get('symbol')   || 'BTCUSDT';
-    const interval = searchParams.get('interval') || '30m'; // PRODUCTION: 30m only
+    const interval = searchParams.get('interval') || '1h'; // PRODUCTION: 1h only (backside-only lookback)
 
     const { data: dbSignals, error: dbError } = await supabaseAdmin
       .from('signals')

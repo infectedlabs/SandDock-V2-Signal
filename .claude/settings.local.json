@@ -117,7 +117,11 @@
       "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3092 -ErrorAction SilentlyContinue | Select-Object OwningProcess\")",
       "Bash(powershell -Command \"Stop-Process -Id 33156 -Force\")",
       "Bash(node debug_match.js)",
-      "Bash(rm -f \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\\\\telegram-signal-worker\\\\debug_match.js\")"
+      "Bash(rm -f \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\\\\telegram-signal-worker\\\\debug_match.js\")",
+      "Bash(node scripts/backtest_multitf_comparison.js)",
+      "Bash(Get-Content \"C:\\\\Users\\\\GHURUP~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-GHURU-PRASAATH-Desktop-sanddock\\\\ebfeb32e-684e-4e1e-b818-571aff3d39ae\\\\tasks\\\\b39il37o1.output\" -Wait -Tail 50)",
+      "Bash(node scripts/backtest_backside_vs_bothsides.js)",
+      "Bash(node scripts/backtest_backside_multitf.js)"
     ]
   }
 }

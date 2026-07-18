@@ -615,7 +615,7 @@ export default function TerminalPage() {
   const [settingsRiskPerTradeType, setSettingsRiskPerTradeType] = useState('1%'); // '1%' | '1.5%' | '2%' | 'custom'
   const [settingsCustomRiskVal, setSettingsCustomRiskVal] = useState('1.0');
   const [settingsMinConfidence, setSettingsMinConfidence] = useState(75);
-  const [settingsDefaultTimeframe, setSettingsDefaultTimeframe] = useState('30m');
+  const [settingsDefaultTimeframe, setSettingsDefaultTimeframe] = useState('1h');
   const [settingsDefaultView, setSettingsDefaultView] = useState('Split');
   const [settingsTimezone, setSettingsTimezone] = useState('UTC');
   const [settingsPriceFormat, setSettingsPriceFormat] = useState('usd');
@@ -647,12 +647,12 @@ export default function TerminalPage() {
 
   // Lifted Chart Selectors State
   const [selectedSymbol,   setSelectedSymbol]   = useState('BTCUSDT');
-  const [selectedInterval, setSelectedInterval] = useState('30m'); // PRODUCTION: 30m only
+  const [selectedInterval, setSelectedInterval] = useState('1h'); // PRODUCTION: 30m only
   const [viewMode,         setViewMode]         = useState('Split');
 
   useEffect(() => {
     // Always use 30m - ignore user's default_timeframe setting
-    setSelectedInterval('30m');
+    setSelectedInterval('1h');
     if (profile?.default_view) {
       setViewMode(profile.default_view);
     }
@@ -921,7 +921,7 @@ export default function TerminalPage() {
       }
 
       setSettingsMinConfidence(profile.min_confidence != null ? profile.min_confidence : 75);
-      setSettingsDefaultTimeframe('30m'); // PRODUCTION: 30m only
+      setSettingsDefaultTimeframe('1h'); // PRODUCTION: 30m only
       setSettingsDefaultView(profile.default_view || 'Split');
       setSettingsTimezone(profile.timezone || 'UTC');
       setSettingsPriceFormat(profile.price_format || 'usd');
@@ -1428,7 +1428,7 @@ export default function TerminalPage() {
                       ))}
                     </div>
                     <div className="flex p-0.5 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                      {['30m'].map(tf => (
+                      {['1h'].map(tf => (
                         <button key={tf}
                           onClick={() => setSelectedInterval(tf)}
                           className={`px-4 py-1.5 text-[10px] font-extrabold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all duration-200 cursor-pointer border-0 ${
@@ -1715,7 +1715,7 @@ export default function TerminalPage() {
 
                     {/* Timeframe Selector Filter */}
                     <div className="flex p-0.5 bg-slate-950/40 rounded-lg border border-[#1e2d4a]/30">
-                      {['30m'].map(tf => {
+                      {['1h'].map(tf => {
                         const locked = false;
                         return (
                           <button key={tf}
@@ -1862,7 +1862,7 @@ export default function TerminalPage() {
 
                         {/* Timeframe Interval Selector */}
                         <div className="flex gap-1 border-r border-slate-800/80 pr-3 mr-1">
-                          {['30m'].map(tf => {
+                          {['1h'].map(tf => {
                             const locked = false;
                             return (
                               <button key={tf}

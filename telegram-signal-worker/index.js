@@ -1,6 +1,6 @@
 // Sanddock Signal Worker
 // Always-on Railway service: listens to Binance's live kline WebSocket for
-// BTC/ETH/BNB 30m candles, closes signals on genuine opposite swings,
+// BTC/ETH/BNB 1h candles, closes signals on genuine opposite swings,
 // creates new live signals, writes both to Supabase, and posts Telegram
 // alerts to a dedicated channel — the instant each candle closes.
 //
@@ -37,11 +37,11 @@ const SAFETY_NET_INTERVAL_SECONDS = parseInt(process.env.SAFETY_NET_INTERVAL_SEC
 const BINANCE_WS_BASE = 'wss://fstream.binance.com/market/stream?streams=';
 
 const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
-const INTERVAL = '30m';
-const LOOKBACK = 5;   // must match the rest of the app's swing detection
+const INTERVAL = '1h';
+const LOOKBACK = 5;   // must match the rest of the app's swing detection (backside only)
 const SL_PCT = 0.5;
 const TP_PCT = 1.5;
-const CANDLES_FETCH = 500; // ~10.4 days of 30m candles — plenty of prior-swing context
+const CANDLES_FETCH = 500; // ~20.8 days of 1h candles — plenty of prior-swing context
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -115,26 +115,24 @@ async function fetchCandles(symbol, limit = CANDLES_FETCH) {
 }
 
 // ─── Swing detection ─────────────────────────────────────────────────────
-// Exact port of scripts/reset_and_backfill_1y_all_coins.js:detectSwingSignals().
-// Symmetric window candles[i-LOOKBACK..i+LOOKBACK] over RAW high/low — the
-// Heikin-Ashi-based / backward-only-window variant that briefly existed
-// elsewhere in this app disagreed with this reference on both swing timing
-// and direction, so this is the only version that should ever be used.
+// Backside-only lookback: checks PAST bars only (no future confirmation needed)
+// This enables LIVE signals without waiting for future candles
+// Window: candles[i-LOOKBACK..i] over RAW high/low
 function detectSwings(candles, lookback = LOOKBACK) {
   const signals = [];
   let lastLow = null;
   let lastHigh = null;
 
-  for (let i = lookback; i < candles.length - lookback; i++) {
+  for (let i = lookback; i < candles.length; i++) {
     const c = candles[i];
 
     let isLow = true;
-    for (let j = i - lookback; j <= i + lookback; j++) {
+    for (let j = i - lookback; j <= i; j++) {
       if (j !== i && candles[j].low < c.low) { isLow = false; break; }
     }
 
     let isHigh = true;
-    for (let j = i - lookback; j <= i + lookback; j++) {
+    for (let j = i - lookback; j <= i; j++) {
       if (j !== i && candles[j].high > c.high) { isHigh = false; break; }
     }
 

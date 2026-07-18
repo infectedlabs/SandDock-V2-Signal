@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext';
  */
 export default function HAChart({
   symbol: selectedSymbol = 'BTCUSDT',
-  interval: selectedInterval = '30m', 
+  interval: selectedInterval = '1h', 
   isFreePlan = true, 
   theme = 'dark',
   onSymbolChange,
@@ -933,7 +933,7 @@ export default function HAChart({
 
           {/* Timeframe Selector */}
           <div className="flex p-1 bg-slate-950/40 rounded-lg border border-slate-800/50 shadow-inner">
-            {['30m'].map(tf => {
+            {['1h'].map(tf => {
               const active = selectedInterval === tf;
               return (
                 <button

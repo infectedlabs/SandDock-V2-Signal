@@ -37,13 +37,13 @@ async function getHACandles(symbol, interval, limit) {
 // ── GET /api/chart/candles ─────────────────────────────────────────────────────
 export async function GET(request) {
   let symbol = 'BTCUSDT';
-  let interval = '30m';
+  let interval = '1h';
   let limit = 500;
 
   try {
     const { searchParams } = new URL(request.url);
     symbol   = (searchParams.get('symbol')   || 'BTCUSDT').toUpperCase();
-    interval = searchParams.get('interval')  || '30m';
+    interval = searchParams.get('interval')  || '1h';
     limit    = Math.min(parseInt(searchParams.get('limit') || '500'), 1000);
 
     const candles = await getHACandles(symbol, interval, limit);

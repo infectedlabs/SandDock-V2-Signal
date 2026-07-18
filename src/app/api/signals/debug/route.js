@@ -23,7 +23,7 @@ export async function GET(request) {
     const { data: latestSignals } = await supabaseAdmin
       .from('signals')
       .select('symbol, interval, bar_time, action, closed_at, pnl_pct')
-      .eq('interval', '30m')
+      .eq('interval', '1h')
       .order('bar_time', { ascending: false })
       .limit(10);
 
@@ -32,7 +32,7 @@ export async function GET(request) {
       .from('ohlcv_cache')
       .select('symbol')
       .in('symbol', ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'])
-      .eq('interval', '30m');
+      .eq('interval', '1h');
 
     return NextResponse.json({
       openSignals,
