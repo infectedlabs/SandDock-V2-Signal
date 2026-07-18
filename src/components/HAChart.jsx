@@ -602,7 +602,7 @@ export default function HAChart({
 
           // 1. Draw Lookback Scan Window (if activeSignal is present)
           if (activeSignal) {
-            const signalBarTimeVal = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000);
+            const signalBarTimeVal = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000) + offsetSeconds;
             const windowStartTime = signalBarTimeVal - (10 * intervalSeconds);
             const windowEndTime = signalBarTimeVal;
 
