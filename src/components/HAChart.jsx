@@ -1070,7 +1070,7 @@ export default function HAChart({
                               {card.close_reason?.replace(/_/g, ' ').toUpperCase()}
                             </span></div>
                             {card.closed_at && (
-                              <div>Exit Time: <span className="text-slate-300">{new Date(card.closed_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false})}</span></div>
+                              <div>Exit Time: <span className="text-slate-300">{new Date(card.closed_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false, timeZone: 'UTC'})}</span></div>
                             )}
                           </div>
                         </>
