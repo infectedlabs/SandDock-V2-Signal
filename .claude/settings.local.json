@@ -142,7 +142,16 @@
       "Bash(git commit -m 'Fix: Remove non-existent signal_30m_bar_time column *)",
       "Bash(xargs sed -i \"s/'1h'/'30m'/g; s/\\\\\"1h\\\\\"/\\\\\"30m\\\\\"/g; s/30m only/30m only/g\")",
       "Bash(timeout 600 node scripts/backfill_30m_signals.js)",
-      "Bash(git commit -m 'Update entire app to 30m strategy *)"
+      "Bash(git commit -m 'Update entire app to 30m strategy *)",
+      "Bash(node scripts/debug_signals.js)",
+      "Bash(curl -s \"http://localhost:3000/api/chart/signals?symbol=BTCUSDT&interval=30m&plan=free\")",
+      "Bash(npm start *)",
+      "Bash(timeout 120 npm start)",
+      "PowerShell(Get-Process | Where-Object { $_.Name -match \"node\" } | Stop-Process -Force)",
+      "PowerShell(\"done\")",
+      "Bash(curl -s \"http://localhost:3000/api/chart/signals?symbol=BTCUSDT&plan=free\")",
+      "Bash(node scripts/check_active_signals.js)",
+      "PowerShell(\"killed\")"
     ]
   }
 }

@@ -393,7 +393,7 @@ async function processSymbol(symbol) {
     if (closeMatch) {
       // Found opposite signal — close the open one with it
       const closeInfo = {
-        close_price: closeMatch.price,
+        close_price: closeMatch.entry_price,
         close_reason: 'swing_opposite',
         closed_at: closeMatch.bar_time,
         pnl_pct: closeMatch.pnl_pct,
@@ -442,6 +442,15 @@ async function processSymbol(symbol) {
   // Dedupe by bar_time
   const seen = new Set();
   const deduped = newOnes.filter(s => (seen.has(s.bar_time) ? false : (seen.add(s.bar_time), true)));
+
+  // Ensure the last signal in deduped is marked as LIVE (closed_at = null)
+  // This overrides any placeholder close calculated by calculateCloses
+  if (deduped.length > 0) {
+    const lastSig = deduped[deduped.length - 1];
+    lastSig.closed_at = null;
+    lastSig.is_win = null;
+    // Leave close_reason and pnl_pct for live signals to show pending state
+  }
 
   const { error: insertError } = await supabase
     .from('signals')

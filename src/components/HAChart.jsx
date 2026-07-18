@@ -36,6 +36,110 @@ export default function HAChart({
   // Floating HTML signal cards state
   const [signalCards, setSignalCards] = useState([]);
   const sigsRef         = useRef([]);
+  const candleDataRef   = useRef([]);
+  const [hoveredSignalId, setHoveredSignalId] = useState(null);
+  const hoveredSignalIdRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (!containerRef.current || signalCards.length === 0) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    let closestSig = null;
+    let minDistance = 30; // 30px hover threshold
+
+    signalCards.forEach(sig => {
+      if (sig.x === null || sig.y === null) return;
+      const dx = mouseX - sig.x;
+      const dy = mouseY - sig.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestSig = sig;
+      }
+    });
+
+    const newHoveredId = closestSig ? closestSig.id : null;
+    if (newHoveredId !== hoveredSignalIdRef.current) {
+      hoveredSignalIdRef.current = newHoveredId;
+      setHoveredSignalId(newHoveredId);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    hoveredSignalIdRef.current = null;
+    setHoveredSignalId(null);
+  };
+
+  const updateFloatingCards = () => {
+    if (!chartRef.current || !seriesRef.current || !containerRef.current || sigsRef.current.length === 0) return;
+    const timeScale = chartRef.current.timeScale();
+    const activeSeries = seriesRef.current;
+    const currentPrice = livePriceRef.current;
+    const offsetSeconds = -new Date().getTimezoneOffset() * 60;
+    const candles = candleDataRef.current || [];
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const updated = sigsRef.current.map((s, idx, arr) => {
+      const sigTimeUtc = Math.floor(new Date(s.bar_time).getTime() / 1000) + offsetSeconds;
+      
+      // Find nearest preceding candle
+      let matchingCandle = null;
+      for (let i = candles.length - 1; i >= 0; i--) {
+        if (candles[i].time <= sigTimeUtc) {
+          matchingCandle = candles[i];
+          break;
+        }
+      }
+      const finalTime = matchingCandle ? matchingCandle.time : (candles[0]?.time || sigTimeUtc);
+
+      const x = timeScale.timeToCoordinate(finalTime);
+      const y = activeSeries.priceToCoordinate(s.entry_price);
+
+      const isLatest = idx === arr.length - 1;
+      const isVisible = x !== null && x >= 0 && x <= containerRef.current.clientWidth && y !== null && y >= 0 && y <= 460;
+
+      // Calculate displayPnl
+      const hasOpposite = s.close_reason === 'swing_opposite';
+      const isClosed = s.pnl !== null && hasOpposite;
+
+      let displayPnl;
+      if (!isClosed) {
+        if (isLatest && currentPrice) {
+          const rawPnl = ((currentPrice - s.entry_price) / s.entry_price) * 100;
+          displayPnl = s.signal_type === 'buy' ? rawPnl : -rawPnl;
+        } else {
+          displayPnl = null;
+        }
+      } else {
+        displayPnl = s.pnl;
+      }
+
+      const barDate = new Date(s.bar_time);
+      const isToday = (
+        barDate.getUTCFullYear() === today.getUTCFullYear() &&
+        barDate.getUTCMonth() === today.getUTCMonth() &&
+        barDate.getUTCDate() === today.getUTCDate()
+      );
+
+      const shouldShow = !hideOldSignalsRef.current || isToday;
+
+      return {
+        ...s,
+        x,
+        y,
+        isVisible: isVisible && shouldShow,
+        isLatest,
+        isToday,
+        displayPnl,
+      };
+    }).filter(c => c.isVisible);
+
+    setSignalCards(updated);
+  };
 
   const signalStats = useMemo(() => {
     if (!activeSignal) return null;
@@ -224,6 +328,7 @@ export default function HAChart({
           close: parseFloat(c.ha_close),
         }));
         candleSeries.setData(candleData);
+        candleDataRef.current = candleData;
 
         let lastCandle = candleData[candleData.length - 1];
 
@@ -438,259 +543,181 @@ export default function HAChart({
         volumeSeries.setData(volumeData);
 
         // ── Load signal markers (arrows on canvas, cards in React) ──────────
+        // Only fetch signals within the time range of loaded candles
         const sigRes  = await fetch(
           `/api/chart/signals?symbol=${selectedSymbol}&interval=${selectedInterval}&plan=${plan}`
         );
         if (!isMounted) return;
-        const sigData = await sigRes.json();
+        const allSigData = await sigRes.json();
 
-        sigsRef.current = sigData || [];
-        console.log('[HAChart] Loaded signals:', sigsRef.current.length);
+        // Filter to only signals within candle date range
+        const firstCandleTime = new Date(candles[0].open_time).getTime();
+        const lastCandleTime = new Date(candles[candles.length - 1].open_time).getTime();
 
-        // Immediately draw arrows on canvas
-        if (sigsRef.current.length > 0) {
-          setTimeout(() => {
-            if (isMounted) drawSignalArrows();
-          }, 50);
+        const filteredSigs = allSigData.filter(sig => {
+          const sigTime = new Date(sig.bar_time).getTime();
+          return sigTime >= firstCandleTime && sigTime <= lastCandleTime;
+        });
+
+        sigsRef.current = filteredSigs;
+        console.log('[HAChart] Loaded signals:', filteredSigs.length);
+
+        // Immediately update card positions (for floating labels)
+        if (filteredSigs.length > 0) {
+          updateCardPositions();
         }
 
-        // Note: signal arrows are drawn once via the canvas overlay
-        // (drawSignalArrows) plus the floating React cards below — LWC's own
-        // createSeriesMarkers used to render a second, overlapping arrow+label
-        // on top of those, so it's intentionally not used here.
-
-        // Helper to recalculate card coordinates on chart scroll/zoom
-        updateCardPositions = () => {
-          if (!isMounted || !chartRef.current || !seriesRef.current || !containerRef.current) return;
-          const timeScale = chartRef.current.timeScale();
-          const activeSeries = seriesRef.current;
-          const currentPrice = livePriceRef.current;
-
-          const today = new Date();
-          today.setUTCHours(0, 0, 0, 0);
-
-          const updated = sigsRef.current.map((s, idx, arr) => {
-            const timeMs = Math.floor(new Date(s.bar_time).getTime() / 1000) + offsetSeconds;
-            const x = timeScale.timeToCoordinate(timeMs);
-            const y = activeSeries.priceToCoordinate(s.entry_price);
-
-            const isLatest = idx === arr.length - 1;
-            const isVisible = x !== null && x >= 0 && x <= containerRef.current.clientWidth && y !== null && y >= 0 && y <= 460;
-
-            // Calculate displayPnl - for live signals, always use current price
-            const hasOpposite = s.close_reason === 'swing_opposite';
-            const isClosed = s.pnl !== null && hasOpposite;
-
-            let displayPnl;
-            if (!isClosed) {
-              // Live signal - always calculate from current price, ignore stored pnl
-              if (isLatest && currentPrice) {
-                const rawPnl = ((currentPrice - s.entry_price) / s.entry_price) * 100;
-                displayPnl = s.signal_type === 'buy' ? rawPnl : -rawPnl;
-              } else {
-                displayPnl = null;
-              }
-            } else {
-              // Closed signal - use stored pnl
-              displayPnl = s.pnl;
+        // Show today's data by default (last 50-100 candles)
+        setTimeout(() => {
+          if (isMounted && chartRef.current && candleData && candleData.length > 0) {
+            try {
+              const lastIdx = candleData.length - 1;
+              const firstIdxToShow = Math.max(0, lastIdx - 100);
+              chartRef.current.timeScale().setVisibleLogicalRange({
+                from: firstIdxToShow,
+                to: lastIdx + 5
+              });
+            } catch (e) {
+              console.error('[HAChart] Error setting visible range:', e.message);
             }
-
-            // Check if signal is from today (compare UTC dates)
-            const barDate = new Date(s.bar_time);
-            const barYear = barDate.getUTCFullYear();
-            const barMonth = barDate.getUTCMonth();
-            const barDay = barDate.getUTCDate();
-            const todayYear = today.getUTCFullYear();
-            const todayMonth = today.getUTCMonth();
-            const todayDay = today.getUTCDate();
-            const isToday = (barYear === todayYear && barMonth === todayMonth && barDay === todayDay);
-
-            // Show if: (1) not hiding old signals, OR (2) signal is from today
-            const shouldShow = !hideOldSignalsRef.current || isToday;
-
-            return {
-              ...s,
-              x,
-              y,
-              isVisible: isVisible && shouldShow,
-              isLatest,
-              displayPnl,
-              isToday,
-            };
-          }).filter(c => c.isVisible);
-
-          setSignalCards(updated);
-        };
-
-        // ── Draw signal arrows on canvas overlay ──
-        const drawSignalArrows = () => {
-          if (!chartLocal) {
-            console.log('[drawSignalArrows] No chartLocal');
-            return;
           }
-          if (!sigsRef.current || sigsRef.current.length === 0) {
-            console.log('[drawSignalArrows] No signals');
-            return;
-          }
+        }, 150);
 
+        // ── Single Unified Canvas Overlay Drawer ──
+        const drawCanvasOverlay = () => {
           const canvas = document.getElementById('chart-overlay');
-          if (!canvas) {
-            console.log('[drawSignalArrows] No canvas');
-            return;
-          }
+          if (!canvas || !chartLocal) return;
 
           const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            console.log('[drawSignalArrows] No context');
-            return;
-          }
-
-          // Ensure canvas has proper dimensions
-          if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-          }
-
-          console.log('[drawSignalArrows] Drawing', sigsRef.current.length, 'signals on canvas', canvas.width, 'x', canvas.height);
+          if (!ctx) return;
 
           const timeScale = chartLocal.timeScale();
           const candleSeries = seriesRef.current;
-          if (!candleSeries) {
-            console.log('[drawSignalArrows] No candleSeries');
-            return;
+          if (!candleSeries) return;
+
+          // Set canvas dimensions
+          const rect = canvas.parentElement?.getBoundingClientRect();
+          const width = rect?.width || canvas.clientWidth || 1280;
+          const height = rect?.height || canvas.clientHeight || 460;
+          canvas.width = width;
+          canvas.height = height;
+
+          ctx.clearRect(0, 0, width, height);
+
+          // 1. Draw Lookback Scan Window (if activeSignal is present)
+          if (activeSignal) {
+            const signalBarTimeVal = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000) + offsetSeconds;
+            const windowStartTime = signalBarTimeVal - (10 * intervalSeconds);
+            const windowEndTime = signalBarTimeVal;
+
+            const x1 = timeScale.timeToCoordinate(windowStartTime);
+            const x2 = timeScale.timeToCoordinate(windowEndTime);
+
+            if (x1 !== null && x2 !== null) {
+              const chartHeight = height * 0.8; // upper 80%
+
+              ctx.fillStyle = 'rgba(61, 90, 254, 0.025)';
+              ctx.fillRect(x1, 0, x2 - x1, chartHeight);
+
+              ctx.strokeStyle = 'rgba(61, 90, 254, 0.2)';
+              ctx.lineWidth = 1;
+              ctx.setLineDash([3, 3]);
+              ctx.strokeRect(x1, 0, x2 - x1, chartHeight);
+
+              ctx.fillStyle = 'rgba(148, 163, 184, 0.8)';
+              ctx.font = 'bold 9px monospace';
+              ctx.setLineDash([]);
+              ctx.fillText('AI scan window · 10 bars', x1 + 6, 14);
+            }
           }
 
           // Filter signals based on hideOldSignals toggle
           const today = new Date();
           today.setUTCHours(0, 0, 0, 0);
           const sigsToRender = sigsRef.current.filter(sig => {
-            if (!hideOldSignalsRef.current) return true; // Show all
-            // Show only today's signals
+            if (!hideOldSignalsRef.current) return true;
             const barDate = new Date(sig.bar_time);
-            const barYear = barDate.getUTCFullYear();
-            const barMonth = barDate.getUTCMonth();
-            const barDay = barDate.getUTCDate();
-            const todayYear = today.getUTCFullYear();
-            const todayMonth = today.getUTCMonth();
-            const todayDay = today.getUTCDate();
-            return (barYear === todayYear && barMonth === todayMonth && barDay === todayDay);
+            return (
+              barDate.getUTCFullYear() === today.getUTCFullYear() &&
+              barDate.getUTCMonth() === today.getUTCMonth() &&
+              barDate.getUTCDate() === today.getUTCDate()
+            );
           });
 
-          let drawnCount = 0;
-          sigsToRender.forEach((sig) => {
+          // 2. Draw circles at bottom AND arrows at entry prices
+          sigsToRender.forEach(sig => {
             try {
-              const barTimeSeconds = Math.floor(new Date(sig.bar_time).getTime() / 1000) + offsetSeconds;
-              const x = timeScale.timeToCoordinate(barTimeSeconds);
+              const sigTimeUtc = Math.floor(new Date(sig.bar_time).getTime() / 1000) + offsetSeconds;
+              
+              // Find matching candle in candleData
+              let matchingCandle = null;
+              for (let i = candleData.length - 1; i >= 0; i--) {
+                if (candleData[i].time <= sigTimeUtc) {
+                  matchingCandle = candleData[i];
+                  break;
+                }
+              }
+
+              const finalTime = matchingCandle ? matchingCandle.time : (candleData[0]?.time || sigTimeUtc);
+
+              const x = timeScale.timeToCoordinate(finalTime);
               const y = candleSeries.priceToCoordinate(sig.entry_price);
 
-              if (x === null || y === null) return;
-              if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) return;
+              if (x === null || x < 0 || x > width) return;
 
               const isBuy = sig.signal_type === 'buy';
-              const arrowSize = 14;
-              const color = isBuy ? '#00e676' : '#ff1744';
 
-              // Draw arrow with stroke outline
-              ctx.fillStyle = color;
-              ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
-              ctx.lineWidth = 1;
+              // Draw arrow at entry price
+              if (y !== null && y >= 0 && y <= height) {
+                const arrowSize = 14;
+                const arrowColor = isBuy ? '#00e676' : '#ff1744';
 
-              if (isBuy) {
-                // Arrow pointing UP (below the entry price)
-                const arrowBaseY = y + 20;
-                ctx.beginPath();
-                ctx.moveTo(x, arrowBaseY - arrowSize);
-                ctx.lineTo(x - arrowSize / 2, arrowBaseY);
-                ctx.lineTo(x + arrowSize / 2, arrowBaseY);
-                ctx.closePath();
-                ctx.stroke();
-                ctx.fill();
-                drawnCount++;
-              } else {
-                // Arrow pointing DOWN (above the entry price)
-                const arrowBaseY = y - 20;
-                ctx.beginPath();
-                ctx.moveTo(x, arrowBaseY + arrowSize);
-                ctx.lineTo(x - arrowSize / 2, arrowBaseY);
-                ctx.lineTo(x + arrowSize / 2, arrowBaseY);
-                ctx.closePath();
-                ctx.stroke();
-                ctx.fill();
-                drawnCount++;
+                ctx.fillStyle = arrowColor;
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.lineWidth = 1;
+
+                if (isBuy) {
+                  // Arrow pointing UP (below the entry price)
+                  const arrowBaseY = y + 25;
+                  ctx.beginPath();
+                  ctx.moveTo(x, arrowBaseY - arrowSize);
+                  ctx.lineTo(x - arrowSize / 2, arrowBaseY);
+                  ctx.lineTo(x + arrowSize / 2, arrowBaseY);
+                  ctx.closePath();
+                  ctx.stroke();
+                  ctx.fill();
+                } else {
+                  // Arrow pointing DOWN (above the entry price)
+                  const arrowBaseY = y - 25;
+                  ctx.beginPath();
+                  ctx.moveTo(x, arrowBaseY + arrowSize);
+                  ctx.lineTo(x - arrowSize / 2, arrowBaseY);
+                  ctx.lineTo(x + arrowSize / 2, arrowBaseY);
+                  ctx.closePath();
+                  ctx.stroke();
+                  ctx.fill();
+                }
               }
             } catch (e) {
-              console.log('[drawSignalArrows] Error drawing signal:', e.message);
+              console.log('[drawCanvasOverlay] Error drawing element:', e.message);
             }
           });
-          console.log('[drawSignalArrows] Drew', drawnCount, 'arrows');
         };
 
-        // ── Lookback Window canvas overlay (Layer 3) ──
-        const drawLookbackWindow = () => {
-          if (!activeSignal || !chartLocal) return;
-          const canvas = document.getElementById('chart-overlay');
-          if (!canvas) return;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) return;
-
-          // Match backing buffer resolution to container size
-          canvas.width = canvas.clientWidth;
-          canvas.height = canvas.clientHeight;
-
-          const signalBarTimeVal = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000) + offsetSeconds;
-          const windowStartTime = signalBarTimeVal - (10 * intervalSeconds);
-          const windowEndTime = signalBarTimeVal;
-
-          const x1 = chartLocal.timeScale().timeToCoordinate(windowStartTime);
-          const x2 = chartLocal.timeScale().timeToCoordinate(windowEndTime);
-
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          if (x1 !== null && x2 !== null) {
-            const chartHeight = canvas.height * 0.8; // upper 80% (above volume pane)
-
-            ctx.fillStyle = 'rgba(61, 90, 254, 0.025)';
-            ctx.fillRect(x1, 0, x2 - x1, chartHeight);
-
-            ctx.strokeStyle = 'rgba(61, 90, 254, 0.2)';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([3, 3]);
-            ctx.strokeRect(x1, 0, x2 - x1, chartHeight);
-
-            ctx.fillStyle = 'rgba(148, 163, 184, 0.8)';
-            ctx.font = 'bold 9px monospace';
-            ctx.setLineDash([]);
-            ctx.fillText('AI scan window · 10 bars', x1 + 6, 14);
-          }
-
-          // Draw signal arrows after drawing the lookback window
-          drawSignalArrows();
-        };
-
-        // Hook coordinate update and canvas draw listeners
-        const redrawCanvas = () => {
-          const canvas = document.getElementById('chart-overlay');
-          if (canvas) {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-          }
-          if (activeSignal) {
-            drawLookbackWindow();
-          } else {
-            drawSignalArrows();
-          }
+        updateCardPositions = () => {
+          drawCanvasOverlay();
+          updateFloatingCards();
         };
 
         const updateWithArrows = () => {
           updateCardPositions();
-          redrawCanvas();
         };
 
         chart.timeScale().subscribeVisibleTimeRangeChange(updateWithArrows);
         setTimeout(() => updateWithArrows(), 100);
 
         // Force redraw on data load
-        setTimeout(() => drawSignalArrows(), 500);
+        setTimeout(() => updateCardPositions(), 500);
         
         // ── Attach onmessage AFTER data loads so the handler closes over
         // candleSeries, lastCandle, and offsetSeconds — variables that only
@@ -709,9 +736,21 @@ export default function HAChart({
                   console.warn(`[HAChart] Dropping stale WS candle: ${candleTime} vs ${lastCandle.time}`);
                   return;
                 }
-                candleSeries.update({ time: candleTime, open: msg.open, high: msg.high, low: msg.low, close: msg.close });
+                const updatedCandle = { time: candleTime, open: msg.open, high: msg.high, low: msg.low, close: msg.close };
+                candleSeries.update(updatedCandle);
+                
+                // Keep candleDataRef.current in sync
+                const currentData = [...candleDataRef.current];
+                const existingIndex = currentData.findIndex(c => c.time === candleTime);
+                if (existingIndex !== -1) {
+                  currentData[existingIndex] = updatedCandle;
+                } else {
+                  currentData.push(updatedCandle);
+                }
+                candleDataRef.current = currentData;
+
                 if (msg.is_closed) {
-                  lastCandle = { time: candleTime, open: msg.open, high: msg.high, low: msg.low, close: msg.close };
+                  lastCandle = updatedCandle;
                 }
                 updateCardPositions();
               }
@@ -750,8 +789,13 @@ export default function HAChart({
           };
         }
 
-        // Initial card positioning
-        setTimeout(() => { if (isMounted) updateCardPositions(); }, 100);
+        // Initial card positioning - ensure signal cards are displayed
+        setTimeout(() => {
+          if (isMounted) {
+            console.log('[HAChart] Calling updateCardPositions with', sigsRef.current?.length || 0, 'signals');
+            updateCardPositions();
+          }
+        }, 100);
 
 
       } catch (err) {
@@ -802,63 +846,7 @@ export default function HAChart({
 
   // Re-filter signals when hideOldSignals toggle changes
   useEffect(() => {
-    if (!chartRef.current || !seriesRef.current || !containerRef.current || sigsRef.current.length === 0) return;
-
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const timeScale = chartRef.current.timeScale();
-    const activeSeries = seriesRef.current;
-    const currentPrice = livePriceRef.current;
-
-    const updated = sigsRef.current.map((s, idx, arr) => {
-      const timeMs = Math.floor(new Date(s.bar_time).getTime() / 1000) + (new Date(s.bar_time).getTimezoneOffset() * 60);
-      const x = timeScale.timeToCoordinate(timeMs);
-      const y = activeSeries.priceToCoordinate(s.entry_price);
-
-      const isLatest = idx === arr.length - 1;
-      const isVisible = x !== null && x >= 0 && x <= containerRef.current.clientWidth && y !== null && y >= 0 && y <= 460;
-
-      // Calculate displayPnl same as in updateCardPositions
-      const hasOpposite = s.close_reason === 'swing_opposite';
-      const isClosed = s.pnl !== null && hasOpposite;
-
-      let displayPnl;
-      if (!isClosed) {
-        // Live signal - always calculate from current price, ignore stored pnl
-        if (isLatest && currentPrice) {
-          const rawPnl = ((currentPrice - s.entry_price) / s.entry_price) * 100;
-          displayPnl = s.signal_type === 'buy' ? rawPnl : -rawPnl;
-        } else {
-          displayPnl = null; // No live price available yet
-        }
-      } else {
-        // Closed signal - use stored pnl
-        displayPnl = s.pnl;
-      }
-
-      const barDate = new Date(s.bar_time);
-      const barYear = barDate.getUTCFullYear();
-      const barMonth = barDate.getUTCMonth();
-      const barDay = barDate.getUTCDate();
-      const todayYear = today.getUTCFullYear();
-      const todayMonth = today.getUTCMonth();
-      const todayDay = today.getUTCDate();
-      const isToday = (barYear === todayYear && barMonth === todayMonth && barDay === todayDay);
-
-      const shouldShow = !hideOldSignalsRef.current || isToday;
-
-      return {
-        ...s,
-        x,
-        y,
-        isVisible: isVisible && shouldShow,
-        isLatest,
-        isToday,
-        displayPnl,
-      };
-    }).filter(c => c.isVisible);
-
-    setSignalCards(updated);
+    updateFloatingCards();
   }, [hideOldSignals]);
 
   const formatSymbolDisplay = (s) => s.replace('USDT', '/USDT');
@@ -999,93 +987,106 @@ export default function HAChart({
           </div>
         )}
 
-        {/* Floating HTML Label Cards Overlay */}
-        {!loading && !noData && !hideSignalCards && signalCards.map((card) => {
-          const isBuy = card.signal_type === 'buy';
-          const pnlVal = card.displayPnl;
-          const hasOpposite = card.close_reason === 'swing_opposite';
-          const isClosed = card.pnl !== null && hasOpposite;
-          const formattedPnl = pnlVal !== null
-            ? `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(2)}%${(card.isLatest && !isClosed) ? ' Live' : ''}`
-            : 'LIVE';
 
+        <div 
+          className="relative w-full h-[460px]"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div ref={containerRef} className="absolute inset-0 z-10" style={{ visibility: loading || noData ? 'hidden' : 'visible' }} />
 
-          return (
-            <div
-              key={card.id || card.bar_time}
-              onClick={() => {
-                const signalId = card.isLatest
-                  ? `live-${selectedSymbol}-${card.bar_time}-new`
-                  : `log-${selectedSymbol}-${card.bar_time}`;
-                window.open(`/terminal/signals/${signalId}`, '_blank');
-              }}
-              className={`absolute z-20 group rounded-xl p-2.5 transition-all duration-300 ease-out glass border hover:scale-[1.05] hover:z-40 text-left cursor-pointer flex flex-col gap-1 w-28 hover:w-44 overflow-hidden select-none shadow-xl`}
-              style={{
-                left: `${card.x - 56}px`,
-                top: isBuy ? `${card.y + 18}px` : `${card.y - 65}px`,
-                borderColor: isBuy ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)',
-              }}
-            >
-              {/* Card Title Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col items-start gap-1">
-                  <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
-                    isBuy ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
-                  }`}>
-                    {isBuy ? 'BUY' : 'SELL'}
-                  </span>
-                  {isClosed ? (
-                    <span className="text-[7.5px] font-extrabold px-1 py-0.5 rounded bg-zinc-800 text-zinc-400 select-none uppercase tracking-wide leading-none">
-                      closed
-                    </span>
-                  ) : (
-                    <span className="text-[7.5px] font-extrabold px-1 py-0.5 rounded bg-cyan-900/40 text-cyan-400 select-none uppercase tracking-wide leading-none">
-                      live
-                    </span>
-                  )}
-                </div>
-                <span className={`text-[10px] font-mono font-bold ${
-                  pnlVal === null ? 'text-cyan-400 animate-pulse' : pnlVal >= 0 ? 'text-emerald-400' : 'text-red-400'
-                }`}>
-                  {formattedPnl}
-                </span>
-              </div>
-              
-              {/* Expandable Body Content on Hover */}
-              <div className="max-h-0 opacity-0 group-hover:max-h-64 group-hover:opacity-100 transition-all duration-300 ease-out border-t border-slate-800/40 pt-1.5 mt-1 space-y-1 font-mono text-[8.5px] text-slate-400 overflow-y-auto">
-                <div>Entry: <span className="text-white font-bold">${card.entry_price?.toLocaleString()}</span></div>
-                <div>Time: <span className="text-slate-300">{new Date(card.bar_time).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false})}</span></div>
-                {isClosed && card.close_price !== null && card.close_price !== undefined && (
-                  <>
-                    <div className="border-t border-slate-800/40 pt-1 mt-1">
-                      <div>Exit: <span className="text-white font-bold">${card.close_price?.toLocaleString()}</span></div>
-                      <div>Method: <span className={`font-bold ${
-                        card.close_reason === 'swing_opposite' ? 'text-cyan-400' :
-                        card.close_reason === 'tp_hit' ? 'text-emerald-400' :
-                        card.close_reason === 'sl_hit' ? 'text-red-400' :
-                        'text-orange-400'
+          {/* Floating HTML Label Cards Overlay */}
+          {!loading && !noData && !hideSignalCards && (
+            <>
+              {signalCards.map((card) => {
+                const isBuy = card.signal_type === 'buy';
+                const pnlVal = card.displayPnl;
+                const hasOpposite = card.close_reason === 'swing_opposite';
+                const isClosed = card.pnl !== null && hasOpposite;
+                const formattedPnl = pnlVal !== null
+                  ? `${pnlVal >= 0 ? '+' : ''}${pnlVal.toFixed(2)}%${(card.isLatest && !isClosed) ? ' Live' : ''}`
+                  : 'LIVE';
+
+                const isActive = activeSignal && card.id === activeSignal.id;
+                const isHovered = hoveredSignalId === card.id;
+
+                if (isClosed && !isActive && !isHovered) return null;
+
+                return (
+                  <div
+                    key={card.id || card.bar_time}
+                    onClick={() => {
+                      const signalId = card.isLatest
+                        ? `live-${selectedSymbol}-${card.bar_time}-new`
+                        : `log-${selectedSymbol}-${card.bar_time}`;
+                      window.open(`/terminal/signals/${signalId}`, '_blank');
+                    }}
+                    className={`absolute z-25 group rounded-xl p-2.5 transition-all duration-300 ease-out glass border hover:scale-[1.05] hover:z-40 text-left cursor-pointer flex flex-col gap-1 w-28 hover:w-44 overflow-hidden select-none shadow-xl`}
+                    style={{
+                      left: `${card.x - 56}px`,
+                      top: isBuy ? `${card.y + 18}px` : `${card.y - 65}px`,
+                      borderColor: isBuy ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)',
+                    }}
+                  >
+                    {/* Card Title Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col items-start gap-1">
+                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
+                          isBuy ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {isBuy ? 'BUY' : 'SELL'}
+                        </span>
+                        {isClosed ? (
+                          <span className="text-[7.5px] font-extrabold px-1 py-0.5 rounded bg-zinc-800 text-zinc-400 select-none uppercase tracking-wide leading-none">
+                            closed
+                          </span>
+                        ) : (
+                          <span className="text-[7.5px] font-extrabold px-1 py-0.5 rounded bg-cyan-900/40 text-cyan-400 select-none uppercase tracking-wide leading-none">
+                            live
+                          </span>
+                        )}
+                      </div>
+                      <span className={`text-[10px] font-mono font-bold ${
+                        pnlVal === null ? 'text-cyan-400 animate-pulse' : pnlVal >= 0 ? 'text-emerald-400' : 'text-red-400'
                       }`}>
-                        {card.close_reason?.replace(/_/g, ' ').toUpperCase()}
-                      </span></div>
-                      {card.closed_at && (
-                        <div>Exit Time: <span className="text-slate-300">{new Date(card.closed_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false})}</span></div>
+                        {formattedPnl}
+                      </span>
+                    </div>
+                    
+                    {/* Expandable Body Content on Hover */}
+                    <div className="max-h-0 opacity-0 group-hover:max-h-64 group-hover:opacity-100 transition-all duration-300 ease-out border-t border-slate-800/40 pt-1.5 mt-1 space-y-1 font-mono text-[8.5px] text-slate-400 overflow-y-auto">
+                      <div>Entry: <span className="text-white font-bold">${card.entry_price?.toLocaleString()}</span></div>
+                      <div>Time: <span className="text-slate-300">{new Date(card.bar_time).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false, timeZone: 'UTC'})}</span></div>
+                      {isClosed && card.close_price !== null && card.close_price !== undefined && (
+                        <>
+                          <div className="border-t border-slate-800/40 pt-1 mt-1">
+                            <div>Exit: <span className="text-white font-bold">${card.close_price?.toLocaleString()}</span></div>
+                            <div>Method: <span className={`font-bold ${
+                              card.close_reason === 'swing_opposite' ? 'text-cyan-400' :
+                              card.close_reason === 'tp_hit' ? 'text-emerald-400' :
+                              card.close_reason === 'sl_hit' ? 'text-red-400' :
+                              'text-orange-400'
+                            }`}>
+                              {card.close_reason?.replace(/_/g, ' ').toUpperCase()}
+                            </span></div>
+                            {card.closed_at && (
+                              <div>Exit Time: <span className="text-slate-300">{new Date(card.closed_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false})}</span></div>
+                            )}
+                          </div>
+                        </>
+                      )}
+                      {!isClosed && (
+                        <div className="border-t border-slate-800/40 pt-1 mt-1">
+                          <div className="text-cyan-400 font-bold">⏳ Awaiting Opposite Signal</div>
+                          <div className="text-slate-500 text-[7.5px] mt-1">Live PnL updates as price moves</div>
+                        </div>
                       )}
                     </div>
-                  </>
-                )}
-                {!isClosed && (
-                  <div className="border-t border-slate-800/40 pt-1 mt-1">
-                    <div className="text-cyan-400 font-bold">⏳ Awaiting Opposite Signal</div>
-                    <div className="text-slate-500 text-[7.5px] mt-1">Live PnL updates as price moves</div>
                   </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-
-        <div className="relative w-full h-[460px]">
-          <div ref={containerRef} className="absolute inset-0 z-10" style={{ visibility: loading || noData ? 'hidden' : 'visible' }} />
+                );
+              })}
+            </>
+          )}
 
           {/* Canvas overlay - always render for signal arrows */}
           {!loading && !noData && (

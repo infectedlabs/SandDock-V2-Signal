@@ -44,6 +44,7 @@ export async function GET(request) {
     );
 
     if (dbError) {
+      console.error('[/api/chart/signals] DB Error:', dbError.message);
       throw new Error(dbError.message);
     }
 
@@ -52,7 +53,10 @@ export async function GET(request) {
     // after taking the newest slice.
     const dbSignals = (recentDesc || []).slice().sort((a, b) => new Date(a.bar_time) - new Date(b.bar_time));
 
+    console.log('[/api/chart/signals] Query:', { symbol, tf, plan, found: dbSignals.length });
+
     if (!dbSignals || dbSignals.length === 0) {
+      console.log('[/api/chart/signals] No signals found');
       return NextResponse.json([], {
         status: 200,
         headers: {
@@ -68,6 +72,8 @@ export async function GET(request) {
       if (plan === 'free' && sigBarTime > fiveMinutesAgo) return false;
       return true;
     });
+
+    console.log('[/api/chart/signals] After plan gate:', { before: dbSignals.length, after: filtered.length });
 
     const mapped = filtered.map(s => ({
       id: s.id,
