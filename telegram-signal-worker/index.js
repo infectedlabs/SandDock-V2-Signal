@@ -127,70 +127,83 @@ async function fetchCandles(symbol, limit = CANDLES_FETCH) {
   }));
 }
 
+// ─── PnL Calculation ───────────────────────────────────────────────────────
+function calculatePnL(openSignal, closeSignal) {
+  const entry = parseFloat(openSignal.entry_price);
+  const close = parseFloat(closeSignal.entry_price);
+  const isBuy = openSignal.action.toLowerCase() === 'buy';
+
+  if (isBuy) {
+    return Number(((close - entry) / entry * 100).toFixed(2));
+  } else {
+    return Number(((entry - close) / entry * 100).toFixed(2));
+  }
+}
+
 // ─── Swing detection (30m + 5m Confirmation) ─────────────────────────────
 // Detects 30m swings (backside-only lookback)
 // Fires on first 5m candle close within that 30m period (~5 minutes average)
 // Result: Real-time entry, price drift minimal, 81% win rate, ~+14,074% annual
 function detectSwings(candles, lookback = LOOKBACK) {
+  // CRITICAL FIX: Only process the LATEST candle to avoid re-detecting old swings
+  // Each call should only check if the newest candle is a swing, using the lookback
+  // window relative to it. Historical swings are already in the database.
+
+  if (candles.length < lookback + 1) return [];
+
   const signals = [];
-  let lastLow = null;
-  let lastHigh = null;
+  const i = candles.length - 1; // Only check the latest candle
+  const c = candles[i];
 
-  for (let i = lookback; i < candles.length; i++) {
-    const c = candles[i];
+  // Check if latest candle is a local low (within lookback window)
+  let isLow = true;
+  for (let j = i - lookback; j <= i; j++) {
+    if (j !== i && candles[j].low < c.low) { isLow = false; break; }
+  }
 
-    let isLow = true;
-    for (let j = i - lookback; j <= i; j++) {
-      if (j !== i && candles[j].low < c.low) { isLow = false; break; }
-    }
+  // Check if latest candle is a local high (within lookback window)
+  let isHigh = true;
+  for (let j = i - lookback; j <= i; j++) {
+    if (j !== i && candles[j].high > c.high) { isHigh = false; break; }
+  }
 
-    let isHigh = true;
-    for (let j = i - lookback; j <= i; j++) {
-      if (j !== i && candles[j].high > c.high) { isHigh = false; break; }
-    }
+  // To determine if this is a TRUE opposite swing, check the last signal in DB
+  // ONLY fire a new signal if it's opposite to the most recent LIVE signal
+  // If there's a LIVE signal that's already the same direction, don't fire a duplicate
 
-    // When swing detected on 30m, calculate fire time as first 5m close
-    // For 30m candles: if opens at HH:00:00, first 5m close is at HH:05:00
-    //                  if opens at HH:30:00, first 5m close is at HH:35:00
-    // This fires signals ~5 minutes after swing detection (real-time entry)
-    const signalTime = calculateFirstFiveMinClose(c.open_time);
+  // When swing detected on 30m, calculate fire time as first 5m close
+  const signalTime = calculateFirstFiveMinClose(c.open_time);
 
-    if (isLow && lastHigh !== null) {
-      const entryPrice = c.low;
-      signals.push({
-        symbol: c.symbol,
-        interval: INTERVAL,
-        bar_time: signalTime,  // Fire on first 5m close within 30m period
-        signal_type: 'buy',
-        entry_price: entryPrice,
-        sl_price: entryPrice * (1 - SL_PCT / 100),
-        tp_price: entryPrice * (1 + TP_PCT / 100),
-        sl_pct: SL_PCT,
-        tp_pct: TP_PCT,
-        confidence: 95,
-      });
-      lastLow = c.low;
-    }
+  if (isLow) {
+    const entryPrice = c.low;
+    signals.push({
+      symbol: c.symbol,
+      interval: INTERVAL,
+      bar_time: signalTime,
+      signal_type: 'buy',
+      entry_price: entryPrice,
+      sl_price: entryPrice * (1 - SL_PCT / 100),
+      tp_price: entryPrice * (1 + TP_PCT / 100),
+      sl_pct: SL_PCT,
+      tp_pct: TP_PCT,
+      confidence: 95,
+    });
+  }
 
-    if (isHigh && lastLow !== null) {
-      const entryPrice = c.high;
-      signals.push({
-        symbol: c.symbol,
-        interval: INTERVAL,
-        bar_time: signalTime,  // Fire on first 5m close within 30m period
-        signal_type: 'sell',
-        entry_price: entryPrice,
-        sl_price: entryPrice * (1 + SL_PCT / 100),
-        tp_price: entryPrice * (1 - TP_PCT / 100),
-        sl_pct: SL_PCT,
-        tp_pct: TP_PCT,
-        confidence: 95,
-      });
-      lastHigh = c.high;
-    }
-
-    if (isLow) lastLow = c.low;
-    if (isHigh) lastHigh = c.high;
+  if (isHigh) {
+    const entryPrice = c.high;
+    signals.push({
+      symbol: c.symbol,
+      interval: INTERVAL,
+      bar_time: signalTime,
+      signal_type: 'sell',
+      entry_price: entryPrice,
+      sl_price: entryPrice * (1 + SL_PCT / 100),
+      tp_price: entryPrice * (1 - TP_PCT / 100),
+      sl_pct: SL_PCT,
+      tp_pct: TP_PCT,
+      confidence: 95,
+    });
   }
 
   return signals;
@@ -371,15 +384,12 @@ async function processSymbol(symbol) {
     log(`[${symbol}] No swings detected in current window.`);
     return true;
   }
-  const withCloses = calculateCloses(detected);
-  resolveTrailingSupersession(withCloses); // in place — see comment on the function
 
   // SIGNAL LIFECYCLE: Properly close current live signal before opening next one
-  // 1. Check if there's an open signal
-  // 2. If yes, try to close it (only if opposite detected)
-  // 3. Only after closing (or if no open), insert the NEW opposite signal
+  // Since detectSwings now only returns latest candle swings, each detected signal
+  // should close any existing opposite-direction live signal
 
-  // Step 1: Get the most recent open signal (if any)
+  // Get the most recent open signal (if any)
   const { data: openRows } = await supabase
     .from('signals')
     .select('*')
@@ -392,25 +402,24 @@ async function processSymbol(symbol) {
   let foundOpenSignal = false;
   if (openRows && openRows.length > 0) {
     const openSignal = openRows[0];
-    const openBarMs = new Date(openSignal.bar_time).getTime();
 
-    // Step 2: Check if detected swings contain the OPPOSITE signal (to close the open one)
-    const closeMatch = withCloses.find(s => {
-      // Opposite direction (buy vs sell)
-      const isOpposite = s.signal_type !== openSignal.action.toLowerCase();
-      // Close reason must be real opposite, not same-direction supersession
-      const isRealClose = s.close_reason === 'swing_opposite';
-      return isOpposite && isRealClose;
-    });
+    // Check if detected signal is opposite direction (will close the open one)
+    const isOppositeDetected = detected.some(sig =>
+      sig.signal_type !== openSignal.action.toLowerCase()
+    );
 
-    if (closeMatch) {
-      // Found opposite signal — close the open one with it
+    if (isOppositeDetected) {
+      // Found opposite swing — close the open signal
+      const oppositeSignal = detected.find(sig =>
+        sig.signal_type !== openSignal.action.toLowerCase()
+      );
+
       const closeInfo = {
-        close_price: closeMatch.entry_price,
+        close_price: oppositeSignal.entry_price,
         close_reason: 'swing_opposite',
-        closed_at: closeMatch.bar_time,
-        pnl_pct: closeMatch.pnl_pct,
-        is_win: closeMatch.pnl_pct > 0,
+        closed_at: oppositeSignal.bar_time,
+        pnl_pct: calculatePnL(openSignal, oppositeSignal),
+        is_win: calculatePnL(openSignal, oppositeSignal) > 0,
       };
 
       const { error } = await supabase
@@ -419,7 +428,7 @@ async function processSymbol(symbol) {
         .eq('id', openSignal.id);
 
       if (!error) {
-        log(`[${symbol}] ✓ Closed ${openSignal.action.toUpperCase()} @ ${openSignal.bar_time} (swing_opposite) — pnl ${closeInfo.pnl_pct}%`);
+        log(`[${symbol}] ✓ Closed ${openSignal.action} @ ${openSignal.bar_time} with ${oppositeSignal.signal_type.toUpperCase()} — pnl ${closeInfo.pnl_pct}%`);
         await sendTelegram(closedSignalMessage({ ...openSignal, ...closeInfo }));
         foundOpenSignal = true;
       } else {
@@ -428,46 +437,25 @@ async function processSymbol(symbol) {
     }
   }
 
-  // Step 3: Only insert NEW signals if we either closed one or there's no open signal
+  // Only insert NEW signals if we either closed an existing one or there's no open signal
   // This ensures: close first, then open new
-  const { data: latestRows } = await supabase
-    .from('signals')
-    .select('bar_time')
-    .eq('symbol', symbol)
-    .eq('interval', INTERVAL)
-    .order('bar_time', { ascending: false })
-    .limit(1);
-
-  const lastStoredBarTime = latestRows?.[0]?.bar_time ? new Date(latestRows[0].bar_time) : new Date(0);
-  const newOnes = withCloses.filter(s => new Date(s.bar_time) > lastStoredBarTime);
-
-  if (newOnes.length === 0) {
-    log(`[${symbol}] Up to date, nothing new.`);
-    return true;
-  }
-
-  // Only insert if we have no open signal (just closed one or never had one)
   if (openRows && openRows.length > 0 && !foundOpenSignal) {
-    log(`[${symbol}] Open signal exists, waiting for close before inserting new one.`);
+    log(`[${symbol}] Open signal exists and no opposite detected, waiting for opposite.`);
     return true;
   }
 
-  // Dedupe by bar_time
-  const seen = new Set();
-  const deduped = newOnes.filter(s => (seen.has(s.bar_time) ? false : (seen.add(s.bar_time), true)));
-
-  // Ensure the last signal in deduped is marked as LIVE (closed_at = null)
-  // This overrides any placeholder close calculated by calculateCloses
-  if (deduped.length > 0) {
-    const lastSig = deduped[deduped.length - 1];
-    lastSig.closed_at = null;
-    lastSig.is_win = null;
-    // Leave close_reason and pnl_pct for live signals to show pending state
-  }
+  // Prepare new signals to insert - mark the latest as LIVE (open)
+  const toInsert = detected.map(sig => ({
+    ...sig,
+    closed_at: null,        // All detected signals are initially LIVE
+    pnl_pct: null,
+    is_win: null,
+    close_reason: null,
+  }));
 
   const { error: insertError } = await supabase
     .from('signals')
-    .upsert(deduped, { onConflict: 'symbol,interval,bar_time' });
+    .insert(toInsert);
 
   if (insertError) {
     log(`[${symbol}] Failed to insert new signals: ${insertError.message}`);
