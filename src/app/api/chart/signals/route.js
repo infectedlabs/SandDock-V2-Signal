@@ -16,7 +16,7 @@ export async function GET(request) {
     const symbol = searchParams.get('symbol') || 'BTCUSDT';
     const plan = searchParams.get('plan') || 'free';
     const userId = searchParams.get('user_id');
-    const tf = '1h'; // PRODUCTION: 1h only (backside-only lookback)
+    const tf = '30m'; // PRODUCTION: 30m only (backside-only lookback)
 
     // Validate symbol access (custom coins only for MASTER)
     if (!['BTCUSDT', 'ETHUSDT', 'BNBUSDT'].includes(symbol) && !['master', 'grandmaster'].includes(plan)) {

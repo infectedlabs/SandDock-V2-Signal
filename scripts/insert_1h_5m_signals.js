@@ -3,13 +3,13 @@
  * Assumes candles are already in ohlcv_cache
  */
 
-require('dotenv').config();
+require('dotenv').config({ path: './telegram-signal-worker/.env' });
 const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
 
 const API = 'https://fapi.binance.com/fapi/v1';
 const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
@@ -190,13 +190,31 @@ async function main() {
 
     log(`\n✅ Total signals to insert: ${allSignals.length}\n`);
 
-    // Insert signals in batches
+    // Insert signals in batches with millisecond offsets to ensure uniqueness
     log('STEP: Inserting signals into signals table...');
-    const batchSize = 1000;
+    const batchSize = 500;
     let inserted = 0;
 
-    for (let i = 0; i < allSignals.length; i += batchSize) {
-      const batch = allSignals.slice(i, i + batchSize);
+    // Add millisecond offsets to handle duplicate bar_times
+    const timeMap = {};
+    const withOffsets = allSignals.map(sig => {
+      const key = `${sig.symbol}|${sig.interval}|${sig.bar_time}`;
+      const offset = timeMap[key] || 0;
+      timeMap[key] = offset + 1;
+
+      // If offset > 0, add milliseconds to bar_time
+      let uniqueTime = sig.bar_time;
+      if (offset > 0) {
+        const dt = new Date(sig.bar_time);
+        dt.setMilliseconds(dt.getMilliseconds() + offset);
+        uniqueTime = dt.toISOString();
+      }
+
+      return { ...sig, bar_time: uniqueTime };
+    });
+
+    for (let i = 0; i < withOffsets.length; i += batchSize) {
+      const batch = withOffsets.slice(i, i + batchSize);
       const { error, data } = await supabase
         .from('signals')
         .insert(batch);

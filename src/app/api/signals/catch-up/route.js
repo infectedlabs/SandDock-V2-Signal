@@ -12,7 +12,7 @@ const supabaseAdmin = createClient(
 
 const CONFIG = {
   SYMBOLS: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
-  TIMEFRAME: '1h',
+  TIMEFRAME: '30m',
   LOOKBACK: 5,
   SL_PCT: 0.5,
   TP_PCT: 1.5,
@@ -178,7 +178,7 @@ async function catchUpSignals() {
         .from('signals')
         .select('*')
         .eq('symbol', symbol)
-        .eq('interval', '1h')
+        .eq('interval', '30m')
         .is('closed_at', null)
         .order('bar_time', { ascending: false })
         .limit(1);
@@ -207,7 +207,7 @@ async function catchUpSignals() {
         .from('ohlcv_cache')
         .select('open_time, high, low, close, symbol')
         .eq('symbol', symbol)
-        .eq('interval', '1h')
+        .eq('interval', '30m')
         .gte('open_time', lookbackStart.toISOString())
         .order('open_time', { ascending: true })
         .limit(CONFIG.CANDLES_FETCH);

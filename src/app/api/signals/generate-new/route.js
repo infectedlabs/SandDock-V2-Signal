@@ -25,7 +25,7 @@ const supabaseAdmin = createClient(
 // MUST match backfill parameters for consistent quality
 const CONFIG = {
   SYMBOLS: ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'],
-  TIMEFRAME: '1h',
+  TIMEFRAME: '30m',
   LOOKBACK: 5,          // ✅ Same as backfill (proven quality, backside-only)
   SL_PCT: 0.5,          // ✅ Same as backfill
   TP_PCT: 1.5,          // ✅ Same as backfill

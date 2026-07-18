@@ -126,7 +126,23 @@
       "Bash(node scripts/backtest_1h_swing_5m_confirm.js)",
       "Bash(timeout 120 node scripts/backtest_1h_swing_5m_confirm.js)",
       "Bash(node scripts/backtest_1h_swing_5m_fast.js)",
-      "Bash(node scripts/reset_backfill_1h_5m_confirmation.js)"
+      "Bash(node scripts/reset_backfill_1h_5m_confirmation.js)",
+      "Bash(git commit -m 'Add complete implementation summary for 1h Swing + 5m Confirmation strategy *)",
+      "Bash(node scripts/clear_signals.js)",
+      "Bash(node -e \"require\\('dotenv'\\).config\\({path: './telegram-signal-worker/.env'}\\); console.log\\('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'OK' : 'MISSING'\\)\")",
+      "Bash(git commit -m 'Fix: Only close recent signals to prevent historical startup flood *)",
+      "Bash(node ../scripts/reset_backfill_1h_5m_confirmation.js)",
+      "Bash(git commit -m 'Fix: Bot only handles LIVE signals, historical data is read-only *)",
+      "Bash(timeout 600 node scripts/reset_backfill_1h_5m_confirmation.js)",
+      "Bash(timeout 600 node scripts/insert_1h_5m_signals.js)",
+      "Bash(git commit -m 'Fix: Ensure bot closes live signal before opening next one *)",
+      "Bash(timeout 600 node scripts/backtest_1h_5m_intrabar_live.js)",
+      "Bash(timeout 600 node scripts/backtest_30m_5m_confirmation.js)",
+      "Bash(git commit -m 'Update bot: Switch from 1h to 30m timeframe for real-time execution *)",
+      "Bash(git commit -m 'Fix: Remove non-existent signal_30m_bar_time column *)",
+      "Bash(xargs sed -i \"s/'1h'/'30m'/g; s/\\\\\"1h\\\\\"/\\\\\"30m\\\\\"/g; s/30m only/30m only/g\")",
+      "Bash(timeout 600 node scripts/backfill_30m_signals.js)",
+      "Bash(git commit -m 'Update entire app to 30m strategy *)"
     ]
   }
 }

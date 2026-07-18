@@ -131,7 +131,7 @@ export default function SignalDetailPage() {
       if (next15 >= 60) {
         closeTime.setHours(closeTime.getHours() + 1);
       }
-    } else if (intervalStr === '1h') {
+    } else if (intervalStr === '30m') {
       closeTime.setHours(closeTime.getHours() + 1, 0, 0, 0);
     } else if (intervalStr === '4h') {
       const utcHours = now.getUTCHours();
