@@ -72,6 +72,8 @@ export default function HAChart({
     setHoveredSignalId(null);
   };
 
+  const offsetSecondsRef = useRef(0);
+
   const updateFloatingCards = () => {
     if (!chartRef.current || !seriesRef.current || !containerRef.current || sigsRef.current.length === 0) return;
     const timeScale = chartRef.current.timeScale();
@@ -83,7 +85,7 @@ export default function HAChart({
     today.setUTCHours(0, 0, 0, 0);
 
     const updated = sigsRef.current.map((s, idx, arr) => {
-      const sigTime = Math.floor(new Date(s.bar_time).getTime() / 1000);
+      const sigTime = Math.floor(new Date(s.bar_time).getTime() / 1000) + offsetSecondsRef.current;
 
       // Find nearest preceding candle (all times now in local timezone)
       let matchingCandle = null;
@@ -315,6 +317,7 @@ export default function HAChart({
         // TradingView time scale labels match the user's clock.
         // IMPORTANT: computed ONCE here and reused for both historical
         const offsetSeconds = -new Date().getTimezoneOffset() * 60;
+        offsetSecondsRef.current = offsetSeconds;
         const candleData = candles.map((c) => ({
           time:  Math.floor(new Date(c.open_time).getTime() / 1000) + offsetSeconds,
           // Heikin Ashi values — same as TradingView when using HA chart mode
