@@ -1052,7 +1052,7 @@ export default function HAChart({
                     {/* Expandable Body Content on Hover */}
                     <div className="max-h-0 opacity-0 group-hover:max-h-64 group-hover:opacity-100 transition-all duration-300 ease-out border-t border-slate-800/40 pt-1.5 mt-1 space-y-1 font-mono text-[8.5px] text-slate-400 overflow-y-auto">
                       <div>Entry: <span className="text-white font-bold">${card.entry_price?.toLocaleString()}</span></div>
-                      <div>Time: <span className="text-slate-300">{card.bar_time}</span></div>
+                      <div>Time: <span className="text-slate-300">{new Date(card.bar_time).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false})}</span></div>
                       {isClosed && card.close_price !== null && card.close_price !== undefined && (
                         <>
                           <div className="border-t border-slate-800/40 pt-1 mt-1">
@@ -1066,7 +1066,7 @@ export default function HAChart({
                               {card.close_reason?.replace(/_/g, ' ').toUpperCase()}
                             </span></div>
                             {card.closed_at && (
-                              <div>Exit Time: <span className="text-slate-300">{card.closed_at}</span></div>
+                              <div>Exit Time: <span className="text-slate-300">{new Date(card.closed_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false})}</span></div>
                             )}
                           </div>
                         </>

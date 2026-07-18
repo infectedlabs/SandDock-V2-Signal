@@ -911,7 +911,7 @@ export default function SignalDetailPage() {
                         const showRow = !isFreePlan || i < 3; // free plan gets 3 rows preview
                       return (
                         <tr key={i} className="hover:bg-slate-900/40 transition-colors">
-                          <td className="py-3">{new Date(h.bar_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
+                          <td className="py-3">{formatLogDate(h.bar_time, profile)}</td>
                           <td className="py-3">
                             <span className={`font-bold ${h.signal_type === 'buy' ? 'text-emerald-400' : 'text-rose-400'}`}>
                               {h.signal_type.toUpperCase()}

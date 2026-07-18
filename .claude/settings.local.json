@@ -151,7 +151,8 @@
       "PowerShell(\"done\")",
       "Bash(curl -s \"http://localhost:3000/api/chart/signals?symbol=BTCUSDT&plan=free\")",
       "Bash(node scripts/check_active_signals.js)",
-      "PowerShell(\"killed\")"
+      "PowerShell(\"killed\")",
+      "Bash(node check_signal_times.js)"
     ]
   }
 }
