@@ -51,7 +51,7 @@ export async function GET(request) {
     }
 
     const targetSymbols = symbol ? [symbol.toUpperCase()] : allowedSymbols;
-    const tf = '1h'; // PRODUCTION: 1h only (backside-only lookback)
+    const tf = '1h'; // PRODUCTION: 1h only (1h swing + 5m confirmation)
 
     // Plan-based gating: time delay only (no confidence limit)
     // FREE: 5min delay

@@ -121,7 +121,11 @@
       "Bash(node scripts/backtest_multitf_comparison.js)",
       "Bash(Get-Content \"C:\\\\Users\\\\GHURUP~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-GHURU-PRASAATH-Desktop-sanddock\\\\ebfeb32e-684e-4e1e-b818-571aff3d39ae\\\\tasks\\\\b39il37o1.output\" -Wait -Tail 50)",
       "Bash(node scripts/backtest_backside_vs_bothsides.js)",
-      "Bash(node scripts/backtest_backside_multitf.js)"
+      "Bash(node scripts/backtest_backside_multitf.js)",
+      "Bash(node scripts/backtest_intrabar_5m_confirmation.js)",
+      "Bash(node scripts/backtest_1h_swing_5m_confirm.js)",
+      "Bash(timeout 120 node scripts/backtest_1h_swing_5m_confirm.js)",
+      "Bash(node scripts/backtest_1h_swing_5m_fast.js)"
     ]
   }
 }
