@@ -643,7 +643,7 @@ export default function HAChart({
           // 2. Draw circles at bottom AND arrows at entry prices
           sigsToRender.forEach(sig => {
             try {
-              const sigTime = Math.floor(new Date(sig.bar_time).getTime() / 1000);
+              const sigTime = Math.floor(new Date(sig.bar_time).getTime() / 1000) + offsetSeconds;
 
               // Find matching candle in candleData (all times in local timezone)
               let matchingCandle = null;
