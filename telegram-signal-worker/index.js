@@ -48,6 +48,19 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
+// Helper: Convert UTC date to local timezone string (e.g., "2026-07-18T18:35:00" IST)
+function toLocalTimeString(utcDate) {
+  const offset = new Date().getTimezoneOffset() * -1; // IST = +330 minutes = +5:30 hours
+  const localDate = new Date(utcDate.getTime() + offset * 60000);
+  const year = localDate.getUTCFullYear();
+  const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(localDate.getUTCDate()).padStart(2, '0');
+  const hours = String(localDate.getUTCHours()).padStart(2, '0');
+  const minutes = String(localDate.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(localDate.getUTCSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
+
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error('[FATAL] SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set.');
   process.exit(1);
@@ -183,14 +196,14 @@ function detectSwings(candles, lookback = LOOKBACK) {
   return signals;
 }
 
-// Helper: Calculate first 5m candle close time within 1h period
+// Helper: Calculate first 5m candle close time within 30m period (in LOCAL timezone)
 function calculateFirstFiveMinClose(isoTimeString) {
   const date = new Date(isoTimeString);
   // Round to nearest 5m, then add 5m to get close time
   const minutes = date.getMinutes();
   const fiveMinBucket = Math.floor(minutes / 5) * 5;
   date.setMinutes(fiveMinBucket + 5, 0, 0);
-  return date.toISOString();
+  return toLocalTimeString(date);
 }
 
 // ─── Close calculation ────────────────────────────────────────────────────

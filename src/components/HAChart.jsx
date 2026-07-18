@@ -77,24 +77,23 @@ export default function HAChart({
     const timeScale = chartRef.current.timeScale();
     const activeSeries = seriesRef.current;
     const currentPrice = livePriceRef.current;
-    const offsetSeconds = -new Date().getTimezoneOffset() * 60;
     const candles = candleDataRef.current || [];
 
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
     const updated = sigsRef.current.map((s, idx, arr) => {
-      const sigTimeUtc = Math.floor(new Date(s.bar_time).getTime() / 1000) + offsetSeconds;
-      
-      // Find nearest preceding candle
+      const sigTime = Math.floor(new Date(s.bar_time).getTime() / 1000);
+
+      // Find nearest preceding candle (all times now in local timezone)
       let matchingCandle = null;
       for (let i = candles.length - 1; i >= 0; i--) {
-        if (candles[i].time <= sigTimeUtc) {
+        if (candles[i].time <= sigTime) {
           matchingCandle = candles[i];
           break;
         }
       }
-      const finalTime = matchingCandle ? matchingCandle.time : (candles[0]?.time || sigTimeUtc);
+      const finalTime = matchingCandle ? matchingCandle.time : (candles[0]?.time || sigTime);
 
       const x = timeScale.timeToCoordinate(finalTime);
       const y = activeSeries.priceToCoordinate(s.entry_price);
@@ -315,12 +314,9 @@ export default function HAChart({
         // Server sends UTC Unix seconds; we shift to local time so the
         // TradingView time scale labels match the user's clock.
         // IMPORTANT: computed ONCE here and reused for both historical
-        // candles AND live WebSocket updates — applying it twice was the
-        // root cause of the time-mismatch spike after a restart.
-        const offsetSeconds = -new Date().getTimezoneOffset() * 60;
-
+        // All times now stored in local timezone, no offset conversion needed
         const candleData = candles.map((c) => ({
-          time:  Math.floor(new Date(c.open_time).getTime() / 1000) + offsetSeconds,
+          time:  Math.floor(new Date(c.open_time).getTime() / 1000),
           // Heikin Ashi values — same as TradingView when using HA chart mode
           open:  parseFloat(c.ha_open),
           high:  parseFloat(c.ha_high),
@@ -399,7 +395,7 @@ export default function HAChart({
         if (activeSignal && signalStats) {
           const { entryVal, slVal, tpVal, tpPct, slPct, tpPctVal, slPctVal } = signalStats;
           
-          signalBarTime = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000) + offsetSeconds;
+          signalBarTime = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000);
           signalBarTimeRef.current = signalBarTime;
           lastCandleTimeRef.current = lastCandle.time;
 
@@ -524,7 +520,7 @@ export default function HAChart({
         });
 
         const volumeData = candles.map((c) => {
-          const t = Math.floor(new Date(c.open_time).getTime() / 1000) + offsetSeconds;
+          const t = Math.floor(new Date(c.open_time).getTime() / 1000);
           const isSignal = signalBarTime && t === signalBarTime;
           let barColor = 'rgba(255, 255, 255, 0.12)';
           if (isSignal) {
@@ -606,7 +602,7 @@ export default function HAChart({
 
           // 1. Draw Lookback Scan Window (if activeSignal is present)
           if (activeSignal) {
-            const signalBarTimeVal = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000) + offsetSeconds;
+            const signalBarTimeVal = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000);
             const windowStartTime = signalBarTimeVal - (10 * intervalSeconds);
             const windowEndTime = signalBarTimeVal;
 
@@ -647,18 +643,18 @@ export default function HAChart({
           // 2. Draw circles at bottom AND arrows at entry prices
           sigsToRender.forEach(sig => {
             try {
-              const sigTimeUtc = Math.floor(new Date(sig.bar_time).getTime() / 1000) + offsetSeconds;
-              
-              // Find matching candle in candleData
+              const sigTime = Math.floor(new Date(sig.bar_time).getTime() / 1000);
+
+              // Find matching candle in candleData (all times in local timezone)
               let matchingCandle = null;
               for (let i = candleData.length - 1; i >= 0; i--) {
-                if (candleData[i].time <= sigTimeUtc) {
+                if (candleData[i].time <= sigTime) {
                   matchingCandle = candleData[i];
                   break;
                 }
               }
 
-              const finalTime = matchingCandle ? matchingCandle.time : (candleData[0]?.time || sigTimeUtc);
+              const finalTime = matchingCandle ? matchingCandle.time : (candleData[0]?.time || sigTime);
 
               const x = timeScale.timeToCoordinate(finalTime);
               const y = candleSeries.priceToCoordinate(sig.entry_price);
@@ -720,9 +716,9 @@ export default function HAChart({
         setTimeout(() => updateCardPositions(), 500);
         
         // ── Attach onmessage AFTER data loads so the handler closes over
-        // candleSeries, lastCandle, and offsetSeconds — variables that only
-        // exist once historical candles have been processed. The WebSocket
-        // itself was already opened and subscribed in the early-init block.
+        // candleSeries, lastCandle — variables that only exist once historical
+        // candles have been processed. The WebSocket itself was already opened
+        // and subscribed in the early-init block.
         if (ws) {
           ws.onmessage = (event) => {
             if (!isMounted) return;
@@ -730,7 +726,7 @@ export default function HAChart({
               const msg = JSON.parse(event.data);
 
               if (msg.type === 'candle_update' && msg.symbol === selectedSymbol && msg.interval === selectedInterval) {
-                const candleTime = msg.time + offsetSeconds;
+                const candleTime = msg.time;
                 // Stale-candle guard: drop candles >2 intervals behind current
                 if (candleTime < lastCandle.time - intervalSeconds * 2) {
                   console.warn(`[HAChart] Dropping stale WS candle: ${candleTime} vs ${lastCandle.time}`);
@@ -1056,7 +1052,7 @@ export default function HAChart({
                     {/* Expandable Body Content on Hover */}
                     <div className="max-h-0 opacity-0 group-hover:max-h-64 group-hover:opacity-100 transition-all duration-300 ease-out border-t border-slate-800/40 pt-1.5 mt-1 space-y-1 font-mono text-[8.5px] text-slate-400 overflow-y-auto">
                       <div>Entry: <span className="text-white font-bold">${card.entry_price?.toLocaleString()}</span></div>
-                      <div>Time: <span className="text-slate-300">{new Date(card.bar_time).toUTCString().split(' ')[4]}</span> UTC</div>
+                      <div>Time: <span className="text-slate-300">{card.bar_time}</span></div>
                       {isClosed && card.close_price !== null && card.close_price !== undefined && (
                         <>
                           <div className="border-t border-slate-800/40 pt-1 mt-1">
@@ -1070,7 +1066,7 @@ export default function HAChart({
                               {card.close_reason?.replace(/_/g, ' ').toUpperCase()}
                             </span></div>
                             {card.closed_at && (
-                              <div>Exit Time: <span className="text-slate-300">{new Date(card.closed_at).toUTCString().split(' ')[4]}</span> UTC</div>
+                              <div>Exit Time: <span className="text-slate-300">{card.closed_at}</span></div>
                             )}
                           </div>
                         </>
