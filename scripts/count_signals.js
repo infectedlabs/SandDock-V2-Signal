@@ -8,16 +8,15 @@ const supabase = createClient(
 );
 
 (async () => {
-  console.log('Clearing signals...');
-  const { error, data } = await supabase
-    .from('signals')
-    .delete()
-    .in('symbol', ['BTCUSDT', 'ETHUSDT', 'BNBUSDT']);
-  
-  if (error) {
-    console.error('Error:', error.message);
-  } else {
-    console.log('✅ Cleared');
+  for (const symbol of ['BTCUSDT', 'ETHUSDT', 'BNBUSDT']) {
+    const { data, count, error } = await supabase
+      .from('signals')
+      .select('*', { count: 'exact' })
+      .eq('symbol', symbol)
+      .eq('interval', '30m')
+      .limit(1);
+    
+    console.log(`${symbol}: ${count} signals`);
   }
-  process.exit(error ? 1 : 0);
+  process.exit(0);
 })();

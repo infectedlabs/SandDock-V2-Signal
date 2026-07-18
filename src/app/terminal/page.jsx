@@ -8,6 +8,7 @@ import { useSignalLog } from '@/hooks/useSignalLog';
 import { usePerformance } from '@/hooks/usePerformance';
 import HAChart from '@/components/HAChart';
 import PerformanceChart from '@/components/PerformanceChart';
+import SignalPanel from '@/components/SignalPanel';
 
 // ── SVG Icons (Replacing Emojis) ─────────────────────────────────────────────
 const Icons = {
@@ -40,7 +41,7 @@ const Icons = {
   Bell: ({ active }) => (
     <svg className="w-5 h-5 text-zinc-400 hover:text-white transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-      {active && <circle cx="18" cy="6" r="3" fill="#ff4500" stroke="#080d1a" strokeWidth="1.5" />}
+      {active && <circle cx="18" cy="6" r="3" fill="#ff4500" stroke="#000000" strokeWidth="1.5" />}
     </svg>
   ),
   Lock: () => (
@@ -317,9 +318,9 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
   const { signals: coinLog } = useSignalLog({ plan: isFreePlan ? 'free' : 'pro', user_id: profile?.id, symbol: sig.symbol, pageSize: 10 });
 
   return (
-    <div className="w-full lg:w-[55%] h-full bg-[#0d1426] border-l border-[#1e2a3a] flex flex-col z-40 relative overflow-y-auto">
+    <div className="w-full lg:w-[55%] h-full bg-[#000000] border-l border-[#1e2a3a] flex flex-col z-40 relative overflow-y-auto">
       {/* Sticky Drawer Header */}
-      <div className="sticky top-0 bg-[#0d1426]/95 backdrop-blur-md p-5 border-b border-[#1e2a3a] flex justify-between items-center z-10">
+      <div className="sticky top-0 bg-[#000000]/95 backdrop-blur-md p-5 border-b border-[#1e2a3a] flex justify-between items-center z-10">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-[20px] font-bold font-mono text-white">{symbolFormatted}</h2>
@@ -410,10 +411,10 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
           <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest text-left">
             Signal Performance Chart
           </span>
-          <HAChart 
-            symbol={sig.symbol} 
-            interval={sig.interval} 
-            isFreePlan={isFreePlan} 
+          <HAChart
+            symbol={sig.symbol}
+            interval={sig.interval}
+            isFreePlan={isFreePlan}
             plan={profile?.plan || 'free'}
             onUpgradeGate={triggerUpgradeGate}
           />
@@ -429,7 +430,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
               No past trade logs available for this coin pair yet.
             </div>
           ) : (
-            <div className="overflow-x-auto bg-[#0d1426] border border-[#1e2a3a]">
+            <div className="overflow-x-auto bg-[#090909] border border-[#1e2a3a]">
               <table className="w-full text-left font-mono border-collapse text-[12px]">
                 <thead>
                   <tr className="border-b border-[#1e2a3a] text-zinc-500 uppercase tracking-wider text-[10px] bg-zinc-950/20">
@@ -560,7 +561,7 @@ function CustomCoinsList({ userId, plan }) {
   if (loading || coins.length === 0) return null;
 
   return (
-    <div className="bg-[#070b16]/40 border border-slate-800/50 rounded-2xl p-4">
+    <div className="bg-[#000000]/40 border border-slate-800/50 rounded-2xl p-4">
       <div className="flex items-center justify-between mb-3">
         <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">Custom Coins</span>
         <span className="text-[11px] font-mono text-zinc-400">{coins.length} / 5</span>
@@ -1117,7 +1118,7 @@ export default function TerminalPage() {
     const categoryBorderColor = categoryColors[prompt.type] || 'border-zinc-500 text-zinc-400';
 
     return (
-      <div className="min-h-screen bg-[#020617] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-[#000000] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
         {/* Background ambient glow */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#3D5AFE]/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-brand-orange/5 rounded-full blur-[100px] pointer-events-none" />
@@ -1175,16 +1176,16 @@ export default function TerminalPage() {
   ];
 
   return (
-    <div className="h-screen overflow-hidden bg-[#080d1a] text-white flex flex-col font-sans">
+    <div className="h-screen overflow-hidden bg-[#000000] text-white flex flex-col font-sans">
 
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-35 h-14 w-full flex-shrink-0 bg-[#0d1426]/90 backdrop-blur-md border-b border-[#1e2a3a] px-5 flex justify-between items-center">
+      <header className="sticky top-0 z-35 h-14 w-full flex-shrink-0 bg-[#000000]/90 backdrop-blur-md border-b border-[#1e2a3a] px-5 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <img src="/sanddock-logo.png" alt="Sanddock" className="w-6 h-6 object-contain" />
           <span className="text-[15px] font-bold uppercase tracking-wider font-mono">
             Sanddock <span className="text-brand-orange">Console</span>
           </span>
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-mono font-bold bg-[#111827] border border-zinc-800 text-zinc-400 uppercase">
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-mono font-bold bg-[#000000] border border-zinc-800 text-zinc-400 uppercase">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Signals Live
           </span>
@@ -1229,7 +1230,7 @@ export default function TerminalPage() {
             </button>
 
             {profileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-[#0d1426] border border-[#1e2a3a] shadow-xl py-1 z-50 text-left">
+              <div className="absolute right-0 mt-2 w-52 bg-[#000000] border border-[#1e2a3a] shadow-xl py-1 z-50 text-left">
                 <div className="px-4 py-2.5 border-b border-zinc-900">
                   <span className="block font-bold text-[13px] text-white uppercase tracking-wider">{profile.name}</span>
                   <span className="block text-[11px] text-zinc-500 font-mono truncate mt-0.5">{profile.email}</span>
@@ -1262,7 +1263,7 @@ export default function TerminalPage() {
       <div className="flex-1 flex overflow-hidden">
 
         {/* SIDEBAR */}
-        <aside className="hidden lg:flex flex-col w-56 bg-[#0d1426] border-r border-[#1e2a3a] p-4 justify-between select-none h-full overflow-y-auto flex-shrink-0">
+        <aside className="hidden lg:flex flex-col w-56 bg-[#000000] border-r border-[#1e2a3a] p-4 justify-between select-none h-full overflow-y-auto flex-shrink-0">
           <div className="space-y-5">
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest block px-3 text-left">Trading Room</span>
@@ -1273,7 +1274,7 @@ export default function TerminalPage() {
                     <button key={item.id} onClick={() => setActiveTab(item.id)}
                       className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-[13px] font-bold uppercase tracking-wide transition-colors text-left cursor-pointer border-0 bg-transparent ${
                         activeTab === item.id
-                          ? 'text-brand-orange bg-[#111827] border-l-2 border-brand-orange'
+                          ? 'text-brand-orange bg-[#000000] border-l-2 border-brand-orange'
                           : 'text-zinc-400 hover:text-white hover:bg-zinc-950/20'
                       }`}>
                       <Icon />
@@ -1290,7 +1291,7 @@ export default function TerminalPage() {
                 <button onClick={() => setActiveTab('settings')}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-[13px] font-bold uppercase tracking-wide transition-colors text-left cursor-pointer border-0 bg-transparent ${
                     activeTab === 'settings'
-                      ? 'text-brand-orange bg-[#111827] border-l-2 border-brand-orange'
+                      ? 'text-brand-orange bg-[#000000] border-l-2 border-brand-orange'
                       : 'text-zinc-400 hover:text-white hover:bg-zinc-950/20'
                   }`}>
                   <Icons.Settings />
@@ -1303,7 +1304,7 @@ export default function TerminalPage() {
           <div className="space-y-3 pt-4 border-t border-zinc-900">
             {/* Telegram status */}
             {profile.telegram_chat_id ? (
-              <div className="bg-[#111827] border border-emerald-500/20 p-3 space-y-1.5 text-left">
+              <div className="bg-[#000000] border border-emerald-500/20 p-3 space-y-1.5 text-left">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Alerts Active</span>
@@ -1311,7 +1312,7 @@ export default function TerminalPage() {
                 <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Telegram delivery synced.</p>
               </div>
             ) : (
-              <div className="bg-[#111827] border border-yellow-500/20 p-3 space-y-1.5 text-left">
+              <div className="bg-[#000000] border border-yellow-500/20 p-3 space-y-1.5 text-left">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-500 font-mono">Alerts Inactive</span>
@@ -1326,14 +1327,14 @@ export default function TerminalPage() {
 
             {isFreePlan && (
               <>
-                <div className="bg-[#111827] border border-red-500/25 p-3 space-y-1.5 text-left">
+                <div className="bg-[#000000] border border-red-500/25 p-3 space-y-1.5 text-left">
                   <span className="block text-[9px] font-bold uppercase tracking-widest text-red-400 font-mono">⚠️ Alerts Missed</span>
                   <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">
                     12 signals fired on locked coins this week. Upgrade to catch the next alert instantly.
                   </p>
                 </div>
 
-                <div className="bg-[#111827] border border-zinc-800 p-3 space-y-2.5 text-left">
+                <div className="bg-[#000000] border border-zinc-800 p-3 space-y-2.5 text-left">
                   <div className="space-y-0.5">
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-[#3D5AFE]">Console Plan</span>
                     <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Free - 1 of 11 coins active.</p>
@@ -1350,14 +1351,14 @@ export default function TerminalPage() {
 
             {profile?.plan === 'pro' && (
               <>
-                <div className="bg-[#111827] border border-purple-500/25 p-3 space-y-1.5 text-left">
+                <div className="bg-[#000000] border border-purple-500/25 p-3 space-y-1.5 text-left">
                   <span className="block text-[9px] font-bold uppercase tracking-widest text-purple-400 font-mono">🔔 Master Alerts Missed</span>
                   <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">
                     18 signals fired on locked Master coins this week. Upgrade to Master to access SOL, XRP, and 10 other high-beta coins.
                   </p>
                 </div>
 
-                <div className="bg-[#111827] border border-zinc-800 p-3 space-y-2.5 text-left">
+                <div className="bg-[#000000] border border-zinc-800 p-3 space-y-2.5 text-left">
                   <div className="space-y-0.5">
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-purple-400 font-mono">Pro Plan Active</span>
                     <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Pro - 3 of 15 coins active.</p>
@@ -1376,14 +1377,14 @@ export default function TerminalPage() {
 
         {/* MAIN PANEL */}
         <div className="flex-1 flex overflow-hidden">
-          <main className="flex-1 bg-[#080d1a] p-5 lg:p-7 overflow-y-auto pb-24 lg:pb-8 h-full">
+          <main className="flex-1 bg-[#000000] p-5 lg:p-7 overflow-y-auto pb-24 lg:pb-8 h-full">
 
             {/* ══ SIGNALS TAB ════════════════════════════════════════════════ */}
             {activeTab === 'signals' && (
               <div className="space-y-5 animate-slide-up">
 
                 {/* Today's Overview Banner */}
-                <div className="bg-[#070b16]/40 border border-slate-800/50 rounded-2xl p-6 grid grid-cols-2 lg:grid-cols-4 gap-6 text-left shadow-xl select-none">
+                <div className="bg-[#000000] border border-slate-800/50 rounded-2xl p-6 grid grid-cols-2 lg:grid-cols-4 gap-6 text-left shadow-xl select-none">
                   <div className="space-y-1">
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 font-mono">Signals Today</span>
                     <span className="block text-3xl font-extrabold font-mono text-white">
@@ -1684,16 +1685,19 @@ export default function TerminalPage() {
 
             {/* ══ CHART TAB ════════════════════════════════════════════════════ */}
             {activeTab === 'chart' && (
-              <HAChart 
-                symbol={selectedSymbol} 
-                interval={selectedInterval} 
-                isFreePlan={isFreePlan} 
-                onSymbolChange={setSelectedSymbol}
-                onIntervalChange={setSelectedInterval}
-                onPriceTick={setLiveBtcPrice}
-                plan={profile?.plan || 'free'}
-                onUpgradeGate={triggerUpgradeGate}
-              />
+              <div className="space-y-5">
+                <HAChart
+                  symbol={selectedSymbol}
+                  interval={selectedInterval}
+                  isFreePlan={isFreePlan}
+                  onSymbolChange={setSelectedSymbol}
+                  onIntervalChange={setSelectedInterval}
+                  onPriceTick={setLiveBtcPrice}
+                  plan={profile?.plan || 'free'}
+                  onUpgradeGate={triggerUpgradeGate}
+                />
+                <SignalPanel signals={logSignals || []} />
+              </div>
             )}
 
             {/* ══ HISTORY TAB ══════════════════════════════════════════════════ */}
@@ -1792,15 +1796,11 @@ export default function TerminalPage() {
                                 {showBlur ? (
                                   <button onClick={() => triggerUpgradeGate('Unlock Logs', 'Full logs available on Pro.')}
                                     className="text-[10px] font-bold uppercase text-brand-orange cursor-pointer bg-transparent border-0">
-                                    Upgrade 🔒
+                                    Upgrade
                                   </button>
-                                ) : !isClosed ? (
-                                  <span className={`font-bold ${sig.pnl_pct >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
-                                    {sig.pnl_pct >= 0 ? '+' : ''}{parseFloat(sig.pnl_pct || 0).toFixed(2)}%
-                                  </span>
                                 ) : (
-                                  <span className={`font-bold ${sig.is_win ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
-                                    {sig.is_win ? '+' : ''}{parseFloat(sig.pnl_pct || 0).toFixed(2)}% {sig.is_win ? '✅' : '❌'}
+                                  <span className={!isClosed ? 'text-zinc-500' : sig.pnl_pct >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}>
+                                    {isClosed ? `${sig.pnl_pct >= 0 ? '+' : ''}${sig.pnl_pct.toFixed(2)}%` : 'Active'}
                                   </span>
                                 )}
                               </td>
@@ -1814,86 +1814,65 @@ export default function TerminalPage() {
                 )}
               </div>
             )}
-            {/* ══ PERFORMANCE TAB ══════════════════════════════════════════════ */}
+
             {activeTab === 'stats' && (
-              <div className="space-y-6">
-                {/* Tab Sub-Header & Navigation */}
-                <div className="flex justify-between items-center border-b border-[#1e2d4a]/40 pb-2">
-                  <div className="flex p-0.5 bg-slate-950/40 rounded-lg border border-[#1e2d4a]/30">
-                    {['performance', 'ledger', 'audit'].map(sub => (
-                      <button key={sub} onClick={() => setActiveSubTab(sub)}
-                        className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all duration-300 cursor-pointer border-0 ${
-                          activeSubTab === sub 
-                            ? 'bg-[#3D5AFE] text-white shadow-md' 
-                            : 'text-zinc-500 hover:text-white bg-transparent'
-                        }`}>
-                        {sub === 'performance' ? 'Analytics Dashboard' : sub === 'ledger' ? 'Global Ledger' : 'Calibration Audit'}
-                      </button>
-                    ))}
+              <div className="bg-[#000000] text-white p-6 md:p-8 border border-zinc-800 rounded-none space-y-10 animate-fade-in text-left">
+                {/* Swiss Header / Navigation */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-zinc-800 pb-6 gap-4">
+                  <div>
+                    <h2 className="text-3xl font-extrabold tracking-tighter text-white uppercase font-sans flex items-center gap-2">
+                      <span>Sanddock Conviction Matrix</span>
+                      <span className="text-[#ff4500] font-light">&lowast;</span>
+                    </h2>
+                    <p className="text-sm text-zinc-400 font-mono">Live conviction models & statistical performance verification.</p>
+                  </div>
+                  <div className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 px-5 py-2.5 font-mono text-xs font-bold text-zinc-400 rounded-none">
+                    <span className="w-2.5 h-2.5 bg-[#ff4500] animate-pulse rounded-none" />
+                    <span>FEED LIVE</span>
                   </div>
                 </div>
 
-                {activeSubTab === 'performance' && (
-                  <div className="space-y-6">
-                    {/* Timeframe Filter Selector Card */}
-                    <div className="relative overflow-hidden bg-gradient-to-r from-[#0d1426]/90 to-[#070b19]/90 border border-[#1e2a3a]/80 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left shadow-lg">
-                      <div className="space-y-1">
-                        <span className="block text-[10px] font-mono font-bold uppercase tracking-widest text-[#3D5AFE]">
-                          Performance Filters
-                        </span>
-                        <h4 className="text-[13px] font-bold text-white uppercase tracking-wider">Select Timeframe & Range</h4>
-                        <p className="text-[11px] text-zinc-400 normal-case max-w-md">Filter historical signals data to align statistical models with your execution style.</p>
+                <div className="space-y-10">
+                  {/* Timeframe Filter Card */}
+                  <div className="bg-[#090909] border border-zinc-800 p-6 rounded-none flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 text-left relative">
+                    <div className="space-y-1">
+                      <span className="block text-xs font-mono font-bold uppercase tracking-widest text-[#ff4500]">
+                        SYSTEM PARAMETERS
+                      </span>
+                      <h4 className="text-lg font-extrabold text-white uppercase tracking-tighter">Asset & Interval Calibration</h4>
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row gap-4 p-1.5 bg-black rounded-none border border-zinc-800 items-center w-full xl:w-auto">
+                      {/* Coin Selector */}
+                      <div className="flex gap-2.5 items-center border-b md:border-b-0 md:border-r border-zinc-800 pb-3 md:pb-0 md:pr-4 w-full md:w-auto justify-between md:justify-start">
+                        <span className="text-xs text-zinc-400 uppercase font-mono font-bold pl-2">Asset:</span>
+                        <select 
+                          value={perfSymbol} 
+                          onChange={(e) => setPerfSymbol(e.target.value)}
+                          className="bg-zinc-950 text-xs text-white font-mono font-bold rounded-none border border-zinc-800 p-2 focus:outline-none focus:border-[#ff4500] cursor-pointer"
+                        >
+                          {ALL_COINS.map(c => (
+                            <option key={c.value} value={c.value}>{c.label}</option>
+                          ))}
+                        </select>
                       </div>
-                      
-                      <div className="flex flex-col sm:flex-row gap-4 p-1 bg-slate-950/60 rounded-xl border border-slate-800/80 shadow-inner items-center">
-                        {/* Coin Selector Dropdown */}
-                        <div className="flex gap-2 items-center border-r border-slate-800/80 pr-3 mr-1">
-                          <span className="text-[10px] text-zinc-500 uppercase font-mono font-bold pl-2">Asset:</span>
-                          <select 
-                            value={perfSymbol} 
-                            onChange={(e) => setPerfSymbol(e.target.value)}
-                            className="bg-[#0f172a] text-xs text-white font-mono font-bold rounded-lg border border-slate-800 p-1.5 focus:outline-none focus:border-[#3D5AFE] cursor-pointer"
-                          >
-                            {ALL_COINS.map(c => (
-                              <option key={c.value} value={c.value}>{c.label}</option>
-                            ))}
-                          </select>
-                        </div>
 
-                        {/* Timeframe Interval Selector */}
-                        <div className="flex gap-1 border-r border-slate-800/80 pr-3 mr-1">
-                          {['30m'].map(tf => {
-                            const locked = false;
-                            return (
-                              <button key={tf}
-                                onClick={() => locked ? triggerUpgradeGate('Timeframe Locked', '1H and 4H timeframes are Pro features.') : setSelectedInterval(tf)}
-                                className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer border-0 flex items-center gap-1 ${
-                                  selectedInterval === tf
-                                    ? 'bg-[#3D5AFE] text-white shadow-md'
-                                    : 'text-zinc-500 hover:text-white bg-transparent'
-                                }`}>
-                                {tf} {locked && <span className="text-[#3D5AFE] text-[10px]">🔒</span>}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* History range selectors */}
-                        <div className="flex flex-wrap gap-2">
-                          {[
+                      {/* History range selectors */}
+                      <div className="flex flex-wrap gap-1 justify-start w-full md:w-auto">
+                        {[
                           { v: 'today', l: 'Today' },
-                          { v: '1w', l: '1 Week' },
-                          { v: '30d', l: '30 Days' },
-                          { v: '6m', l: '6 Months' },
-                          { v: '1y', l: '1 Year' },
+                          { v: '1w', l: '1W' },
+                          { v: '30d', l: '30D' },
+                          { v: '6m', l: '6M' },
+                          { v: '1y', l: '1Y' },
                         ].map(opt => (
                           <button
                             key={opt.v}
                             onClick={() => setPerfTimeFilter(opt.v)}
-                            className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer border-0 ${
+                            className={`px-5 py-2.5 rounded-none text-xs font-mono font-bold uppercase transition-colors cursor-pointer border ${
                               perfTimeFilter === opt.v
-                                ? 'bg-[#3D5AFE] text-white shadow shadow-[#3D5AFE]/30 font-extrabold'
-                                : 'bg-transparent text-zinc-500 hover:text-white'
+                                ? 'bg-[#ff4500] text-white border-[#ff4500] font-extrabold'
+                                : 'bg-transparent text-zinc-400 hover:text-white border-transparent'
                             }`}
                           >
                             {opt.l}
@@ -1903,314 +1882,212 @@ export default function TerminalPage() {
                     </div>
                   </div>
 
-                    {perfLoading ? (
-                      <div className="flex flex-col items-center justify-center py-16 gap-3 bg-[#0a0f1d]/40 rounded-2xl border border-[#1e2d4a]/20">
-                        <div className="w-6 h-6 border-2 border-[#3D5AFE] border-t-transparent rounded-full animate-spin" />
-                        <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-widest animate-pulse">Aggregating trade outcomes...</span>
-                      </div>
-                    ) : (
-                      <div className="space-y-6">
-                        {/* Redesigned Outcome Hero Cards Section */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                          {/* Hero 1: Net Profitability */}
-                          <div className="relative overflow-hidden bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-5 rounded-2xl text-left space-y-4 shadow-xl flex flex-col justify-between group hover:border-[#3D5AFE]/40 transition-all duration-300">
-                            <div className="flex justify-between items-start">
-                              <div className="space-y-1">
-                                <span className="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">Outcome Yield</span>
-                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Fixed-Risk PnL (1% Risk)</h3>
-                              </div>
-                              <span className={`p-2 rounded-lg text-xs font-mono font-bold ${
-                                (computedStats?.cumulative_r || 0) >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
-                              }`}>
-                                {(computedStats?.cumulative_r || 0) >= 0 ? '↗ Positive' : '↘ Drawdown'}
+                  {perfLoading ? (
+                    <div className="flex flex-col items-center justify-center py-24 gap-3 bg-[#090909] border border-zinc-800 rounded-none">
+                      <div className="w-8 h-8 border-2 border-[#ff4500] border-t-transparent rounded-none animate-spin" />
+                      <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest animate-pulse">Recompiling Engine...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-8">
+                      {/* Top grid: Winrate card on left, performance calculator on right */}
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                        {/* LEFT COLUMN: TELEMETRY BOARD */}
+                        <div className="lg:col-span-4 bg-[#090909] border border-zinc-800 rounded-none p-6 flex flex-col justify-between relative text-white">
+                          <div className="space-y-1.5 mb-6 text-left">
+                            <span className="inline-block px-2.5 py-0.5 bg-[#ff4500]/10 border border-[#ff4500]/25 text-[10px] font-mono font-bold text-[#ff4500] uppercase tracking-wider rounded-none">
+                              ACCURACY STATS
+                            </span>
+                            <h3 className="text-lg font-extrabold text-white uppercase tracking-tighter mt-1">Conviction Engine</h3>
+                          </div>
+
+                          {/* Digital winrate value */}
+                          <div className="py-6 text-left space-y-4">
+                            <div className="space-y-1">
+                              <span className="text-xs text-zinc-400 block font-mono font-bold uppercase">SWING WIN RATE</span>
+                              <span className="text-6xl font-black font-mono tracking-tighter text-white block">
+                                {computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '0.0%'}
                               </span>
                             </div>
                             
-                            <div className="space-y-1 pt-2">
-                              <span className={`block text-[22px] sm:text-2xl font-extrabold font-mono tracking-tight ${
-                                (computedStats?.cumulative_r || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
-                              }`}>
-                                {computedStats?.cumulative_r != null
-                                  ? `${(computedStats.cumulative_r) >= 0 ? '+' : ''}${computedStats.cumulative_r.toFixed(2)}R`
-                                  : '0.00R'}
-                              </span>
-                              <span className="block text-[11px] text-zinc-400 normal-case">
-                                {computedStats?.cumulative_r != null
-                                  ? `≈ ${(computedStats.cumulative_r) >= 0 ? '+' : ''}${computedStats.cumulative_r.toFixed(2)}% account return risking a fixed 1% per signal — not the raw sum of the % moves in the log.`
-                                  : 'Net return risking a fixed 1% of balance per signal.'}
-                              </span>
-                            </div>
-
-                            {/* Raw PnL Sum — kept separate from the R-multiple figure above on purpose */}
-                            <div className="flex justify-between items-center pt-2 border-t border-[#1e2d4a]/60">
-                              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Raw PnL Sum</span>
-                              <span className={`text-sm font-bold font-mono ${
-                                (computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
-                              }`}>
-                                {computedStats?.raw_pnl_sum != null
-                                  ? `${(computedStats.raw_pnl_sum) >= 0 ? '+' : ''}${computedStats.raw_pnl_sum.toFixed(2)}%`
-                                  : '0.00%'}
-                              </span>
-                            </div>
-
-                            {/* Visual Progress Line */}
-                            <div className="w-full bg-[#162035] h-1.5 rounded-full overflow-hidden mt-1">
-                              <div 
-                                className={`h-full rounded-full transition-all duration-500 ${
-                                  (computedStats?.cumulative_r || 0) >= 0 ? 'bg-[#00e676]' : 'bg-[#ff1744]'
-                                }`} 
-                                style={{ width: `${Math.min(100, Math.max(10, Math.abs(computedStats?.cumulative_r || 0) * 4))}%` }}
+                            {/* Flat progress bar */}
+                            <div className="w-full h-5 bg-zinc-950 border border-zinc-850 rounded-none overflow-hidden p-0.5">
+                              <div className="bg-[#ff4500] h-full transition-all duration-1000 ease-out" 
+                                style={{ width: `${computedStats?.win_rate_pct || 0}%` }} 
                               />
                             </div>
                           </div>
 
-                          {/* Hero 2: Accuracy Dial (Win Rate) */}
-                          <div className="relative overflow-hidden bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-5 rounded-2xl text-left space-y-4 shadow-xl flex flex-col justify-between group hover:border-[#3D5AFE]/40 transition-all duration-300">
-                            <div className="flex justify-between items-start">
-                              <div className="space-y-1">
-                                <span className="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">Hit Rate</span>
-                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Trading Accuracy</h3>
-                              </div>
-                              <span className="p-2 rounded-lg text-xs font-mono font-bold bg-cyan-500/10 text-cyan-400">
-                                {computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '-'}
+                          {/* Live telemetry lines */}
+                          <div className="space-y-4 mt-4 pt-4 border-t border-zinc-800 font-mono text-xs text-zinc-400">
+                            <div className="flex justify-between items-center">
+                              <span>Live Active Swings:</span>
+                              <span className="text-white font-bold flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 bg-[#ff4500] rounded-none" />
+                                {openSignalsCount} open
                               </span>
                             </div>
-                            
-                            <div className="space-y-1 pt-2 flex items-center justify-between gap-2">
+                            <div className="flex justify-between items-center">
+                              <span>Total Complete Swings:</span>
+                              <span className="text-white font-bold">{computedStats?.total_signals ?? '-'}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span>Engine Health:</span>
+                              <span className="text-[#ff4500] font-bold uppercase">
+                                STABLE &lowast;
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* RIGHT COLUMN: CORE PERFORMANCE YIELD & CALCULATOR */}
+                        <div className="lg:col-span-8 space-y-8">
+                          {/* Upper stats blocks */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            {/* Card 1: Yield */}
+                            <div className="bg-[#090909] border border-zinc-800 rounded-none p-6 text-left flex flex-col justify-between text-white">
+                              <div className="flex justify-between items-start border-b border-zinc-800 pb-2 mb-4">
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#ff4500]">CORE YIELD</span>
+                                <span className="text-zinc-400 text-[10px] font-mono">1% FIXED RISK</span>
+                              </div>
+                              <div className="my-4">
+                                <span className="text-5xl font-black font-mono tracking-tighter text-white block">
+                                  {computedStats?.cumulative_r != null
+                                    ? `${(computedStats.cumulative_r) >= 0 ? '+' : ''}${computedStats.cumulative_r.toFixed(2)} R`
+                                    : '0.00 R'}
+                                </span>
+                              </div>
+                              <div className="pt-3 border-t border-zinc-800 flex justify-between items-center text-xs font-mono">
+                                <span className="text-zinc-400 font-bold">Arithmetic Return:</span>
+                                <span className={`font-black ${
+                                  (computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
+                                }`}>
+                                  {computedStats?.raw_pnl_sum != null
+                                    ? `${(computedStats.raw_pnl_sum) >= 0 ? '+' : ''}${computedStats.raw_pnl_sum.toFixed(2)}%`
+                                    : '0.00%'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Card 2: Profit Factor */}
+                            <div className="bg-[#090909] border border-zinc-800 rounded-none p-6 text-left flex flex-col justify-between text-white">
+                              <div className="flex justify-between items-start border-b border-zinc-800 pb-2 mb-4">
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-white">PROFIT FACTOR</span>
+                                <span className="text-zinc-400 text-[10px] font-mono">EFFICIENCY</span>
+                              </div>
+                              <div className="my-4">
+                                <span className="text-5xl font-black font-mono tracking-tighter text-white block">
+                                  {computedStats?.profit_factor ?? '0.00'}
+                                </span>
+                              </div>
+                              <div className="pt-3 border-t border-zinc-800 flex flex-col gap-1 text-[10px] font-mono text-zinc-400">
+                                <div className="flex justify-between font-bold">
+                                  <span>Gains / Losses Winrate Ratio:</span>
+                                  <span>{computedStats ? `${computedStats.wins} Wins` : '0'}</span>
+                                </div>
+                                <div className="w-full h-4 bg-zinc-950 border border-zinc-800 rounded-none overflow-hidden flex p-0.5 mt-1">
+                                  <div className="bg-[#00e676] h-full" style={{ width: `${computedStats ? (computedStats.wins / (computedStats.wins + computedStats.losses || 1)) * 100 : 50}%` }} />
+                                  <div className="bg-[#ff1744] h-full" style={{ width: `${computedStats ? (computedStats.losses / (computedStats.wins + computedStats.losses || 1)) * 100 : 50}%` }} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Swiss Compound Capital Estimator */}
+                          <div className="bg-[#090909] border border-zinc-800 p-6 rounded-none text-left space-y-5 text-white">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-zinc-800 pb-3">
                               <div>
-                                <span className="block text-3xl font-extrabold font-mono tracking-tight text-white">
-                                  {computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '0.0%'}
+                                <h3 className="text-lg font-extrabold text-white uppercase tracking-tighter">Compound Capital Estimator</h3>
+                                <p className="text-xs text-zinc-400 font-mono mt-0.5">Drag to calibrate starting capital and view simulated growth telemetry.</p>
+                              </div>
+                              <span className="px-4 py-1.5 bg-[#ff4500] text-white text-xs font-mono font-bold uppercase rounded-none">
+                                Compounding Model
+                              </span>
+                            </div>
+
+                            {/* Range slider input */}
+                            <div className="space-y-2 pt-2">
+                              <div className="flex justify-between font-mono text-sm text-zinc-400 font-bold">
+                                <span>$1,000</span>
+                                <span className="text-white font-black text-lg underline decoration-[#ff4500] decoration-2">${startingCapital.toLocaleString()}</span>
+                                <span>$100,000</span>
+                              </div>
+                              <input 
+                                type="range" 
+                                min="1000" 
+                                max="100000" 
+                                step="1000" 
+                                value={startingCapital} 
+                                onChange={(e) => setStartingCapital(Number(e.target.value))}
+                                className="w-full h-2.5 bg-zinc-950 rounded-none appearance-none cursor-pointer accent-[#ff4500] border border-zinc-800" 
+                              />
+                            </div>
+
+                            {/* Telemetry data grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-black rounded-none border border-zinc-800 font-mono text-center text-xs">
+                              <div>
+                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">Selected Equity</span>
+                                <span className="text-sm font-bold text-white mt-1 block">${startingCapital.toLocaleString()}</span>
+                              </div>
+                              <div>
+                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">Risk Per Swing</span>
+                                <span className="text-sm font-bold text-black mt-1 block">${(startingCapital * 0.01).toLocaleString()}</span>
+                              </div>
+                              <div>
+                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">Projected Return</span>
+                                <span className={`text-sm font-bold mt-1 block ${(computedStats?.cumulative_r || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
+                                  {computedStats?.cumulative_r != null 
+                                    ? `${(computedStats.cumulative_r) >= 0 ? '+' : ''}${(computedStats.cumulative_r).toFixed(2)}%`
+                                    : '0.00%'}
                                 </span>
-                                <span className="block text-[11px] text-zinc-400 normal-case">
-                                  Ratio of profitable closed swings.
+                              </div>
+                              <div>
+                                <span className="block text-[9px] text-zinc-400 font-bold uppercase tracking-widest font-bold">Simulated Equity</span>
+                                <span className="text-sm font-extrabold text-[#ff4500] mt-1 block">
+                                  ${(startingCapital + (computedStats?.cumulative_r || 0) * (startingCapital * 0.01)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                               </div>
-                              
-                              {/* Small Circular SVG Indicator */}
-                              <div className="relative w-12 h-12 flex-shrink-0">
-                                <svg className="w-full h-full transform -rotate-90">
-                                  <circle cx="24" cy="24" r="20" stroke="#162035" strokeWidth="3" fill="transparent" />
-                                  <circle cx="24" cy="24" r="20" stroke="#06b6d4" strokeWidth="3" fill="transparent"
-                                    strokeDasharray={`${2 * Math.PI * 20}`}
-                                    strokeDashoffset={`${2 * Math.PI * 20 * (1 - (parseFloat(computedStats?.win_rate_pct || 0) / 100))}`}
-                                    strokeLinecap="round"
-                                    className="transition-all duration-500"
-                                  />
-                                </svg>
-                              </div>
-                            </div>
-
-                            <div className="text-[10px] font-mono text-[#06b6d4] uppercase tracking-wider">
-                              🎯 {computedStats ? `${computedStats.wins} Wins` : '0'} / {computedStats ? `${computedStats.losses} Losses` : '0'}
                             </div>
                           </div>
-
-                          {/* Hero 3: Efficiency Metric (Profit Factor) */}
-                          <div className="relative overflow-hidden bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-5 rounded-2xl text-left space-y-4 shadow-xl flex flex-col justify-between group hover:border-[#3D5AFE]/40 transition-all duration-300">
-                            <div className="flex justify-between items-start">
-                              <div className="space-y-1">
-                                <span className="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">Efficiency</span>
-                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Profit Factor</h3>
-                              </div>
-                              <span className="p-2 rounded-lg text-xs font-mono font-bold bg-[#3D5AFE]/10 text-[#3D5AFE]">
-                                {computedStats?.profit_factor ?? '-'}
-                              </span>
-                            </div>
-                            
-                            <div className="space-y-1 pt-2">
-                              <span className="block text-3xl font-extrabold font-mono tracking-tight text-[#3D5AFE]">
-                                {computedStats?.profit_factor ?? '0.00'}
-                              </span>
-                              <span className="block text-[11px] text-zinc-400 normal-case">
-                                Gross positive gains vs gross negative risk loss.
-                              </span>
-                            </div>
-
-                            {/* Efficiency horizontal split bar */}
-                            <div className="space-y-1">
-                              <div className="flex justify-between text-[9px] font-mono text-zinc-500 uppercase">
-                                <span>Gains</span>
-                                <span>Losses</span>
-                              </div>
-                              <div className="w-full h-1.5 rounded-full overflow-hidden flex">
-                                <div className="bg-[#00e676] h-full" style={{ width: `${computedStats ? (computedStats.wins / (computedStats.wins + computedStats.losses || 1)) * 100 : 50}%` }} />
-                                <div className="bg-[#ff1744] h-full" style={{ width: `${computedStats ? (computedStats.losses / (computedStats.wins + computedStats.losses || 1)) * 100 : 50}%` }} />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Mid-level Grid: Numerical Value Details & Interactive Compound Outcome Simulator */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                          {/* Outcome Simulator Card */}
-                          <div className="lg:col-span-1 bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-5 rounded-2xl text-left space-y-4 shadow-xl flex flex-col justify-between">
-                            <div className="space-y-1">
-                              <span className="block text-[10px] font-mono font-bold uppercase tracking-widest text-[#3D5AFE]">
-                                Outcome Simulator
-                              </span>
-                              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Fixed-Risk Growth</h3>
-                              <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">
-                                Estimate capital growth risking a fixed 1% of balance per signal, using cumulative R-multiples.
-                              </p>
-                            </div>
-
-                            <div className="space-y-3 pt-1">
-                              {/* Capital Input Toggles */}
-                              <div className="space-y-1.5">
-                                <label className="block text-[9px] font-mono font-bold uppercase tracking-widest text-zinc-500">Starting Balance ($)</label>
-                                <div className="grid grid-cols-3 gap-1 bg-slate-950/60 p-0.5 rounded-lg border border-slate-800/80 shadow-inner">
-                                  {[5000, 10000, 25000].map(val => (
-                                    <button
-                                      key={val}
-                                      onClick={() => setStartingCapital(val)}
-                                      className={`py-1.5 rounded-md text-[10px] font-mono font-bold transition-all duration-300 cursor-pointer border-0 ${
-                                        startingCapital === val
-                                          ? 'bg-[#3D5AFE] text-white shadow shadow-[#3D5AFE]/20'
-                                          : 'bg-transparent text-zinc-500 hover:text-white'
-                                      }`}
-                                    >
-                                      ${val.toLocaleString()}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-
-                              {/* Simulation Results Output */}
-                              <div className="p-3.5 bg-slate-950/40 rounded-xl border border-slate-800/50 space-y-2 font-mono">
-                                <div className="flex justify-between items-center text-[10px] text-zinc-500">
-                                  <span>Initial Capital:</span>
-                                  <span className="text-white">${startingCapital.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-[10px] text-zinc-500">
-                                  <span>Risk Per Signal (1%):</span>
-                                  <span className="text-white">${(startingCapital * 0.01).toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-[10px] text-zinc-500">
-                                  <span>Cumulative R-Multiple:</span>
-                                  <span className={`font-bold ${
-                                    (computedStats?.cumulative_r || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
-                                  }`}>
-                                    {computedStats?.cumulative_r != null 
-                                      ? `${(computedStats.cumulative_r) >= 0 ? '+' : ''}${computedStats.cumulative_r.toFixed(2)} R`
-                                      : '0.00 R'}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center text-[10px] text-zinc-500">
-                                  <span>Total Return PnL:</span>
-                                  <span className={`font-bold ${
-                                    (computedStats?.cumulative_r || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
-                                  }`}>
-                                    {computedStats?.cumulative_r != null 
-                                      ? `${(computedStats.cumulative_r) >= 0 ? '+' : ''}${(computedStats.cumulative_r).toFixed(2)}%`
-                                      : '0.00%'}
-                                  </span>
-                                </div>
-                                <div className="border-t border-slate-900 my-1 pt-1 flex justify-between items-center">
-                                  <span className="text-[10px] text-zinc-400 font-bold">Simulated Balance:</span>
-                                  <span className="text-sm font-black text-white">
-                                    ${(startingCapital + (computedStats?.cumulative_r || 0) * (startingCapital * 0.01)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* 2x3 Mini Metrics Cards */}
-                          <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
-                            {[
-                              { label: 'Total Signals', val: computedStats?.total_signals ?? '-', note: `Complete Swings` },
-                              { label: 'Average Outcome', val: computedStats?.avg_pnl != null ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${computedStats.avg_pnl}%` : '-', note: 'Per closed trade' },
-                              { label: 'Open Indicators', val: openSignalsCount, note: 'Current active swings' },
-                              { label: 'Best Outcome', val: computedStats?.best_trade != null ? `+${computedStats.best_trade}%` : '-', note: 'Maximum trade gain' },
-                              { label: 'Max Drawdown', val: computedStats?.worst_trade != null ? `${computedStats.worst_trade}%` : '-', note: 'Maximum trade loss' },
-                              { label: 'Trade Split', val: computedStats ? `${computedStats.wins}W - ${computedStats.losses}L` : '-', note: 'Total win/loss ratio' },
-                            ].map((s, i) => (
-                              <div key={i} className="bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-4 rounded-xl text-left space-y-1.5 group hover:border-[#3D5AFE]/30 transition-all duration-300">
-                                <span className="block text-[9px] font-bold uppercase tracking-widest text-zinc-500">{s.label}</span>
-                                <span className="block text-[20px] font-bold font-mono text-white tracking-tight">{s.val}</span>
-                                <span className="block text-[10px] text-zinc-400 normal-case">{s.note}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Interactive Line Chart */}
-                        <div className="w-full">
-                          <PerformanceChart signals={perfSignals} />
                         </div>
                       </div>
-                    )}
-                  </div>
-                )}
 
-                {activeSubTab === 'ledger' && (
-                  <div className="space-y-4 text-left">
-                    <div className="p-6 bg-[#3D5AFE]/5 border border-[#3D5AFE]/20 rounded-2xl space-y-2">
-                      <span className="text-[11px] font-mono text-[#3D5AFE] font-bold uppercase tracking-widest">Global Audit Ledger</span>
-                      <h3 className="text-[15px] font-bold uppercase tracking-wide text-white">Immutable Historical Audits</h3>
-                      <p className="text-[13px] text-zinc-400 normal-case leading-relaxed">
-                        Every trading execution signal generated by the Sanddock algorithmic pipelines is logged permanently. We maintain a full, transparent audit trail with zero deletions or back-dated adjustments.
-                      </p>
+                      {/* 2x3 Metric Grid expanded full width below both cards */}
+                      <div className="w-full border border-zinc-800 rounded-none p-6 bg-[#090909] shadow-none">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 font-mono text-white">
+                          {[
+                            { label: 'Average Outcome', val: computedStats?.avg_pnl != null ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${computedStats.avg_pnl}%` : '-', note: 'per closed trade' },
+                            { label: 'Total Logs', val: computedStats?.total_signals ?? '-', note: 'closed swings' },
+                            { label: 'Current Indicators', val: openSignalsCount, note: 'active metrics' },
+                            { label: 'Peak Trade Gain', val: computedStats?.best_trade != null ? `+${computedStats.best_trade}%` : '-', note: 'maximum outcome' },
+                            { label: 'Peak Drawdown', val: computedStats?.worst_trade != null ? `${computedStats.worst_trade}%` : '-', note: 'maximum loss' },
+                            { label: 'Outcome Ratio', val: computedStats ? `${computedStats.wins}W - ${computedStats.losses}L` : '-', note: 'wins vs losses' },
+                          ].map((s, i) => (
+                            <div key={i} className="text-left py-2 px-4 border-r last:border-0 border-zinc-800/40 space-y-1">
+                              <span className="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-zinc-400 leading-none">{s.label}</span>
+                              <span className="block text-2xl md:text-3xl font-black text-white tracking-tighter leading-none pt-1">{s.val}</span>
+                              <span className="block text-[10px] text-zinc-500 leading-none pt-0.5">{s.note}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-center py-16 border border-dashed border-zinc-800/80 rounded-2xl text-[12px] text-zinc-500 font-mono uppercase tracking-wider bg-[#070b19]/25">
-                      📜 Database records are active. Access the complete ledger in the Signal Log tab.
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {activeSubTab === 'audit' && (
-                  <div className="space-y-6 text-left animate-slide-up">
-                    <div className="p-6 bg-gradient-to-r from-[#0b1224] to-[#070d19] border border-[#1e2d4a] rounded-2xl space-y-2">
-                      <span className="text-[10px] font-mono text-[#3D5AFE] font-bold uppercase tracking-widest">Model Verification</span>
-                      <h3 className="text-[15px] font-bold uppercase tracking-wide text-white">AI Confidence Calibration Audit</h3>
-                      <p className="text-[13px] text-zinc-400 normal-case leading-relaxed">
-                        This audit log validates that the Sanddock AI confidence score is highly calibrated to trading outcomes. Under a rational model, higher conviction levels should translate to superior accuracy and higher win-rates.
-                      </p>
+                  {/* Chart Container */}
+                  {!perfLoading && (
+                    <div className="w-full bg-[#090909] border border-zinc-800 rounded-none p-6 text-white">
+                      <div className="flex justify-between items-center mb-6 border-b border-zinc-800 pb-3">
+                        <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff4500]">OUTCOME DISTRIBUTION</span>
+                        <span className="text-xs font-bold text-white uppercase tracking-wider">Equity Growth curve</span>
+                      </div>
+                      <PerformanceChart signals={perfSignals} />
                     </div>
-
-                    <div className="bg-[#0b1224] border border-[#1e2d4a] rounded-2xl overflow-hidden shadow-xl">
-                      <table className="w-full text-left border-collapse">
-                        <thead>
-                          <tr className="border-b border-[#1e2d4a] bg-slate-950/40 text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider">
-                            <th className="p-4">Confidence Band</th>
-                            <th className="p-4">Sample Size</th>
-                            <th className="p-4">Win Rate (%)</th>
-                            <th className="p-4">Avg R-Multiple</th>
-                            <th className="p-4">Status Verdict</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[#1e2d4a]/50 text-xs font-mono text-zinc-300">
-                          {calibrationAuditData.map((row, idx) => {
-                            const isHighAccuracy = parseFloat(row.winRate) >= 65;
-                            return (
-                              <tr key={idx} className="hover:bg-slate-900/10">
-                                <td className="p-4 text-white font-bold">{row.label}</td>
-                                <td className="p-4 text-zinc-400">{row.sampleSize} signals</td>
-                                <td className={`p-4 font-bold ${isHighAccuracy ? 'text-[#00e676]' : 'text-zinc-400'}`}>{row.winRate}</td>
-                                <td className={`p-4 font-bold ${row.avgR.startsWith('-') ? 'text-[#ff1744]' : 'text-zinc-300'}`}>{row.avgR}</td>
-                                <td className="p-4">
-                                  {row.sampleSize === 0 ? (
-                                    <span className="text-zinc-600 text-[10px] uppercase font-bold">No Data</span>
-                                  ) : isHighAccuracy ? (
-                                    <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 uppercase">
-                                      ✓ Strongly Calibrated
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 text-[9px] font-bold text-zinc-400 bg-zinc-500/10 px-2 py-0.5 rounded border border-zinc-700/20 uppercase">
-                                      ✓ Normal Distribution
-                                    </span>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             )}
+
+
 
             {/* ══ SETTINGS TAB ════════════════════════════════════════════════ */}
             {activeTab === 'settings' && (

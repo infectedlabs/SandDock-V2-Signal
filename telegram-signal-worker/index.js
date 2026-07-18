@@ -143,7 +143,7 @@ function calculatePnL(openSignal, closeSignal) {
 // ─── Swing detection (30m + 5m Confirmation) ─────────────────────────────
 // Detects 30m swings (backside-only lookback)
 // Fires on first 5m candle close within that 30m period (~5 minutes average)
-// Result: Real-time entry, price drift minimal, 81% win rate, ~+14,074% annual
+// Result: Real-time entry, price drift minimal, 80%+ win rate
 function detectSwings(candles, lookback = LOOKBACK) {
   // CRITICAL FIX: Only process the LATEST candle to avoid re-detecting old swings
   // Each call should only check if the newest candle is a swing, using the lookback
@@ -151,7 +151,6 @@ function detectSwings(candles, lookback = LOOKBACK) {
 
   if (candles.length < lookback + 1) return [];
 
-  const signals = [];
   const i = candles.length - 1; // Only check the latest candle
   const c = candles[i];
 
@@ -167,12 +166,9 @@ function detectSwings(candles, lookback = LOOKBACK) {
     if (j !== i && candles[j].high > c.high) { isHigh = false; break; }
   }
 
-  // To determine if this is a TRUE opposite swing, check the last signal in DB
-  // ONLY fire a new signal if it's opposite to the most recent LIVE signal
-  // If there's a LIVE signal that's already the same direction, don't fire a duplicate
-
-  // When swing detected on 30m, calculate fire time as first 5m close
-  const signalTime = calculateFirstFiveMinClose(c.open_time);
+  // When swing detected on 30m, use the candle's close time
+  const signalTime = c.close_time;
+  const signals = [];
 
   if (isLow) {
     const entryPrice = c.low;
@@ -188,16 +184,17 @@ function detectSwings(candles, lookback = LOOKBACK) {
       tp_price: entryPrice * (1 + TP_PCT / 100),
       sl_pct: SL_PCT,
       tp_pct: TP_PCT,
-      confidence: 95,
     });
   }
 
   if (isHigh) {
+    // If both low and high, offset high by 1 second for uniqueness
+    const offset = isLow ? new Date(signalTime).getTime() + 1000 : signalTime;
     const entryPrice = c.high;
     signals.push({
       symbol: c.symbol,
       interval: INTERVAL,
-      bar_time: signalTime,
+      bar_time: new Date(offset).toISOString(),
       signal_type: 'sell',
       action: 'SELL',
       rationale: 'Swing high detected',
@@ -206,7 +203,6 @@ function detectSwings(candles, lookback = LOOKBACK) {
       tp_price: entryPrice * (1 - TP_PCT / 100),
       sl_pct: SL_PCT,
       tp_pct: TP_PCT,
-      confidence: 95,
     });
   }
 
@@ -318,18 +314,50 @@ function resolveTrailingSupersession(withCloses) {
   return withCloses;
 }
 
-// ─── Telegram ─────────────────────────────────────────────────────────────
-async function sendTelegram(text) {
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
+// ─── Dynamic Confidence Calculation ──────────────────────────────────────
+async function getDynamicConfidence(symbol) {
   try {
-    await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    const { data } = await supabase
+      .from('signals')
+      .select('is_win')
+      .eq('symbol', symbol)
+      .eq('interval', INTERVAL)
+      .not('closed_at', 'is', null)
+      .order('bar_time', { ascending: false })
+      .limit(20); // Last 20 closed signals
+
+    if (!data || data.length === 0) return 75; // Default if no history
+
+    const wins = data.filter(s => s.is_win).length;
+    const winRate = (wins / data.length) * 100;
+    return Math.min(Math.max(Math.round(winRate), 60), 95); // Clamp between 60-95
+  } catch (err) {
+    return 75;
+  }
+}
+
+// Store message IDs for replies
+const signalMessageIds = {}; // signal_id -> message_id
+
+// ─── Telegram ─────────────────────────────────────────────────────────────
+async function sendTelegram(text, replyToMessageId = null) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return null;
+  try {
+    const payload = {
       chat_id: TELEGRAM_CHAT_ID,
       text,
       parse_mode: 'HTML',
       disable_web_page_preview: true,
-    }, { timeout: 10000 });
+    };
+    if (replyToMessageId) {
+      payload.reply_to_message_id = replyToMessageId;
+    }
+
+    const { data } = await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, payload, { timeout: 10000 });
+    return data?.result?.message_id || null;
   } catch (err) {
     log(`[Telegram] Send failed: ${err.response?.data?.description || err.message}`);
+    return null;
   }
 }
 
@@ -338,31 +366,35 @@ function coinLabel(symbol) {
 }
 
 function newSignalMessage(sig) {
-  const dir = sig.signal_type === 'buy' ? '🟢 BUY' : '🔴 SELL';
+  const isBuy = sig.signal_type === 'buy';
+  const icon = isBuy ? '🟢' : '🔴';
+  const dir = isBuy ? 'BUY' : 'SELL';
+  const localTime = toLocalTimeString(new Date(sig.bar_time));
+
   return (
-    `${dir} <b>${coinLabel(sig.symbol)}</b> (30m)\n\n` +
-    `Entry: <b>${sig.entry_price.toFixed(2)}</b>\n` +
-    `Stop Loss: ${sig.sl_price.toFixed(2)}\n` +
-    `Take Profit: ${sig.tp_price.toFixed(2)}\n` +
-    `Confidence: ${sig.confidence}%\n` +
-    `Bar: ${sig.bar_time}`
+    `${icon} <b>${dir} ${coinLabel(sig.symbol)} (30m)</b>\n\n` +
+    `📊 <b>Entry:</b> <code>$${sig.entry_price.toFixed(2)}</code>\n` +
+    `🎯 <b>Target:</b> <code>$${sig.tp_price.toFixed(2)}</code>\n` +
+    `🛑 <b>Stop:</b> <code>$${sig.sl_price.toFixed(2)}</code>\n\n` +
+    `💪 <b>Confidence:</b> ${sig.confidence}%\n` +
+    `⏰ <b>Time:</b> ${localTime}`
   );
 }
 
 function closedSignalMessage(sig) {
+  const isBuy = sig.signal_type === 'buy';
   const win = sig.is_win;
   const icon = win ? '✅' : '❌';
-  const dir = sig.signal_type === 'buy' ? 'BUY' : 'SELL';
+  const dir = isBuy ? 'BUY' : 'SELL';
   const pnlStr = `${sig.pnl_pct >= 0 ? '+' : ''}${sig.pnl_pct.toFixed(2)}%`;
-  const reasonStr = sig.close_reason === 'superseded'
-    ? 'superseded by a newer same-direction signal'
-    : 'opposite swing confirmed';
+  const pnlColor = sig.pnl_pct >= 0 ? '🟢' : '🔴';
+
   return (
-    `${icon} <b>${coinLabel(sig.symbol)}</b> ${dir} closed\n\n` +
-    `Entry: ${parseFloat(sig.entry_price).toFixed(2)}\n` +
-    `Close: ${sig.close_price.toFixed(2)}\n` +
-    `PnL: <b>${pnlStr}</b>\n` +
-    `Reason: ${reasonStr}`
+    `${icon} <b>${coinLabel(sig.symbol)} ${dir} CLOSED</b>\n\n` +
+    `📥 <b>Entry:</b> <code>$${parseFloat(sig.entry_price).toFixed(2)}</code>\n` +
+    `📤 <b>Exit:</b> <code>$${sig.close_price.toFixed(2)}</code>\n\n` +
+    `${pnlColor} <b>PnL:</b> <code>${pnlStr}</code>\n` +
+    `📋 <b>Reason:</b> ${sig.close_reason === 'swing_opposite' ? 'Opposite swing' : 'Target hit'}`
   );
 }
 
@@ -433,7 +465,8 @@ async function processSymbol(symbol) {
 
       if (!error) {
         log(`[${symbol}] ✓ Closed ${openSignal.action} @ ${openSignal.bar_time} with ${oppositeSignal.signal_type.toUpperCase()} — pnl ${closeInfo.pnl_pct}%`);
-        await sendTelegram(closedSignalMessage({ ...openSignal, ...closeInfo }));
+        const replyToId = signalMessageIds[openSignal.id] || null;
+        await sendTelegram(closedSignalMessage({ ...openSignal, ...closeInfo }), replyToId);
         foundOpenSignal = true;
       } else {
         log(`[${symbol}] Failed to close signal: ${error.message}`);
@@ -449,17 +482,20 @@ async function processSymbol(symbol) {
   }
 
   // Prepare new signals to insert - mark the latest as LIVE (open)
+  const confidence = await getDynamicConfidence(symbol);
   const toInsert = detected.map(sig => ({
     ...sig,
+    confidence,
     closed_at: null,        // All detected signals are initially LIVE
     pnl_pct: null,
     is_win: null,
     close_reason: null,
   }));
 
-  const { error: insertError } = await supabase
+  const { data: insertedSignals, error: insertError } = await supabase
     .from('signals')
-    .insert(toInsert);
+    .insert(toInsert)
+    .select();
 
   if (insertError) {
     log(`[${symbol}] Failed to insert new signals: ${insertError.message}`);
@@ -467,9 +503,12 @@ async function processSymbol(symbol) {
   }
 
   log(`[${symbol}] ➕ Inserted ${toInsert.length} new signal(s).`);
-  for (const sig of toInsert) {
+  for (const sig of (insertedSignals || toInsert)) {
     if (sig.closed_at === null) {
-      await sendTelegram(newSignalMessage(sig));
+      const messageId = await sendTelegram(newSignalMessage(sig));
+      if (messageId && sig.id) {
+        signalMessageIds[sig.id] = messageId;
+      }
     }
   }
   return true;

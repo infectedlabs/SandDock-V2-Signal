@@ -152,7 +152,15 @@
       "Bash(curl -s \"http://localhost:3000/api/chart/signals?symbol=BTCUSDT&plan=free\")",
       "Bash(node scripts/check_active_signals.js)",
       "PowerShell(\"killed\")",
-      "Bash(node check_signal_times.js)"
+      "Bash(node check_signal_times.js)",
+      "PowerShell(Get-Process | Where-Object { $_.ProcessName -eq \"node\" } | Stop-Process -Force; Start-Sleep -Seconds 2; \"All Node processes killed\")",
+      "Bash(node scripts/backfill_signals.js)",
+      "Bash(node scripts/backfill_debug.js)",
+      "Bash(node scripts/count_signals.js)",
+      "Bash(node -c telegram-signal-worker/index.js)",
+      "Bash(node -c src/components/HAChart.jsx)",
+      "Bash(git checkout *)",
+      "Bash(node scripts/audit_alternation.js)"
     ]
   }
 }

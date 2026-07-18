@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020617;
+  --background: #000000;
   --foreground: #f8fafc;
 }
 
@@ -9,9 +9,9 @@
   --font-sans: var(--font-satoshi), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-mono), monospace;
 
-  --color-bg-primary: #020617;
-  --color-bg-secondary: #0f172a;
-  --color-bg-tertiary: #1e293b;
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #090909;
+  --color-bg-tertiary: #111111;
 
   --color-brand-orange: #3D5AFE;
   --color-brand-orange-hover: #2943d0;
