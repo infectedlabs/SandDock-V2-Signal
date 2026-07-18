@@ -362,11 +362,12 @@ async function processSymbol(symbol) {
   const withCloses = calculateCloses(detected);
   resolveTrailingSupersession(withCloses); // in place — see comment on the function
 
-  // LIVE-ONLY MODE: Only handle signals generated from the current candle window.
-  // Don't try to close old signals — they're read-only historical data for analytics.
-  // The only signals we close are ones that just generated in this cycle (a real opposite).
+  // SIGNAL LIFECYCLE: Properly close current live signal before opening next one
+  // 1. Check if there's an open signal
+  // 2. If yes, try to close it (only if opposite detected)
+  // 3. Only after closing (or if no open), insert the NEW opposite signal
 
-  // Get the most recent open signal
+  // Step 1: Get the most recent open signal (if any)
   const { data: openRows } = await supabase
     .from('signals')
     .select('*')
@@ -376,25 +377,28 @@ async function processSymbol(symbol) {
     .order('bar_time', { ascending: false })
     .limit(1);
 
+  let foundOpenSignal = false;
   if (openRows && openRows.length > 0) {
     const openSignal = openRows[0];
     const openBarMs = new Date(openSignal.bar_time).getTime();
 
-    // Check if any of TODAY'S detected swings close this signal
-    const match = withCloses.find(s => {
-      const sameAction = s.signal_type === openSignal.action.toLowerCase();
-      const sameBar = Math.abs(new Date(s.bar_time).getTime() - openBarMs) < 1000;
-      return sameAction && sameBar;
+    // Step 2: Check if detected swings contain the OPPOSITE signal (to close the open one)
+    const closeMatch = withCloses.find(s => {
+      // Opposite direction (buy vs sell)
+      const isOpposite = s.signal_type !== openSignal.action.toLowerCase();
+      // Close reason must be real opposite, not same-direction supersession
+      const isRealClose = s.close_reason === 'swing_opposite';
+      return isOpposite && isRealClose;
     });
 
-    // Only close if we found a genuine opposite (swing_opposite), not superseded
-    if (match && match.closed_at !== null && match.close_reason === 'swing_opposite') {
+    if (closeMatch) {
+      // Found opposite signal — close the open one with it
       const closeInfo = {
-        close_price: match.close_price,
-        close_reason: match.close_reason,
-        closed_at: match.closed_at,
-        pnl_pct: match.pnl_pct,
-        is_win: match.is_win,
+        close_price: closeMatch.price,
+        close_reason: 'swing_opposite',
+        closed_at: closeMatch.bar_time,
+        pnl_pct: closeMatch.pnl_pct,
+        is_win: closeMatch.pnl_pct > 0,
       };
 
       const { error } = await supabase
@@ -403,15 +407,17 @@ async function processSymbol(symbol) {
         .eq('id', openSignal.id);
 
       if (!error) {
-        log(`[${symbol}] Closed ${openSignal.action} @ ${openSignal.bar_time} (${closeInfo.close_reason}) — pnl ${closeInfo.pnl_pct}%`);
+        log(`[${symbol}] ✓ Closed ${openSignal.action.toUpperCase()} @ ${openSignal.bar_time} (swing_opposite) — pnl ${closeInfo.pnl_pct}%`);
         await sendTelegram(closedSignalMessage({ ...openSignal, ...closeInfo }));
+        foundOpenSignal = true;
       } else {
         log(`[${symbol}] Failed to close signal: ${error.message}`);
       }
     }
   }
 
-  // 2. Insert any genuinely new signals (bar_time after the latest one we've stored).
+  // Step 3: Only insert NEW signals if we either closed one or there's no open signal
+  // This ensures: close first, then open new
   const { data: latestRows } = await supabase
     .from('signals')
     .select('bar_time')
@@ -421,15 +427,20 @@ async function processSymbol(symbol) {
     .limit(1);
 
   const lastStoredBarTime = latestRows?.[0]?.bar_time ? new Date(latestRows[0].bar_time) : new Date(0);
-  // withCloses was already resolved in place above — no separate
-  // markTrailingSignalLive step needed.
   const newOnes = withCloses.filter(s => new Date(s.bar_time) > lastStoredBarTime);
+
   if (newOnes.length === 0) {
     log(`[${symbol}] Up to date, nothing new.`);
     return true;
   }
 
-  // Dedupe by bar_time (defensive — detectSwings shouldn't produce duplicates)
+  // Only insert if we have no open signal (just closed one or never had one)
+  if (openRows && openRows.length > 0 && !foundOpenSignal) {
+    log(`[${symbol}] Open signal exists, waiting for close before inserting new one.`);
+    return true;
+  }
+
+  // Dedupe by bar_time
   const seen = new Set();
   const deduped = newOnes.filter(s => (seen.has(s.bar_time) ? false : (seen.add(s.bar_time), true)));
 
@@ -442,15 +453,10 @@ async function processSymbol(symbol) {
     return true;
   }
 
-  log(`[${symbol}] Inserted ${deduped.length} new signal(s).`);
+  log(`[${symbol}] ➕ Inserted ${deduped.length} new signal(s).`);
   for (const sig of deduped) {
-    // Only alert on the currently-live one plus any genuinely-closed catch-up
-    // signals — a cold start against an empty table could otherwise replay
-    // months of history as a wall of Telegram messages.
     if (sig.closed_at === null) {
       await sendTelegram(newSignalMessage(sig));
-    } else {
-      await sendTelegram(closedSignalMessage(sig));
     }
   }
   return true;
