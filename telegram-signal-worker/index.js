@@ -148,7 +148,6 @@ function detectSwings(candles, lookback = LOOKBACK) {
         symbol: c.symbol,
         interval: INTERVAL,
         bar_time: signalTime,  // Fire on first 5m close within 30m period
-        signal_30m_bar_time: c.open_time,  // Store original 30m bar for reference
         signal_type: 'buy',
         entry_price: entryPrice,
         sl_price: entryPrice * (1 - SL_PCT / 100),
@@ -166,7 +165,6 @@ function detectSwings(candles, lookback = LOOKBACK) {
         symbol: c.symbol,
         interval: INTERVAL,
         bar_time: signalTime,  // Fire on first 5m close within 30m period
-        signal_30m_bar_time: c.open_time,  // Store original 30m bar for reference
         signal_type: 'sell',
         entry_price: entryPrice,
         sl_price: entryPrice * (1 + SL_PCT / 100),
