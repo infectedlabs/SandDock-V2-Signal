@@ -466,8 +466,8 @@ async function processSymbol(symbol) {
     return true;
   }
 
-  log(`[${symbol}] ➕ Inserted ${deduped.length} new signal(s).`);
-  for (const sig of deduped) {
+  log(`[${symbol}] ➕ Inserted ${toInsert.length} new signal(s).`);
+  for (const sig of toInsert) {
     if (sig.closed_at === null) {
       await sendTelegram(newSignalMessage(sig));
     }
