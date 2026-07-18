@@ -314,9 +314,9 @@ export default function HAChart({
         // Server sends UTC Unix seconds; we shift to local time so the
         // TradingView time scale labels match the user's clock.
         // IMPORTANT: computed ONCE here and reused for both historical
-        // All times now stored in local timezone, no offset conversion needed
+        const offsetSeconds = -new Date().getTimezoneOffset() * 60;
         const candleData = candles.map((c) => ({
-          time:  Math.floor(new Date(c.open_time).getTime() / 1000),
+          time:  Math.floor(new Date(c.open_time).getTime() / 1000) + offsetSeconds,
           // Heikin Ashi values — same as TradingView when using HA chart mode
           open:  parseFloat(c.ha_open),
           high:  parseFloat(c.ha_high),
@@ -394,8 +394,8 @@ export default function HAChart({
         let signalBarTime = null;
         if (activeSignal && signalStats) {
           const { entryVal, slVal, tpVal, tpPct, slPct, tpPctVal, slPctVal } = signalStats;
-          
-          signalBarTime = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000);
+
+          signalBarTime = Math.floor(new Date(activeSignal.created_at || activeSignal.bar_time).getTime() / 1000) + offsetSeconds;
           signalBarTimeRef.current = signalBarTime;
           lastCandleTimeRef.current = lastCandle.time;
 
@@ -520,7 +520,7 @@ export default function HAChart({
         });
 
         const volumeData = candles.map((c) => {
-          const t = Math.floor(new Date(c.open_time).getTime() / 1000);
+          const t = Math.floor(new Date(c.open_time).getTime() / 1000) + offsetSeconds;
           const isSignal = signalBarTime && t === signalBarTime;
           let barColor = 'rgba(255, 255, 255, 0.12)';
           if (isSignal) {
