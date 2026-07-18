@@ -362,32 +362,33 @@ async function processSymbol(symbol) {
   const withCloses = calculateCloses(detected);
   resolveTrailingSupersession(withCloses); // in place — see comment on the function
 
-  // ONLY close signals that match detected swings in the CURRENT candle window.
-  // This prevents the startup flood of "superseded" closes on old historical signals.
-  // Only process signals from the last 24 hours to avoid touching ancient history.
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  // LIVE-ONLY MODE: Only handle signals generated from the current candle window.
+  // Don't try to close old signals — they're read-only historical data for analytics.
+  // The only signals we close are ones that just generated in this cycle (a real opposite).
+
+  // Get the most recent open signal
   const { data: openRows } = await supabase
     .from('signals')
     .select('*')
     .eq('symbol', symbol)
     .eq('interval', INTERVAL)
     .is('closed_at', null)
-    .gt('bar_time', oneDayAgo.toISOString())
-    .order('bar_time', { ascending: true });
+    .order('bar_time', { ascending: false })
+    .limit(1);
 
-  const rows = openRows || [];
-  for (let idx = 0; idx < rows.length; idx++) {
-    const openSignal = rows[idx];
+  if (openRows && openRows.length > 0) {
+    const openSignal = openRows[0];
     const openBarMs = new Date(openSignal.bar_time).getTime();
 
-    // Only match against signals from the CURRENT detected swings
+    // Check if any of TODAY'S detected swings close this signal
     const match = withCloses.find(s => {
       const sameAction = s.signal_type === openSignal.action.toLowerCase();
       const sameBar = Math.abs(new Date(s.bar_time).getTime() - openBarMs) < 1000;
       return sameAction && sameBar;
     });
 
-    if (match && match.closed_at !== null) {
+    // Only close if we found a genuine opposite (swing_opposite), not superseded
+    if (match && match.closed_at !== null && match.close_reason === 'swing_opposite') {
       const closeInfo = {
         close_price: match.close_price,
         close_reason: match.close_reason,
