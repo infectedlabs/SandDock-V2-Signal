@@ -125,7 +125,8 @@
       "Bash(node scripts/backtest_intrabar_5m_confirmation.js)",
       "Bash(node scripts/backtest_1h_swing_5m_confirm.js)",
       "Bash(timeout 120 node scripts/backtest_1h_swing_5m_confirm.js)",
-      "Bash(node scripts/backtest_1h_swing_5m_fast.js)"
+      "Bash(node scripts/backtest_1h_swing_5m_fast.js)",
+      "Bash(node scripts/reset_backfill_1h_5m_confirmation.js)"
     ]
   }
 }
