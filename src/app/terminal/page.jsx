@@ -1031,6 +1031,12 @@ export default function TerminalPage() {
     };
   }, [cleanLiveSignals, livePrices, selectedSymbol]);
 
+  // Get the most recent LIVE signal for the selected symbol to display on chart
+  const selectedSymbolActiveSignal = useMemo(() => {
+    const activeForSymbol = cleanLiveSignals.filter(s => s.symbol === selectedSymbol && s.is_live);
+    return activeForSymbol.length > 0 ? activeForSymbol[activeForSymbol.length - 1] : null;
+  }, [cleanLiveSignals, selectedSymbol]);
+
   // Load fallback signals when live feed is empty (to prevent conversion drop)
   // Retrieve the most recent signal from the general history ledger
   const { signals: allBtcHistoryLog } = useSignalLog({ plan: 'free', symbol: 'BTCUSDT', pageSize: 6 });
@@ -1695,6 +1701,7 @@ export default function TerminalPage() {
                   onPriceTick={setLiveBtcPrice}
                   plan={profile?.plan || 'free'}
                   onUpgradeGate={triggerUpgradeGate}
+                  activeSignal={selectedSymbolActiveSignal}
                 />
                 <SignalPanel signals={logSignals || []} />
               </div>
