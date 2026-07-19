@@ -114,57 +114,64 @@ function calculatePnL(openSignal, closeSignal) {
 function detectSwings(candles, lookback = LOOKBACK) {
   if (candles.length < lookback + 1) return [];
 
-  const i = candles.length - 1;
-  const c = candles[i];
-
-  let isLow = true;
-  for (let j = i - lookback; j <= i; j++) {
-    if (j !== i && candles[j].low < c.low) { isLow = false; break; }
-  }
-
-  let isHigh = true;
-  for (let j = i - lookback; j <= i; j++) {
-    if (j !== i && candles[j].high > c.high) { isHigh = false; break; }
-  }
-
-  const signalTime = c.close_time;
   const signals = [];
 
-  if (isLow) {
-    signals.push({
-      symbol: c.symbol,
-      interval: INTERVAL,
-      bar_time: signalTime,
-      signal_type: 'buy',
-      action: 'BUY',
-      rationale: 'Swing low detected',
-      entry_price: c.low,
-      sl_price: c.low * (1 - SL_PCT / 100),
-      tp_price: c.low * (1 + TP_PCT / 100),
-      sl_pct: SL_PCT,
-      tp_pct: TP_PCT,
-      alert_type: 'confirmed',
-      alert_time: new Date().toISOString(),
-    });
-  }
+  // Scan through recent candles (not just the last one) to find swings
+  // Start from lookback+1 so we have enough historical context
+  const startIdx = Math.max(lookback + 1, candles.length - 100); // scan last 100 candles
+  for (let i = startIdx; i < candles.length; i++) {
+    const c = candles[i];
 
-  if (isHigh) {
-    const offset = isLow ? new Date(signalTime).getTime() + 1000 : signalTime;
-    signals.push({
-      symbol: c.symbol,
-      interval: INTERVAL,
-      bar_time: new Date(offset).toISOString(),
-      signal_type: 'sell',
-      action: 'SELL',
-      rationale: 'Swing high detected',
-      entry_price: c.high,
-      sl_price: c.high * (1 + SL_PCT / 100),
-      tp_price: c.high * (1 - TP_PCT / 100),
-      sl_pct: SL_PCT,
-      tp_pct: TP_PCT,
-      alert_type: 'confirmed',
-      alert_time: new Date().toISOString(),
-    });
+    // Check if this candle is a local low
+    let isLow = true;
+    for (let j = i - lookback; j <= i; j++) {
+      if (j !== i && candles[j].low < c.low) {
+        isLow = false;
+        break;
+      }
+    }
+
+    // Check if this candle is a local high
+    let isHigh = true;
+    for (let j = i - lookback; j <= i; j++) {
+      if (j !== i && candles[j].high > c.high) {
+        isHigh = false;
+        break;
+      }
+    }
+
+    if (isLow) {
+      signals.push({
+        symbol: c.symbol,
+        interval: INTERVAL,
+        bar_time: c.close_time,
+        signal_type: 'buy',
+        action: 'BUY',
+        rationale: 'Swing low detected',
+        entry_price: c.low,
+        sl_price: c.low * (1 - SL_PCT / 100),
+        tp_price: c.low * (1 + TP_PCT / 100),
+        sl_pct: SL_PCT,
+        tp_pct: TP_PCT,
+              });
+    }
+
+    if (isHigh) {
+      const offset = isLow ? new Date(c.close_time).getTime() + 1000 : c.close_time;
+      signals.push({
+        symbol: c.symbol,
+        interval: INTERVAL,
+        bar_time: new Date(offset).toISOString(),
+        signal_type: 'sell',
+        action: 'SELL',
+        rationale: 'Swing high detected',
+        entry_price: c.high,
+        sl_price: c.high * (1 + SL_PCT / 100),
+        tp_price: c.high * (1 - TP_PCT / 100),
+        sl_pct: SL_PCT,
+        tp_pct: TP_PCT,
+              });
+    }
   }
 
   return signals;
@@ -204,8 +211,6 @@ function detectWickSwings(openCandle, historicalCandles, lookback = LOOKBACK) {
       tp_price: c.low * (1 + TP_PCT / 100),
       sl_pct: SL_PCT,
       tp_pct: TP_PCT,
-      alert_type: 'pending_wick',
-      alert_time: wickTime,
       wick_price: c.low,
     });
   }
@@ -223,8 +228,6 @@ function detectWickSwings(openCandle, historicalCandles, lookback = LOOKBACK) {
       tp_price: c.high * (1 - TP_PCT / 100),
       sl_pct: SL_PCT,
       tp_pct: TP_PCT,
-      alert_type: 'pending_wick',
-      alert_time: wickTime,
       wick_price: c.high,
     });
   }
@@ -356,7 +359,7 @@ function pendingWickMessage(sig) {
   const isBuy = sig.signal_type === 'buy';
   const icon = isBuy ? '🟢' : '🔴';
   const dir = isBuy ? 'BUY' : 'SELL';
-  const localTime = toLocalTimeString(new Date(sig.alert_time));
+  const localTime = toLocalTimeString(new Date());
 
   return (
     `${icon} <b>⏳ PENDING: ${dir} ${coinLabel(sig.symbol)} (30m wick)</b>\n\n` +
@@ -689,9 +692,56 @@ app.get('/', (req, res) => {
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   log(`Signal worker listening on port ${PORT}`);
   for (const symbol of SYMBOLS) trigger(symbol, 'startup');
+
+  // Bootstrap: ensure at least one live signal exists per symbol
+  await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for initial triggers
+  for (const symbol of SYMBOLS) {
+    const { data: liveSignals } = await supabase
+      .from('signals')
+      .select('*')
+      .eq('symbol', symbol)
+      .eq('interval', INTERVAL)
+      .is('closed_at', null);
+
+    if (!liveSignals || liveSignals.length === 0) {
+      log(`[${symbol}] Bootstrap: no live signals found, generating from candle analysis...`);
+      try {
+        const allCandles = await fetchCandles(symbol);
+        const bootstrapSignals = detectSwings(allCandles);
+        if (bootstrapSignals.length > 0) {
+          const confidence = await getDynamicConfidence(symbol);
+          const toInsert = bootstrapSignals.map(sig => ({
+            ...sig,
+            confidence,
+            closed_at: null,
+            pnl_pct: null,
+            is_win: null,
+            close_reason: null,
+          }));
+          const { error } = await supabase
+            .from('signals')
+            .insert(toInsert)
+            .select();
+          if (!error) {
+            log(`[${symbol}] ✓ Bootstrap: inserted ${toInsert.length} live signal(s)`);
+            for (const sig of toInsert) {
+              await sendTelegram(newSignalMessage(sig));
+            }
+          }
+        } else {
+          log(`[${symbol}] Bootstrap: no swings found in any candles — waiting for next candle close`);
+        }
+      } catch (err) {
+        log(`[${symbol}] Bootstrap error: ${err.message}`);
+      }
+    } else {
+      log(`[${symbol}] Bootstrap: ${liveSignals.length} live signal(s) already exist`);
+    }
+  }
+
   connectWebSocket();
   startSafetyNet();
 });
