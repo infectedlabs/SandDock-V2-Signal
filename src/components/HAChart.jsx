@@ -277,23 +277,77 @@ export default function HAChart({
       // handshake runs in parallel with candle/signal data fetching.
       // By the time the chart renders, the socket is already live.
       // ───────────────────────────────────────────────────────────────
-      {
-        const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsHost = process.env.NEXT_PUBLIC_WS_URL
-          ? process.env.NEXT_PUBLIC_WS_URL.replace(/^https?:\/\//, '')
-          : 'localhost:8000';
-        const wsUrl = `${wsProto}//${wsHost}/ws/chart?token=${session?.access_token || ''}`;
-        console.log(`[HAChart] Connecting WebSocket early: ${wsUrl}`);
-        ws = new WebSocket(wsUrl);
-        ws.onopen = () => {
-          console.log('[HAChart] WebSocket open — subscribing to', selectedSymbol, selectedInterval);
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ action: 'subscribe', symbol: selectedSymbol, interval: selectedInterval }));
+      let wsRetryCount = 0;
+      const MAX_WS_RETRIES = 5;
+      const connectWebSocket = () => {
+        if (!session?.access_token) {
+          console.warn('[HAChart] WebSocket: No access token available, skipping connection');
+          return;
+        }
+
+        // Build WebSocket URL from environment or default
+        let wsUrl;
+        const baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8000';
+
+        // Convert HTTP(S) URLs to WS(S) for WebSocket
+        if (baseUrl.startsWith('https://')) {
+          wsUrl = `wss://${baseUrl.replace(/^https:\/\//, '')}/ws/chart?token=${session.access_token}`;
+        } else if (baseUrl.startsWith('http://')) {
+          wsUrl = `ws://${baseUrl.replace(/^http:\/\//, '')}/ws/chart?token=${session.access_token}`;
+        } else {
+          // Fallback for bare hostnames
+          const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          wsUrl = `${proto}//${baseUrl}/ws/chart?token=${session.access_token}`;
+        }
+
+        console.log(`[HAChart] Connecting WebSocket (attempt ${wsRetryCount + 1}/${MAX_WS_RETRIES}): ${wsUrl.replace(session.access_token, '***')}`);
+
+        try {
+          ws = new WebSocket(wsUrl);
+
+          ws.onopen = () => {
+            console.log('[HAChart] WebSocket open — subscribing to', selectedSymbol, selectedInterval);
+            wsRetryCount = 0;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ action: 'subscribe', symbol: selectedSymbol, interval: selectedInterval }));
+            }
+          };
+
+          ws.onerror = (event) => {
+            console.error('[HAChart] WebSocket error:', {
+              readyState: ws?.readyState,
+              url: wsUrl.replace(session.access_token, '***'),
+              eventType: event.type,
+              target: event.target?.readyState,
+            });
+          };
+
+          ws.onclose = (event) => {
+            console.warn('[HAChart] WebSocket closed:', {
+              code: event.code,
+              reason: event.reason || 'No reason provided',
+              wasClean: event.wasClean,
+            });
+
+            if (!event.wasClean && wsRetryCount < MAX_WS_RETRIES && isMounted) {
+              wsRetryCount++;
+              const delayMs = Math.min(1000 * Math.pow(2, wsRetryCount - 1), 10000);
+              console.log(`[HAChart] Scheduling WebSocket reconnect in ${delayMs}ms...`);
+              setTimeout(connectWebSocket, delayMs);
+            }
+          };
+        } catch (err) {
+          console.error('[HAChart] Failed to create WebSocket:', err.message);
+          if (wsRetryCount < MAX_WS_RETRIES && isMounted) {
+            wsRetryCount++;
+            const delayMs = Math.min(1000 * Math.pow(2, wsRetryCount - 1), 10000);
+            console.log(`[HAChart] Scheduling WebSocket reconnect in ${delayMs}ms...`);
+            setTimeout(connectWebSocket, delayMs);
           }
-        };
-        ws.onerror = (err) => console.warn('[HAChart] WebSocket connection error (retry pending):', err);
-        ws.onclose = () => console.log('[HAChart] WebSocket disconnected.');
-      }
+        }
+      };
+
+      connectWebSocket();
 
       setLoading(true);
       setNoData(false);
@@ -729,7 +783,11 @@ export default function HAChart({
               const msg = JSON.parse(event.data);
 
               if (msg.type === 'candle_update' && msg.symbol === selectedSymbol && msg.interval === selectedInterval) {
-                const candleTime = msg.time;
+                // msg.time is raw UTC seconds from the backend; historical
+                // candles were shifted by offsetSeconds (local tz) when loaded
+                // above, so the same shift must be applied here or every
+                // live update looks "hours behind" and gets dropped as stale.
+                const candleTime = msg.time + offsetSeconds;
                 // Stale-candle guard: drop candles >2 intervals behind current
                 if (candleTime < lastCandle.time - intervalSeconds * 2) {
                   console.warn(`[HAChart] Dropping stale WS candle: ${candleTime} vs ${lastCandle.time}`);

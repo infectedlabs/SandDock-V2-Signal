@@ -1,6 +1,6 @@
 # stream_subscriber.py
 # Persistent background process managing the Binance Futures WebSocket connection
-# Feeds Redis caching, Pub/Sub channels, and PostgreSQL DB storage
+# Feeds PostgreSQL NOTIFY events and PostgreSQL DB storage
 
 import asyncio
 import json
@@ -8,9 +8,13 @@ import logging
 import os
 import requests
 import websockets
-import redis.asyncio as aioredis
 import psycopg2
 from datetime import datetime, timezone
+from dotenv import load_dotenv
+
+# Load environment variables from .env.local in root directory
+env_path = os.path.join(os.path.dirname(__file__), '..', '.env.local')
+load_dotenv(env_path)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,8 +24,10 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # ── Configuration ─────────────────────────────────────────────────────────────
-REDIS_URL  = os.getenv("REDIS_URL", "redis://localhost:6379")
-DB_URL     = os.getenv("DATABASE_URL")
+DB_URL = os.getenv("DATABASE_URL")
+if not DB_URL:
+    log.error("DATABASE_URL not set in environment")
+    exit(1)
 
 # List of active symbols
 SYMBOLS = [
@@ -46,12 +52,23 @@ def build_stream_url():
     return "wss://fstream.binance.com/market/stream?streams=" + "/".join(streams)
 
 # ── Heikin Ashi helpers ───────────────────────────────────────────────────────
-async def compute_ha(symbol, interval, candle, redis_client):
-    prev_key = f"ha:prev:{symbol}:{interval}"
-    prev_raw = await redis_client.get(prev_key)
+# Store previous HA values in memory for faster access
+ha_prev_cache = {}
 
-    if prev_raw:
-        prev = json.loads(prev_raw)
+def get_ha_prev(symbol, interval):
+    """Get previous HA values from memory cache"""
+    key = f"ha:prev:{symbol}:{interval}"
+    return ha_prev_cache.get(key)
+
+def set_ha_prev(symbol, interval, ha):
+    """Store HA values in memory cache"""
+    key = f"ha:prev:{symbol}:{interval}"
+    ha_prev_cache[key] = ha
+
+def compute_ha(symbol, interval, candle):
+    prev = get_ha_prev(symbol, interval)
+
+    if prev:
         ha_open = (prev["ha_open"] + prev["ha_close"]) / 2
     else:
         # Initial fallback
@@ -69,7 +86,7 @@ async def compute_ha(symbol, interval, candle, redis_client):
     }
 
     if candle["is_closed"]:
-        await redis_client.set(prev_key, json.dumps(ha))
+        set_ha_prev(symbol, interval, ha)
 
     return ha
 
@@ -177,7 +194,7 @@ def bootstrap_history(db_conn):
     log.info("Bootstrapping phase complete.")
 
 # ── Handle incoming messages ──────────────────────────────────────────────────
-async def handle_kline(data, redis_client, db_conn):
+async def handle_kline(data, db_conn):
     k = data["k"]
     symbol    = k["s"]
     interval  = k["i"]
@@ -193,37 +210,71 @@ async def handle_kline(data, redis_client, db_conn):
         "is_closed":  is_closed,
     }
 
-    ha = await compute_ha(symbol, interval, candle, redis_client)
+    ha = compute_ha(symbol, interval, candle)
 
-    # Cache the latest open/closed candle in Redis for instant WebSocket load
-    current_key = f"candle:current:{symbol}:{interval}"
-    payload = {**candle, **ha, "symbol": symbol, "interval": interval}
-    await redis_client.setex(current_key, 90, json.dumps(payload))
-
-    # Publish kline update to subscribers.
+    # Publish kline update via PostgreSQL NOTIFY
     # Chart display uses HA values (same as TradingView HA mode).
-    await redis_client.publish(f"chart:{symbol}:{interval}", json.dumps({
-        "type":      "candle_update",
-        "symbol":    symbol,
-        "interval":  interval,
-        "time":      k["t"] // 1000,
-        # HA values — what the chart renders (matches TradingView HA mode)
-        "open":      ha["ha_open"],
-        "high":      ha["ha_high"],
-        "low":       ha["ha_low"],
-        "close":     ha["ha_close"],
-        # Raw OHLC kept alongside for signal engine consumers
-        "raw_open":  candle["open"],
-        "raw_high":  candle["high"],
-        "raw_low":   candle["low"],
-        "raw_close": candle["close"],
-        "volume":    candle["volume"],
-        "is_closed": is_closed,
-    }))
+    channel_name = f"chart:{symbol}:{interval}"
+    try:
+        payload = {
+            "type":      "candle_update",
+            "symbol":    symbol,
+            "interval":  interval,
+            "time":      k["t"] // 1000,
+            # HA values — what the chart renders (matches TradingView HA mode)
+            "open":      ha["ha_open"],
+            "high":      ha["ha_high"],
+            "low":       ha["ha_low"],
+            "close":     ha["ha_close"],
+            # Raw OHLC kept alongside for signal engine consumers
+            "raw_open":  candle["open"],
+            "raw_high":  candle["high"],
+            "raw_low":   candle["low"],
+            "raw_close": candle["close"],
+            "volume":    candle["volume"],
+            "is_closed": is_closed,
+        }
+        with db_conn.cursor() as cur:
+            # Quote channel name for PostgreSQL (colons need escaping)
+            cur.execute(f'NOTIFY "{channel_name}", %s', (json.dumps(payload),))
+            db_conn.commit()
+    except Exception as e:
+        log.error(f"Failed to publish via NOTIFY [{channel_name}]: {e}")
+
+    # Upsert the in-progress (or just-closed) candle into live_candles on
+    # EVERY tick, not just on close. ohlcv_cache below only gets written when
+    # a candle closes, so the WebSocket polling layer reads from live_candles
+    # to get real-time price movement within the current bar.
+    open_time = datetime.fromtimestamp(candle["open_time"] / 1000, tz=timezone.utc)
+    with db_conn.cursor() as cur:
+        cur.execute("""
+            INSERT INTO live_candles
+                (symbol, interval, open_time,
+                 open, high, low, close, volume,
+                 ha_open, ha_high, ha_low, ha_close)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (symbol, interval) DO UPDATE SET
+                open_time = EXCLUDED.open_time,
+                open      = EXCLUDED.open,
+                high      = EXCLUDED.high,
+                low       = EXCLUDED.low,
+                close     = EXCLUDED.close,
+                volume    = EXCLUDED.volume,
+                ha_open   = EXCLUDED.ha_open,
+                ha_high   = EXCLUDED.ha_high,
+                ha_low    = EXCLUDED.ha_low,
+                ha_close  = EXCLUDED.ha_close
+            WHERE EXCLUDED.open_time >= live_candles.open_time
+        """, (
+            symbol, interval, open_time,
+            candle["open"], candle["high"], candle["low"],
+            candle["close"], candle["volume"],
+            ha["ha_open"], ha["ha_high"], ha["ha_low"], ha["ha_close"],
+        ))
+        db_conn.commit()
 
     if is_closed:
         # Save closed candle to database cache
-        open_time = datetime.fromtimestamp(candle["open_time"] / 1000, tz=timezone.utc)
         with db_conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO ohlcv_cache
@@ -246,52 +297,98 @@ async def handle_kline(data, redis_client, db_conn):
             ))
             db_conn.commit()
 
-        # Publish a trigger to the signal engine to recalculate
-        await redis_client.publish("signal_engine:trigger", json.dumps({
-            "symbol":   symbol,
-            "interval": interval,
-        }))
+        # Publish a trigger to the signal engine via PostgreSQL NOTIFY
+        try:
+            with db_conn.cursor() as cur:
+                cur.execute('NOTIFY "signal_engine_trigger", %s', (json.dumps({
+                    "symbol":   symbol,
+                    "interval": interval,
+                }),))
+                db_conn.commit()
+        except Exception as e:
+            log.error(f"Failed to trigger signal engine: {e}")
         log.info(f"Persisted closed candle and triggered signal engine: {symbol} {interval}")
 
-async def handle_mini_ticker(data, redis_client):
+async def handle_mini_ticker(data, db_conn):
     """Handle 24hrMiniTicker stream events.
-    
+
     Uses data["c"] = last TRADE price, which matches TradingView BTCUSDT.P.
     This replaces the old @markPrice handler that used data["p"] (mark price),
     a calculated index price that can differ from last trade price by $5-30.
     """
     symbol = data["s"]
     price  = float(data["c"])  # "c" = last trade price (NOT mark price)
+    event_time = data.get("E", 0)
 
-    # Cache last trade price in Redis
-    await redis_client.setex(f"price:{symbol}", 30, str(price))
+    # Upsert into live_prices so the WebSocket polling layer can read the
+    # latest last-trade price without relying on NOTIFY (which pgbouncer breaks).
+    try:
+        with db_conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO live_prices (symbol, price, event_time)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (symbol) DO UPDATE SET
+                    price = EXCLUDED.price,
+                    event_time = EXCLUDED.event_time
+            """, (symbol, price, event_time))
+            db_conn.commit()
+    except Exception as e:
+        log.error(f"Failed to upsert live price for {symbol}: {e}")
 
-    # Publish price tick in real-time
-    await redis_client.publish(f"price:{symbol}", json.dumps({
-        "type":   "price_tick",
-        "symbol": symbol,
-        "price":  price,
-        "time":   data.get("E", 0),  # event time
-    }))
+    # Publish price tick via PostgreSQL NOTIFY
+    channel_name = f"price:{symbol}"
+    try:
+        payload = {
+            "type":   "price_tick",
+            "symbol": symbol,
+            "price":  price,
+            "time":   event_time,
+        }
+        with db_conn.cursor() as cur:
+            # Quote channel name for PostgreSQL (colons need escaping)
+            cur.execute(f'NOTIFY "{channel_name}", %s', (json.dumps(payload),))
+            db_conn.commit()
+    except Exception as e:
+        log.error(f"Failed to publish price tick for {symbol}: {e}")
 
 # ── Main Loop ─────────────────────────────────────────────────────────────────
 async def run():
-    redis_client = await aioredis.from_url(REDIS_URL, decode_responses=True)
-    
-    # Wait/retry for Redis connection to be available
-    while True:
-        try:
-            await redis_client.ping()
-            log.info("Successfully connected to Redis.")
-            break
-        except Exception as e:
-            log.error(f"Cannot connect to Redis at {REDIS_URL}. Retrying in 5s... Error: {e}")
-            await asyncio.sleep(5)
-    
     log.info("Connecting to Database...")
     db_conn = psycopg2.connect(DB_URL)
     db_conn.autocommit = True
-    
+
+    # live_candles holds one row per (symbol, interval) representing the
+    # currently forming candle, upserted on every kline tick (not just close).
+    # live_prices holds the latest last-trade price per symbol from miniTicker.
+    # Both exist because pgbouncer (transaction pooling) breaks LISTEN/NOTIFY,
+    # so the WebSocket layer polls these tables instead of listening for NOTIFY.
+    with db_conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS live_candles (
+                symbol    TEXT NOT NULL,
+                interval  TEXT NOT NULL,
+                open_time TIMESTAMPTZ NOT NULL,
+                open      DOUBLE PRECISION NOT NULL,
+                high      DOUBLE PRECISION NOT NULL,
+                low       DOUBLE PRECISION NOT NULL,
+                close     DOUBLE PRECISION NOT NULL,
+                volume    DOUBLE PRECISION NOT NULL,
+                ha_open   DOUBLE PRECISION NOT NULL,
+                ha_high   DOUBLE PRECISION NOT NULL,
+                ha_low    DOUBLE PRECISION NOT NULL,
+                ha_close  DOUBLE PRECISION NOT NULL,
+                PRIMARY KEY (symbol, interval)
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS live_prices (
+                symbol     TEXT PRIMARY KEY,
+                price      DOUBLE PRECISION NOT NULL,
+                event_time BIGINT NOT NULL
+            )
+        """)
+    log.info("Ensured live_candles and live_prices tables exist.")
+
     # Run historical data bootstrap
     bootstrap_history(db_conn)
     
@@ -307,11 +404,10 @@ async def run():
     # compute the full HA chain, and use the LAST result as the seed.
     # This produces the exact same HA values the frontend already displays
     # (which also fetches fresh Binance data via /api/chart/candles).
-    log.info("Seeding ha:prev Redis keys from FRESH Binance REST data...")
+    log.info("Seeding ha:prev memory cache from FRESH Binance REST data...")
     seeded = 0
     failed = 0
     for symbol, interval in SUBSCRIPTIONS:
-        prev_key = f"ha:prev:{symbol}:{interval}"
         try:
             # 200 candles is enough to get a stable HA seed for any interval
             candles = fetch_rest_candles(symbol, interval, limit=200)
@@ -319,7 +415,7 @@ async def run():
             if ha_list:
                 last = ha_list[-1]
                 ha_seed = {"ha_open": last["ha_open"], "ha_close": last["ha_close"]}
-                await redis_client.set(prev_key, json.dumps(ha_seed))
+                set_ha_prev(symbol, interval, ha_seed)
                 seeded += 1
                 log.debug(f"  Seeded {symbol} {interval}: ha_open={last['ha_open']}, ha_close={last['ha_close']}")
             else:
@@ -355,10 +451,10 @@ async def run():
                         event_type = data.get("e")
 
                         if event_type == "kline":
-                            await handle_kline(data, redis_client, db_conn)
+                            await handle_kline(data, db_conn)
                         elif event_type == "24hrMiniTicker":
                             # Last trade price — matches TradingView BTCUSDT.P
-                            await handle_mini_ticker(data, redis_client)
+                            await handle_mini_ticker(data, db_conn)
 
                     except Exception as e:
                         log.error(f"Error handling message: {e}")

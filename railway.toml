@@ -1,0 +1,16 @@
+# Railway.app configuration
+# Automatically detected when deploying from GitHub
+# Docs: https://docs.railway.app/reference/railway-toml
+
+[build]
+dockerfile = "Dockerfile.prod"
+context = "."
+
+[deploy]
+startCommand = "uvicorn api.main:app --host 0.0.0.0 --port $PORT"
+numReplicas = 1
+healthcheckPath = "/"
+healthcheckTimeout = 30
+
+[env]
+PYTHONUNBUFFERED = "1"

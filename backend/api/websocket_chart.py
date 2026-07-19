@@ -2,12 +2,12 @@ import os
 import json
 import asyncio
 import logging
+import asyncpg
 from fastapi import WebSocket, WebSocketDisconnect
-import redis.asyncio as aioredis
 from .auth import get_current_user_from_token
 
 log = logging.getLogger(__name__)
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+DB_URL = os.getenv("DATABASE_URL")
 
 # Plan access limits matching the Next.js frontend definitions
 PLAN_SYMBOLS = {
@@ -21,43 +21,113 @@ def user_has_access(user_plan: str, symbol: str) -> bool:
     return symbol.upper() in allowed
 
 async def chart_websocket(websocket: WebSocket):
-    # Retrieve token from query parameters
     token = websocket.query_params.get("token")
     user = get_current_user_from_token(token)
     user_plan = user.get("plan", "free") if user else "free"
 
     await websocket.accept()
     log.info(f"WebSocket client connected. Plan: {user_plan}")
-    
-    redis_client = await aioredis.from_url(REDIS_URL, decode_responses=True)
-    pubsub = redis_client.pubsub()
-    subscribed_channels = set()
-    
-    # Listen to Redis Pub/Sub channels and forward to browser WebSocket
-    async def listen_redis():
+
+    subscribed = {}  # (symbol, interval) -> last_sent_candle_data
+    last_price = {}  # symbol -> last_sent_price
+    poller_task = None
+
+    async def poll_and_send():
+        """Periodically poll database for updates and send via WebSocket"""
+        db_conn = await asyncpg.connect(DB_URL, statement_cache_size=0)
         try:
-            async for message in pubsub.listen():
-                if message["type"] == "message":
-                    await websocket.send_text(message["data"])
+            while True:
+                await asyncio.sleep(0.2)  # Poll every 200ms
+
+                for (symbol, interval) in list(subscribed.keys()):
+                    try:
+                        # live_candles reflects the in-progress candle, updated
+                        # on every kline tick. Fall back to ohlcv_cache (which
+                        # only has closed candles) if nothing has ticked yet.
+                        candle = await db_conn.fetchrow("""
+                            SELECT open_time, open, high, low, close, volume,
+                                   ha_open, ha_high, ha_low, ha_close
+                            FROM live_candles
+                            WHERE symbol = $1 AND interval = $2
+                        """, symbol, interval)
+
+                        if not candle:
+                            candle = await db_conn.fetchrow("""
+                                SELECT open_time, open, high, low, close, volume,
+                                       ha_open, ha_high, ha_low, ha_close
+                                FROM ohlcv_cache
+                                WHERE symbol = $1 AND interval = $2
+                                ORDER BY open_time DESC LIMIT 1
+                            """, symbol, interval)
+
+                        if candle and candle['open_time']:
+                            data = {
+                                "type": "candle_update",
+                                "symbol": symbol,
+                                "interval": interval,
+                                "time": int(candle['open_time'].timestamp()),
+                                "open": float(candle['ha_open']),
+                                "high": float(candle['ha_high']),
+                                "low": float(candle['ha_low']),
+                                "close": float(candle['ha_close']),
+                                "volume": float(candle['volume']),
+                            }
+
+                            # Only send if data changed
+                            if subscribed[(symbol, interval)] != data:
+                                try:
+                                    await websocket.send_json(data)
+                                    subscribed[(symbol, interval)] = data
+                                    log.debug(f"[POLL] Sent {symbol} {interval}: time={data['time']} close=${data['close']}")
+                                except Exception as e:
+                                    log.error(f"[POLL] Failed to send: {e}")
+                                    break
+                        else:
+                            log.warning(f"[POLL] No candle found for {symbol} {interval}")
+
+                    except Exception as e:
+                        log.error(f"[POLL] Query error for {symbol} {interval}: {e}")
+
+                    # Also poll live last-trade price for this symbol
+                    if symbol not in last_price:
+                        last_price[symbol] = None
+                    try:
+                        price_row = await db_conn.fetchrow("""
+                            SELECT price, event_time FROM live_prices WHERE symbol = $1
+                        """, symbol)
+                        if price_row:
+                            price_data = {
+                                "type": "price_tick",
+                                "symbol": symbol,
+                                "price": float(price_row['price']),
+                                "time": price_row['event_time'],
+                            }
+                            if last_price[symbol] != price_data:
+                                try:
+                                    await websocket.send_json(price_data)
+                                    last_price[symbol] = price_data
+                                except Exception as e:
+                                    log.error(f"[POLL] Failed to send price: {e}")
+                                    break
+                    except Exception as e:
+                        log.error(f"[POLL] Price query error for {symbol}: {e}")
+
         except asyncio.CancelledError:
             pass
-        except Exception as e:
-            log.error(f"Error in Redis listener task: {e}")
+        finally:
+            await db_conn.close()
 
-    listener_task = None
     try:
         while True:
             raw = await websocket.receive_text()
             msg = json.loads(raw)
 
             if msg.get("action") == "subscribe":
-                symbol   = msg.get("symbol")
-                interval = msg.get("interval")
+                symbol = msg.get("symbol", "").upper()
+                interval = msg.get("interval", "")
                 if not symbol or not interval:
                     continue
 
-                symbol = symbol.upper()
-                # Verify plan limits
                 if not user_has_access(user_plan, symbol):
                     await websocket.send_json({
                         "type": "error",
@@ -65,59 +135,26 @@ async def chart_websocket(websocket: WebSocket):
                     })
                     continue
 
-                # Redis channels to subscribe to
-                channel = f"chart:{symbol}:{interval}"
-                price_ch = f"price:{symbol}"
+                if (symbol, interval) not in subscribed:
+                    subscribed[(symbol, interval)] = None
+                    log.info(f"[WS] Subscribed: {symbol} {interval}")
 
-                if channel not in subscribed_channels:
-                    await pubsub.subscribe(channel, price_ch)
-                    subscribed_channels.add(channel)
-                    subscribed_channels.add(price_ch)
-                    log.info(f"Subscribed client to: {channel} & {price_ch}")
+                    if not poller_task:
+                        poller_task = asyncio.create_task(poll_and_send())
+                        log.info("[WS] Started polling task")
 
-                    # Immediately send current open candle from Redis cache to chart.
-                    # open_time in Redis is the raw Binance ms timestamp (integer).
-                    # Guard against it being stored as a string (e.g. ISO format).
-                    current = await redis_client.get(
-                        f"candle:current:{symbol}:{interval}"
-                    )
-                    if current:
-                        data = json.loads(current)
-                        raw_ot = data.get("open_time", 0)
-                        if isinstance(raw_ot, str):
-                            # ISO-format string — convert to unix ms
-                            from datetime import datetime
-                            raw_ot = int(datetime.fromisoformat(
-                                raw_ot.replace("Z", "+00:00")
-                            ).timestamp() * 1000)
-                        await websocket.send_json({
-                            "type":      "candle_update",
-                            "symbol":    symbol,
-                            "interval":  interval,
-                            "time":      raw_ot // 1000,
-                            # HA values — matches chart's historical HA candles
-                            "open":      data["ha_open"],
-                            "high":      data["ha_high"],
-                            "low":       data["ha_low"],
-                            "close":     data["ha_close"],
-                            # Raw OHLC alongside for signal engine consumers
-                            "raw_open":  data["open"],
-                            "raw_high":  data["high"],
-                            "raw_low":   data["low"],
-                            "raw_close": data["close"],
-                            "is_closed": False,  # current open candle
-                        })
-
-                # Start the background listening task if not running
-                if not listener_task:
-                    listener_task = asyncio.create_task(listen_redis())
+                    await websocket.send_json({
+                        "type": "subscription_confirmed",
+                        "channel": f"chart:{symbol}:{interval}"
+                    })
 
     except WebSocketDisconnect:
-        log.info("Client disconnected from WebSocket")
+        log.info("WebSocket disconnected")
     finally:
-        if listener_task:
-            listener_task.cancel()
-        if subscribed_channels:
-            await pubsub.unsubscribe(*subscribed_channels)
-        await pubsub.close()
-        await redis_client.close()
+        if poller_task:
+            poller_task.cancel()
+            try:
+                await poller_task
+            except:
+                pass
+        subscribed.clear()

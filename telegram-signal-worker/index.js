@@ -1,6 +1,6 @@
 // Sanddock Signal Worker
 // Always-on Railway service: listens to Binance's live kline WebSocket for
-// BTC/ETH/BNB 1h candles, closes signals on genuine opposite swings,
+// BTC/ETH/BNB 30m candles, closes signals on genuine opposite swings,
 // creates new live signals, writes both to Supabase, and posts Telegram
 // alerts to a dedicated channel — the instant each candle closes.
 //
@@ -25,32 +25,23 @@ const { createClient } = require('@supabase/supabase-js');
 
 // ─── Config ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-// Backstop only — the WebSocket is the real-time trigger. This just catches
-// the rare case of a dropped WS message. Runs the same cheap change-detection
-// guard as everything else, so it costs nothing when there's no new candle.
 const SAFETY_NET_INTERVAL_SECONDS = parseInt(process.env.SAFETY_NET_INTERVAL_SECONDS || '180', 10);
-
-// Matches the exact path already proven working in production by
-// backend/stream_subscriber.py — Binance's documented `/stream?streams=` and
-// `/ws/` paths both connected but delivered zero messages when tested
-// directly against this account/region; this one delivers within ~1s.
 const BINANCE_WS_BASE = 'wss://fstream.binance.com/market/stream?streams=';
 
 const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
 const INTERVAL = '30m';
-const LOOKBACK = 5;   // must match the rest of the app's swing detection (backside only)
+const LOOKBACK = 5;
 const SL_PCT = 0.5;
 const TP_PCT = 1.5;
-const CANDLES_FETCH = 1000; // ~20.8 days of 30m candles — plenty of prior-swing context
+const CANDLES_FETCH = 1000;
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
-// Helper: Convert UTC date to local timezone string (e.g., "2026-07-18T18:35:00" IST)
 function toLocalTimeString(utcDate) {
-  const offset = new Date().getTimezoneOffset() * -1; // IST = +330 minutes = +5:30 hours
+  const offset = new Date().getTimezoneOffset() * -1;
   const localDate = new Date(utcDate.getTime() + offset * 60000);
   const year = localDate.getUTCFullYear();
   const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');
@@ -71,18 +62,10 @@ if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
 
-// ─── Logging ─────────────────────────────────────────────────────────────
 function log(msg) {
   console.log(`[${new Date().toISOString()}] ${msg}`);
 }
 
-// ─── Binance REST candle fetch ───────────────────────────────────────────
-// Futures (fapi), not spot — matches the chart's live websocket
-// (stream_subscriber.py connects to fstream.binance.com) and the app's own
-// live-price fallback (src/lib/binanceFallback.js uses fapi.binance.com).
-// The original backfill script used spot and is left untouched — this is a
-// deliberate divergence for the worker only, so its entries/closes line up
-// with what's actually shown on the live chart going forward.
 async function fetchCandles(symbol, limit = CANDLES_FETCH) {
   let data;
   try {
@@ -101,18 +84,6 @@ async function fetchCandles(symbol, limit = CANDLES_FETCH) {
     }
     throw err;
   }
-  // Binance's klines endpoint includes the currently-forming (not yet closed)
-  // candle as the last element by default. Its high/low keep changing in
-  // real time, and since the symmetric detection window looks at
-  // candles[i-LOOKBACK..i+LOOKBACK], including it makes detectSwings
-  // non-deterministic between consecutive calls: a bar near the tail can be
-  // "confirmed" in one run and silently "unconfirmed" in the next purely
-  // because the live partial candle's high/low shifted, with no real price
-  // action on the confirmed bar itself. That's how a signal already stored
-  // as open in the DB can stop matching anything in a later run's
-  // withCloses and sit there forever unclosed. Drop it — only fully closed
-  // candles are deterministic, matching what a historical backfill (which
-  // only ever sees closed candles) actually computes.
   const closeTimeMs = k => k[6];
   const now = Date.now();
   const closed = data.filter(k => closeTimeMs(k) <= now);
@@ -128,7 +99,6 @@ async function fetchCandles(symbol, limit = CANDLES_FETCH) {
   }));
 }
 
-// ─── PnL Calculation ───────────────────────────────────────────────────────
 function calculatePnL(openSignal, closeSignal) {
   const entry = parseFloat(openSignal.entry_price);
   const close = parseFloat(closeSignal.entry_price);
@@ -141,38 +111,26 @@ function calculatePnL(openSignal, closeSignal) {
   }
 }
 
-// ─── Swing detection (30m + 5m Confirmation) ─────────────────────────────
-// Detects 30m swings (backside-only lookback)
-// Fires on first 5m candle close within that 30m period (~5 minutes average)
-// Result: Real-time entry, price drift minimal, 80%+ win rate
 function detectSwings(candles, lookback = LOOKBACK) {
-  // CRITICAL FIX: Only process the LATEST candle to avoid re-detecting old swings
-  // Each call should only check if the newest candle is a swing, using the lookback
-  // window relative to it. Historical swings are already in the database.
-
   if (candles.length < lookback + 1) return [];
 
-  const i = candles.length - 1; // Only check the latest candle
+  const i = candles.length - 1;
   const c = candles[i];
 
-  // Check if latest candle is a local low (within lookback window)
   let isLow = true;
   for (let j = i - lookback; j <= i; j++) {
     if (j !== i && candles[j].low < c.low) { isLow = false; break; }
   }
 
-  // Check if latest candle is a local high (within lookback window)
   let isHigh = true;
   for (let j = i - lookback; j <= i; j++) {
     if (j !== i && candles[j].high > c.high) { isHigh = false; break; }
   }
 
-  // When swing detected on 30m, use the candle's close time
   const signalTime = c.close_time;
   const signals = [];
 
   if (isLow) {
-    const entryPrice = c.low;
     signals.push({
       symbol: c.symbol,
       interval: INTERVAL,
@@ -180,18 +138,18 @@ function detectSwings(candles, lookback = LOOKBACK) {
       signal_type: 'buy',
       action: 'BUY',
       rationale: 'Swing low detected',
-      entry_price: entryPrice,
-      sl_price: entryPrice * (1 - SL_PCT / 100),
-      tp_price: entryPrice * (1 + TP_PCT / 100),
+      entry_price: c.low,
+      sl_price: c.low * (1 - SL_PCT / 100),
+      tp_price: c.low * (1 + TP_PCT / 100),
       sl_pct: SL_PCT,
       tp_pct: TP_PCT,
+      alert_type: 'confirmed',
+      alert_time: new Date().toISOString(),
     });
   }
 
   if (isHigh) {
-    // If both low and high, offset high by 1 second for uniqueness
     const offset = isLow ? new Date(signalTime).getTime() + 1000 : signalTime;
-    const entryPrice = c.high;
     signals.push({
       symbol: c.symbol,
       interval: INTERVAL,
@@ -199,33 +157,81 @@ function detectSwings(candles, lookback = LOOKBACK) {
       signal_type: 'sell',
       action: 'SELL',
       rationale: 'Swing high detected',
-      entry_price: entryPrice,
-      sl_price: entryPrice * (1 + SL_PCT / 100),
-      tp_price: entryPrice * (1 - TP_PCT / 100),
+      entry_price: c.high,
+      sl_price: c.high * (1 + SL_PCT / 100),
+      tp_price: c.high * (1 - TP_PCT / 100),
       sl_pct: SL_PCT,
       tp_pct: TP_PCT,
+      alert_type: 'confirmed',
+      alert_time: new Date().toISOString(),
     });
   }
 
   return signals;
 }
 
-// Helper: Calculate first 5m candle close time within 30m period (in LOCAL timezone)
-function calculateFirstFiveMinClose(isoTimeString) {
-  const date = new Date(isoTimeString);
-  // Round to nearest 5m, then add 5m to get close time
-  const minutes = date.getMinutes();
-  const fiveMinBucket = Math.floor(minutes / 5) * 5;
-  date.setMinutes(fiveMinBucket + 5, 0, 0);
-  return toLocalTimeString(date);
+function detectWickSwings(openCandle, historicalCandles, lookback = LOOKBACK) {
+  const signals = [];
+
+  if (historicalCandles.length < lookback) return signals;
+
+  const allCandles = [...historicalCandles, openCandle];
+  const i = allCandles.length - 1;
+  const c = openCandle;
+
+  let isWickLow = true;
+  for (let j = i - lookback; j < i; j++) {
+    if (allCandles[j].low < c.low) { isWickLow = false; break; }
+  }
+
+  let isWickHigh = true;
+  for (let j = i - lookback; j < i; j++) {
+    if (allCandles[j].high > c.high) { isWickHigh = false; break; }
+  }
+
+  const wickTime = new Date().toISOString();
+
+  if (isWickLow && c.low > 0) {
+    signals.push({
+      symbol: c.symbol,
+      interval: INTERVAL,
+      bar_time: c.open_time,
+      signal_type: 'buy',
+      action: 'BUY',
+      rationale: 'Swing low wick detected',
+      entry_price: c.low,
+      sl_price: c.low * (1 - SL_PCT / 100),
+      tp_price: c.low * (1 + TP_PCT / 100),
+      sl_pct: SL_PCT,
+      tp_pct: TP_PCT,
+      alert_type: 'pending_wick',
+      alert_time: wickTime,
+      wick_price: c.low,
+    });
+  }
+
+  if (isWickHigh && c.high > 0) {
+    signals.push({
+      symbol: c.symbol,
+      interval: INTERVAL,
+      bar_time: new Date(new Date(c.open_time).getTime() + 500).toISOString(),
+      signal_type: 'sell',
+      action: 'SELL',
+      rationale: 'Swing high wick detected',
+      entry_price: c.high,
+      sl_price: c.high * (1 + SL_PCT / 100),
+      tp_price: c.high * (1 - TP_PCT / 100),
+      sl_pct: SL_PCT,
+      tp_pct: TP_PCT,
+      alert_type: 'pending_wick',
+      alert_time: wickTime,
+      wick_price: c.high,
+    });
+  }
+
+  return signals;
 }
 
-// ─── Close calculation ────────────────────────────────────────────────────
-// Every signal gets a close computed, including the still-open one at the
-// end of the chain — for that one this is only a PLACEHOLDER
-// (close_reason: 'tp_hit', closed_at = its own bar_time, pnl_pct = tp_pct)
-// so markTrailingSignalLive() can detect and revert it. NEVER write that
-// placeholder to the DB as a real close — only 'swing_opposite' is genuine.
 function calculateCloses(signals) {
   return signals.map((sig, i) => {
     const entryPrice = parseFloat(sig.entry_price);
@@ -250,7 +256,7 @@ function calculateCloses(signals) {
     } else {
       closePrice = parseFloat(sig.tp_price);
       closedAt = sig.bar_time;
-      closeReason = 'tp_hit'; // placeholder — see comment above
+      closeReason = 'tp_hit';
       pnlPct = parseFloat(sig.tp_pct);
       isWin = true;
     }
@@ -268,23 +274,6 @@ function calculateCloses(signals) {
   });
 }
 
-// calculateCloses() only searches forward for the next OPPOSITE-direction
-// signal (matches the app's original backfill methodology — deliberately
-// left untouched so historical 'swing_opposite' closes/winrate never
-// change). Anything it couldn't match that way gets a placeholder close
-// (close_reason !== 'swing_opposite') that was meant to represent "still
-// open." But if several consecutive same-direction swings occur with no
-// opposite ever following any of them, EVERY one of them gets that same
-// placeholder — and reverting all of them to live at once is exactly how
-// a symbol ends up with multiple simultaneously-open rows (the BNBUSDT bug).
-//
-// Fix: only the chronologically LAST signal in the whole array can
-// genuinely still be open (nothing has happened after it yet). Every other
-// placeholder-closed signal must have been superseded by whatever
-// immediately follows it — which, by construction, has to be same-direction
-// (a real opposite would already have been matched by calculateCloses).
-// This only touches placeholder entries; anything already 'swing_opposite'
-// is left completely untouched, so no historical PnL/winrate changes.
 function resolveTrailingSupersession(withCloses) {
   for (let i = 0; i < withCloses.length; i++) {
     const sig = withCloses[i];
@@ -315,7 +304,6 @@ function resolveTrailingSupersession(withCloses) {
   return withCloses;
 }
 
-// ─── Dynamic Confidence Calculation ──────────────────────────────────────
 async function getDynamicConfidence(symbol) {
   try {
     const { data } = await supabase
@@ -325,22 +313,20 @@ async function getDynamicConfidence(symbol) {
       .eq('interval', INTERVAL)
       .not('closed_at', 'is', null)
       .order('bar_time', { ascending: false })
-      .limit(20); // Last 20 closed signals
+      .limit(20);
 
-    if (!data || data.length === 0) return 75; // Default if no history
+    if (!data || data.length === 0) return 75;
 
     const wins = data.filter(s => s.is_win).length;
     const winRate = (wins / data.length) * 100;
-    return Math.min(Math.max(Math.round(winRate), 60), 95); // Clamp between 60-95
+    return Math.min(Math.max(Math.round(winRate), 60), 95);
   } catch (err) {
     return 75;
   }
 }
 
-// Store message IDs for replies
-const signalMessageIds = {}; // signal_id -> message_id
+const signalMessageIds = {};
 
-// ─── Telegram ─────────────────────────────────────────────────────────────
 async function sendTelegram(text, replyToMessageId = null) {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return null;
   try {
@@ -366,6 +352,22 @@ function coinLabel(symbol) {
   return symbol.replace('USDT', '') + '/USDT';
 }
 
+function pendingWickMessage(sig) {
+  const isBuy = sig.signal_type === 'buy';
+  const icon = isBuy ? '🟢' : '🔴';
+  const dir = isBuy ? 'BUY' : 'SELL';
+  const localTime = toLocalTimeString(new Date(sig.alert_time));
+
+  return (
+    `${icon} <b>⏳ PENDING: ${dir} ${coinLabel(sig.symbol)} (30m wick)</b>\n\n` +
+    `📊 <b>Wick Price:</b> <code>$${sig.wick_price.toFixed(2)}</code>\n` +
+    `🎯 <b>Target:</b> <code>$${sig.tp_price.toFixed(2)}</code>\n` +
+    `🛑 <b>Stop:</b> <code>$${sig.sl_price.toFixed(2)}</code>\n\n` +
+    `⏰ <b>Alert Time:</b> ${localTime}\n` +
+    `📝 <b>Status:</b> Waiting for candle close confirmation...`
+  );
+}
+
 function newSignalMessage(sig) {
   const isBuy = sig.signal_type === 'buy';
   const icon = isBuy ? '🟢' : '🔴';
@@ -373,7 +375,7 @@ function newSignalMessage(sig) {
   const localTime = toLocalTimeString(new Date(sig.bar_time));
 
   return (
-    `${icon} <b>${dir} ${coinLabel(sig.symbol)} (30m)</b>\n\n` +
+    `${icon} <b>✅ CONFIRMED: ${dir} ${coinLabel(sig.symbol)} (30m)</b>\n\n` +
     `📊 <b>Entry:</b> <code>$${sig.entry_price.toFixed(2)}</code>\n` +
     `🎯 <b>Target:</b> <code>$${sig.tp_price.toFixed(2)}</code>\n` +
     `🛑 <b>Stop:</b> <code>$${sig.sl_price.toFixed(2)}</code>\n\n` +
@@ -399,7 +401,6 @@ function closedSignalMessage(sig) {
   );
 }
 
-// ─── Per-symbol cycle ─────────────────────────────────────────────────────
 async function processSymbol(symbol) {
   const candles = await fetchCandles(symbol);
   if (candles.length < LOOKBACK * 2 + 1) {
@@ -407,10 +408,10 @@ async function processSymbol(symbol) {
     return;
   }
 
-  // Skip everything below if Binance hasn't produced a new candle since we
-  // last looked. In normal operation the WebSocket only calls this once a
-  // candle has genuinely closed, so this is mostly a no-op guard against the
-  // safety-net sweep reprocessing a candle the WebSocket already handled.
+  if (!historicalCandles[symbol]) {
+    historicalCandles[symbol] = candles.slice(0, -1);
+  }
+
   const latestCandleTime = candles[candles.length - 1].open_time;
   if (lastSeenCandle[symbol] === latestCandleTime) return false;
   lastSeenCandle[symbol] = latestCandleTime;
@@ -422,11 +423,6 @@ async function processSymbol(symbol) {
     return true;
   }
 
-  // SIGNAL LIFECYCLE: Properly close current live signal before opening next one
-  // Since detectSwings now only returns latest candle swings, each detected signal
-  // should close any existing opposite-direction live signal
-
-  // Get the most recent open signal (if any)
   const { data: openRows } = await supabase
     .from('signals')
     .select('*')
@@ -440,13 +436,11 @@ async function processSymbol(symbol) {
   if (openRows && openRows.length > 0) {
     const openSignal = openRows[0];
 
-    // Check if detected signal is opposite direction (will close the open one)
     const isOppositeDetected = detected.some(sig =>
       sig.signal_type !== openSignal.action.toLowerCase()
     );
 
     if (isOppositeDetected) {
-      // Found opposite swing — close the open signal
       const oppositeSignal = detected.find(sig =>
         sig.signal_type !== openSignal.action.toLowerCase()
       );
@@ -475,19 +469,16 @@ async function processSymbol(symbol) {
     }
   }
 
-  // Only insert NEW signals if we either closed an existing one or there's no open signal
-  // This ensures: close first, then open new
   if (openRows && openRows.length > 0 && !foundOpenSignal) {
     log(`[${symbol}] Open signal exists and no opposite detected, waiting for opposite.`);
     return true;
   }
 
-  // Prepare new signals to insert - mark the latest as LIVE (open)
   const confidence = await getDynamicConfidence(symbol);
   const toInsert = detected.map(sig => ({
     ...sig,
     confidence,
-    closed_at: null,        // All detected signals are initially LIVE
+    closed_at: null,
     pnl_pct: null,
     is_win: null,
     close_reason: null,
@@ -515,18 +506,16 @@ async function processSymbol(symbol) {
   return true;
 }
 
-// ─── Shared state ───────────────────────────────────────────────────────
-const lastSeenCandle = {}; // symbol -> latest candle open_time seen so far
-const inFlight = {};       // symbol -> true while a processSymbol() call is running for it
+const lastSeenCandle = {};
+const inFlight = {};
+const pendingWicks = {};
+const historicalCandles = {};
 let lastEventAt = null;
 let lastEventError = null;
 let wsConnected = false;
 let wsConnectCount = 0;
-let lastMessageAt = null; // any WS message, not just candle-close events
+let lastMessageAt = null;
 
-// A symbol is processed independently of the others — one busy/slow symbol
-// must never block another symbol's candle-close event from being handled
-// immediately, so concurrency is guarded per-symbol, not globally.
 async function trigger(symbol, source) {
   if (inFlight[symbol]) {
     log(`[${symbol}] Already processing, dropping duplicate ${source} trigger.`);
@@ -547,7 +536,6 @@ async function trigger(symbol, source) {
   }
 }
 
-// ─── Binance WebSocket (primary, real-time trigger) ──────────────────────
 function connectWebSocket() {
   const streams = SYMBOLS.map(s => `${s.toLowerCase()}@kline_${INTERVAL}`).join('/');
   const url = BINANCE_WS_BASE + streams;
@@ -567,12 +555,46 @@ function connectWebSocket() {
       const msg = JSON.parse(raw);
       const k = msg?.data?.k;
       if (!k) return;
-      // k.x === true means this candle has closed — that's the exact moment
-      // a signal for this bar becomes possible to confirm. Fire immediately;
-      // don't await here, so one symbol's processing can't delay another's
-      // message from being read off the socket.
+
+      const symbol = k.s;
+      const candle = {
+        symbol,
+        open_time: new Date(k.t).toISOString(),
+        close_time: new Date(k.T).toISOString(),
+        open: +k.o,
+        high: +k.h,
+        low: +k.l,
+        close: +k.c,
+      };
+
+      // Real-time wick detection during candle formation
+      if (k.x === false && historicalCandles[symbol]) {
+        const wickSignals = detectWickSwings(candle, historicalCandles[symbol], LOOKBACK);
+        for (const sig of wickSignals) {
+          const wickKey = `${symbol}_${sig.signal_type}_${sig.wick_price}`;
+          if (!pendingWicks[wickKey]) {
+            pendingWicks[wickKey] = true;
+            log(`[${symbol}] WICK ALERT: Swing ${sig.signal_type.toUpperCase()} @ ${sig.wick_price.toFixed(2)}`);
+            sendTelegram(pendingWickMessage(sig));
+          }
+        }
+      }
+
+      // Candle close: confirm swings and process signals
       if (k.x === true) {
-        trigger(k.s, 'websocket');
+        if (!historicalCandles[symbol]) {
+          historicalCandles[symbol] = [];
+        }
+        historicalCandles[symbol].push(candle);
+        if (historicalCandles[symbol].length > 50) {
+          historicalCandles[symbol].shift();
+        }
+        for (const key of Object.keys(pendingWicks)) {
+          if (key.startsWith(symbol)) {
+            delete pendingWicks[key];
+          }
+        }
+        trigger(symbol, 'websocket');
       }
     } catch (err) {
       log(`WebSocket message parse error: ${err.message}`);
@@ -589,13 +611,6 @@ function connectWebSocket() {
     setTimeout(connectWebSocket, 5000);
   });
 
-  // Binance pushes a kline update on every trade for the open candle, so
-  // under any real market activity a message should arrive within seconds.
-  // A connection that "opens" but never delivers anything is the exact
-  // symptom of a geo-blocked host (handshake succeeds, Binance silently
-  // sends nothing) — the same root cause as the REST 451 error, just
-  // without an explicit status code to log. Warn once so it's diagnosable
-  // from logs alone instead of looking like a silently-idle connection.
   const watchdog = setInterval(() => {
     if (!wsConnected) { clearInterval(watchdog); return; }
     if (!watchdogWarned && Date.now() - connectedAt > 90000 && (!lastMessageAt || lastMessageAt < connectedAt)) {
@@ -608,17 +623,12 @@ function connectWebSocket() {
   }, 30000);
 }
 
-// ─── REST safety net (backstop only) ──────────────────────────────────────
-// Catches the rare dropped WebSocket message. Reuses the same
-// change-detection guard in processSymbol, so this is a no-op (one cheap
-// REST call per symbol) whenever the WebSocket has already kept up.
 function startSafetyNet() {
   setInterval(() => {
     for (const symbol of SYMBOLS) trigger(symbol, 'safety-net');
   }, SAFETY_NET_INTERVAL_SECONDS * 1000);
 }
 
-// ─── HTTP server (Railway health check) ──────────────────────────────────
 const app = express();
 
 app.get('/', (req, res) => {
@@ -641,7 +651,6 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.listen(PORT, () => {
   log(`Signal worker listening on port ${PORT}`);
-  // Catch up on anything missed while offline, then go fully event-driven.
   for (const symbol of SYMBOLS) trigger(symbol, 'startup');
   connectWebSocket();
   startSafetyNet();

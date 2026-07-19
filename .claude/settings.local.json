@@ -181,7 +181,20 @@
       "Bash(node -e \"console.log\\(new Date\\(1784442400573\\).toISOString\\(\\)\\)\")",
       "Bash(git fetch *)",
       "Bash(git rev-list *)",
-      "Bash(curl -s http://localhost:3000/api/hero-stats)"
+      "Bash(curl -s http://localhost:3000/api/hero-stats)",
+      "Bash(python backtest_strategy.py)",
+      "PowerShell(python \"C:\\\\Users\\\\GHURUP~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-GHURU-PRASAATH-Desktop-sanddock\\\\a941673f-4073-4865-b988-151b0e23b8d5\\\\scratchpad\\\\backtest_strategy.py\")",
+      "PowerShell(pip install ccxt pandas numpy -q)",
+      "PowerShell(python \"C:\\\\Users\\\\GHURUP~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-GHURU-PRASAATH-Desktop-sanddock\\\\a941673f-4073-4865-b988-151b0e23b8d5\\\\scratchpad\\\\backtest_indicator.py\")",
+      "Bash(python backtest_lookback_comparison.py)",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "Bash(python backtest_realtime_signals.py)",
+      "Bash(python backend/run_local.py)",
+      "Bash(tasklist //FI \"IMAGENAME eq python.exe\" //V)",
+      "Bash(wmic process *)",
+      "Bash(curl -s \"http://localhost:3000/api/chart/candles?symbol=BTCUSDT&interval=30m&limit=3\")",
+      "Bash(curl -s \"http://localhost:3000/api/chart/candles?symbol=BTCUSDT&interval=30m&limit=1\")"
     ]
   }
 }
