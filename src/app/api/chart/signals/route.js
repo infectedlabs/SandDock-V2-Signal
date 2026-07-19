@@ -80,6 +80,8 @@ export async function GET(request) {
       bar_time: s.bar_time,
       signal_type: s.signal_type,
       entry_price: parseFloat(s.entry_price),
+      sl_price: s.sl_price !== null ? parseFloat(s.sl_price) : null,
+      tp_price: s.tp_price !== null ? parseFloat(s.tp_price) : null,
       confidence: s.confidence || 95,
       action: s.action || 'new',
       pnl: s.pnl_pct !== null ? Number(parseFloat(s.pnl_pct).toFixed(2)) : null,
