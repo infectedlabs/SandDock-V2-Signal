@@ -487,34 +487,19 @@ async function processSymbol(symbol) {
     close_reason: null,
   }));
 
-  // Filter out signals that already exist (check by symbol + interval + bar_time)
-  const { data: existingSignals } = await supabase
-    .from('signals')
-    .select('bar_time')
-    .eq('symbol', symbol)
-    .eq('interval', INTERVAL)
-    .in('bar_time', toInsert.map(sig => sig.bar_time));
-
-  const existingTimes = new Set((existingSignals || []).map(sig => sig.bar_time));
-  const newSignalsToInsert = toInsert.filter(sig => !existingTimes.has(sig.bar_time));
-
-  if (newSignalsToInsert.length === 0) {
-    log(`[${symbol}] All detected swings already exist, skipping insert.`);
-    return true;
-  }
-
+  // Try to insert, silently skip duplicates via upsert
   const { data: insertedSignals, error: insertError } = await supabase
     .from('signals')
-    .insert(newSignalsToInsert)
+    .upsert(toInsert, { onConflict: 'symbol,interval,bar_time' })
     .select();
 
-  if (insertError) {
+  if (insertError && !insertError.message.includes('duplicate')) {
     log(`[${symbol}] Failed to insert new signals: ${insertError.message}`);
     return true;
   }
 
-  log(`[${symbol}] ➕ Inserted ${newSignalsToInsert.length} new signal(s).`);
-  for (const sig of (insertedSignals || newSignalsToInsert)) {
+  log(`[${symbol}] ➕ Processed ${toInsert.length} detected swing(s).`);
+  for (const sig of (insertedSignals || toInsert)) {
     if (sig.closed_at === null) {
       const messageId = await sendTelegram(newSignalMessage(sig));
       if (messageId && sig.id) {
@@ -546,34 +531,20 @@ async function processSymbol(symbol) {
         close_reason: null,
       }));
 
-      // Filter out signals that already exist (check by symbol + interval + bar_time)
-      const { data: existingRecovery } = await supabase
+      const { data: recoveryData, error: recoveryError } = await supabase
         .from('signals')
-        .select('bar_time')
-        .eq('symbol', symbol)
-        .eq('interval', INTERVAL)
-        .in('bar_time', recoveryInsert.map(sig => sig.bar_time));
+        .upsert(recoveryInsert, { onConflict: 'symbol,interval,bar_time' })
+        .select();
 
-      const existingRecoveryTimes = new Set((existingRecovery || []).map(sig => sig.bar_time));
-      const newRecoverySignals = recoveryInsert.filter(sig => !existingRecoveryTimes.has(sig.bar_time));
-
-      if (newRecoverySignals.length === 0) {
-        log(`[${symbol}] ⚠️  All recovery signals already exist in database.`);
+      if (recoveryError && !recoveryError.message.includes('duplicate')) {
+        log(`[${symbol}] Failed to insert recovery signals: ${recoveryError.message}`);
       } else {
-        const { error: recoveryError } = await supabase
-          .from('signals')
-          .insert(newRecoverySignals)
-          .select();
-        if (!recoveryError) {
-          log(`[${symbol}] ✓ Recovery: inserted ${newRecoverySignals.length} live signal(s)`);
-          for (const sig of newRecoverySignals) {
-            const messageId = await sendTelegram(newSignalMessage(sig));
-            if (messageId && sig.id) {
-              signalMessageIds[sig.id] = messageId;
-            }
+        log(`[${symbol}] ✓ Recovery: processed ${recoveryInsert.length} signal(s)`);
+        for (const sig of (recoveryData || recoveryInsert)) {
+          const messageId = await sendTelegram(newSignalMessage(sig));
+          if (messageId && sig.id) {
+            signalMessageIds[sig.id] = messageId;
           }
-        } else {
-          log(`[${symbol}] Failed to insert recovery signals: ${recoveryError.message}`);
         }
       }
     }
