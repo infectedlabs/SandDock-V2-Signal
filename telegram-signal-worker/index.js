@@ -503,6 +503,45 @@ async function processSymbol(symbol) {
       }
     }
   }
+
+  // Recovery: if no live signals exist, re-analyze to generate them
+  const { data: liveSignals } = await supabase
+    .from('signals')
+    .select('*')
+    .eq('symbol', symbol)
+    .eq('interval', INTERVAL)
+    .is('closed_at', null);
+
+  if (!liveSignals || liveSignals.length === 0) {
+    log(`[${symbol}] ⚠️  NO LIVE SIGNALS DETECTED — re-running candle analysis for recovery...`);
+    const allCandles = await fetchCandles(symbol);
+    const recoverySignals = detectSwings(allCandles);
+    if (recoverySignals.length > 0) {
+      const confidence = await getDynamicConfidence(symbol);
+      const recoveryInsert = recoverySignals.map(sig => ({
+        ...sig,
+        confidence,
+        closed_at: null,
+        pnl_pct: null,
+        is_win: null,
+        close_reason: null,
+      }));
+      const { error: recoveryError } = await supabase
+        .from('signals')
+        .insert(recoveryInsert)
+        .select();
+      if (!recoveryError) {
+        log(`[${symbol}] ✓ Recovery: inserted ${recoveryInsert.length} live signal(s)`);
+        for (const sig of recoveryInsert) {
+          const messageId = await sendTelegram(newSignalMessage(sig));
+          if (messageId && sig.id) {
+            signalMessageIds[sig.id] = messageId;
+          }
+        }
+      }
+    }
+  }
+
   return true;
 }
 
