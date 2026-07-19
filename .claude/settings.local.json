@@ -194,7 +194,8 @@
       "Bash(tasklist //FI \"IMAGENAME eq python.exe\" //V)",
       "Bash(wmic process *)",
       "Bash(curl -s \"http://localhost:3000/api/chart/candles?symbol=BTCUSDT&interval=30m&limit=3\")",
-      "Bash(curl -s \"http://localhost:3000/api/chart/candles?symbol=BTCUSDT&interval=30m&limit=1\")"
+      "Bash(curl -s \"http://localhost:3000/api/chart/candles?symbol=BTCUSDT&interval=30m&limit=1\")",
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\\\\src\\\\app\\\\apply\\\\page.jsx\"\\).Length)"
     ]
   }
 }
