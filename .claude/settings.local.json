@@ -160,7 +160,28 @@
       "Bash(node -c telegram-signal-worker/index.js)",
       "Bash(node -c src/components/HAChart.jsx)",
       "Bash(git checkout *)",
-      "Bash(node scripts/audit_alternation.js)"
+      "Bash(node scripts/audit_alternation.js)",
+      "Bash(python -c \"import requests; print\\('requests ok'\\)\")",
+      "Read(//c/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/1089db95-855c-455c-aa39-7df8a367443e/scratchpad/**)",
+      "Bash(python backtest.py)",
+      "Bash(curl -s -m 15 \"https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=5\")",
+      "Bash(python3 -c \"import pandas\")",
+      "Bash(node fetch_klines.js)",
+      "Bash(node backtest.js)",
+      "Bash(node fetch_klines_futures.js)",
+      "Bash(node backtest_futures.js)",
+      "Bash(node backtest_lb5.js)",
+      "Bash(node fetch_5m.js)",
+      "Bash(node backtest_hybrid.js)",
+      "Bash(node backtest_hybrid_intrabar.js)",
+      "Bash(node fetch_klines_5m.js)",
+      "Bash(node intrabar_analysis.js)",
+      "Bash(node fetch_ticks_for_signals.js)",
+      "Bash(node tick_level_analysis.js)",
+      "Bash(node -e \"console.log\\(new Date\\(1784442400573\\).toISOString\\(\\)\\)\")",
+      "Bash(git fetch *)",
+      "Bash(git rev-list *)",
+      "Bash(curl -s http://localhost:3000/api/hero-stats)"
     ]
   }
 }

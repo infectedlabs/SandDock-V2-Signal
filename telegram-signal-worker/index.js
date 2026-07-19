@@ -119,6 +119,7 @@ async function fetchCandles(symbol, limit = CANDLES_FETCH) {
 
   return closed.map(k => ({
     open_time: new Date(k[0]).toISOString(),
+    close_time: new Date(k[6]).toISOString(),
     open: +k[1],
     high: +k[2],
     low: +k[3],

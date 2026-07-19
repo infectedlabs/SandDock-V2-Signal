@@ -1943,21 +1943,23 @@ export default function TerminalPage() {
                         <div className="lg:col-span-8 space-y-8">
                           {/* Upper stats blocks */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            {/* Card 1: Yield */}
+                            {/* Card 1: Total PnL */}
                             <div className="bg-[#090909] border border-zinc-800 rounded-none p-6 text-left flex flex-col justify-between text-white">
                               <div className="flex justify-between items-start border-b border-zinc-800 pb-2 mb-4">
-                                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#ff4500]">CORE YIELD</span>
-                                <span className="text-zinc-400 text-[10px] font-mono">1% FIXED RISK</span>
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#ff4500]">Total PnL Return</span>
+                                <span className="text-zinc-400 text-[10px] font-mono">All Closed Trades</span>
                               </div>
                               <div className="my-4">
-                                <span className="text-5xl font-black font-mono tracking-tighter text-white block">
-                                  {computedStats?.cumulative_r != null
-                                    ? `${(computedStats.cumulative_r) >= 0 ? '+' : ''}${computedStats.cumulative_r.toFixed(2)} R`
-                                    : '0.00 R'}
+                                <span className={`text-5xl font-black font-mono tracking-tighter block ${
+                                  (computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
+                                }`}>
+                                  {computedStats?.raw_pnl_sum != null
+                                    ? `${(computedStats.raw_pnl_sum) >= 0 ? '+' : ''}${computedStats.raw_pnl_sum.toFixed(2)}%`
+                                    : '0.00%'}
                                 </span>
                               </div>
                               <div className="pt-3 border-t border-zinc-800 flex justify-between items-center text-xs font-mono">
-                                <span className="text-zinc-400 font-bold">Arithmetic Return:</span>
+                                <span className="text-zinc-400 font-bold">Cumulative Gain/Loss:</span>
                                 <span className={`font-black ${
                                   (computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
                                 }`}>
@@ -2025,25 +2027,27 @@ export default function TerminalPage() {
                             {/* Telemetry data grid */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-black rounded-none border border-zinc-800 font-mono text-center text-xs">
                               <div>
-                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">Selected Equity</span>
+                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">Starting Capital</span>
                                 <span className="text-sm font-bold text-white mt-1 block">${startingCapital.toLocaleString()}</span>
                               </div>
                               <div>
-                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">Risk Per Swing</span>
-                                <span className="text-sm font-bold text-black mt-1 block">${(startingCapital * 0.01).toLocaleString()}</span>
+                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">PnL Return Rate</span>
+                                <span className={`text-sm font-bold mt-1 block ${(computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
+                                  {computedStats?.raw_pnl_sum != null
+                                    ? `${(computedStats.raw_pnl_sum) >= 0 ? '+' : ''}${(computedStats.raw_pnl_sum).toFixed(2)}%`
+                                    : '0.00%'}
+                                </span>
                               </div>
                               <div>
-                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">Projected Return</span>
-                                <span className={`text-sm font-bold mt-1 block ${(computedStats?.cumulative_r || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
-                                  {computedStats?.cumulative_r != null 
-                                    ? `${(computedStats.cumulative_r) >= 0 ? '+' : ''}${(computedStats.cumulative_r).toFixed(2)}%`
-                                    : '0.00%'}
+                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">Projected Gain</span>
+                                <span className={`text-sm font-bold mt-1 block ${(computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
+                                  ${((computedStats?.raw_pnl_sum || 0) * startingCapital / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                               </div>
                               <div>
                                 <span className="block text-[9px] text-zinc-400 font-bold uppercase tracking-widest font-bold">Simulated Equity</span>
                                 <span className="text-sm font-extrabold text-[#ff4500] mt-1 block">
-                                  ${(startingCapital + (computedStats?.cumulative_r || 0) * (startingCapital * 0.01)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  ${(startingCapital + (computedStats?.raw_pnl_sum || 0) * startingCapital / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                               </div>
                             </div>

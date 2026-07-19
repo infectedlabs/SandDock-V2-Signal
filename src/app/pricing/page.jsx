@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -10,162 +10,69 @@ const PLANS_DATA = {
     label: "Free Plan",
     sublabel: "Always open to BTC signals",
     monthlyPrice: 0,
-    yearlyPrice: 0,
     color: "text-zinc-400",
     badge: null,
     highlight: false,
     features: [
-      { text: "BTC/USDT signals - 15m, 1h & 4h timeframes",  available: true },
-      { text: "Real-time web dashboard",                       available: true },
-      { text: "AI explanation & confidence score",            available: true },
-      { text: "Full BTC signal history (log + performance)",  available: true },
-      { text: "Basic BTC Heikin Ashi chart view",             available: true },
-      { text: "Free BTC Telegram group alerts",               available: true },
-      { text: "Automated Stop Loss & Take Profit",            available: false },
-      { text: "Pro/Master private channels alerts",           available: false },
+      { text: "BTC/USDT signals - 15m, 1h & 4h timeframes", available: true },
+      { text: "Real-time web dashboard", available: true },
+      { text: "AI explanation & confidence score", available: true },
+      { text: "Full BTC signal history (log + performance)", available: true },
+      { text: "Basic BTC Heikin Ashi chart view", available: true },
+      { text: "Free BTC Telegram group alerts", available: true },
+      { text: "Automated Stop Loss & Take Profit", available: false },
+      { text: "Pro/Master private channels alerts", available: false },
     ],
   },
   pro: {
     label: "Pro",
     sublabel: "Best for active traders",
-    monthlyPrice: 29,
-    yearlyPrice: 19,
-    yearlyTotal: 228,
     color: "text-brand-orange",
     badge: "Most Popular",
     highlight: true,
     features: [
-      { text: "BTC + ETH + BNB signals (Top 3 pairs)",        available: true },
-      { text: "15m, 1h & 4h timeframes for all 3 coins",      available: true },
-      { text: "Automated Stop Loss & Take Profit levels",     available: true },
-      { text: "Telegram alerts (1 paired chat / group)",      available: true },
-      { text: "P&L dashboard & full performance metrics",     available: true },
-      { text: "AI explanation & confidence score",            available: true },
-      { text: "CSV export of signal history",                 available: true },
-      { text: "Priority 24h email support",                   available: true },
+      { text: "BTC + ETH + BNB signals (Top 3 pairs)", available: true },
+      { text: "15m, 1h & 4h timeframes for all 3 coins", available: true },
+      { text: "Automated Stop Loss & Take Profit levels", available: true },
+      { text: "Telegram alerts (1 paired chat / group)", available: true },
+      { text: "P&L dashboard & full performance metrics", available: true },
+      { text: "AI explanation & confidence score", available: true },
+      { text: "CSV export of signal history", available: true },
+      { text: "Priority 24h email support", available: true },
     ],
   },
   master: {
     label: "Master",
     sublabel: "For power traders",
-    monthlyPrice: 79,
-    yearlyPrice: 49,
-    yearlyTotal: 588,
     color: "text-purple-400",
     badge: "All Coins",
     highlight: false,
     features: [
-      { text: "All 15 premium altcoins scanned 24/7",         available: true },
-      { text: "15m, 1h & 4h on every pair",                   available: true },
-      { text: "Automated Stop Loss & Take Profit levels",     available: true },
-      { text: "Unlimited Telegram alerts & channels",         available: true },
-      { text: "Multi-timeframe trend confluence analysis",    available: true },
-      { text: "Full P&L history & CSV export",                available: true },
-      { text: "AI explanation & confidence score",            available: true },
-      { text: "Priority 12h email support",                   available: true },
+      { text: "All 15 premium altcoins scanned 24/7", available: true },
+      { text: "15m, 1h & 4h on every pair", available: true },
+      { text: "Automated Stop Loss & Take Profit levels", available: true },
+      { text: "Unlimited Telegram alerts & channels", available: true },
+      { text: "Multi-timeframe trend confluence analysis", available: true },
+      { text: "Full P&L history & CSV export", available: true },
+      { text: "AI explanation & confidence score", available: true },
+      { text: "Priority 12h email support", available: true },
     ],
   },
 };
 
-const FEATURE_TABLE = [
-  {
-    group: "Signal Coverage",
-    rows: [
-      { name: "Coins Available",          free: "BTC only",       pro: "BTC, ETH, BNB", master: "All 15 pairs" },
-      { name: "Timeframes",               free: "15m, 1h, 4h",    pro: "15m, 1h, 4h",   master: "15m, 1h, 4h" },
-      { name: "Live Active Signals",      free: "Yes",            pro: "Yes",           master: "Yes" },
-      { name: "Historical Signal Log",    free: "BTC read-only",  pro: "3 coins",       master: "All coins" },
-    ],
-  },
-  {
-    group: "Risk & Calculation",
-    rows: [
-      { name: "SL & TP Levels",          free: "Locked",         pro: "Visible",       master: "Visible" },
-      { name: "P&L Calculator",          free: "No",             pro: "30-day window", master: "Full history" },
-      { name: "Heikin Ashi Chart",       free: "BTC only",       pro: "BTC, ETH, BNB", master: "All pairs" },
-      { name: "CSV Export",              free: "No",             pro: "Yes",           master: "Yes" },
-    ],
-  },
-  {
-    group: "Alerts & Automation",
-    rows: [
-      { name: "Web Dashboard",           free: "Real-time",      pro: "Real-time",     master: "Real-time" },
-      { name: "Telegram Alerts",         free: "Free BTC Group",  pro: "Pro Channel (1 invite)", master: "Master Channel (1 invite)" },
-      { name: "AI Explanation",          free: "Yes",            pro: "Yes",           master: "Yes + Confluence" },
-    ],
-  },
-  {
-    group: "Support",
-    rows: [
-      { name: "Email Support",           free: "48h response",   pro: "24h response",  master: "12h priority" },
-    ],
-  },
-];
+// Demo/Mock stats for FOMO
+const DEMO_STATS = {
+  totalApplications: 47,
+  thisWeek: 12,
+  acceptedThisWeek: 8,
+  proAccepted: 23,
+  proWaitlist: 6,
+  masterAccepted: 11,
+  masterWaitlist: 13,
+  averageReviewTime: "< 48 hours",
+  lastReviewDate: "Tuesday",
+};
 
-const FAQS = [
-  {
-    q: "How does the Free Plan work?",
-    a: "When you sign up, you get permanent, unlimited access to live BTC/USDT signals across all timeframes (15m, 1h, 4h) with AI explanations, signal history, and Heikin Ashi charts. You can also join our free public BTC Telegram alert group.",
-  },
-  {
-    q: "What signals require upgrading?",
-    a: "Access to premium altcoins (like ETH, BNB, SOL), automated SL/TP parameters, and our private Pro, Master, or Grandmaster Telegram channels require upgrading to a paid plan.",
-  },
-  {
-    q: "How does monthly vs yearly billing work?",
-    a: "Yearly plans are billed as one upfront payment - $228/year for Pro ($19/mo equivalent) or $588/year for Master ($49/mo equivalent), saving up to 38% vs monthly billing. You can cancel before your renewal date.",
-  },
-  {
-    q: "Can I cancel at any time?",
-    a: "Yes. Email support@sanddock.com or use the Billing page inside your account. You keep full access to your plan until the end of your current billing period with zero cancellation fees.",
-  },
-  {
-    q: "What is the GrandMaster Lifetime Deal?",
-    a: "A one-time payment of $799 grants permanent Master-level access - forever. No recurring fees, upsells, or surprises. All future coins, features, and updates are included. Comes with a custom Binance Pair.",
-  },
-  {
-    q: "Do you offer refunds?",
-    a: "Yes. 14-day money-back guarantee on all monthly and yearly plans, and a 30-day guarantee on the Lifetime Deal. Contact support@sanddock.com.",
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    category: "SIGNAL QUALITY",
-    text: '"The AI explanation on every signal is a game-changer - I actually understand why I\'m entering a trade now. First signal tool that doesn\'t make me feel confused."',
-    author: "Alex Rivera",
-    role: "Senior Software Engineer",
-  },
-  {
-    category: "HONEST LEDGER",
-    text: '"The public track record is what sold me. They show the losses too. Every other signal group hides that. Instant trust from day one."',
-    author: "Nico G.",
-    role: "Asset Allocator",
-  },
-  {
-    category: "PRO USER",
-    text: '"Switched from a VIP signal group to Sanddock. No more spam. One clean alert with an explanation. The Pro plan is absolutely worth it."',
-    author: "Marcus Aurelius",
-    role: "Swing Trader",
-  },
-];
-
-// ── Checkout helper ─────────────────────────────────────────────────────────
-async function startCheckout({ userId, plan, billingCycle }) {
-  const res = await fetch("/api/checkout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, plan, billingCycle }),
-  });
-  const data = await res.json();
-  if (data.checkoutUrl) {
-    window.location.href = data.checkoutUrl;
-    return true;
-  }
-  throw new Error(data.error || "Could not start checkout");
-}
-
-// ── CheckIcon ───────────────────────────────────────────────────────────────
 function CheckIcon({ available }) {
   if (available) {
     return (
@@ -181,17 +88,16 @@ function CheckIcon({ available }) {
   );
 }
 
-// ── PricingCard ─────────────────────────────────────────────────────────────
-function PricingCard({ planKey, data, isYearly, user, onUpgrade, loadingKey }) {
-  const price = isYearly ? data.yearlyPrice : data.monthlyPrice;
+// ── PricingCard ─────────────────────────────────────────────────────────
+function PricingCard({ planKey, data, user }) {
+  const router = useRouter();
   const isFree = planKey === "free";
-  const isLoading = loadingKey === `${planKey}_${isYearly ? "yearly" : "monthly"}`;
 
   return (
     <div
       className={`relative flex flex-col justify-between rounded-none border p-7 ${
         data.highlight
-          ? "border-brand-orange bg-white shadow-[6px_6px_0px_0px_rgba(61,90,254,0.6)]"
+          ? "border-brand-orange bg-white shadow-[6px_6px_0px_0px_rgba(255,69,0,0.3)]"
           : "border-black bg-[#f8f9fa] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
       }`}
       id={`plan-${planKey}`}
@@ -205,20 +111,19 @@ function PricingCard({ planKey, data, isYearly, user, onUpgrade, loadingKey }) {
       <div className="space-y-5">
         <div>
           <span className={`text-[11px] font-extrabold uppercase tracking-wider ${data.color}`}>{data.label}</span>
-          <div className="mt-1.5 flex items-end gap-1">
-            <span className="text-4xl font-extrabold font-mono text-black">
-              {isFree ? "$0" : `$${price}`}
-            </span>
-            {!isFree && <span className="text-sm font-bold text-black uppercase mb-1">/mo</span>}
+          <div className="mt-1.5">
+            {isFree ? (
+              <>
+                <span className="text-4xl font-extrabold font-mono text-black">$0</span>
+                <span className="block text-[11px] text-zinc-500 font-bold mt-0.5">No credit card · Permanent access</span>
+              </>
+            ) : (
+              <>
+                <span className="text-2xl font-extrabold font-mono text-brand-orange">Application Only</span>
+                <span className="block text-[11px] text-zinc-500 font-bold mt-1">Pricing revealed after approval</span>
+              </>
+            )}
           </div>
-          {!isFree && isYearly && (
-            <span className="block text-[11px] text-zinc-500 font-bold">
-              Billed annually (${data.yearlyTotal}/yr)
-            </span>
-          )}
-          {isFree && (
-            <span className="block text-[11px] text-zinc-500 font-bold mt-0.5">No credit card · 7 days free</span>
-          )}
         </div>
 
         <p className="text-[13px] text-zinc-600 leading-relaxed">{data.sublabel}</p>
@@ -254,15 +159,14 @@ function PricingCard({ planKey, data, isYearly, user, onUpgrade, loadingKey }) {
           )
         ) : (
           <button
-            onClick={() => onUpgrade(planKey, isYearly ? "yearly" : "monthly")}
-            disabled={isLoading}
-            className={`w-full py-3 font-bold text-[12px] uppercase tracking-widest transition-all rounded-none border cursor-pointer disabled:opacity-60 ${
+            onClick={() => router.push(`/apply?plan=${planKey}`)}
+            className={`w-full py-3 font-bold text-[12px] uppercase tracking-widest transition-all rounded-none border cursor-pointer ${
               data.highlight
                 ? "bg-brand-orange hover:bg-black text-white border-brand-orange"
                 : "bg-black hover:bg-brand-orange text-white border-black"
             }`}
           >
-            {isLoading ? "Redirecting…" : `Upgrade to ${data.label} →`}
+            Apply for {data.label} →
           </button>
         )}
       </div>
@@ -272,43 +176,7 @@ function PricingCard({ planKey, data, isYearly, user, onUpgrade, loadingKey }) {
 
 // ── Main Page ───────────────────────────────────────────────────────────────
 export default function PricingPage() {
-  const { user, profile } = useAuth();
-  const router = useRouter();
-  const [isYearly, setIsYearly] = useState(true);
-  const [openFAQ, setOpenFAQ] = useState({});
-  const [loadingKey, setLoadingKey] = useState(null);
-
-  // Trial features are permanently disabled
-  const isFreePlan = profile?.plan === "free";
-  const trialEndsAt = null;
-  const trialDaysLeft = null;
-  const trialExpired = false;
-
-  const handleUpgrade = async (plan, billingCycle) => {
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-    const key = `${plan}_${billingCycle}`;
-    setLoadingKey(key);
-    try {
-      await startCheckout({ userId: user.id, plan, billingCycle });
-    } catch (e) {
-      alert(`Checkout error: ${e.message}`);
-      setLoadingKey(null);
-    }
-  };
-
-  const handleLifetime = async () => {
-    if (!user) { router.push("/login"); return; }
-    setLoadingKey("lifetime_lifetime");
-    try {
-      await startCheckout({ userId: user.id, plan: "lifetime", billingCycle: "lifetime" });
-    } catch (e) {
-      alert(`Checkout error: ${e.message}`);
-      setLoadingKey(null);
-    }
-  };
+  const { user } = useAuth();
 
   return (
     <div className="relative min-h-screen bg-white text-black overflow-hidden">
@@ -355,35 +223,14 @@ export default function PricingPage() {
       {/* ── TITLE SECTION ──────────────────────────────────────────────────── */}
       <section className="pt-16 pb-10 max-w-7xl mx-auto px-6 border-b border-black text-left">
         <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange block mb-2">
-          Transparent Cost
+          Application-Based Access
         </span>
         <h1 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none mb-4">
-          Simple pricing. No surprises.
+          We're selective about who we let in.
         </h1>
         <p className="text-zinc-500 text-sm max-w-xl leading-relaxed">
-          Start free on Bitcoin for 7 days. Upgrade when the signals prove themselves.
+          Every trader is reviewed for risk management. Start free on Bitcoin, then apply for Pro or Master. We review applications within 24 hours and notify you via email.
         </p>
-
-        <div className="flex items-center justify-start gap-3 pt-7">
-          <span className={`text-[11px] font-bold uppercase tracking-wider transition-colors ${!isYearly ? "text-black" : "text-zinc-400"}`}>
-            Monthly
-          </span>
-          <button
-            onClick={() => setIsYearly(!isYearly)}
-            className="relative w-10 h-5 bg-zinc-200 border border-black rounded-none transition-colors focus:outline-none cursor-pointer"
-            aria-label="Toggle billing frequency"
-          >
-            <div className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-black rounded-none transition-transform duration-200 ${isYearly ? "translate-x-5" : ""}`} />
-          </button>
-          <div className="flex items-center gap-2">
-            <span className={`text-[11px] font-bold uppercase tracking-wider transition-colors ${isYearly ? "text-black" : "text-zinc-400"}`}>
-              Yearly
-            </span>
-            <span className="text-[10px] font-bold text-white bg-brand-orange px-2 py-0.5 rounded-none uppercase">
-              Save 38%
-            </span>
-          </div>
-        </div>
       </section>
 
       {/* ── PLAN CARDS ─────────────────────────────────────────────────────── */}
@@ -394,236 +241,177 @@ export default function PricingPage() {
               key={key}
               planKey={key}
               data={data}
-              isYearly={isYearly}
               user={user}
-              onUpgrade={handleUpgrade}
-              loadingKey={loadingKey}
             />
           ))}
         </div>
+      </section>
 
-        {/* ── Lifetime Card ─────────────────────────────────────────────── */}
-        <div
-          className="relative rounded-none border border-black bg-[#f4f6fa] p-8 mt-12 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
-          id="plan-lifetime"
-        >
-          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-brand-orange/15 to-transparent pointer-events-none" />
-          <div className="space-y-3 text-left max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-orange text-white text-[10px] font-bold uppercase tracking-wider">
-              ⚡ Founding Member Offer - One-Time Payment
-            </div>
-            <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-black font-sans leading-none">
-              GrandMaster Lifetime Access - $799
-            </h2>
-            <p className="text-sm text-zinc-600 leading-relaxed">
-              Permanent Master-level access to Sanddock forever. All future coins, features &amp; updates included - no recurring fees.
-            </p>
-            <ul className="space-y-1.5 text-[12px] text-zinc-700 font-semibold">
-              {["All 15 coins, all timeframes - permanently", "Unlimited Telegram alerts & channels", "All future features included automatically", "GrandMaster certification badge", "Custom Binance Pair"].map((f) => (
-                <li key={f} className="flex items-center gap-2">
-                  <span className="text-brand-orange font-mono text-sm">•</span> {f}
-                </li>
-              ))}
-            </ul>
-            <div className="text-brand-orange font-mono text-[11px] font-bold uppercase tracking-wide">
-              🔥 Only 188 spots left at this price - 312 of 500 claimed
-            </div>
+      {/* ── ACCESS STATUS (FOMO) ───────────────────────────────────────────── */}
+      <section className="py-14 max-w-7xl mx-auto px-6 border-b border-black">
+        <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange block mb-6">
+          Current Access Status
+        </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="border border-black p-6 bg-white">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Pro Plan</p>
+            <p className="text-3xl font-extrabold text-black mb-1">Open</p>
+            <p className="text-[11px] text-zinc-600">{DEMO_STATS.proAccepted} accepted this month</p>
           </div>
-          <button
-            onClick={handleLifetime}
-            disabled={!!loadingKey}
-            className="w-full lg:w-auto bg-black hover:bg-brand-orange text-white font-bold text-[12px] uppercase tracking-widest px-8 py-4 transition-all rounded-none border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] flex-shrink-0 text-center cursor-pointer disabled:opacity-60"
-          >
-            {loadingKey === "lifetime_lifetime" ? "Redirecting…" : "Secure Spot Now →"}
-          </button>
+          <div className="border border-black p-6 bg-zinc-50">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Master Waitlist</p>
+            <p className="text-3xl font-extrabold text-brand-orange mb-1">{DEMO_STATS.masterWaitlist}</p>
+            <p className="text-[11px] text-zinc-600">traders waiting for access</p>
+          </div>
+          <div className="border border-black p-6 bg-white">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">This Week</p>
+            <p className="text-3xl font-extrabold text-black mb-1">{DEMO_STATS.thisWeek}</p>
+            <p className="text-[11px] text-zinc-600">{DEMO_STATS.acceptedThisWeek} approved applications</p>
+          </div>
+          <div className="border border-black p-6 bg-zinc-50">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Response Time</p>
+            <p className="text-3xl font-extrabold text-brand-orange mb-1">&lt; 24h</p>
+            <p className="text-[11px] text-zinc-600">email notification sent</p>
+          </div>
         </div>
       </section>
 
-      {/* ── SIGNAL OUTCOME MOCKUP ──────────────────────────────────────────── */}
+      {/* ── HOW THE PROCESS WORKS ──────────────────────────────────────────── */}
       <section className="py-14 max-w-7xl mx-auto px-6 border-b border-black">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-5 text-left space-y-4">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange">Verified Outcomes</span>
-            <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
-              Every alert has a verified entry &amp; exit.
-            </h2>
-            <p className="text-sm text-zinc-600 leading-relaxed">
-              We do not post curated screenshots of hypothetical returns. Our system tracks every trade in a public ledger linked with live alerts.
-            </p>
-            <div className="p-4 bg-zinc-50 border border-black rounded-none space-y-2 text-[11px] font-bold uppercase tracking-wider text-black">
-              <div className="flex justify-between"><span>Signal Accuracy</span><span className="text-[#00b050]">78.4%</span></div>
-              <div className="flex justify-between"><span>Avg Return / Trade</span><span className="text-[#00b050]">+4.92%</span></div>
-              <div className="flex justify-between font-extrabold border-t border-black/10 pt-2"><span>Monthly Net (10x Leverage)</span><span>+48.1%</span></div>
+        <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange block mb-6">
+          The Application Process
+        </span>
+        <h2 className="text-2xl font-bold uppercase tracking-tighter mb-8">Why we review every application</h2>
+        <div className="space-y-6 text-zinc-700 max-w-3xl">
+          <p className="leading-relaxed">
+            Signal quality means nothing if you don't understand risk management. We review each application and grant access based on your approach to position sizing and stop losses. This ensures everyone on the platform has realistic expectations and the discipline to follow their plan.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="border border-black p-6 bg-zinc-50">
+              <div className="text-2xl font-bold mb-2">📋</div>
+              <p className="font-bold text-black mb-1 text-[13px]">Applications reviewed</p>
+              <p className="text-[12px] text-zinc-600">Within 24 hours of submission</p>
             </div>
-          </div>
-          <div className="lg:col-span-7 w-full">
-            <div className="bg-[#080d1a] border border-black rounded-none p-6 text-white relative overflow-hidden text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-5">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#00e676] animate-pulse" />
-                  <span className="font-mono text-[10px] text-[#00e676] font-bold tracking-widest uppercase">Real-Time Signal Outcome</span>
-                </div>
-                <span className="font-mono text-[9px] text-zinc-500">PAIRED TELEGRAM OUTFLOW</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-3">
-                  <div><span className="block text-[9px] text-zinc-500 font-mono">INSTRUMENT</span><span className="text-lg font-bold font-mono tracking-tight">BTC/USDT</span></div>
-                  <div><span className="block text-[9px] text-zinc-500 font-mono">SIGNAL TYPE</span><span className="inline-block bg-[#00e676]/15 text-[#00e676] font-mono text-[10px] font-bold px-2 py-0.5 border border-[#00e676]/20">BUY ALERT</span></div>
-                  <div className="bg-black/40 p-3 border border-white/5 space-y-1.5 font-mono text-[10px]">
-                    <div className="flex justify-between"><span className="text-zinc-500">ENTRY:</span><span className="text-white font-bold">$67,432.00</span></div>
-                    <div className="flex justify-between"><span className="text-zinc-500">EXIT:</span><span className="text-[#00e676] font-bold">$70,812.00</span></div>
-                    <div className="flex justify-between border-t border-white/5 pt-1.5"><span className="text-zinc-500">STOP LOSS:</span><span className="text-red-400 font-bold">$65,800.00</span></div>
-                  </div>
-                </div>
-                <div className="space-y-3 flex flex-col justify-between">
-                  <div className="bg-[#00e676]/5 border border-[#00e676]/20 p-3">
-                    <span className="block text-[9px] text-zinc-500 font-mono uppercase">Trade Profit</span>
-                    <span className="block text-2xl font-bold font-mono text-[#00e676]">+5.01%</span>
-                    <span className="block text-[9px] text-[#00e676]/80 font-mono mt-0.5">Unleveraged Spot</span>
-                  </div>
-                  <div className="bg-[#00e676]/10 border border-[#00e676]/30 p-3">
-                    <span className="block text-[9px] text-zinc-500 font-mono uppercase">10× Leverage Return</span>
-                    <span className="block text-2xl font-bold font-mono text-[#00e676]">+50.1%</span>
-                  </div>
-                </div>
-              </div>
+            <div className="border border-black p-6 bg-white">
+              <div className="text-2xl font-bold mb-2">✉️</div>
+              <p className="font-bold text-black mb-1 text-[13px]">Notification</p>
+              <p className="text-[12px] text-zinc-600">Decision sent via email. Check spam folder to be safe.</p>
+            </div>
+            <div className="border border-black p-6 bg-zinc-50">
+              <div className="text-2xl font-bold mb-2">💳</div>
+              <p className="font-bold text-black mb-1 text-[13px]">Payment method</p>
+              <p className="text-[12px] text-zinc-600">USDT TRC-20 only. Direct on-chain, no middleman.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── FEATURE TABLE ──────────────────────────────────────────────────── */}
+      {/* ── FEATURE COMPARISON TABLE ────────────────────────────────────────── */}
       <section className="py-14 max-w-7xl mx-auto px-6 border-b border-black">
-        <div className="text-left mb-8">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange block mb-2">Detailed Comparison</span>
-          <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
-            Compare all plan capabilities.
-          </h2>
-        </div>
+        <h2 className="text-2xl font-bold uppercase tracking-tighter mb-8">Complete Feature Comparison</h2>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-black text-left">
+          <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-zinc-100 border-b border-black text-[11px] font-extrabold uppercase tracking-wider text-black">
-                <th className="p-3.5 border-r border-black">Feature</th>
-                <th className="p-3.5 border-r border-black text-center w-28">Free Trial</th>
-                <th className="p-3.5 border-r border-black text-center w-28 text-brand-orange">Pro</th>
-                <th className="p-3.5 text-center w-28">Master</th>
+              <tr className="border-b border-black">
+                <th className="text-left py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-zinc-600">Feature</th>
+                <th className="text-center py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-zinc-600">Free</th>
+                <th className="text-center py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-brand-orange">Pro</th>
+                <th className="text-center py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-purple-600">Master</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/10 font-sans">
-              {FEATURE_TABLE.map((section) => (
-                <React.Fragment key={section.group}>
-                  <tr className="bg-zinc-50 font-bold border-t border-b border-black/30">
-                    <td colSpan={4} className="p-2.5 pl-3.5 text-[10px] uppercase tracking-widest text-zinc-500">{section.group}</td>
-                  </tr>
-                  {section.rows.map((row) => (
-                    <tr key={row.name} className="hover:bg-zinc-50/60 transition-colors">
-                      <td className="p-3.5 border-r border-black/10 font-bold text-[12px] uppercase tracking-wide text-black">{row.name}</td>
-                      <td className="p-3.5 border-r border-black/10 text-center text-[12px] text-zinc-600">{row.free}</td>
-                      <td className="p-3.5 border-r border-black/10 text-center text-[12px] font-semibold text-zinc-900">{row.pro}</td>
-                      <td className="p-3.5 text-center text-[12px] font-bold text-black">{row.master}</td>
-                    </tr>
-                  ))}
-                </React.Fragment>
-              ))}
+            <tbody>
+              <tr className="border-b border-black/10">
+                <td className="py-3 px-4 text-sm font-semibold">Coins Available</td>
+                <td className="text-center py-3 px-4 text-sm text-zinc-600">BTC only</td>
+                <td className="text-center py-3 px-4 text-sm text-black">BTC, ETH, BNB</td>
+                <td className="text-center py-3 px-4 text-sm text-black">All 15 pairs</td>
+              </tr>
+              <tr className="border-b border-black/10">
+                <td className="py-3 px-4 text-sm font-semibold">Timeframes</td>
+                <td className="text-center py-3 px-4 text-sm text-zinc-600">15m, 1h, 4h</td>
+                <td className="text-center py-3 px-4 text-sm text-black">15m, 1h, 4h</td>
+                <td className="text-center py-3 px-4 text-sm text-black">15m, 1h, 4h</td>
+              </tr>
+              <tr className="border-b border-black/10">
+                <td className="py-3 px-4 text-sm font-semibold">SL & TP Levels</td>
+                <td className="text-center py-3 px-4 text-sm text-zinc-600">Locked</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Visible</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Visible</td>
+              </tr>
+              <tr className="border-b border-black/10">
+                <td className="py-3 px-4 text-sm font-semibold">P&L Calculator</td>
+                <td className="text-center py-3 px-4 text-sm text-zinc-600">No</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Full history</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Full history</td>
+              </tr>
+              <tr className="border-b border-black/10">
+                <td className="py-3 px-4 text-sm font-semibold">CSV Export</td>
+                <td className="text-center py-3 px-4 text-sm text-zinc-600">No</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
+              </tr>
+              <tr className="border-b border-black/10">
+                <td className="py-3 px-4 text-sm font-semibold">Telegram Alerts</td>
+                <td className="text-center py-3 px-4 text-sm text-zinc-600">Free BTC Group</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Private Channel</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Unlimited Channels</td>
+              </tr>
+              <tr className="border-b border-black/10">
+                <td className="py-3 px-4 text-sm font-semibold">AI Explanations</td>
+                <td className="text-center py-3 px-4 text-sm text-zinc-600">Yes</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Yes + Confluence</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 text-sm font-semibold">Email Support</td>
+                <td className="text-center py-3 px-4 text-sm text-zinc-600">48h response</td>
+                <td className="text-center py-3 px-4 text-sm text-black">24h response</td>
+                <td className="text-center py-3 px-4 text-sm text-black">12h priority</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ───────────────────────────────────────────────────── */}
-      <section className="py-14 max-w-7xl mx-auto px-6 border-b border-black">
-        <div className="text-left mb-8">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange block mb-2">Social Proof</span>
-          <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
-            Loved by active crypto traders.
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t, i) => (
-            <div key={i} className="bg-zinc-50 border border-black p-6 flex flex-col justify-between space-y-5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-              <div className="space-y-3">
-                <span className="text-[9px] font-bold px-2 py-0.5 border border-black bg-white text-black font-mono">{t.category}</span>
-                <p className="text-sm text-zinc-700 leading-relaxed font-sans normal-case">{t.text}</p>
-              </div>
-              <div className="border-t border-black/10 pt-3">
-                <span className="block font-bold text-[12px] text-black uppercase">{t.author}</span>
-                <span className="block text-[10px] text-zinc-500 uppercase font-mono mt-0.5">{t.role}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── FAQ ────────────────────────────────────────────────────────────── */}
-      <section id="faq" className="py-14 max-w-4xl mx-auto px-6 border-b border-black">
-        <div className="text-left mb-8 space-y-2">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange">FAQ</span>
-          <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
-            Everything you need to know
-          </h2>
-        </div>
-        <div className="border-t border-black divide-y divide-black">
-          {FAQS.map((item, i) => {
-            const isOpen = !!openFAQ[i];
-            return (
-              <div key={i} className="py-5">
-                <button
-                  onClick={() => setOpenFAQ((prev) => ({ ...prev, [i]: !prev[i] }))}
-                  className="w-full text-left flex items-center justify-between gap-4 font-bold uppercase text-sm text-black hover:text-brand-orange transition-colors cursor-pointer bg-transparent border-0 p-0"
-                >
-                  <span className="font-sans">{item.q}</span>
-                  <span className="text-lg font-bold font-mono">{isOpen ? "−" : "+"}</span>
-                </button>
-                {isOpen && (
-                  <p className="text-zinc-600 text-sm leading-relaxed pt-3 pr-8 normal-case font-normal font-sans">{item.a}</p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ── FINAL CTA ──────────────────────────────────────────────────────── */}
-      <section className="py-14 max-w-7xl mx-auto px-6">
-        <div className="relative rounded-none border border-black bg-[#f4f6fa] p-10 text-left overflow-hidden">
-          <div className="max-w-xl space-y-4 relative z-10">
-            <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
-              Not sure? Start free - no card required.
-            </h2>
-            <p className="text-sm text-zinc-600 leading-relaxed">
-              Join traders who get AI-powered Buy and Sell signals with a verified public track record. Always free for BTC.
-            </p>
-            <div className="flex flex-wrap gap-3 pt-2">
-              {user ? (
-                <a href="/terminal" className="bg-black hover:bg-brand-orange font-bold text-white text-[12px] uppercase tracking-widest px-7 py-3.5 transition-colors rounded-none inline-block border border-black">
-                  Go to Terminal →
-                </a>
-              ) : (
-                <a href="/signup" className="bg-black hover:bg-brand-orange font-bold text-white text-[12px] uppercase tracking-widest px-7 py-3.5 transition-colors rounded-none inline-block border border-black">
-                  Get Started Free →
-                </a>
-              )}
-              <a href="/pricing#faq" className="font-bold text-black text-[12px] uppercase tracking-widest px-7 py-3.5 border border-black hover:bg-zinc-100 transition-colors rounded-none inline-block">
-                Read FAQ
-              </a>
-            </div>
+      {/* ── FAQ ─────────────────────────────────────────────────────────────── */}
+      <section className="py-14 max-w-4xl mx-auto px-6 border-b border-black">
+        <h2 className="text-2xl font-bold uppercase tracking-tighter mb-8">Questions?</h2>
+        <div className="space-y-4">
+          <div className="border border-black p-6 bg-zinc-50">
+            <h3 className="font-bold text-black mb-2">How long does the review process take?</h3>
+            <p className="text-sm text-zinc-700">Applications are reviewed within 24 hours of submission. You'll receive an email with your decision and feedback on your risk management. Please check your spam folder to ensure you don't miss it.</p>
+          </div>
+          <div className="border border-black p-6 bg-white">
+            <h3 className="font-bold text-black mb-2">What if I'm rejected?</h3>
+            <p className="text-sm text-zinc-700">You'll receive specific feedback on your risk management approach. Most rejections are because traders aren't sizing positions properly or moving stops. You can reapply after addressing the feedback.</p>
+          </div>
+          <div className="border border-black p-6 bg-zinc-50">
+            <h3 className="font-bold text-black mb-2">Can I cancel my subscription?</h3>
+            <p className="text-sm text-zinc-700">Yes. Email support@sanddock.com anytime. Your account downgrades to Free on your renewal date.</p>
+          </div>
+          <div className="border border-black p-6 bg-white">
+            <h3 className="font-bold text-black mb-2">Why USDT only?</h3>
+            <p className="text-sm text-zinc-700">USDT TRC-20 has near-zero fees, instant confirmation, and no price volatility. We avoid volatile assets to simplify accounting and prevent refund nightmares when BTC drops 20% after you pay.</p>
           </div>
         </div>
+      </section>
+
+      {/* ── CTA ─────────────────────────────────────────────────────────────── */}
+      <section className="py-14 max-w-4xl mx-auto px-6 text-center border-b border-black">
+        <h2 className="text-2xl font-bold uppercase tracking-tighter mb-4">Ready to apply?</h2>
+        <p className="text-zinc-600 text-sm mb-8 max-w-2xl mx-auto">The application takes 3 minutes. We review within 24 hours and notify you via email with specific feedback on your risk management. Please check spam folder.</p>
+        <a
+          href="/apply"
+          className="inline-block px-8 py-3 bg-brand-orange hover:bg-black text-white font-bold text-[12px] uppercase tracking-widest transition-all rounded-none border border-brand-orange hover:border-black"
+        >
+          Start Application →
+        </a>
       </section>
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer className="bg-black text-white py-8 text-[11px] border-t border-zinc-800">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-zinc-500">
-          <span>© {new Date().getFullYear()} Sanddock. Dynamic Live Data. Not financial advice.</span>
-          <div className="flex items-center gap-5">
-            <a href="/billing" className="hover:text-white transition-colors uppercase tracking-wider font-bold">Billing</a>
-            <a href="/contact" className="hover:text-white transition-colors uppercase tracking-wider font-bold">Contact</a>
-            <a href="/pricing#faq" className="hover:text-white transition-colors uppercase tracking-wider font-bold">FAQ</a>
-          </div>
-        </div>
+      <footer className="py-8 text-center text-zinc-500 text-xs border-t border-black">
+        <p>© 2024 Sanddock. Not financial advice. Educational purposes only.</p>
       </footer>
-
     </div>
   );
 }

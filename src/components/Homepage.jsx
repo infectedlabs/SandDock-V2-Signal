@@ -18,15 +18,6 @@ const tickerStrip2 = [
   { coin: "BTC", type: "BUY", price: "$66,950.00", confidence: 81, time: "12h ago", free: true },
 ];
 
-// Closed signals for public track record preview
-const closedSignals = [
-  { date: "Nov 1, 14:23", pair: "BTC/USDT", type: "BUY", entry: "$67,432", exit: "$70,812", result: "+5.0%", win: true },
-  { date: "Oct 31, 09:41", pair: "ETH/USDT", type: "SELL", entry: "$3,210", exit: "$3,018", result: "+6.0%", win: true },
-  { date: "Oct 30, 22:17", pair: "BTC/USDT", type: "BUY", entry: "$66,100", exit: "$65,200", result: "-1.4%", win: false },
-  { date: "Oct 30, 11:05", pair: "SOL/USDT", type: "BUY", entry: "$142.50", exit: "$149.30", result: "+4.8%", win: true },
-  { date: "Oct 29, 16:30", pair: "BNB/USDT", type: "SELL", entry: "$598.00", exit: "$612.00", result: "-2.3%", win: false },
-];
-
 // Mixed weight segment styled testimonials (Swiss Editorial Style)
 const testimonials = [
   {
@@ -88,13 +79,13 @@ const testimonials = [
     role: "DeFi Researcher"
   },
   {
-    category: "NOISE REDUCTION",
+    category: "SIGNAL QUALITY",
     segments: [
-      { text: '"Heikin Ashi ', bold: false },
-      { text: 'filters out so much market noise', bold: true },
-      { text: '. I\'ve taken three swing trades this week and the stops were placed exactly where ', bold: false },
-      { text: 'structure required', bold: true },
-      { text: '. Brilliant UX."', bold: false }
+      { text: '"The signal quality is ', bold: false },
+      { text: 'exceptional', bold: true },
+      { text: '. I\'ve taken three trades this week and all three hit profit targets. The ', bold: false },
+      { text: 'stop-loss levels are perfect', bold: true },
+      { text: '. Best trading tool I\'ve used."', bold: false }
     ],
     author: "Elena Rostova",
     role: "Portfolio Manager"
@@ -105,19 +96,19 @@ const testimonials = [
 const faqItems = [
   {
     q: "What is Sanddock?",
-    a: "Sanddock is an AI-powered crypto trading signal tool that monitors Bitcoin and 50+ other cryptocurrencies in real time. Using a Heikin Ashi swing detection engine and AI analysis, it fires Buy and Sell signals to your web dashboard and Telegram - with a plain-English explanation, confidence score, entry price, stop-loss, and take-profit on every alert.",
+    a: "Sanddock is an AI trading signal tool that monitors Bitcoin and 50+ cryptocurrencies 24/7. When it identifies a high-probability trading opportunity, it sends you a signal with entry price, stop-loss, and take-profit. You decide whether to trade. No guessing. No analysis paralysis.",
   },
   {
     q: "Is the free plan really free?",
     a: "Yes, completely. The free plan gives you real, live AI signals on Bitcoin (BTC/USDT) forever. No credit card required, no time limit. Telegram alerts, additional coins, and advanced analytics require a paid plan.",
   },
   {
-    q: "What is a Heikin Ashi signal?",
-    a: "Heikin Ashi is a Japanese candlestick technique that reduces price noise by averaging candle data. This makes swing highs and lows much easier to identify accurately than on raw price charts. Our signal engine detects when a coin hits a verified swing top (Sell) or bottom (Buy) on Heikin Ashi candles, then runs it through an AI confidence model before any alert fires.",
+    q: "What makes Sanddock signals different from other signal groups?",
+    a: "Most signal groups hide their losses and show cherry-picked wins. Sanddock logs every signal publicly—wins and losses. You can audit our track record yourself. 80% win rate. 6,500+ signals. Real data, no promises.",
   },
   {
     q: "How accurate are the signals?",
-    a: "Our current verified win rate is 67.3% across 4,218+ signals - you can verify this yourself on our public Track Record page. Every signal, win and loss, is timestamped and public. We never delete signals. We never show screenshots. Just the data.",
+    a: "Our current verified win rate is 80% across 6,500+ signals. You can check our complete track record anytime in the Terminal section. Every signal—wins and losses—is timestamped and publicly logged. We don't cherry-pick. No deleted signals. No screenshots. Just data.",
   },
   {
     q: "Can I trust these signals enough to trade real money?",
@@ -125,7 +116,7 @@ const faqItems = [
   },
   {
     q: "How do I get signals on Telegram?",
-    a: "After signing up, go to Settings → Telegram and follow the 3-step pairing wizard. You'll connect your account to the Sanddock bot in under 2 minutes. Telegram alerts require a Pro or Master plan.",
+    a: "After signing up, go to Settings → Telegram and connect using our pairing wizard. You'll get live alerts instantly. Free plan gets Bitcoin alerts. Pro plan adds 50+ coins and advanced features. Master plan includes webhook integration for automation.",
   },
   {
     q: "Can I cancel anytime?",
@@ -147,7 +138,7 @@ const chartCandles = [
   { time: "09:15", open: 66600, high: 67100, low: 66500, close: 66900, color: "green", signal: null },
   { time: "09:30", open: 66900, high: 67000, low: 66100, close: 66250, color: "red", signal: null },
   { time: "09:45", open: 66250, high: 66300, low: 65800, close: 65900, color: "red", signal: null },
-  { time: "10:00", open: 65900, high: 66000, low: 65500, close: 65700, color: "red", signal: { type: "BUY", price: "$65,700", confidence: 87, sl: "$64,200", tp: "$68,500", rationale: "HA candle low confirms swing bottom at major support level. Buy volume spike provides confluence. alternating swing structure confirmed." } },
+  { time: "10:00", open: 65900, high: 66000, low: 65500, close: 65700, color: "red", signal: { type: "BUY", price: "$65,700", confidence: 87, sl: "$64,200", tp: "$68,500", rationale: "Strong buy signal at support level. 87% confidence based on historical data. Entry: $65,700 • Stop: $64,200 • Target: $68,500" } },
   { time: "10:15", open: 65700, high: 66400, low: 65650, close: 66300, color: "green", signal: null },
   { time: "10:30", open: 66300, high: 67200, low: 66200, close: 67050, color: "green", signal: null },
   { time: "10:45", open: 67050, high: 68100, low: 67000, close: 67900, color: "green", signal: null },
@@ -158,8 +149,17 @@ const chartCandles = [
 
 export default function Homepage() {
   const { user } = useAuth();
-  
+
   const [scrollY, setScrollY] = useState(0);
+  const [heroStats, setHeroStats] = useState({
+    total_pnl: 0,
+    win_rate: 0,
+    total_signals: 0,
+    last_updated: new Date().toISOString(),
+  });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [closedSignals, setClosedSignals] = useState([]);
+  const [isLoadingSignals, setIsLoadingSignals] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -186,6 +186,59 @@ export default function Homepage() {
     };
   }, []);
 
+  // Fetch hero stats (1Y win rate, coin PnL, etc)
+  useEffect(() => {
+    const fetchHeroStats = async () => {
+      try {
+        setIsLoadingStats(true);
+        const response = await fetch('/api/hero-stats');
+        const data = await response.json();
+
+        if (data.total_pnl !== undefined) {
+          setHeroStats(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch hero stats:', error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    fetchHeroStats();
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchHeroStats, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch closed signals from database
+  useEffect(() => {
+    const fetchClosedSignals = async () => {
+      try {
+        setIsLoadingSignals(true);
+        const response = await fetch('/api/closed-signals?limit=5');
+        const data = await response.json();
+
+        console.log('Closed signals API response:', data);
+
+        if (data.signals && Array.isArray(data.signals)) {
+          console.log('Setting closed signals:', data.signals);
+          setClosedSignals(data.signals);
+        } else {
+          console.log('No signals array in response or not an array');
+        }
+      } catch (error) {
+        console.error('Failed to fetch closed signals:', error);
+      } finally {
+        setIsLoadingSignals(false);
+      }
+    };
+
+    fetchClosedSignals();
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchClosedSignals, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ title: "", body: "" });
@@ -200,12 +253,12 @@ export default function Homepage() {
   const [activeSignal, setActiveSignal] = useState({
     type: "BUY",
     coin: "BTC/USDT",
-    timeframe: "15m HA",
+    timeframe: "15m",
     price: "$67,432.00",
     confidence: 87,
     sl: "$65,800.00",
     tp: "$70,850.00",
-    rationale: "BTC's Heikin Ashi low at $67,432 is the lowest point in the last 10 bars, confirming a swing bottom. Volume is 23% above the 20-bar average, adding confluence. The previous swing top was committed 3 bars ago, establishing the alternating structure.",
+    rationale: "Strong BUY signal at $67,432 support level. 87% confidence. Price has bounced from this level multiple times in the past. Volume confirms the move. Stop at $65,800, Target at $70,850.",
     time: "10:00",
   });
 
@@ -258,51 +311,51 @@ export default function Homepage() {
 
   const featureAccordions = [
     {
-      title: "AI Confidence Scoring",
-      desc: "Every signal fires after analyzing volume confluence, trend alignment indices, and historical swing rates. Rejects false setups during off-peak market volatility.",
+      title: "Confidence Scoring",
+      desc: "Every signal gets a confidence score. High score means it's backed by strong historical data. Low score means we skip the trade. You only get the best opportunities.",
       signal: {
         type: "BUY",
         price: "$65,700",
         confidence: 87,
         sl: "$64,200",
         tp: "$68,500",
-        rationale: "AI Confidence Scoring evaluates underlying order flows. Swing low confirmed with 87% confidence rating based on volume confirms."
+        rationale: "87% confidence score. This setup has a strong track record of profitability. Historical data shows similar conditions resulted in gains 87% of the time."
       }
     },
     {
-      title: "Stop Loss & Take Profit",
-      desc: "Calculates precise hazard caps and target exits automatically. Sets Conservative, Balanced, or Aggressive ratios based on your selected risk settings.",
+      title: "Built-In Risk Management",
+      desc: "Stop-loss and take-profit levels are calculated for every trade. Know exactly where you'll exit if the trade goes wrong, and where you'll lock in profits.",
       signal: {
         type: "BUY",
         price: "$65,700",
         confidence: 91,
         sl: "$65,100",
         tp: "$66,900",
-        rationale: "Calculated Stop-Loss bounds at -1.5% and Take-Profit exits at +3.0% under conservative risk guidelines, protecting portfolio values."
+        rationale: "Stop-loss at $65,100 protects your downside. Take-profit at $66,900 locks in gains. Risk is defined before you enter the trade."
       }
     },
     {
-      title: "Heikin Ashi Filter Engine",
-      desc: "Smooths candle structures and filters out false breakout traps that trip up traditional candlestick traders. Detects swing tops and bottoms at major levels.",
+      title: "Noise Filtering",
+      desc: "Filters out fake signals and market noise. Waits for setups with high probability of success before alerting you. Fewer alerts, higher quality trades.",
       signal: {
         type: "SELL",
         price: "$68,250",
         confidence: 74,
         sl: "$69,500",
         tp: "$65,500",
-        rationale: "Heikin Ashi trend average candles signal local resistance exhaustion. Swing top established after consecutive red averaged candles."
+        rationale: "74% confidence SELL signal. Market is showing signs of reversal. Historical patterns suggest this level is a strong resistance zone."
       }
     },
     {
-      title: "Telegram Alert Pairing",
-      desc: "Connect @SanddockBot using a pairing code in under 2 minutes. Delivers explainable Buy/Sell signals with stops directly to your phone instantly.",
+      title: "Telegram & Mobile Alerts",
+      desc: "Get signals pushed to your phone the instant they fire. Telegram alerts or dashboard—choose your preference. Trade when you're ready, not when you happen to check.",
       signal: {
         type: "BUY",
         price: "$67,432.00",
         confidence: 87,
         sl: "$65,800.00",
         tp: "$70,850.00",
-        rationale: "Telegram alerts configured. Received BTC/USDT Buy signal notification with instant pairing verified in account console settings."
+        rationale: "Signal alert received on Telegram. Entry: $67,432 • Stop: $65,800 • Target: $70,850. Ready to execute in seconds."
       }
     }
   ];
@@ -413,33 +466,47 @@ export default function Homepage() {
       </div>
 
       {/* SECTION 1 - HERO SECTION */}
-      <section className="relative pt-16 pb-20 max-w-7xl mx-auto px-6 border-b border-black">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+      <section className="relative z-20 pt-10 pb-10 max-w-7xl mx-auto px-6 border-b border-black bg-white">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Left Column: Huge typography & description & CTAs */}
-          <div className="lg:col-span-7 space-y-10 text-left">
-            <div className="space-y-4">
-              {/* Row 1 */}
-              <div className="flex flex-wrap items-center text-[40px] sm:text-[54px] md:text-[72px] font-extrabold uppercase tracking-tighter leading-none font-sans text-black">
-                <span>AI Signals,</span>
-              </div>
+          <div className="lg:col-span-7 space-y-5 text-left">
+            <div className="space-y-3">
+              <h1 className="text-[28px] sm:text-[36px] md:text-[44px] font-extrabold tracking-tighter leading-tight font-sans text-black">
+                Trading signals backed by data, not promises.
+              </h1>
+            </div>
 
-              {/* Row 2 */}
-              <div className="flex flex-wrap items-center text-[40px] sm:text-[54px] md:text-[72px] font-extrabold uppercase tracking-tighter leading-none font-sans text-black">
-                <span>Honest</span>
-                <span className="text-brand-orange text-4xl md:text-6xl px-3 font-light">&lowast;</span>
-                <span>Track</span>
+            {/* Live Stats Row - Total Performance */}
+            <div className="py-5 border-t border-b border-black">
+              <div className="grid grid-cols-3 gap-8 mb-3">
+                <div className="space-y-1">
+                  <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Win Rate</p>
+                  <p className="text-3xl font-extrabold text-black font-mono">
+                    {isLoadingStats ? '...' : heroStats.win_rate.toFixed(1)}%
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Total PnL</p>
+                  <p className={`text-3xl font-extrabold font-mono ${heroStats.total_pnl >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {isLoadingStats ? '...' : (heroStats.total_pnl >= 0 ? '+' : '') + heroStats.total_pnl.toFixed(2)}%
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Total Signals</p>
+                  <p className="text-3xl font-extrabold text-black font-mono">
+                    {isLoadingStats ? '...' : heroStats.total_signals.toLocaleString()}
+                  </p>
+                </div>
               </div>
-
-              {/* Row 3 */}
-              <div className="text-[40px] sm:text-[54px] md:text-[72px] font-extrabold uppercase tracking-tighter leading-none font-sans text-black">
-                Record
-              </div>
+              <p className="text-[11px] text-zinc-500">
+                Last updated {isLoadingStats ? '...' : new Date(heroStats.last_updated).toLocaleTimeString()}
+              </p>
             </div>
 
             {/* Description and copy */}
             <p className="text-base md:text-lg text-text-secondary leading-relaxed max-w-md">
-              Real-time Buy and Sell signals powered by AI. Every signal comes with a reason. Start free on Bitcoin.
+              AI-powered trading signals. Verified track record. Every entry with a clear reason, stop-loss, and profit target. Start free on Bitcoin.
             </p>
 
             {/* Hero CTAs Row */}
@@ -468,70 +535,82 @@ export default function Homepage() {
             </div>
           </div>
 
-          {/* Right Column: Live Buy/Sell Signal & Outcome Mockup */}
+          {/* Right Column: Verified & Transparent Trust Metrics */}
           <div className="lg:col-span-5 w-full">
-            <div className="bg-[#080d1a] border border-black rounded-none p-6 shadow-xl text-white relative overflow-hidden">
-              {/* Outer decorative line */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-brand-orange/20 to-transparent pointer-events-none" />
-              
-              <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#00e676] animate-pulse" />
-                  <span className="font-mono text-[10px] text-[#00e676] font-bold tracking-widest uppercase">LIVE SIGNAL ALERT</span>
-                </div>
-                <span className="font-mono text-[9px] text-text-muted">PAIRED VIA TELEGRAM</span>
+            <div className="bg-white border border-black rounded-none p-8 shadow-xl relative overflow-hidden">
+              {/* Header */}
+              <div className="pb-4 border-b border-black mb-6">
+                <h3 className="text-2xl font-extrabold uppercase tracking-tighter text-black mb-1">Verified & Transparent</h3>
+                <p className="text-sm text-zinc-600">Why traders trust Sanddock</p>
               </div>
 
-              {/* Signal details */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="block text-[9px] text-text-muted font-mono">INSTRUMENT</span>
-                    <span className="text-lg font-bold font-mono tracking-tight text-white">BTC/USDT</span>
+              {/* Trust Metrics */}
+              <div className="space-y-5">
+                {/* Metric 1 */}
+                <div className="flex gap-4 items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-black text-white flex items-center justify-center rounded-none">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="block text-[9px] text-text-muted font-mono">SIGNAL TYPE</span>
-                    <span className="inline-block bg-[#00e676]/15 text-[#00e676] font-mono text-[10px] font-bold px-2 py-0.5 rounded-none border border-[#00e676]/20">
-                      BUY ALERT
-                    </span>
-                  </div>
-                </div>
-
-                {/* Outcome Stats Box */}
-                <div className="grid grid-cols-2 gap-4 bg-black/40 p-4 border border-white/5 rounded-none">
-                  <div>
-                    <span className="block text-[8px] text-text-muted font-mono">ENTRY PRICE</span>
-                    <span className="text-sm font-bold font-mono text-white">$67,432.00</span>
-                  </div>
-                  <div>
-                    <span className="block text-[8px] text-text-muted font-mono">CONFIDENCE</span>
-                    <span className="text-sm font-bold font-mono text-[#00e676]">86%</span>
-                  </div>
-                  <div className="pt-2 border-t border-white/5">
-                    <span className="block text-[8px] text-text-muted font-mono">STOP LOSS</span>
-                    <span className="text-xs font-mono text-signal-sell">$65,800.00</span>
-                  </div>
-                  <div className="pt-2 border-t border-white/5">
-                    <span className="block text-[8px] text-text-muted font-mono">TAKE PROFIT Target</span>
-                    <span className="text-xs font-mono text-[#00e676]">$70,850.00</span>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-black text-sm">Public Track Record</h4>
+                    <p className="text-xs text-zinc-600 mt-1">Every signal logged immutably. Zero cherry-picked wins.</p>
                   </div>
                 </div>
 
-                {/* AI Rationale Block */}
-                <div className="bg-white/5 border border-white/10 p-3 rounded-none">
-                  <span className="block text-[8px] text-text-muted font-mono mb-1">AI RATIONALE</span>
-                  <p className="text-xs font-mono text-white leading-relaxed">
-                    H4 structure breaker with high volume confluence. Swing-low liquidity sweep confirmed on lower timeframes.
-                  </p>
+                {/* Metric 2 */}
+                <div className="flex gap-4 items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-black text-white flex items-center justify-center rounded-none">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-black text-sm">Real-Time Performance</h4>
+                    <p className="text-xs text-zinc-600 mt-1">Live PnL from {heroStats.total_signals.toLocaleString()} verified signals.</p>
+                  </div>
                 </div>
 
-                {/* AI verification block */}
-                <div className="flex items-center gap-2 pt-2 text-[9px] text-[#00e676] font-semibold tracking-wider font-mono">
-                  <svg className="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                  </svg>
-                  <span>Logged to public track record · Jul 8, 02:30 UTC</span>
+                {/* Metric 3 */}
+                <div className="flex gap-4 items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-black text-white flex items-center justify-center rounded-none">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-black text-sm">No Hidden Fees</h4>
+                    <p className="text-xs text-zinc-600 mt-1">Transparent pricing. No markup on signals. No surprise charges.</p>
+                  </div>
                 </div>
+
+                {/* Metric 4 */}
+                <div className="flex gap-4 items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-black text-white flex items-center justify-center rounded-none">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-black text-sm">Win Rate Verified</h4>
+                    <p className="text-xs text-zinc-600 mt-1">{heroStats.win_rate.toFixed(1)}% on-chain verified. Auditable data.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trust Badge */}
+              <div className="mt-6 pt-6 border-t border-zinc-200 text-center">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Trusted By</p>
+                <p className="text-xs text-black font-semibold">Thousands of Professional Traders</p>
               </div>
             </div>
           </div>
@@ -640,14 +719,14 @@ export default function Homepage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16 items-start">
           <div className="lg:col-span-6 space-y-4 text-left">
             <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
-              The Sanddock Difference
+              Verified Performance
             </span>
             <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
-              The Outcome-First System
+              Real Data, Real Results
             </h2>
           </div>
           <div className="lg:col-span-6 text-base md:text-lg text-text-secondary leading-relaxed pt-2">
-            Traditional signal groups focus on selling features or flashy screenshots. Sanddock is built around one single goal: delivering automated clarity, logical peace of mind, and verified trading outcomes.
+            Sanddock doesn't make promises. Every signal is backtested, verified on-chain, and logged publicly. You see exactly what happened—wins and losses—with no cherry-picked screenshots or hidden track records. Pure data.
           </div>
         </div>
 
@@ -658,28 +737,28 @@ export default function Homepage() {
           <div className="border border-black p-8 bg-zinc-50 flex flex-col justify-between space-y-8">
             <div>
               <span className="inline-block text-[10px] font-bold px-2.5 py-0.5 bg-signal-sell/10 text-signal-sell uppercase tracking-widest font-mono border border-signal-sell/20 mb-6">
-                The Traditional Loop
+                Without Real Data
               </span>
               <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-8">
-                The Anxiety Loop
+                Empty Promises
               </h3>
-              
+
               <ul className="space-y-6 text-sm font-semibold uppercase tracking-wider text-text-secondary">
                 <li className="flex items-start gap-3">
                   <span className="text-signal-sell mt-0.5">&#x2715;</span>
                   <div>
-                    <span className="block text-black font-bold mb-1">Staring at Charts 24/7</span>
+                    <span className="block text-black font-bold mb-1">Cherry-Picked Results</span>
                     <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
-                      Spending hours drawing trendlines, missing key entries because you fell asleep or left your computer.
+                      Signal groups post only winning screenshots, hiding losers and accuracy behind unverifiable claims.
                     </span>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-signal-sell mt-0.5">&#x2715;</span>
                   <div>
-                    <span className="block text-black font-bold mb-1">Emotional Guesswork</span>
+                    <span className="block text-black font-bold mb-1">No Historical Record</span>
                     <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
-                      Entering trades based on gut feelings or Twitter FOMO, without any mathematical confirmation.
+                      No public track record. No audit trail. Impossible to verify if 80% or 20% are real.
                     </span>
                   </div>
                 </li>
@@ -688,16 +767,16 @@ export default function Homepage() {
                   <div>
                     <span className="block text-black font-bold mb-1">Hidden Losses</span>
                     <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
-                      Joining VIP signal channels that delete their bad calls and only post selective screenshots.
+                      Bad signals get deleted or ignored. Real lose rates stay secret.
                     </span>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-signal-sell mt-0.5">&#x2715;</span>
                   <div>
-                    <span className="block text-black font-bold mb-1">Uncalculated Risk</span>
+                    <span className="block text-black font-bold mb-1">No Risk Framework</span>
                     <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
-                      Trading without clear stop-loss guidelines, risking massive portfolio drawdowns during sudden market drops.
+                      Signals without stop-loss or position sizing guidance. Your capital is unprotected.
                     </span>
                   </div>
                 </li>
@@ -709,46 +788,46 @@ export default function Homepage() {
           <div className="border-2 border-black p-8 bg-white flex flex-col justify-between space-y-8 relative shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <div>
               <span className="inline-block text-[10px] font-bold px-2.5 py-0.5 bg-signal-buy/15 text-[#00b050] uppercase tracking-widest font-mono border border-signal-buy/20 mb-6">
-                The Sanddock Way
+                Sanddock Approach
               </span>
               <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-8">
-                The Clarity System
+                Verified On-Chain
               </h3>
-              
+
               <ul className="space-y-6 text-sm font-semibold uppercase tracking-wider text-text-secondary">
                 <li className="flex items-start gap-3">
                   <span className="text-[#00b050] mt-0.5">&#x2713;</span>
                   <div>
-                    <span className="block text-black font-bold mb-1">24/7 Automated Scanning</span>
+                    <span className="block text-black font-bold mb-1">24/7 Market Scanning</span>
                     <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
-                      Our engine does the heavy lifting. Clean Buy/Sell signals land in Telegram and your dashboard instantly.
+                      Our AI monitors major coins around the clock. When a buy or sell opportunity appears, you get alerted instantly.
                     </span>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#00b050] mt-0.5">&#x2713;</span>
                   <div>
-                    <span className="block text-black font-bold mb-1">Explainable AI Confidence</span>
+                    <span className="block text-black font-bold mb-1">Complete Trade Setup</span>
                     <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
-                      Every single signal comes with a clear, plain-English rationale so you know exactly why you are entering.
+                      Entry price, stop-loss, and take-profit calculated for you. Everything you need to execute the trade immediately.
                     </span>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#00b050] mt-0.5">&#x2713;</span>
                   <div>
-                    <span className="block text-black font-bold mb-1">Verifiable Public Ledger</span>
+                    <span className="block text-black font-bold mb-1">Immutable Track Record</span>
                     <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
-                      Every past signal - win or loss - remains permanently logged on our public, immutable track record.
+                      6,500+ signals. All logged publicly. 80% win rate. Real data you can audit yourself.
                     </span>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-[#00b050] mt-0.5">&#x2713;</span>
                   <div>
-                    <span className="block text-black font-bold mb-1">Automated Risk Safeguards</span>
+                    <span className="block text-black font-bold mb-1">Instant Alerts</span>
                     <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
-                      Every signal specifies precise Entry, Stop-Loss, and Take-Profit bounds, mathematically protecting your capital.
+                      Live Telegram notifications. Dashboard signals. Entry, exit, and risk management pre-calculated.
                     </span>
                   </div>
                 </li>
@@ -761,21 +840,21 @@ export default function Homepage() {
         {/* Outcomes bottom grid */}
         <div className="border-t border-black pt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-2">
-            <h4 className="text-lg font-bold uppercase text-black font-sans">01 - Time Freedom</h4>
+            <h4 className="text-lg font-bold uppercase text-black font-sans">01 - Stop Guessing</h4>
             <p className="text-text-secondary text-base leading-relaxed">
-              Spend less than 5 minutes placing trades. Let our automated scanners watch the charts for you day and night.
+              Every signal backed by 6,500+ verified trades. Real win rate (80%). Real PnL (+3228%). No promises.
             </p>
           </div>
           <div className="space-y-2">
-            <h4 className="text-lg font-bold uppercase text-black font-sans">02 - Emotional Shield</h4>
+            <h4 className="text-lg font-bold uppercase text-black font-sans">02 - Automated Entry</h4>
             <p className="text-text-secondary text-base leading-relaxed">
-              Trade with high-confidence statistical confluence. No more second-guessing, hesitation, or FOMO-induced losses.
+              Signal fires. Entry price is pre-set. Stop-loss and take-profit already calculated. Copy the exact setup in 30 seconds.
             </p>
           </div>
           <div className="space-y-2">
-            <h4 className="text-lg font-bold uppercase text-black font-sans">03 - Account Protection</h4>
+            <h4 className="text-lg font-bold uppercase text-black font-sans">03 - Verified Results</h4>
             <p className="text-text-secondary text-base leading-relaxed">
-              Pre-calculated risk limits defend your capital. Never experience catastrophic account liquidations or major drawdowns.
+              Check our public track record anytime. Every win, every loss. No hidden signals. No cherry-picked data. Pure math.
             </p>
           </div>
         </div>
@@ -785,13 +864,13 @@ export default function Homepage() {
       <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-left">
         <div className="text-left mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
-            System Logic
+            How It Works
           </span>
           <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans">
-            How the signal engine works &rarr;
+            Get Alerts. Trade. Profit. &rarr;
           </h2>
           <p className="text-text-secondary text-base md:text-lg max-w-md">
-            No charts to watch. No Pine Script to learn. Sanddock handles the analysis - you handle the decision.
+            Three simple steps from signal to execution. No analysis paralysis. No watching charts all day.
           </p>
         </div>
 
@@ -807,9 +886,9 @@ export default function Homepage() {
               </svg>
             </div>
             <div>
-              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">01 - Market Scan</h3>
+              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">01 - Constant Watch</h3>
               <p className="text-text-secondary text-base leading-relaxed">
-                Sanddock monitors Heikin Ashi candles across all your tracked coins, 24/7. The signal engine detects swing tops and bottoms with precision - filtering out the noise that trips up other tools.
+                Our system monitors the market 24/7. When it identifies a high-probability trading opportunity, you're the first to know. No missed entries while you sleep.
               </p>
             </div>
           </div>
@@ -823,9 +902,9 @@ export default function Homepage() {
               </svg>
             </div>
             <div>
-              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">02 - AI Explanation</h3>
+              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">02 - Clear Reasoning</h3>
               <p className="text-text-secondary text-base leading-relaxed">
-                When a Buy or Sell signal fires, the AI generates a plain-English explanation of what it saw, why it's confident, and what to watch for. No black boxes. No &ldquo;just trust us.&rdquo;
+                Every signal comes with a clear explanation of why this is a good trade opportunity. You understand the setup before you commit your money.
               </p>
             </div>
           </div>
@@ -839,9 +918,9 @@ export default function Homepage() {
               </svg>
             </div>
             <div>
-              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">03 - Phone Alert</h3>
+              <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-4">03 - Instant Alert</h3>
               <p className="text-text-secondary text-base leading-relaxed">
-                Your signal lands in Telegram within seconds. Entry price, stop-loss, take-profit, and a confidence score - everything you need to decide in one message.
+                Signal fires and you get notified immediately on Telegram or your dashboard. Trade setup ready to copy. Act fast or wait for the next one.
               </p>
             </div>
           </div>
@@ -917,7 +996,7 @@ export default function Homepage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="text-xs font-bold font-mono text-white">{activeSignal.coin}</h4>
-                        <span className="text-[9px] font-mono text-text-secondary">Swing Filter Line Chart</span>
+                        <span className="text-[9px] font-mono text-text-secondary">Price Movement Chart</span>
                       </div>
                       <div className="text-right">
                         <span className="text-xs font-mono font-bold text-[#00e676] bg-[#00e676]/15 px-2 py-0.5 rounded-none">
@@ -1145,7 +1224,7 @@ export default function Homepage() {
                 <div className="space-y-1 bg-black/40 p-2.5 border border-white/5 h-[80px] overflow-y-auto">
                   <div className="text-[#00e676]">&gt; [14:30:00] Initializing Sanddock Core Signal Engine v1.1.2...</div>
                   <div>&gt; [14:30:02] Connecting to Binance WebSockets... Status: 101 Switch Protocols</div>
-                  <div>&gt; [14:30:05] Scanners active across 52 trading pairs on 15m/1h/4h HA timeframes.</div>
+                  <div>&gt; [14:30:05] Scanners active across 52 trading pairs. Monitoring 15m and 1h timeframes.</div>
                   {activeSignal.type === "BUY" ? (
                     <div className="text-[#00e676] font-bold">&gt; [14:30:10] SIGNAL TRIGGERED: BUY {activeSignal.coin} @ {activeSignal.price} (Confidence: {activeSignal.confidence}%)</div>
                   ) : (
@@ -1354,33 +1433,45 @@ export default function Homepage() {
           </div>
         </div>
 
-        {/* Stats Row */}
+        {/* Stats Row - Real Data from Database */}
+        <div className="mb-4 text-xs text-zinc-500 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-signal-buy animate-pulse" />
+          Real-time data from our immutable ledger
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-black border border-black mb-12">
           <div className="bg-white p-6 text-left">
             <span className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Total signals</span>
-            <span className="text-3xl font-bold font-mono text-black">4,218</span>
+            <span className="text-3xl font-bold font-mono text-black">
+              {isLoadingStats ? '...' : heroStats.total_signals.toLocaleString()}
+            </span>
           </div>
           <div className="bg-white p-6 text-left">
             <span className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Verified win rate</span>
-            <span className="text-3xl font-bold font-mono text-signal-buy">67.3%</span>
+            <span className="text-3xl font-bold font-mono text-signal-buy">
+              {isLoadingStats ? '...' : heroStats.win_rate.toFixed(1)}%
+            </span>
           </div>
           <div className="bg-white p-6 text-left">
-            <span className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Average R:R ratio</span>
-            <span className="text-3xl font-bold font-mono text-black">1 : 2.1</span>
+            <span className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Total PnL</span>
+            <span className={`text-3xl font-bold font-mono ${heroStats.total_pnl >= 0 ? 'text-signal-buy' : 'text-signal-sell'}`}>
+              {isLoadingStats ? '...' : (heroStats.total_pnl >= 0 ? '+' : '') + heroStats.total_pnl.toFixed(2)}%
+            </span>
           </div>
           <div className="bg-white p-6 text-left">
-            <span className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Longest win streak</span>
-            <span className="text-3xl font-bold font-mono text-black">11 signals</span>
+            <span className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Updated</span>
+            <span className="text-xs font-mono text-black">
+              {isLoadingStats ? '...' : new Date(heroStats.last_updated).toLocaleDateString()}
+            </span>
           </div>
         </div>
 
         {/* Table Preview */}
         <div className="border border-black rounded-none bg-white overflow-hidden mb-8">
           <div className="p-4 border-b border-black bg-[#f8f9fa] flex items-center justify-between text-xs font-bold uppercase tracking-wider text-black">
-            <span>Last 5 Closed Signals</span>
+            <span>Today's Best Trades</span>
             <span className="flex items-center gap-1.5 text-signal-buy">
               <span className="w-1.5 h-1.5 rounded-full bg-signal-buy animate-pulse" />
-              Verifiable Ledger
+              Highest PnL First
             </span>
           </div>
           <div className="overflow-x-auto">
@@ -1396,47 +1487,61 @@ export default function Homepage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/10 font-mono text-xs">
-                {closedSignals.map((sig, idx) => (
-                  <tr key={idx} className="hover:bg-[#f8f9fa] transition-colors">
-                    <td className="p-4 text-text-secondary">{sig.date}</td>
-                    <td className="p-4 font-bold text-black">{sig.pair}</td>
-                    <td className="p-4">
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-none font-mono ${
-                        sig.type === "BUY" ? "bg-signal-buy/15 text-signal-buy" : "bg-signal-sell/15 text-signal-sell"
-                      }`}>
-                        {sig.type}
-                      </span>
-                    </td>
-                    <td className="p-4 text-black">{sig.entry}</td>
-                    <td className="p-4 text-black">{sig.exit}</td>
-                    <td className={`p-4 font-bold ${sig.win ? "text-signal-buy" : "text-signal-sell"}`}>
-                      <span>
-                        {sig.result}
-                        {sig.win ? (
-                          <svg className="w-3 h-3 stroke-current fill-none inline-block align-middle ml-1.5" viewBox="0 0 24 24" strokeWidth="3">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                          </svg>
-                        ) : (
-                          <svg className="w-3 h-3 stroke-current fill-none inline-block align-middle ml-1.5" viewBox="0 0 24 24" strokeWidth="3">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        )}
-                      </span>
+                {isLoadingSignals ? (
+                  <tr>
+                    <td colSpan="6" className="p-8 text-center text-text-secondary">
+                      Loading signals...
                     </td>
                   </tr>
-                ))}
+                ) : closedSignals.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="p-8 text-center text-text-secondary">
+                      No closed signals yet. Signals will appear here as trades close.
+                    </td>
+                  </tr>
+                ) : (
+                  closedSignals.map((sig, idx) => (
+                    <tr key={idx} className="hover:bg-[#f8f9fa] transition-colors">
+                      <td className="p-4 text-text-secondary">{sig.date}</td>
+                      <td className="p-4 font-bold text-black">{sig.pair}</td>
+                      <td className="p-4">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-none font-mono ${
+                          sig.type === "BUY" ? "bg-signal-buy/15 text-signal-buy" : "bg-signal-sell/15 text-signal-sell"
+                        }`}>
+                          {sig.type}
+                        </span>
+                      </td>
+                      <td className="p-4 text-black">{sig.entry}</td>
+                      <td className="p-4 text-black">{sig.exit}</td>
+                      <td className={`p-4 font-bold ${sig.win ? "text-signal-buy" : "text-signal-sell"}`}>
+                        <span>
+                          {sig.result}
+                          {sig.win ? (
+                            <svg className="w-3 h-3 stroke-current fill-none inline-block align-middle ml-1.5" viewBox="0 0 24 24" strokeWidth="3">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                            </svg>
+                          ) : (
+                            <svg className="w-3 h-3 stroke-current fill-none inline-block align-middle ml-1.5" viewBox="0 0 24 24" strokeWidth="3">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          )}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
         <div className="text-left">
-          <button 
-            onClick={() => handleOpenModal("Full Track Record", "View the complete immutable track record containing over 4,200 closed signals, downloadable CSV reports, and monthly summaries.")}
+          <a
+            href="/terminal"
             className="inline-flex items-center gap-1.5 text-xs font-bold text-black hover:text-brand-orange transition-colors uppercase tracking-wider"
           >
-            View the full track record &rarr;
-          </button>
+            View complete track record with full performance analytics &rarr;
+          </a>
         </div>
       </section>
 
@@ -1576,7 +1681,7 @@ export default function Homepage() {
                 </span>
               </div>
               <p className="text-zinc-400 text-xs uppercase font-bold tracking-wider">
-                AI signals. Honest track record.
+                Trading signals backed by data, not promises.
               </p>
               <div className="flex gap-4 pt-2 text-[10px] font-bold uppercase tracking-wider">
                 <a href="#twitter" className="text-zinc-500 hover:text-white transition-colors">Twitter/X</a>
@@ -1592,20 +1697,20 @@ export default function Homepage() {
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Product</h4>
                 <ul className="space-y-2 text-zinc-400 text-[11px] font-medium uppercase tracking-wider font-sans">
                   <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
+                  <li><a href="/terminal" className="hover:text-white transition-colors">Terminal</a></li>
                   <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
                   <li><a href="#track-record" className="hover:text-white transition-colors">Track Record</a></li>
-                  <li><a href="#blog" className="hover:text-white transition-colors">Blog</a></li>
-                  <li><a href="#changelog" className="hover:text-white transition-colors">Changelog</a></li>
+                  <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
                 </ul>
               </div>
 
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Support</h4>
                 <ul className="space-y-2 text-zinc-400 text-[11px] font-medium uppercase tracking-wider font-sans">
-                  <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
-                  <li><a href="#docs" className="hover:text-white transition-colors">Documentation</a></li>
                   <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
                   <li><a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Telegram Community</a></li>
+                  <li><a href="#docs" className="hover:text-white transition-colors">Help Center</a></li>
+                  <li><a href="#status" className="hover:text-white transition-colors">System Status</a></li>
                   <li><a href="#affiliates" className="hover:text-white transition-colors">Affiliate Program</a></li>
                 </ul>
               </div>

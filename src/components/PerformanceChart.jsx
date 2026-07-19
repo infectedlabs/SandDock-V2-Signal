@@ -15,10 +15,7 @@ export default function PerformanceChart({ signals = [] }) {
 
     return signals.map((s, idx) => {
       const pnl = parseFloat(s.pnl_pct || 0);
-      const sl = parseFloat(s.sl_pct || 0);
-      // R-multiple = pnl_pct / sl_pct (if no stop loss distance, default to 1.0)
-      const r = sl > 0 ? (pnl / sl) : 0;
-      cumulativePnl += r;
+      cumulativePnl += pnl;
       if (s.is_win) {
         totalWins += 1;
       }
@@ -26,7 +23,7 @@ export default function PerformanceChart({ signals = [] }) {
 
       return {
         date: new Date(s.bar_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        pnl: r,
+        pnl: pnl,
         cumulativePnl: Number(cumulativePnl.toFixed(2)),
         winRate: Number(winRate.toFixed(1)),
         isWin: s.is_win,
@@ -166,15 +163,15 @@ export default function PerformanceChart({ signals = [] }) {
 
         <div className="text-left sm:text-right">
           <span className="text-[9px] text-slate-500 uppercase block tracking-widest font-extrabold">
-            {activeTab === 'pnl' ? 'Net Cumulative Return (1% Risk)' : 'Cumulative Success Accuracy'}
+            {activeTab === 'pnl' ? 'Cumulative PnL Return' : 'Cumulative Success Accuracy'}
           </span>
           <span className={`text-xl font-black font-mono tracking-tight ${
             activeTab === 'pnl'
               ? points[points.length - 1].cumulativePnl >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
               : 'text-[#06b6d4]'
           }`}>
-            {activeTab === 'pnl' 
-              ? `${points[points.length - 1].cumulativePnl >= 0 ? '+' : ''}${points[points.length - 1].cumulativePnl.toFixed(2)}% (${points[points.length - 1].cumulativePnl >= 0 ? '+' : ''}${points[points.length - 1].cumulativePnl.toFixed(2)}R)` 
+            {activeTab === 'pnl'
+              ? `${points[points.length - 1].cumulativePnl >= 0 ? '+' : ''}${points[points.length - 1].cumulativePnl.toFixed(2)}%`
               : `${points[points.length - 1].winRate.toFixed(1)}%`}
           </span>
         </div>
@@ -313,15 +310,15 @@ export default function PerformanceChart({ signals = [] }) {
             </span>
             <div className="space-y-1">
               <div className="flex justify-between gap-4">
-                <span className="text-slate-400">Trade PnL (1% Risk):</span>
+                <span className="text-slate-400">Trade PnL:</span>
                 <span className={`font-bold ${points[hoveredIndex].pnl >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
-                  {points[hoveredIndex].pnl >= 0 ? '+' : ''}{points[hoveredIndex].pnl.toFixed(2)}% ({points[hoveredIndex].pnl >= 0 ? '+' : ''}{points[hoveredIndex].pnl.toFixed(2)}R)
+                  {points[hoveredIndex].pnl >= 0 ? '+' : ''}{points[hoveredIndex].pnl.toFixed(2)}%
                 </span>
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-slate-400">Cumulative Return:</span>
                 <span className={`font-bold ${points[hoveredIndex].cumulativePnl >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
-                  {points[hoveredIndex].cumulativePnl >= 0 ? '+' : ''}{points[hoveredIndex].cumulativePnl.toFixed(2)}% ({points[hoveredIndex].cumulativePnl >= 0 ? '+' : ''}{points[hoveredIndex].cumulativePnl.toFixed(2)}R)
+                  {points[hoveredIndex].cumulativePnl >= 0 ? '+' : ''}{points[hoveredIndex].cumulativePnl.toFixed(2)}%
                 </span>
               </div>
               <div className="flex justify-between gap-4">
