@@ -9,6 +9,7 @@ import os
 import requests
 import websockets
 import psycopg2
+import psycopg2.extras
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
@@ -465,5 +466,4 @@ async def run():
             await asyncio.sleep(5)
 
 if __name__ == "__main__":
-    import psycopg2.extras
     asyncio.run(run())

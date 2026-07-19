@@ -1,4 +1,5 @@
 import os
+import asyncio
 import logging
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +17,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Import stream_subscriber to run it as a background task
+# (avoids needing a separate Railway service on free tier)
+async def start_stream_subscriber():
+    """Start stream_subscriber in the background on API startup"""
+    try:
+        # Import here to avoid circular dependencies
+        import sys
+        sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+        import stream_subscriber
+
+        log.info("[Main] Starting stream_subscriber background task...")
+        asyncio.create_task(stream_subscriber.run())
+    except Exception as e:
+        log.error(f"[Main] Failed to start stream_subscriber: {e}")
+
+@app.on_event("startup")
+async def startup_event():
+    await start_stream_subscriber()
 
 @app.get("/")
 def read_root():
