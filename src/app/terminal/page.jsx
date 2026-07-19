@@ -1701,7 +1701,6 @@ export default function TerminalPage() {
                   onPriceTick={setLiveBtcPrice}
                   plan={profile?.plan || 'free'}
                   onUpgradeGate={triggerUpgradeGate}
-                  activeSignal={selectedSymbolActiveSignal}
                 />
                 <SignalPanel signals={logSignals || []} />
               </div>
