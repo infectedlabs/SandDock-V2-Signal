@@ -71,9 +71,11 @@ async function fetchCandlesInChunks(symbol, intervalMs) {
   return allCandles;
 }
 
-// Detect swings: only check if each candle is a local high/low
+// Detect swings with ALTERNATING pattern enforcement: BUY, SELL, BUY, SELL
+// Ensures no two consecutive same-direction signals
 function detectSwings(candles, lookback = LOOKBACK) {
   const signals = [];
+  let lastSignalType = null; // Track last signal to enforce alternation
 
   for (let i = lookback; i < candles.length; i++) {
     const c = candles[i];
@@ -96,8 +98,13 @@ function detectSwings(candles, lookback = LOOKBACK) {
       }
     }
 
-    if (isLow) {
-      signals.push({
+    // CRITICAL: A candle can be both a local low AND high (rare, e.g., doji-like)
+    // Never emit both from the same candle. Prefer low if both true, OR only take
+    // one based on alternation rule.
+    let signal = null;
+
+    if (isLow && lastSignalType !== 'buy') {
+      signal = {
         symbol: c.symbol,
         interval: INTERVAL,
         bar_time: c.close_time,
@@ -109,12 +116,12 @@ function detectSwings(candles, lookback = LOOKBACK) {
         tp_price: c.low * (1 + TP_PCT / 100),
         sl_pct: SL_PCT,
         tp_pct: TP_PCT,
-      });
-    }
-
-    if (isHigh) {
-      const offset = isLow ? new Date(c.close_time).getTime() + 1000 : c.close_time;
-      signals.push({
+      };
+      lastSignalType = 'buy';
+    } else if (isHigh && lastSignalType !== 'sell') {
+      // If low was already emitted this candle, offset sell by 1 second
+      const offset = lastSignalType === 'buy' ? new Date(c.close_time).getTime() + 1000 : c.close_time;
+      signal = {
         symbol: c.symbol,
         interval: INTERVAL,
         bar_time: new Date(offset).toISOString(),
@@ -126,7 +133,12 @@ function detectSwings(candles, lookback = LOOKBACK) {
         tp_price: c.high * (1 - TP_PCT / 100),
         sl_pct: SL_PCT,
         tp_pct: TP_PCT,
-      });
+      };
+      lastSignalType = 'sell';
+    }
+
+    if (signal) {
+      signals.push(signal);
     }
   }
 
