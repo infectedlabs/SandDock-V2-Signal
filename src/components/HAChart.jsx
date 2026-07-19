@@ -615,6 +615,65 @@ export default function HAChart({
         sigsRef.current = filteredSigs;
         console.log('[HAChart] Loaded signals:', filteredSigs.length);
 
+        // Find the most recent LIVE signal (not closed)
+        const liveSignal = filteredSigs.find(sig => sig.closed_at === null);
+        if (liveSignal) {
+          console.log('[HAChart] Found live signal:', liveSignal.signal_type, liveSignal.entry_price);
+          // Draw live signal layers
+          const entryVal = parseFloat(liveSignal.entry_price);
+          const slVal = parseFloat(liveSignal.sl_price);
+          const tpVal = parseFloat(liveSignal.tp_price);
+          const isBuySignal = liveSignal.signal_type === 'buy';
+
+          // Calculate SL/TP percentages
+          const rawTpPct = ((tpVal - entryVal) / entryVal) * 100;
+          const rawSlPct = ((slVal - entryVal) / entryVal) * 100;
+          const tpPctVal = isBuySignal ? rawTpPct : -rawTpPct;
+          const slPctVal = isBuySignal ? rawSlPct : -rawSlPct;
+
+          const signalBarTime = Math.floor(new Date(liveSignal.bar_time).getTime() / 1000) + offsetSeconds;
+          signalBarTimeRef.current = signalBarTime;
+          lastCandleTimeRef.current = candleData[candleData.length - 1].time;
+
+          // Set price scale to fit the signal levels
+          const rangeBuffer = Math.abs(tpVal - slVal) * 0.15;
+          chart.priceScale('right').applyOptions({
+            priceRange: {
+              minValue: Math.min(slVal, entryVal, tpVal) - rangeBuffer,
+              maxValue: Math.max(slVal, entryVal, tpVal) + rangeBuffer,
+            },
+          });
+
+          // Draw entry, SL, TP price lines
+          const candleSeries = seriesRef.current;
+          if (candleSeries) {
+            candleSeries.createPriceLine({
+              price: entryVal,
+              color: isBuySignal ? '#10b981' : '#ef4444',
+              lineWidth: 2,
+              lineStyle: lwc.LineStyle.Solid,
+              axisLabelVisible: true,
+              title: 'Entry',
+            });
+            candleSeries.createPriceLine({
+              price: tpVal,
+              color: '#10b981',
+              lineWidth: 1,
+              lineStyle: lwc.LineStyle.Dashed,
+              axisLabelVisible: true,
+              title: `TP (${tpPctVal.toFixed(1)}%)`,
+            });
+            candleSeries.createPriceLine({
+              price: slVal,
+              color: '#ef4444',
+              lineWidth: 1,
+              lineStyle: lwc.LineStyle.Dashed,
+              axisLabelVisible: true,
+              title: `SL (${slPctVal.toFixed(1)}%)`,
+            });
+          }
+        }
+
         // Immediately update card positions (for floating labels)
         if (filteredSigs.length > 0) {
           updateCardPositions();
