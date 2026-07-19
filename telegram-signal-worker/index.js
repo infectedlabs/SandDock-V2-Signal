@@ -487,9 +487,25 @@ async function processSymbol(symbol) {
     close_reason: null,
   }));
 
+  // Filter out signals that already exist (check by symbol + interval + bar_time)
+  const { data: existingSignals } = await supabase
+    .from('signals')
+    .select('bar_time')
+    .eq('symbol', symbol)
+    .eq('interval', INTERVAL)
+    .in('bar_time', toInsert.map(sig => sig.bar_time));
+
+  const existingTimes = new Set((existingSignals || []).map(sig => sig.bar_time));
+  const newSignalsToInsert = toInsert.filter(sig => !existingTimes.has(sig.bar_time));
+
+  if (newSignalsToInsert.length === 0) {
+    log(`[${symbol}] All detected swings already exist, skipping insert.`);
+    return true;
+  }
+
   const { data: insertedSignals, error: insertError } = await supabase
     .from('signals')
-    .insert(toInsert)
+    .insert(newSignalsToInsert)
     .select();
 
   if (insertError) {
@@ -497,8 +513,8 @@ async function processSymbol(symbol) {
     return true;
   }
 
-  log(`[${symbol}] ➕ Inserted ${toInsert.length} new signal(s).`);
-  for (const sig of (insertedSignals || toInsert)) {
+  log(`[${symbol}] ➕ Inserted ${newSignalsToInsert.length} new signal(s).`);
+  for (const sig of (insertedSignals || newSignalsToInsert)) {
     if (sig.closed_at === null) {
       const messageId = await sendTelegram(newSignalMessage(sig));
       if (messageId && sig.id) {
