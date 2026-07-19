@@ -571,7 +571,8 @@ function connectWebSocket() {
       if (k.x === false && historicalCandles[symbol]) {
         const wickSignals = detectWickSwings(candle, historicalCandles[symbol], LOOKBACK);
         for (const sig of wickSignals) {
-          const wickKey = `${symbol}_${sig.signal_type}_${sig.wick_price}`;
+          // Use candle open_time as part of key, not wick_price (which changes every tick)
+          const wickKey = `${symbol}_${sig.signal_type}_${sig.bar_time}`;
           if (!pendingWicks[wickKey]) {
             pendingWicks[wickKey] = true;
             log(`[${symbol}] WICK ALERT: Swing ${sig.signal_type.toUpperCase()} @ ${sig.wick_price.toFixed(2)}`);
