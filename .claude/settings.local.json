@@ -214,7 +214,11 @@
       "Bash(sed -i 's/className=\"text-white text-sm mb-8 max-w-2xl mx-auto\">The application/className=\"text-black text-sm mb-8 max-w-2xl mx-auto\">The application/g' src/app/pricing/page.jsx)",
       "Bash(xargs sed -i 's/font-sans/font-satoshi/g')",
       "Bash(xargs sed -i 's/font-mono/font-cabinet/g')",
-      "Bash(xargs sed -i 's/font-cabinet/font-satoshi/g')"
+      "Bash(xargs sed -i 's/font-cabinet/font-satoshi/g')",
+      "Bash(grep -n \"activeTab === \\\\|{/\\\\* ══\" src/app/terminal/page.jsx)",
+      "Bash(awk '/activeTab === .settings. && \\\\\\(/{start=NR} start && /^            \\\\\\)}$/{print NR; exit}' src/app/terminal/page.jsx)",
+      "Bash(awk '/activeTab === .settings. && \\\\\\(/{start=NR} start && /^            \\\\\\)}$/{print start\"-\"NR; exit}' src/app/terminal/page.jsx)",
+      "Bash(awk '/SETTINGS TAB/{start=NR} start && /^            \\\\{\\\\/\\\\* ══/{if\\(NR>start+5\\) {print start\"-\"NR; exit}}' src/app/terminal/page.jsx)"
     ]
   }
 }

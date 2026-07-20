@@ -1205,40 +1205,11 @@ export default function TerminalPage() {
     setUpgradeModal(true);
   };
 
-  const handleVirtualUpgrade = async () => {
-    try { await updateProfile({ plan: 'pro' }); setUpgradeModal(false); }
-    catch (err) { console.error(err); }
+  const handleVirtualUpgrade = () => {
+    setUpgradeModal(false);
+    router.push('/pricing');
   };
 
-  const handleUpdateSettings = async e => {
-    e.preventDefault();
-    try {
-      let rVal = 1.0;
-      if (settingsRiskPerTradeType === '1%') rVal = 1.0;
-      else if (settingsRiskPerTradeType === '1.5%') rVal = 1.5;
-      else if (settingsRiskPerTradeType === '2%') rVal = 2.0;
-      else {
-        rVal = parseFloat(settingsCustomRiskVal) || 1.0;
-      }
-
-      await updateProfile({
-        experience_level: settingsExperience,
-        risk_style: settingsRisk,
-        primary_goal: settingsGoal,
-        account_size: settingsAccountSize,
-        risk_per_trade: rVal,
-        min_confidence: settingsMinConfidence,
-        default_timeframe: settingsDefaultTimeframe,
-        default_view: settingsDefaultView,
-        timezone: settingsTimezone,
-        price_format: settingsPriceFormat,
-        email_signal_closed: settingsEmailSignalClosed,
-        email_weekly_debrief: settingsEmailWeeklyDebrief,
-        email_system_alerts: settingsEmailSystemAlerts
-      });
-      alert('Preferences updated!');
-    } catch (err) { console.error(err); }
-  };
 
   if (loading || !user || !profile) {
     const prompt = loadingPrompt || LOADING_PROMPTS[0];
@@ -1367,10 +1338,6 @@ export default function TerminalPage() {
                   <span className="block font-bold text-[13px] text-white uppercase tracking-wider">{profile.name}</span>
                   <span className="block text-[11px] text-white font-satoshi truncate mt-0.5">{profile.email}</span>
                 </div>
-                <button onClick={() => { setActiveTab('settings'); setProfileMenuOpen(false); }}
-                  className="w-full text-left px-4 py-2.5 text-[13px] text-zinc-300 hover:bg-[#111827] hover:text-white uppercase font-bold tracking-wider cursor-pointer bg-transparent border-0">
-                  Settings
-                </button>
                 <a href="/billing"
                   className="block w-full text-left px-4 py-2.5 text-[13px] text-zinc-300 hover:bg-[#111827] hover:text-white uppercase font-bold tracking-wider">
                   Billing & Plan
@@ -1417,20 +1384,6 @@ export default function TerminalPage() {
               </nav>
             </div>
 
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold text-white uppercase tracking-widest block px-3 text-left">Configuration</span>
-              <nav>
-                <button onClick={() => setActiveTab('settings')}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-[13px] font-bold uppercase tracking-wide transition-colors text-left cursor-pointer border-0 bg-transparent ${
-                    activeTab === 'settings'
-                      ? 'text-brand-orange bg-[#000000] border-l-2 border-brand-orange'
-                      : 'text-white hover:text-white hover:bg-zinc-950/20'
-                  }`}>
-                  <Icons.Settings />
-                  <span>Console Settings</span>
-                </button>
-              </nav>
-            </div>
           </div>
 
           <div className="space-y-3 pt-4 border-t border-zinc-900">
@@ -1509,7 +1462,7 @@ export default function TerminalPage() {
                     <p className="text-[11px] text-white normal-case leading-relaxed">Pro - 3 of 15 coins active.</p>
                   </div>
                   <button
-                    onClick={() => triggerUpgradeGate('Upgrade to Master', 'Access SOL, XRP, and all 15 high-beta coins instantly.')}
+                    onClick={() => router.push('/pricing')}
                     className="w-full py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] uppercase tracking-wider transition-colors border border-purple-600 cursor-pointer text-center block"
                   >
                     Upgrade to Master
@@ -2354,14 +2307,6 @@ export default function TerminalPage() {
 
 
             {/* ══ SETTINGS TAB ════════════════════════════════════════════════ */}
-            {activeTab === 'settings' && (
-              <div className="space-y-6 max-w-xl text-left">
-                <div className="space-y-1 border-b border-zinc-800 pb-4">
-                  <h2 className="text-[18px] font-bold uppercase tracking-wider text-white">Console Settings</h2>
-                  <p className="text-[13px] text-white font-satoshi">Update experience profile, risk tolerance, alerts, and display parameters.</p>
-                </div>
-
-                <form onSubmit={handleUpdateSettings} className="space-y-6">
 
                   {/* TRADING PROFILE */}
                   <div className="space-y-4">
@@ -2697,9 +2642,6 @@ export default function TerminalPage() {
                     </button>
                   </div>
 
-                </form>
-              </div>
-            )}
 
           </main>
         </div>
@@ -2752,7 +2694,7 @@ export default function TerminalPage() {
             <div className="flex gap-3 pt-1">
               <button onClick={handleVirtualUpgrade}
                 className="flex-1 py-3 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-[13px] uppercase tracking-widest transition-colors cursor-pointer border-0">
-                Upgrade to Pro ($29/mo)
+                Upgrade to Pro
               </button>
               <button onClick={() => setUpgradeModal(false)}
                 className="px-4 py-3 border border-zinc-800 bg-transparent hover:bg-[#111827] hover:text-white text-[13px] font-bold text-white uppercase tracking-widest transition-colors cursor-pointer">

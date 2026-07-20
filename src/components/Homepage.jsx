@@ -128,7 +128,7 @@ const faqItems = [
   },
   {
     q: "What is the Lifetime plan?",
-    a: "A one-time payment of $999 that gives you Master-level access to Sanddock forever, including all current and future features without compromise. Available only during the launch window - limited to 500 GrandMaster members.",
+    a: "A one-time payment that gives you Master-level access to Sanddock forever, including all current and future features without compromise. Available only during the launch window - limited to 500 GrandMaster members.",
   },
 ];
 
