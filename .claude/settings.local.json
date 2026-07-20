@@ -195,7 +195,9 @@
       "Bash(wmic process *)",
       "Bash(curl -s \"http://localhost:3000/api/chart/candles?symbol=BTCUSDT&interval=30m&limit=3\")",
       "Bash(curl -s \"http://localhost:3000/api/chart/candles?symbol=BTCUSDT&interval=30m&limit=1\")",
-      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\\\\src\\\\app\\\\apply\\\\page.jsx\"\\).Length)"
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\\\\src\\\\app\\\\apply\\\\page.jsx\"\\).Length)",
+      "Bash(curl -s \"http://localhost:3000/api/chart/signals?symbol=BTCUSDT&interval=30m&plan=master\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('total:', len\\(d\\)\\); live=[s for s in d if s['closed_at'] is None]; print\\('live signals:', live\\)\")"
     ]
   }
 }

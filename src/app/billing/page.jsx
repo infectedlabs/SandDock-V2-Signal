@@ -297,18 +297,18 @@ export default function BillingPage() {
                 <h2 className="text-[13px] font-black uppercase tracking-wider text-white mb-2 border-b border-[#1e2d4a] pb-2">Manage Subscription</h2>
                 <p className="text-[12px] text-zinc-400 mb-5 font-medium leading-relaxed">
                   To cancel or update your payment method, contact us at{' '}
-                  <a href="mailto:support@sanddock.com" className="text-[#3D5AFE] hover:underline font-bold">support@sanddock.com</a>
+                  <a href="mailto:alex@sanddock.com" className="text-[#3D5AFE] hover:underline font-bold">alex@sanddock.com</a>
                   . You'll keep access until the end of your billing period.
                 </p>
                 <div className="flex flex-col gap-3 font-mono">
                   <a
-                    href="mailto:support@sanddock.com?subject=Cancel Subscription"
+                    href="mailto:alex@sanddock.com?subject=Cancel Subscription"
                     className="py-2 px-4 rounded-xl text-center text-[10px] font-bold uppercase tracking-widest bg-transparent hover:bg-red-500/10 text-red-400 border border-red-500/30 transition-colors"
                   >
                     Request Cancellation
                   </a>
                   <a
-                    href="mailto:support@sanddock.com?subject=Update Payment Method"
+                    href="mailto:alex@sanddock.com?subject=Update Payment Method"
                     className="py-2 px-4 rounded-xl text-center text-[10px] font-bold uppercase tracking-widest bg-slate-950/50 hover:bg-slate-900/50 text-zinc-300 border border-[#1e2d4a] transition-colors"
                   >
                     Update Payment Method

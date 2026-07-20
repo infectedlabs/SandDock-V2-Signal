@@ -18,7 +18,7 @@ const faqItems = [
   },
   {
     q: "How do I report a bug or suggest a feature?",
-    a: "Please email team@sanddock.com with the subject line '[BUG]' or '[FEATURE]'. Our product engineers review all feedback weekly."
+    a: "Please email alex@sanddock.com with the subject line '[BUG]' or '[FEATURE]'. Our product engineers review all feedback weekly."
   }
 ];
 
@@ -116,14 +116,14 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           
           {/* Card 1: Email */}
-          <a href="mailto:team@sanddock.com" className="bg-[#f4f6fa] border border-black p-8 rounded-none flex flex-col justify-between h-56 hover:bg-black hover:text-white transition-colors group">
+          <a href="mailto:alex@sanddock.com" className="bg-[#f4f6fa] border border-black p-8 rounded-none flex flex-col justify-between h-56 hover:bg-black hover:text-white transition-colors group">
             <div>
               <span className="text-[10px] font-mono font-bold tracking-wider block text-brand-orange uppercase mb-4">Direct Email</span>
               <h3 className="text-2xl font-bold uppercase tracking-tight text-black group-hover:text-white">Email Us</h3>
               <p className="text-text-secondary text-sm group-hover:text-zinc-300 mt-2">Get quick support and technical answers.</p>
             </div>
             <div className="font-mono text-xs font-bold uppercase tracking-wider mt-4">
-              team@sanddock.com &rarr;
+              alex@sanddock.com &rarr;
             </div>
           </a>
 
@@ -220,7 +220,8 @@ export default function ContactPage() {
               <div className="flex gap-4 pt-2 text-[10px] font-bold uppercase tracking-wider">
                 <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors">Twitter/X</a>
                 <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors">Telegram</a>
-                <a href="#youtube" className="text-zinc-500 hover:text-white transition-colors">YouTube</a>
+                <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors">YouTube</a>
+                <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors">Instagram</a>
               </div>
             </div>
 

@@ -620,8 +620,8 @@ export default function Homepage() {
         {/* Separator and Bottom Meta row */}
         <div className="border-t border-black mt-16 pt-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs font-bold uppercase tracking-wider text-black">
           {/* Contact Us bubble style */}
-          <div 
-            onClick={() => handleOpenModal("Contact Support", "Drop us an email at support@sanddock.com. Response within 12-48 hours.")}
+          <div
+            onClick={() => handleOpenModal("Contact Support", "Drop us an email at alex@sanddock.com. Response within 12-48 hours.")}
             className="flex items-center gap-2 cursor-pointer hover:underline"
           >
             <svg className="w-4 h-4 fill-current inline-block" viewBox="0 0 24 24">

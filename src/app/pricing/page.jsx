@@ -387,7 +387,7 @@ export default function PricingPage() {
           </div>
           <div className="border border-black p-6 bg-zinc-50">
             <h3 className="font-bold text-black mb-2">Can I cancel my subscription?</h3>
-            <p className="text-sm text-zinc-700">Yes. Email support@sanddock.com anytime. Your account downgrades to Free on your renewal date.</p>
+            <p className="text-sm text-zinc-700">Yes. Email alex@sanddock.com anytime. Your account downgrades to Free on your renewal date.</p>
           </div>
           <div className="border border-black p-6 bg-white">
             <h3 className="font-bold text-black mb-2">Why USDT only?</h3>
