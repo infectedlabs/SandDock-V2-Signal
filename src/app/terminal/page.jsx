@@ -1389,7 +1389,7 @@ export default function TerminalPage() {
       <div className="flex-1 flex overflow-hidden">
 
         {/* SIDEBAR */}
-        <aside className="hidden lg:flex flex-col w-72 bg-[#000000] border-r border-[#1e2a3a] p-4 justify-between select-none h-full overflow-y-auto flex-shrink-0">
+        <aside className="hidden lg:flex flex-col w-80 bg-[#000000] border-r border-[#1e2a3a] p-4 justify-between select-none h-full overflow-y-auto flex-shrink-0">
           <div className="space-y-5">
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-white uppercase tracking-widest block px-3 text-left">Trading Room</span>
@@ -1459,25 +1459,13 @@ export default function TerminalPage() {
             )}
 
             {/* Telegram status */}
-            {profile.telegram_chat_id ? (
+            {profile.telegram_chat_id && (
               <div className="bg-[#000000] border border-emerald-500/20 p-3 space-y-1.5 text-left">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Alerts Active</span>
                 </div>
                 <p className="text-[11px] text-white normal-case leading-relaxed">Telegram delivery synced.</p>
-              </div>
-            ) : (
-              <div onClick={() => router.push('/pricing')} className="bg-[#000000] border border-yellow-500/20 p-3 space-y-1.5 text-left cursor-pointer hover:border-yellow-500/40 transition-colors">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-500 font-satoshi">Alerts Inactive</span>
-                </div>
-                <p className="text-[11px] text-white normal-case leading-relaxed">Telegram not connected.</p>
-                <button
-                  className="text-[11px] font-bold uppercase tracking-wider text-yellow-500 hover:text-white transition-colors cursor-pointer bg-transparent border-0 underline block p-0">
-                  Upgrade for Alerts →
-                </button>
               </div>
             )}
 
