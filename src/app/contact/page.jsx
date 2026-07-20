@@ -217,11 +217,34 @@ export default function ContactPage() {
               <p className="text-zinc-400 text-xs uppercase font-bold tracking-wider">
                 AI signals. Honest track record.
               </p>
-              <div className="flex gap-4 pt-2 text-[10px] font-bold uppercase tracking-wider">
-                <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors">Twitter/X</a>
-                <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors">Telegram</a>
-                <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors">YouTube</a>
-                <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors">Instagram</a>
+              <div className="space-y-4 pt-4">
+                <div className="flex gap-4">
+                  <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Twitter/X">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.637l-5.206-6.801-5.979 6.801h-3.31l7.734-8.835L2.25 2.25h6.82l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/>
+                    </svg>
+                  </a>
+                  <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Telegram">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.82-1.084.51l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.782 13.5l-2.995-.937c-.652-.213-.66-.652.135-.973l11.717-4.518c.54-.213 1.012.122.84 1.15z"/>
+                    </svg>
+                  </a>
+                  <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="YouTube">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                  </a>
+                  <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Instagram">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.441 7.265c.504 0 .915.41.915.915 0 .504-.41.915-.915.915-.504 0-.915-.41-.915-.915 0-.504.41-.915.915-.915zm-3.441.915c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-1.5c-2.485 0-4.5 2.015-4.5 4.5s2.015 4.5 4.5 4.5 4.5-2.015 4.5-4.5-2.015-4.5-4.5-4.5zm6.5-2c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5z"/>
+                    </svg>
+                  </a>
+                </div>
+                <div className="pt-2">
+                  <a href="mailto:alex@sanddock.com" className="text-zinc-500 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">
+                    alex@sanddock.com
+                  </a>
+                </div>
               </div>
             </div>
 

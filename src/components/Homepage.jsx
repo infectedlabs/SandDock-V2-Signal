@@ -3,15 +3,15 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 
-// Tickers mock data
-const tickerStrip1 = [
+// Tickers mock data structure (will be updated with real prices)
+const getInitialTickerStrip1 = () => [
   { coin: "BTC", type: "BUY", price: "$67,432.00", confidence: 87, time: "14m ago", free: true },
   { coin: "ETH", type: "SELL", price: "$3,210.00", confidence: 72, time: "2h ago", free: false },
   { coin: "SOL", type: "BUY", price: "$142.50", confidence: 91, time: "5h ago", free: false },
   { coin: "BNB", type: "SELL", price: "$598.30", confidence: 68, time: "1d ago", free: false },
 ];
 
-const tickerStrip2 = [
+const getInitialTickerStrip2 = () => [
   { coin: "ADA", type: "BUY", price: "$0.612", confidence: 79, time: "3h ago", free: false },
   { coin: "AVAX", type: "SELL", price: "$38.20", confidence: 83, time: "6h ago", free: false },
   { coin: "XRP", type: "BUY", price: "$0.541", confidence: 74, time: "8h ago", free: false },
@@ -160,6 +160,8 @@ export default function Homepage() {
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [closedSignals, setClosedSignals] = useState([]);
   const [isLoadingSignals, setIsLoadingSignals] = useState(true);
+  const [tickerStrip1, setTickerStrip1] = useState(getInitialTickerStrip1());
+  const [tickerStrip2, setTickerStrip2] = useState(getInitialTickerStrip2());
 
   useEffect(() => {
     const handleScroll = () => {
@@ -236,6 +238,63 @@ export default function Homepage() {
     fetchClosedSignals();
     // Refresh every 60 seconds
     const interval = setInterval(fetchClosedSignals, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch crypto prices from Coinbase API and update ticker
+  useEffect(() => {
+    const fetchCryptoPrices = async () => {
+      try {
+        const response = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=USD');
+        const data = await response.json();
+
+        if (data.data && data.data.rates) {
+          const rates = data.data.rates;
+
+          // Coinbase API returns rates as crypto per USD, need to invert to get USD per crypto
+          const priceMap = {
+            BTC: rates.BTC ? 1 / parseFloat(rates.BTC) : null,
+            ETH: rates.ETH ? 1 / parseFloat(rates.ETH) : null,
+            SOL: rates.SOL ? 1 / parseFloat(rates.SOL) : null,
+            BNB: rates.BNB ? 1 / parseFloat(rates.BNB) : null,
+            ADA: rates.ADA ? 1 / parseFloat(rates.ADA) : null,
+            AVAX: rates.AVAX ? 1 / parseFloat(rates.AVAX) : null,
+            XRP: rates.XRP ? 1 / parseFloat(rates.XRP) : null,
+          };
+
+          // Update ticker strips with real prices
+          setTickerStrip1((prev) =>
+            prev.map((item) => ({
+              ...item,
+              price: priceMap[item.coin]
+                ? `$${priceMap[item.coin].toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`
+                : item.price,
+            }))
+          );
+
+          setTickerStrip2((prev) =>
+            prev.map((item) => ({
+              ...item,
+              price: priceMap[item.coin]
+                ? `$${priceMap[item.coin].toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`
+                : item.price,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error('Failed to fetch crypto prices:', error);
+      }
+    };
+
+    fetchCryptoPrices();
+    // Refresh every 5 minutes
+    const interval = setInterval(fetchCryptoPrices, 300000);
     return () => clearInterval(interval);
   }, []);
 
@@ -447,12 +506,6 @@ export default function Homepage() {
 
       {/* Floating Retro Parallax Elements */}
       <div 
-        className="absolute top-48 right-12 w-8 h-8 border border-black rotate-45 pointer-events-none hidden lg:flex items-center justify-center text-xs font-bold text-black select-none z-10"
-        style={{ transform: `translateY(${scrollY * -0.12}px) rotate(45deg)` }}
-      >
-        SD
-      </div>
-      <div 
         className="absolute top-[600px] left-10 w-6 h-6 border-t border-l border-black pointer-events-none hidden lg:block z-10"
         style={{ transform: `translateY(${scrollY * 0.08}px)` }}
       />
@@ -472,29 +525,29 @@ export default function Homepage() {
           {/* Left Column: Huge typography & description & CTAs */}
           <div className="lg:col-span-7 space-y-5 text-left">
             <div className="space-y-3">
-              <h1 className="text-[28px] sm:text-[36px] md:text-[44px] font-extrabold tracking-tighter leading-tight font-sans text-black">
-                Trading signals backed by data, not promises.
+              <h1 className="text-[28px] sm:text-[36px] md:text-[44px] font-extrabold tracking-tighter leading-snug font-sans text-black max-w-full">
+                Trading signals backed by data,<br className="hidden md:block" /> not promises.
               </h1>
             </div>
 
             {/* Live Stats Row - Total Performance */}
-            <div className="py-5 border-t border-b border-black">
-              <div className="grid grid-cols-3 gap-8 mb-3">
+            <div className="py-3 md:py-5 border-t border-b border-black">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 mb-3">
                 <div className="space-y-1">
-                  <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Win Rate</p>
-                  <p className="text-3xl font-extrabold text-black font-mono">
+                  <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-text-muted">Win Rate</p>
+                  <p className="text-xl md:text-3xl font-extrabold text-black font-mono">
                     {isLoadingStats ? '...' : heroStats.win_rate.toFixed(1)}%
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Total PnL</p>
-                  <p className={`text-3xl font-extrabold font-mono ${heroStats.total_pnl >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-text-muted">Total PnL</p>
+                  <p className={`text-xl md:text-3xl font-extrabold font-mono ${heroStats.total_pnl >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                     {isLoadingStats ? '...' : (heroStats.total_pnl >= 0 ? '+' : '') + heroStats.total_pnl.toFixed(2)}%
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs font-bold uppercase tracking-widest text-text-muted">Total Signals</p>
-                  <p className="text-3xl font-extrabold text-black font-mono">
+                  <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-text-muted">Total Signals</p>
+                  <p className="text-xl md:text-3xl font-extrabold text-black font-mono">
                     {isLoadingStats ? '...' : heroStats.total_signals.toLocaleString()}
                   </p>
                 </div>
@@ -505,7 +558,7 @@ export default function Homepage() {
             </div>
 
             {/* Description and copy */}
-            <p className="text-base md:text-lg text-text-secondary leading-relaxed max-w-md">
+            <p className="text-base md:text-lg text-text-secondary leading-relaxed max-w-3xl whitespace-normal break-words">
               AI-powered trading signals. Verified track record. Every entry with a clear reason, stop-loss, and profit target. Start free on Bitcoin.
             </p>
 
@@ -540,7 +593,7 @@ export default function Homepage() {
             <div className="bg-white border border-black rounded-none p-8 shadow-xl relative overflow-hidden">
               {/* Header */}
               <div className="pb-4 border-b border-black mb-6">
-                <h3 className="text-2xl font-extrabold uppercase tracking-tighter text-black mb-1">Verified & Transparent</h3>
+                <h3 className="text-2xl font-extrabold uppercase tracking-tighter text-black mb-1 mt-2">Verified & Transparent</h3>
                 <p className="text-sm text-zinc-600">Why traders trust Sanddock</p>
               </div>
 
@@ -619,16 +672,6 @@ export default function Homepage() {
 
         {/* Separator and Bottom Meta row */}
         <div className="border-t border-black mt-16 pt-6 flex flex-col md:flex-row items-center justify-between gap-6 text-xs font-bold uppercase tracking-wider text-black">
-          {/* Contact Us bubble style */}
-          <div
-            onClick={() => handleOpenModal("Contact Support", "Drop us an email at alex@sanddock.com. Response within 12-48 hours.")}
-            className="flex items-center gap-2 cursor-pointer hover:underline"
-          >
-            <svg className="w-4 h-4 fill-current inline-block" viewBox="0 0 24 24">
-              <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
-            </svg>
-            <span className="underline decoration-black decoration-2">Contact us</span>
-          </div>
 
           {/* Exchange lists */}
           <div className="flex items-center gap-6 opacity-60 text-[10px]">
@@ -640,12 +683,6 @@ export default function Homepage() {
             <span>·</span>
             <span>KuCoin</span>
           </div>
-
-          {/* Scroll Down action */}
-          <a href="#how-it-works" className="flex items-center gap-1.5 hover:text-brand-orange transition-colors">
-            <span className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-[10px]">&darr;</span>
-            <span>Scroll down</span>
-          </a>
         </div>
       </section>
 
@@ -1468,11 +1505,7 @@ export default function Homepage() {
         {/* Table Preview */}
         <div className="border border-black rounded-none bg-white overflow-hidden mb-8">
           <div className="p-4 border-b border-black bg-[#f8f9fa] flex items-center justify-between text-xs font-bold uppercase tracking-wider text-black">
-            <span>Today's Best Trades</span>
-            <span className="flex items-center gap-1.5 text-signal-buy">
-              <span className="w-1.5 h-1.5 rounded-full bg-signal-buy animate-pulse" />
-              Highest PnL First
-            </span>
+            <span>Today's Trades</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -1683,10 +1716,34 @@ export default function Homepage() {
               <p className="text-zinc-400 text-xs uppercase font-bold tracking-wider">
                 Trading signals backed by data, not promises.
               </p>
-              <div className="flex gap-4 pt-2 text-[10px] font-bold uppercase tracking-wider">
-                <a href="#twitter" className="text-zinc-500 hover:text-white transition-colors">Twitter/X</a>
-                <a href="#telegram" className="text-zinc-500 hover:text-white transition-colors">Telegram</a>
-                <a href="#youtube" className="text-zinc-500 hover:text-white transition-colors">YouTube</a>
+              <div className="space-y-4 pt-4">
+                <div className="flex gap-4">
+                  <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Twitter/X">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.637l-5.206-6.801-5.979 6.801h-3.31l7.734-8.835L2.25 2.25h6.82l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/>
+                    </svg>
+                  </a>
+                  <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Telegram">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.82-1.084.51l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.782 13.5l-2.995-.937c-.652-.213-.66-.652.135-.973l11.717-4.518c.54-.213 1.012.122.84 1.15z"/>
+                    </svg>
+                  </a>
+                  <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="YouTube">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                  </a>
+                  <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Instagram">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.441 7.265c.504 0 .915.41.915.915 0 .504-.41.915-.915.915-.504 0-.915-.41-.915-.915 0-.504.41-.915.915-.915zm-3.441.915c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-1.5c-2.485 0-4.5 2.015-4.5 4.5s2.015 4.5 4.5 4.5 4.5-2.015 4.5-4.5-2.015-4.5-4.5-4.5zm6.5-2c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5z"/>
+                    </svg>
+                  </a>
+                </div>
+                <div className="pt-2">
+                  <a href="mailto:alex@sanddock.com" className="text-zinc-500 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">
+                    alex@sanddock.com
+                  </a>
+                </div>
               </div>
             </div>
 

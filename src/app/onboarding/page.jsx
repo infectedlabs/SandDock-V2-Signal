@@ -30,7 +30,7 @@ export default function OnboardingPage() {
     ? `${firstName}, how would you describe your trading experience?` 
     : 'How would you describe your trading experience?';
   const router = useRouter();
-  const [step, setStep] = useState(1); // 1 to 5, and 6 for Telegram connect
+  const [step, setStep] = useState(1); // 1 to 4, and 5 for Telegram connect
 
   // Onboarding answers states
   const [experience, setExperience] = useState(null); // 'beginner', 'comfortable', 'experienced'
@@ -69,13 +69,13 @@ export default function OnboardingPage() {
 
   // Next Step trigger
   const handleNext = () => {
-    if (step < 5) {
+    if (step < 4) {
       setStep(step + 1);
     } else {
-      // Step 5 completed
+      // Step 4 completed
       if (delivery.telegram) {
         // Redirect to Telegram Connection step
-        setStep(6);
+        setStep(5);
       } else {
         handleFinishOnboarding();
       }
@@ -435,69 +435,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP 4: ALERT DELIVERY */}
+          {/* STEP 4: PRIMARY GOAL */}
           {step === 4 && (
-            <div className="space-y-6 text-left">
-              <div className="space-y-2">
-                <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
-                  How do you want to receive your signals?
-                </h2>
-                <p className="text-zinc-400 text-sm">
-                  Choose how Sanddock fires Heikin Ashi alerts. You can configure both methods.
-                </p>
-              </div>
-
-              <div className="space-y-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setDelivery({ ...delivery, web: !delivery.web })}
-                  className={`w-full flex items-start gap-4 p-5 border text-left cursor-pointer transition-all ${
-                    delivery.web
-                      ? 'border-brand-orange bg-brand-orange/5'
-                      : 'border-zinc-800 bg-[#111827] hover:border-zinc-700'
-                  }`}
-                >
-                  <span className="text-2xl">📊</span>
-                  <div className="space-y-1">
-                    <span className="block font-bold text-sm uppercase tracking-wide">Web Terminal Feed</span>
-                    <span className="block text-xs text-zinc-400 normal-case leading-relaxed">
-                      Check live signals inside the web app dashboard. Available on all plans.
-                    </span>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setDelivery({ ...delivery, telegram: !delivery.telegram })}
-                  className={`w-full flex items-start gap-4 p-5 border text-left cursor-pointer transition-all ${
-                    delivery.telegram
-                      ? 'border-brand-orange bg-brand-orange/5'
-                      : 'border-zinc-800 bg-[#111827] hover:border-zinc-700'
-                  }`}
-                >
-                  <span className="text-2xl">✈️</span>
-                  <div className="space-y-1">
-                    <span className="block font-bold text-sm uppercase tracking-wide flex items-center gap-2">
-                      Telegram Alerts
-                      <span className="text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.2 font-mono font-bold uppercase">PRO</span>
-                    </span>
-                    <span className="block text-xs text-zinc-400 normal-case leading-relaxed">
-                      Get real-time Buy/Sell push alerts delivered directly to your Telegram chat bot.
-                    </span>
-                  </div>
-                </button>
-              </div>
-
-              {delivery.telegram && (
-                <div className="p-3 bg-brand-orange/10 border border-brand-orange/20 text-zinc-300 text-xs font-semibold uppercase tracking-wider font-mono mt-4">
-                  ℹ️ Telegram pairing configuration will begin immediately after finishing sitemap setup.
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* STEP 5: PRIMARY GOAL */}
-          {step === 5 && (
             <div className="space-y-6 text-left">
               <div className="space-y-2">
                 <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
@@ -542,8 +481,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* STEP 6: TELEGRAM PAIRING SCREEN */}
-          {step === 6 && (
+          {/* STEP 5: TELEGRAM PAIRING SCREEN */}
+          {step === 5 && (
             <div className="space-y-6 text-left">
               <div className="space-y-2 border-b border-zinc-800 pb-4">
                 <span className="text-[10px] font-mono text-brand-orange font-bold uppercase tracking-widest">Connect Telegram</span>
