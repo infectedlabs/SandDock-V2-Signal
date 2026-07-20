@@ -218,7 +218,8 @@
       "Bash(grep -n \"activeTab === \\\\|{/\\\\* ══\" src/app/terminal/page.jsx)",
       "Bash(awk '/activeTab === .settings. && \\\\\\(/{start=NR} start && /^            \\\\\\)}$/{print NR; exit}' src/app/terminal/page.jsx)",
       "Bash(awk '/activeTab === .settings. && \\\\\\(/{start=NR} start && /^            \\\\\\)}$/{print start\"-\"NR; exit}' src/app/terminal/page.jsx)",
-      "Bash(awk '/SETTINGS TAB/{start=NR} start && /^            \\\\{\\\\/\\\\* ══/{if\\(NR>start+5\\) {print start\"-\"NR; exit}}' src/app/terminal/page.jsx)"
+      "Bash(awk '/SETTINGS TAB/{start=NR} start && /^            \\\\{\\\\/\\\\* ══/{if\\(NR>start+5\\) {print start\"-\"NR; exit}}' src/app/terminal/page.jsx)",
+      "Bash(grep -n \"^\\\\s*</main>\\\\|^\\\\s*{/\\\\* ══\")"
     ]
   }
 }
