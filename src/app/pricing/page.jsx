@@ -114,12 +114,12 @@ function PricingCard({ planKey, data, user }) {
           <div className="mt-1.5">
             {isFree ? (
               <>
-                <span className="text-4xl font-extrabold font-mono text-black">$0</span>
+                <span className="text-4xl font-extrabold font-satoshi text-black">$0</span>
                 <span className="block text-[11px] text-black font-bold mt-0.5">No credit card · Permanent access</span>
               </>
             ) : (
               <>
-                <span className="text-2xl font-extrabold font-mono text-brand-orange">Application Only</span>
+                <span className="text-2xl font-extrabold font-satoshi text-brand-orange">Application Only</span>
                 <span className="block text-[11px] text-black font-bold mt-1">Pricing revealed after approval</span>
               </>
             )}
@@ -179,7 +179,7 @@ export default function PricingPage() {
   const { user } = useAuth();
 
   return (
-    <div className="relative min-h-screen bg-white text-black overflow-hidden">
+    <div className="relative min-h-screen bg-white text-black overflow-hidden font-satoshi">
 
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
@@ -187,7 +187,7 @@ export default function PricingPage() {
           <div className="flex items-center px-6 h-16 border-r border-black relative">
             <a href="/" className="flex items-center gap-2.5">
               <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg font-bold tracking-tighter uppercase font-sans text-black">Sanddock</span>
+              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">Sanddock</span>
             </a>
             <div className="absolute bottom-0 right-0 translate-y-1/2 translate-x-1/2 w-2 h-2 bg-black rotate-45 z-10" />
           </div>
@@ -225,7 +225,7 @@ export default function PricingPage() {
         <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange block mb-2">
           Application-Based Access
         </span>
-        <h1 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none mb-4">
+        <h1 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none mb-4">
           We're selective about who we let in.
         </h1>
         <p className="text-black text-sm max-w-xl leading-relaxed">
@@ -433,7 +433,7 @@ export default function PricingPage() {
             <div className="md:col-span-5 space-y-4 text-left">
               <div className="flex items-center gap-2">
                 <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-6 h-6 object-contain" />
-                <span className="text-base font-bold uppercase tracking-wider font-sans text-white">Sanddock</span>
+                <span className="text-base font-bold uppercase tracking-wider font-satoshi text-white">Sanddock</span>
               </div>
               <p className="text-white text-xs uppercase font-bold tracking-wider">Trading signals backed by data, not promises.</p>
               <div className="space-y-4 pt-4">
@@ -459,7 +459,7 @@ export default function PricingPage() {
             <div className="md:col-span-7 grid grid-cols-3 gap-8 text-left">
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Product</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
                   <li><a href="/#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
                   <li><a href="/terminal" className="hover:text-white transition-colors">Terminal</a></li>
                   <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
@@ -469,7 +469,7 @@ export default function PricingPage() {
               </div>
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Support</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
                   <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
                   <li><a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Telegram Community</a></li>
                   <li><a href="#docs" className="hover:text-white transition-colors">Help Center</a></li>
@@ -479,7 +479,7 @@ export default function PricingPage() {
               </div>
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Legal</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
                   <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
                   <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
                   <li><a href="#disclaimer" className="hover:text-white transition-colors">Disclaimer</a></li>

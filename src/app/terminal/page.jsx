@@ -139,17 +139,17 @@ function LockedSignalCard({ symbol, timeframe, type, onUpgrade, plan = 'free', c
     >
       {/* 1. Logo & Token Info */}
       <div className="flex items-center gap-3 w-full md:w-[22%] shrink-0">
-        <div className={`w-7 h-7 rounded-full border flex items-center justify-center font-mono font-bold text-[10px] shadow-inner shrink-0 ${logo.bg}`}>
+        <div className={`w-7 h-7 rounded-full border flex items-center justify-center font-satoshi font-bold text-[10px] shadow-inner shrink-0 ${logo.bg}`}>
           {logo.char}
         </div>
         <div>
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-white tracking-wide text-xs">{coin} <span className="text-white font-normal">/ USDT</span></span>
-            <span className="text-[9px] font-mono font-bold bg-slate-950/60 px-1.5 py-0.2 rounded border border-slate-800 text-white tracking-wider">
+            <span className="text-[9px] font-satoshi font-bold bg-slate-950/60 px-1.5 py-0.2 rounded border border-slate-800 text-white tracking-wider">
               {timeframe}
             </span>
           </div>
-          <span className="text-[10px] text-white font-mono tracking-normal">Locked for your tier</span>
+          <span className="text-[10px] text-white font-satoshi tracking-normal">Locked for your tier</span>
         </div>
       </div>
 
@@ -161,7 +161,7 @@ function LockedSignalCard({ symbol, timeframe, type, onUpgrade, plan = 'free', c
       </div>
 
       {/* 3. Locked Content Area */}
-      <div className="w-full md:w-[56%] flex items-center justify-between text-white text-xs font-mono">
+      <div className="w-full md:w-[56%] flex items-center justify-between text-white text-xs font-satoshi">
         <span>🔒 HA entry, targets, and live floating performance locked.</span>
         {confidence && (
           <span className="inline-flex items-center gap-1 text-[9px] font-bold text-[#3D5AFE] bg-[#3D5AFE]/10 border border-[#3D5AFE]/20 px-2 py-0.5 rounded uppercase tracking-wider shrink-0">
@@ -205,17 +205,17 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
     >
       {/* 1. Logo & Token Info */}
       <div className="flex items-center gap-3 w-full md:w-[20%] shrink-0">
-        <div className={`w-8 h-8 rounded-full border flex items-center justify-center font-mono font-bold text-xs shadow-inner shrink-0 ${logo.bg}`}>
+        <div className={`w-8 h-8 rounded-full border flex items-center justify-center font-satoshi font-bold text-xs shadow-inner shrink-0 ${logo.bg}`}>
           {logo.char}
         </div>
         <div>
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-white tracking-wide text-xs sm:text-sm">{coin} <span className="text-white font-normal">/ USDT</span></span>
-            <span className="text-[9px] font-mono font-bold bg-slate-950/60 px-1.5 py-0.2 rounded border border-slate-800 text-white tracking-wider">
+            <span className="text-[9px] font-satoshi font-bold bg-slate-950/60 px-1.5 py-0.2 rounded border border-slate-800 text-white tracking-wider">
               {sig.interval}
             </span>
           </div>
-          <span className="text-[10px] text-white font-mono tracking-normal">Fired {formatRelativeTime(sig.bar_time)}</span>
+          <span className="text-[10px] text-white font-satoshi tracking-normal">Fired {formatRelativeTime(sig.bar_time)}</span>
         </div>
       </div>
 
@@ -232,43 +232,43 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
 
       {/* 3. Entry Price */}
       <div className="w-full md:w-[10%] flex flex-col justify-center">
-        <span className="block text-[9px] text-white font-mono uppercase tracking-widest">Entry Price</span>
-        <span className="font-mono text-xs sm:text-sm font-bold text-white mt-0.5 block">{formatPrice(sig.entry_price)}</span>
+        <span className="block text-[9px] text-white font-satoshi uppercase tracking-widest">Entry Price</span>
+        <span className="font-satoshi text-xs sm:text-sm font-bold text-white mt-0.5 block">{formatPrice(sig.entry_price)}</span>
       </div>
 
       {/* 4. Stop Loss */}
       <div className="w-full md:w-[10%] flex flex-col justify-center">
-        <span className="block text-[9px] text-white font-mono uppercase tracking-widest">Stop Loss</span>
-        <span className="font-mono text-xs text-white mt-0.5 block">{sig.sl_price ? formatPrice(sig.sl_price) : '-'}</span>
+        <span className="block text-[9px] text-white font-satoshi uppercase tracking-widest">Stop Loss</span>
+        <span className="font-satoshi text-xs text-white mt-0.5 block">{sig.sl_price ? formatPrice(sig.sl_price) : '-'}</span>
       </div>
 
       {/* 5. Take Profit */}
       <div className="w-full md:w-[10%] flex flex-col justify-center">
-        <span className="block text-[9px] text-white font-mono uppercase tracking-widest">Take Profit</span>
-        <span className="font-mono text-xs text-white mt-0.5 block">{sig.tp_price ? formatPrice(sig.tp_price) : '-'}</span>
+        <span className="block text-[9px] text-white font-satoshi uppercase tracking-widest">Take Profit</span>
+        <span className="font-satoshi text-xs text-white mt-0.5 block">{sig.tp_price ? formatPrice(sig.tp_price) : '-'}</span>
       </div>
 
       {/* R:R Ratio */}
       <div className="w-full md:w-[8%] flex flex-col justify-center">
-        <span className="block text-[9px] text-white font-mono uppercase tracking-widest">R:R Ratio</span>
-        <span className="font-mono text-xs text-white mt-0.5 block">
+        <span className="block text-[9px] text-white font-satoshi uppercase tracking-widest">R:R Ratio</span>
+        <span className="font-satoshi text-xs text-white mt-0.5 block">
           1:{sig.sl_pct && sig.tp_pct && sig.sl_pct > 0 ? (sig.tp_pct / sig.sl_pct).toFixed(1) : '2.0'}
         </span>
       </div>
 
       {/* 6. Confidence */}
       <div className="relative group/tooltip w-full md:w-[10%] flex flex-col justify-center cursor-help">
-        <span className="block text-[9px] text-white font-mono uppercase tracking-widest border-b border-dashed border-zinc-600/50 w-max">Confidence</span>
-        <span className="font-mono text-xs font-bold text-zinc-300 mt-0.5 block">{sig.confidence || 75}%</span>
-        <div className="absolute left-0 bottom-full mb-2 w-40 p-2 bg-slate-950/95 border border-slate-800 rounded shadow-xl text-left hidden group-hover/tooltip:block z-50 font-mono text-[9px] text-zinc-300 leading-normal normal-case">
+        <span className="block text-[9px] text-white font-satoshi uppercase tracking-widest border-b border-dashed border-zinc-600/50 w-max">Confidence</span>
+        <span className="font-satoshi text-xs font-bold text-zinc-300 mt-0.5 block">{sig.confidence || 75}%</span>
+        <div className="absolute left-0 bottom-full mb-2 w-40 p-2 bg-slate-950/95 border border-slate-800 rounded shadow-xl text-left hidden group-hover/tooltip:block z-50 font-satoshi text-[9px] text-zinc-300 leading-normal normal-case">
           AI conviction strength. Signals &gt;75% have higher historical accuracy.
         </div>
       </div>
 
       {/* 7. PNL */}
       <div className="w-full md:w-[9%] flex flex-col justify-center min-w-[70px]">
-        <span className="block text-[9px] text-white font-mono uppercase tracking-widest">PNL</span>
-        <span className={`font-mono text-xs sm:text-sm font-bold mt-0.5 block ${pnlColorClass}`}>
+        <span className="block text-[9px] text-white font-satoshi uppercase tracking-widest">PNL</span>
+        <span className={`font-satoshi text-xs sm:text-sm font-bold mt-0.5 block ${pnlColorClass}`}>
           {pnlText || '0.00%'}
         </span>
       </div>
@@ -276,12 +276,12 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
       {/* 8. Status & Action */}
       <div className="w-full md:w-[12%] flex items-center justify-between md:justify-end gap-2 shrink-0">
         {isLive ? (
-          <span className="inline-flex items-center gap-1.5 text-[9px] font-mono font-bold bg-[#3D5AFE]/15 text-[#3D5AFE] border border-[#3D5AFE]/20 px-2 py-0.5 uppercase rounded-full shrink-0">
+          <span className="inline-flex items-center gap-1.5 text-[9px] font-satoshi font-bold bg-[#3D5AFE]/15 text-[#3D5AFE] border border-[#3D5AFE]/20 px-2 py-0.5 uppercase rounded-full shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-[#3D5AFE] animate-ping" />
             Active
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 text-[9px] font-mono font-bold bg-zinc-800/80 text-white border border-zinc-700/40 px-2 py-0.5 uppercase rounded-full shrink-0">
+          <span className="inline-flex items-center gap-1.5 text-[9px] font-satoshi font-bold bg-zinc-800/80 text-white border border-zinc-700/40 px-2 py-0.5 uppercase rounded-full shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
             Closed
           </span>
@@ -323,16 +323,16 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
       <div className="sticky top-0 bg-[#000000]/95 backdrop-blur-md p-5 border-b border-[#1e2a3a] flex justify-between items-center z-10">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-[20px] font-bold font-mono text-white">{symbolFormatted}</h2>
-            <span className="text-[12px] font-mono bg-zinc-800 text-white px-2 py-0.5 uppercase">
+            <h2 className="text-[20px] font-bold font-satoshi text-white">{symbolFormatted}</h2>
+            <span className="text-[12px] font-satoshi bg-zinc-800 text-white px-2 py-0.5 uppercase">
               {sig.interval} HA
             </span>
           </div>
           <div className="flex items-center gap-2.5 mt-1">
-            <span className="text-[14px] text-zinc-300 font-mono">
+            <span className="text-[14px] text-zinc-300 font-satoshi">
               Live Price: <span className="font-bold text-white">{formatPrice(sig.entry_price, profile)}</span>
             </span>
-            <span className="text-[11px] font-mono text-emerald-400 bg-emerald-400/10 px-1 py-0.2 rounded-xs">
+            <span className="text-[11px] font-satoshi text-emerald-400 bg-emerald-400/10 px-1 py-0.2 rounded-xs">
               +2.3% (24h)
             </span>
           </div>
@@ -358,7 +358,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
                 Fired {formatRelativeTime(sig.created_at)}
               </span>
             </div>
-            <span className="text-white font-mono text-[13px]">
+            <span className="text-white font-satoshi text-[13px]">
               Conf: <span className="font-bold text-white">{sig.confidence}%</span>
             </span>
           </div>
@@ -366,7 +366,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
           <div className="grid grid-cols-3 gap-2 bg-zinc-950 px-3 py-2.5 border border-zinc-900">
             <div>
               <span className="block text-[10px] text-white font-bold uppercase tracking-wider">Entry Target</span>
-              <span className="text-[14px] text-white font-bold font-mono">{formatPrice(sig.entry_price, profile)}</span>
+              <span className="text-[14px] text-white font-bold font-satoshi">{formatPrice(sig.entry_price, profile)}</span>
             </div>
             <div>
               <span className="block text-[10px] text-white font-bold uppercase tracking-wider">Stop Loss</span>
@@ -376,7 +376,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
                   🔒 Pro Only
                 </button>
               ) : (
-                <span className="text-[14px] text-white font-bold font-mono">
+                <span className="text-[14px] text-white font-bold font-satoshi">
                   {formatPrice(sig.sl_price, profile)} ({sig.sl_pct}%)
                 </span>
               )}
@@ -389,7 +389,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
                   🔒 Pro Only
                 </button>
               ) : (
-                <span className="text-[14px] text-[#00e676] font-bold font-mono">
+                <span className="text-[14px] text-[#00e676] font-bold font-satoshi">
                   {formatPrice(sig.tp_price, profile)} (+{sig.tp_pct}%)
                 </span>
               )}
@@ -398,7 +398,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
 
           {sig.rationale && (
             <div className="space-y-1">
-              <span className="text-[10px] font-mono text-white font-bold uppercase">AI Analysis Rationale</span>
+              <span className="text-[10px] font-satoshi text-white font-bold uppercase">AI Analysis Rationale</span>
               <p className="text-[13px] text-zinc-300 normal-case leading-relaxed bg-zinc-950 p-3 border border-zinc-900/60">
                 {sig.rationale}
               </p>
@@ -408,7 +408,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
 
         {/* Section 2: HA Chart */}
         <div className="space-y-2">
-          <span className="block text-[11px] font-mono text-white uppercase tracking-widest text-left">
+          <span className="block text-[11px] font-satoshi text-white uppercase tracking-widest text-left">
             Signal Performance Chart
           </span>
           <HAChart
@@ -422,7 +422,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
 
         {/* Section 3: Signal History list */}
         <div className="space-y-3">
-          <span className="block text-[11px] font-mono text-white uppercase tracking-widest text-left">
+          <span className="block text-[11px] font-satoshi text-white uppercase tracking-widest text-left">
             Completed signals for {symbolFormatted}
           </span>
           {coinLog.length === 0 ? (
@@ -431,7 +431,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
             </div>
           ) : (
             <div className="overflow-x-auto bg-[#090909] border border-[#1e2a3a]">
-              <table className="w-full text-left font-mono border-collapse text-[12px]">
+              <table className="w-full text-left font-satoshi border-collapse text-[12px]">
                 <thead>
                   <tr className="border-b border-[#1e2a3a] text-white uppercase tracking-wider text-[10px] bg-zinc-950/20">
                     <th className="p-3">Date</th>
@@ -476,7 +476,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
 
         {/* Section 4: About This Signal accordion */}
         <div className="space-y-2 text-left">
-          <span className="block text-[11px] font-mono text-white uppercase tracking-widest">
+          <span className="block text-[11px] font-satoshi text-white uppercase tracking-widest">
             Trading Educational Guides
           </span>
 
@@ -564,7 +564,7 @@ function CustomCoinsList({ userId, plan }) {
     <div className="bg-[#000000]/40 border border-slate-800/50 rounded-2xl p-4">
       <div className="flex items-center justify-between mb-3">
         <span className="text-[11px] font-bold uppercase tracking-widest text-white">Custom Coins</span>
-        <span className="text-[11px] font-mono text-white">{coins.length} / 5</span>
+        <span className="text-[11px] font-satoshi text-white">{coins.length} / 5</span>
       </div>
       <div className="flex flex-wrap gap-2">
         {coins.map(coin => (
@@ -1250,7 +1250,7 @@ export default function TerminalPage() {
     const categoryBorderColor = categoryColors[prompt.type] || 'border-zinc-500 text-white';
 
     return (
-      <div className="min-h-screen bg-[#000000] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-[#000000] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden font-satoshi">
         {/* Background ambient glow */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#3D5AFE]/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-brand-orange/5 rounded-full blur-[100px] pointer-events-none" />
@@ -1259,7 +1259,7 @@ export default function TerminalPage() {
           {/* Logo or icon */}
           <div className="flex flex-col items-center gap-2">
             <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-10 h-10 object-contain animate-pulse" />
-            <h2 className="text-lg font-bold tracking-wider font-mono uppercase text-white">
+            <h2 className="text-lg font-bold tracking-wider font-satoshi uppercase text-white">
               SANDDOCK <span className="text-[#3D5AFE]">CONSOLE</span>
             </h2>
           </div>
@@ -1277,21 +1277,21 @@ export default function TerminalPage() {
           {/* Randomized prompt card */}
           <div className={`w-full p-5 rounded-xl border-l-4 ${categoryBorderColor} bg-slate-950/40 backdrop-blur-md shadow-xl transition-all duration-500`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold font-mono uppercase tracking-widest opacity-80">
+              <span className="text-[10px] font-bold font-satoshi uppercase tracking-widest opacity-80">
                 {prompt.type}
               </span>
-              <span className="text-[9px] font-mono text-white uppercase tracking-wider">
+              <span className="text-[9px] font-satoshi text-white uppercase tracking-wider">
                 Console Sync
               </span>
             </div>
-            <p className="text-zinc-300 text-xs leading-relaxed font-sans font-medium">
+            <p className="text-zinc-300 text-xs leading-relaxed font-satoshi font-medium">
               "{prompt.content}"
             </p>
           </div>
 
           {/* Subtle loading label */}
           <div className="flex items-center gap-2">
-            <span className="text-white uppercase tracking-widest text-[9px] font-mono animate-pulse">
+            <span className="text-white uppercase tracking-widest text-[9px] font-satoshi animate-pulse">
               Restoring secure terminal session...
             </span>
           </div>
@@ -1308,29 +1308,29 @@ export default function TerminalPage() {
   ];
 
   return (
-    <div className="h-screen overflow-hidden bg-[#000000] text-white flex flex-col font-sans">
+    <div className="h-screen overflow-hidden bg-[#000000] text-white flex flex-col font-satoshi">
 
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-35 h-14 w-full flex-shrink-0 bg-[#000000]/90 backdrop-blur-md border-b border-[#1e2a3a] px-5 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <img src="/sanddock-logo.png" alt="Sanddock" className="w-6 h-6 object-contain" />
-          <span className="text-[15px] font-bold uppercase tracking-wider font-mono">
+          <span className="text-[15px] font-bold uppercase tracking-wider font-satoshi">
             Sanddock <span className="text-brand-orange">Console</span>
           </span>
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-mono font-bold bg-[#000000] border border-zinc-800 text-white uppercase">
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-satoshi font-bold bg-[#000000] border border-zinc-800 text-white uppercase">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Signals Live
           </span>
         </div>
 
         <div className="flex items-center gap-3 relative">
-          <span className="hidden xs:inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">
+          <span className="hidden xs:inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-satoshi font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">
             Total PnL: +142.8%
           </span>
 
           {/* Plan badge + trial countdown */}
           <div className="flex items-center gap-2">
-            <span className={`text-[11px] font-mono font-bold px-2 py-0.5 uppercase tracking-wider ${
+            <span className={`text-[11px] font-satoshi font-bold px-2 py-0.5 uppercase tracking-wider ${
               isTrialExpired
                 ? 'bg-red-900/60 text-red-400 border border-red-700/50'
                 : isFreePlan
@@ -1342,7 +1342,7 @@ export default function TerminalPage() {
               {isTrialExpired ? 'Trial Expired' : isFreePlan ? `Trial${trialDaysRemaining !== null ? ` - ${trialDaysRemaining}d` : ''}` : `${profile.plan} Plan`}
             </span>
             {isFreePlan && !isTrialExpired && trialDaysRemaining !== null && trialDaysRemaining <= 3 && (
-              <span className="text-[10px] font-bold text-amber-400 animate-pulse font-mono uppercase">⚠ Expiring</span>
+              <span className="text-[10px] font-bold text-amber-400 animate-pulse font-satoshi uppercase">⚠ Expiring</span>
             )}
           </div>
 
@@ -1356,7 +1356,7 @@ export default function TerminalPage() {
           <div className="relative">
             <button
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-              className="w-8 h-8 rounded-full bg-brand-orange text-white font-mono font-bold text-[12px] flex items-center justify-center cursor-pointer border border-[#1e2a3a] hover:border-brand-orange"
+              className="w-8 h-8 rounded-full bg-brand-orange text-white font-satoshi font-bold text-[12px] flex items-center justify-center cursor-pointer border border-[#1e2a3a] hover:border-brand-orange"
             >
               {profile.name ? profile.name.slice(0, 2).toUpperCase() : 'SD'}
             </button>
@@ -1365,7 +1365,7 @@ export default function TerminalPage() {
               <div className="absolute right-0 mt-2 w-52 bg-[#000000] border border-[#1e2a3a] shadow-xl py-1 z-50 text-left">
                 <div className="px-4 py-2.5 border-b border-zinc-900">
                   <span className="block font-bold text-[13px] text-white uppercase tracking-wider">{profile.name}</span>
-                  <span className="block text-[11px] text-white font-mono truncate mt-0.5">{profile.email}</span>
+                  <span className="block text-[11px] text-white font-satoshi truncate mt-0.5">{profile.email}</span>
                 </div>
                 <button onClick={() => { setActiveTab('settings'); setProfileMenuOpen(false); }}
                   className="w-full text-left px-4 py-2.5 text-[13px] text-zinc-300 hover:bg-[#111827] hover:text-white uppercase font-bold tracking-wider cursor-pointer bg-transparent border-0">
@@ -1447,7 +1447,7 @@ export default function TerminalPage() {
               <div onClick={() => router.push('/pricing')} className="bg-[#000000] border border-yellow-500/20 p-3 space-y-1.5 text-left cursor-pointer hover:border-yellow-500/40 transition-colors">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-500 font-mono">Alerts Inactive</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-500 font-satoshi">Alerts Inactive</span>
                 </div>
                 <p className="text-[11px] text-white normal-case leading-relaxed">Telegram not connected.</p>
                 <button
@@ -1460,7 +1460,7 @@ export default function TerminalPage() {
             {isFreePlan && (
               <>
                 <div className="bg-[#000000] border border-amber-900/50 p-3 space-y-2.5 text-left">
-                  <span className="block text-[10px] font-bold uppercase tracking-widest text-amber-600 font-mono">📊 1 Week PnL</span>
+                  <span className="block text-[10px] font-bold uppercase tracking-widest text-amber-600 font-satoshi">📊 1 Week PnL</span>
                   <div className="space-y-2 text-[13px]">
                     <div className="flex justify-between items-center">
                       <span className="text-white">BTC:</span>
@@ -1497,7 +1497,7 @@ export default function TerminalPage() {
             {profile?.plan === 'pro' && (
               <>
                 <div className="bg-[#000000] border border-purple-500/25 p-3 space-y-1.5 text-left">
-                  <span className="block text-[9px] font-bold uppercase tracking-widest text-purple-400 font-mono">🔔 Master Alerts Missed</span>
+                  <span className="block text-[9px] font-bold uppercase tracking-widest text-purple-400 font-satoshi">🔔 Master Alerts Missed</span>
                   <p className="text-[11px] text-white normal-case leading-relaxed">
                     18 signals fired on locked Master coins this week. Upgrade to Master to access SOL, XRP, and 10 other high-beta coins.
                   </p>
@@ -1505,7 +1505,7 @@ export default function TerminalPage() {
 
                 <div className="bg-[#000000] border border-zinc-800 p-3 space-y-2.5 text-left">
                   <div className="space-y-0.5">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-purple-400 font-mono">Pro Plan Active</span>
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-purple-400 font-satoshi">Pro Plan Active</span>
                     <p className="text-[11px] text-white normal-case leading-relaxed">Pro - 3 of 15 coins active.</p>
                   </div>
                   <button
@@ -1531,27 +1531,27 @@ export default function TerminalPage() {
                 {/* Today's Overview Banner */}
                 <div className="bg-[#000000] border border-slate-800/50 rounded-2xl p-6 grid grid-cols-2 lg:grid-cols-4 gap-6 text-left shadow-xl select-none">
                   <div className="space-y-1">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-mono">Signals Today</span>
-                    <span className="block text-3xl font-extrabold font-mono text-white">
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-satoshi">Signals Today</span>
+                    <span className="block text-3xl font-extrabold font-satoshi text-white">
                       {todayStats.totalTrades}
                     </span>
                   </div>
                   <div className="space-y-1">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-mono">Active Signals</span>
-                    <span className="block text-3xl font-extrabold font-mono text-white">
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-satoshi">Active Signals</span>
+                    <span className="block text-3xl font-extrabold font-satoshi text-white">
                       {activeSignals.length}
                     </span>
                   </div>
                   <div className="space-y-1">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-mono">Avg Confidence</span>
-                    <span className="block text-3xl font-extrabold font-mono text-white">
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-satoshi">Avg Confidence</span>
+                    <span className="block text-3xl font-extrabold font-satoshi text-white">
                       {todayStats.avgConfidence}
                     </span>
                   </div>
                   <div className="space-y-1">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-mono">Engine Status</span>
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-satoshi">Engine Status</span>
                     <div className="pt-0.5">
-                      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-0.5 rounded-full border border-emerald-500/20 uppercase font-mono">
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-0.5 rounded-full border border-emerald-500/20 uppercase font-satoshi">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
                       </span>
                     </div>
@@ -1591,7 +1591,7 @@ export default function TerminalPage() {
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className="bg-slate-950 text-xs text-white font-mono rounded-lg border border-slate-800 px-3 py-1.5 focus:outline-none focus:border-[#3D5AFE] cursor-pointer"
+                        className="bg-slate-950 text-xs text-white font-satoshi rounded-lg border border-slate-800 px-3 py-1.5 focus:outline-none focus:border-[#3D5AFE] cursor-pointer"
                       >
                         <option value="recent">Recent</option>
                         <option value="highest-pnl">Highest PnL</option>
@@ -1610,7 +1610,7 @@ export default function TerminalPage() {
                           type="text"
                           placeholder="e.g. SOLUSDT"
                           id="customCoinInput"
-                          className="bg-slate-950 text-xs text-white font-mono rounded-lg border border-slate-800 px-2 py-1 focus:outline-none focus:border-[#3D5AFE]"
+                          className="bg-slate-950 text-xs text-white font-satoshi rounded-lg border border-slate-800 px-2 py-1 focus:outline-none focus:border-[#3D5AFE]"
                         />
                         <button
                           onClick={async () => {
@@ -1650,7 +1650,7 @@ export default function TerminalPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 text-white font-mono text-xs">
+                  <div className="flex items-center gap-2 text-white font-satoshi text-xs">
                     {sigLoading && <div className="w-3.5 h-3.5 border-2 border-zinc-700 border-t-[#3D5AFE] rounded-full animate-spin" />}
                     <span>
                       {sigLoading ? 'Updating setups...' : `${cleanLiveSignals.length} signal${cleanLiveSignals.length !== 1 ? 's' : ''} today`}
@@ -1691,7 +1691,7 @@ export default function TerminalPage() {
                     {/* 1. Show the last BTC signal with a LAST SIGNAL badge */}
                     {lastBtcSignal && (
                       <div className="space-y-2">
-                        <span className="block text-[11px] font-mono text-white uppercase tracking-widest text-left">
+                        <span className="block text-[11px] font-satoshi text-white uppercase tracking-widest text-left">
                           Previous Active Setup
                         </span>
                         <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl">
@@ -1714,7 +1714,7 @@ export default function TerminalPage() {
                     {recentBtcSignals.length > 0 && (
                       <div className="space-y-3">
                         <div className="text-left">
-                          <span className="block text-[11px] font-mono text-white uppercase tracking-widest">
+                          <span className="block text-[11px] font-satoshi text-white uppercase tracking-widest">
                             Recent BTC Signals
                           </span>
                           <p className="text-[11px] text-white normal-case leading-relaxed">
@@ -1750,11 +1750,11 @@ export default function TerminalPage() {
                         <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
                           <div className="flex items-center gap-2">
                             <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#3D5AFE]">{"Recent Signals"}</span>
-                            <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-[#3D5AFE]/15 text-[#3D5AFE] rounded border border-[#3D5AFE]/20">
+                            <span className="px-2 py-0.5 text-[9px] font-satoshi font-bold bg-[#3D5AFE]/15 text-[#3D5AFE] rounded border border-[#3D5AFE]/20">
                               {allRecentSignals.length} TOTAL
                             </span>
                           </div>
-                          <span className="text-[10px] text-white font-mono uppercase tracking-wider">Chronological feed of setups</span>
+                          <span className="text-[10px] text-white font-satoshi uppercase tracking-wider">Chronological feed of setups</span>
                         </div>
 
                         <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
@@ -1818,7 +1818,7 @@ export default function TerminalPage() {
                               <svg className="w-4 h-4 text-[#ff4500]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                               </svg>
-                              <h4 className="text-xs font-extrabold uppercase tracking-widest text-[#ff4500] font-mono">THIS WEEK'S STATS</h4>
+                              <h4 className="text-xs font-extrabold uppercase tracking-widest text-[#ff4500] font-satoshi">THIS WEEK'S STATS</h4>
                             </div>
                             <p className="text-white/60 text-xs">Across all {weeklyStats.total} signals fired</p>
                           </div>
@@ -1831,7 +1831,7 @@ export default function TerminalPage() {
                                 <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
-                                <span className="text-xs text-white/60 uppercase font-mono tracking-wide">Signals</span>
+                                <span className="text-xs text-white/60 uppercase font-satoshi tracking-wide">Signals</span>
                               </div>
                               <span className="text-2xl font-bold text-white">{weeklyStats.total}</span>
                             </div>
@@ -1842,7 +1842,7 @@ export default function TerminalPage() {
                                 <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span className="text-xs text-white/60 uppercase font-mono tracking-wide">Wins</span>
+                                <span className="text-xs text-white/60 uppercase font-satoshi tracking-wide">Wins</span>
                               </div>
                               <span className="text-2xl font-bold text-emerald-400">{weeklyStats.wins}</span>
                             </div>
@@ -1854,7 +1854,7 @@ export default function TerminalPage() {
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7H5v12h8V7z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 13h6V7h-6v6z" />
                                 </svg>
-                                <span className="text-xs text-white/60 uppercase font-mono tracking-wide">Combined PnL (1% risk each)</span>
+                                <span className="text-xs text-white/60 uppercase font-satoshi tracking-wide">Combined PnL (1% risk each)</span>
                               </div>
                               <span className={`text-2xl font-bold ${weeklyStats.pnlSum >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                 {weeklyStats.pnlSum >= 0 ? '+' : ''}{weeklyStats.pnlSum.toFixed(2)}%
@@ -1905,11 +1905,11 @@ export default function TerminalPage() {
                     <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-extrabold uppercase tracking-widest text-white">Completed Setups</span>
-                        <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-zinc-800 text-white rounded border border-zinc-700/60">
+                        <span className="px-2 py-0.5 text-[9px] font-satoshi font-bold bg-zinc-800 text-white rounded border border-zinc-700/60">
                           {closedSignals.length} CLOSED
                         </span>
                       </div>
-                      <span className="text-[10px] text-white font-mono uppercase tracking-wider hidden sm:block">Historical - read only</span>
+                      <span className="text-[10px] text-white font-satoshi uppercase tracking-wider hidden sm:block">Historical - read only</span>
                     </div>
                     <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
                       {closedSignals.map((sig) => (
@@ -1936,7 +1936,7 @@ export default function TerminalPage() {
               <div className="space-y-5">
                 {/* Helpful Note */}
                 <div className="bg-[#0d1426]/50 border border-[#1e2d4a]/50 rounded-lg p-3">
-                  <p className="text-[11px] text-white/80 font-mono">💡 Click the arrow or drag near the signal to view entry, stop loss & take profit details</p>
+                  <p className="text-[11px] text-white/80 font-satoshi">💡 Click the arrow or drag near the signal to view entry, stop loss & take profit details</p>
                 </div>
 
                 {/* Chart Component - Full Width */}
@@ -1970,7 +1970,7 @@ export default function TerminalPage() {
                     <select
                       value={selectedSymbol}
                       onChange={(e) => setSelectedSymbol(e.target.value)}
-                      className="bg-[#0d1426] text-xs text-white font-mono font-bold rounded-lg border border-slate-800 px-2 py-1.5 focus:outline-none focus:border-[#3D5AFE] cursor-pointer"
+                      className="bg-[#0d1426] text-xs text-white font-satoshi font-bold rounded-lg border border-slate-800 px-2 py-1.5 focus:outline-none focus:border-[#3D5AFE] cursor-pointer"
                     >
                       <option value="BTCUSDT">Bitcoin (BTC)</option>
                       <option value="ETHUSDT">Ethereum (ETH)</option>
@@ -1984,7 +1984,7 @@ export default function TerminalPage() {
                         return (
                           <button key={tf}
                             onClick={() => locked ? triggerUpgradeGate('Timeframe Locked', '1H and 4H timeframes are Pro features.') : setSelectedInterval(tf)}
-                            className={`px-3 py-1.5 rounded-md text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer border-0 flex items-center gap-1 ${
+                            className={`px-3 py-1.5 rounded-md text-xs font-satoshi font-bold uppercase transition-all duration-300 cursor-pointer border-0 flex items-center gap-1 ${
                               selectedInterval === tf
                                 ? 'bg-[#3D5AFE] text-white shadow-md'
                                 : 'text-white hover:text-white bg-transparent'
@@ -1997,7 +1997,7 @@ export default function TerminalPage() {
                     {/* Export button */}
                     <button
                       onClick={() => isFreePlan ? triggerUpgradeGate('CSV Export Locked', 'Downloading as CSV is a Pro feature.') : alert('CSV download triggered!')}
-                      className="px-3 py-1.5 border border-[#1e2d4a]/40 hover:bg-zinc-900 font-mono text-[12px] uppercase tracking-wider text-white hover:text-white cursor-pointer bg-transparent rounded-lg"
+                      className="px-3 py-1.5 border border-[#1e2d4a]/40 hover:bg-zinc-900 font-satoshi text-[12px] uppercase tracking-wider text-white hover:text-white cursor-pointer bg-transparent rounded-lg"
                     >
                       Export CSV {isFreePlan && '🔒'}
                     </button>
@@ -2007,7 +2007,7 @@ export default function TerminalPage() {
                 {logLoading && (
                   <div className="flex items-center justify-center py-16 gap-3">
                     <div className="w-4 h-4 border border-zinc-600 border-t-brand-orange rounded-full animate-spin" />
-                    <span className="text-[12px] font-mono text-white uppercase">Loading history...</span>
+                    <span className="text-[12px] font-satoshi text-white uppercase">Loading history...</span>
                   </div>
                 )}
 
@@ -2022,7 +2022,7 @@ export default function TerminalPage() {
 
                 {!logLoading && cleanLogSignals.length > 0 && (
                   <div className="overflow-x-auto bg-[#0d1426] border border-[#1e2a3a]">
-                    <table className="w-full text-left font-mono border-collapse">
+                    <table className="w-full text-left font-satoshi border-collapse">
                       <thead>
                         <tr className="border-b border-[#1e2a3a] text-white uppercase tracking-widest text-[11px] bg-zinc-950/20">
                           {['Date', 'Pair', 'Type', 'TF', 'Entry', 'Exit', 'Result', 'Conf.'].map(h => (
@@ -2080,13 +2080,13 @@ export default function TerminalPage() {
                 {/* Swiss Header / Navigation */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-zinc-800 pb-6 gap-4">
                   <div>
-                    <h2 className="text-3xl font-extrabold tracking-tighter text-white uppercase font-sans flex items-center gap-2">
+                    <h2 className="text-3xl font-extrabold tracking-tighter text-white uppercase font-satoshi flex items-center gap-2">
                       <span>Sanddock Conviction Matrix</span>
                       <span className="text-[#ff4500] font-light">&lowast;</span>
                     </h2>
-                    <p className="text-sm text-white font-mono">Live conviction models & statistical performance verification.</p>
+                    <p className="text-sm text-white font-satoshi">Live conviction models & statistical performance verification.</p>
                   </div>
-                  <div className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 px-5 py-2.5 font-mono text-xs font-bold text-white rounded-none">
+                  <div className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 px-5 py-2.5 font-satoshi text-xs font-bold text-white rounded-none">
                     <span className="w-2.5 h-2.5 bg-[#ff4500] animate-pulse rounded-none" />
                     <span>FEED LIVE</span>
                   </div>
@@ -2096,7 +2096,7 @@ export default function TerminalPage() {
                   {/* Timeframe Filter Card */}
                   <div className="bg-[#090909] border border-zinc-800 p-6 rounded-none flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 text-left relative">
                     <div className="space-y-1">
-                      <span className="block text-xs font-mono font-bold uppercase tracking-widest text-[#ff4500]">
+                      <span className="block text-xs font-satoshi font-bold uppercase tracking-widest text-[#ff4500]">
                         SYSTEM PARAMETERS
                       </span>
                       <h4 className="text-lg font-extrabold text-white uppercase tracking-tighter">Asset & Interval Calibration</h4>
@@ -2105,11 +2105,11 @@ export default function TerminalPage() {
                     <div className="flex flex-col md:flex-row gap-4 p-1.5 bg-black rounded-none border border-zinc-800 items-center w-full xl:w-auto">
                       {/* Coin Selector */}
                       <div className="flex gap-2.5 items-center border-b md:border-b-0 md:border-r border-zinc-800 pb-3 md:pb-0 md:pr-4 w-full md:w-auto justify-between md:justify-start">
-                        <span className="text-xs text-white uppercase font-mono font-bold pl-2">Asset:</span>
+                        <span className="text-xs text-white uppercase font-satoshi font-bold pl-2">Asset:</span>
                         <select 
                           value={perfSymbol} 
                           onChange={(e) => setPerfSymbol(e.target.value)}
-                          className="bg-zinc-950 text-xs text-white font-mono font-bold rounded-none border border-zinc-800 p-2 focus:outline-none focus:border-[#ff4500] cursor-pointer"
+                          className="bg-zinc-950 text-xs text-white font-satoshi font-bold rounded-none border border-zinc-800 p-2 focus:outline-none focus:border-[#ff4500] cursor-pointer"
                         >
                           {ALL_COINS.map(c => (
                             <option key={c.value} value={c.value}>{c.label}</option>
@@ -2129,7 +2129,7 @@ export default function TerminalPage() {
                           <button
                             key={opt.v}
                             onClick={() => setPerfTimeFilter(opt.v)}
-                            className={`px-5 py-2.5 rounded-none text-xs font-mono font-bold uppercase transition-colors cursor-pointer border ${
+                            className={`px-5 py-2.5 rounded-none text-xs font-satoshi font-bold uppercase transition-colors cursor-pointer border ${
                               perfTimeFilter === opt.v
                                 ? 'bg-[#ff4500] text-white border-[#ff4500] font-extrabold'
                                 : 'bg-transparent text-white hover:text-white border-transparent'
@@ -2145,7 +2145,7 @@ export default function TerminalPage() {
                   {perfLoading ? (
                     <div className="flex flex-col items-center justify-center py-24 gap-3 bg-[#090909] border border-zinc-800 rounded-none">
                       <div className="w-8 h-8 border-2 border-[#ff4500] border-t-transparent rounded-none animate-spin" />
-                      <span className="text-xs font-mono text-white uppercase tracking-widest animate-pulse">Recompiling Engine...</span>
+                      <span className="text-xs font-satoshi text-white uppercase tracking-widest animate-pulse">Recompiling Engine...</span>
                     </div>
                   ) : (
                     <div className="space-y-8">
@@ -2154,7 +2154,7 @@ export default function TerminalPage() {
                         {/* LEFT COLUMN: TELEMETRY BOARD */}
                         <div className="lg:col-span-4 bg-[#090909] border border-zinc-800 rounded-none p-6 flex flex-col justify-between relative text-white">
                           <div className="space-y-1.5 mb-6 text-left">
-                            <span className="inline-block px-2.5 py-0.5 bg-[#ff4500]/10 border border-[#ff4500]/25 text-[10px] font-mono font-bold text-[#ff4500] uppercase tracking-wider rounded-none">
+                            <span className="inline-block px-2.5 py-0.5 bg-[#ff4500]/10 border border-[#ff4500]/25 text-[10px] font-satoshi font-bold text-[#ff4500] uppercase tracking-wider rounded-none">
                               ACCURACY STATS
                             </span>
                             <h3 className="text-lg font-extrabold text-white uppercase tracking-tighter mt-1">Conviction Engine</h3>
@@ -2163,8 +2163,8 @@ export default function TerminalPage() {
                           {/* Digital winrate value */}
                           <div className="py-6 text-left space-y-4">
                             <div className="space-y-1">
-                              <span className="text-xs text-white block font-mono font-bold uppercase">SWING WIN RATE</span>
-                              <span className="text-6xl font-black font-mono tracking-tighter text-white block">
+                              <span className="text-xs text-white block font-satoshi font-bold uppercase">SWING WIN RATE</span>
+                              <span className="text-6xl font-black font-satoshi tracking-tighter text-white block">
                                 {computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '0.0%'}
                               </span>
                             </div>
@@ -2178,7 +2178,7 @@ export default function TerminalPage() {
                           </div>
 
                           {/* Live telemetry lines */}
-                          <div className="space-y-4 mt-4 pt-4 border-t border-zinc-800 font-mono text-xs text-white">
+                          <div className="space-y-4 mt-4 pt-4 border-t border-zinc-800 font-satoshi text-xs text-white">
                             <div className="flex justify-between items-center">
                               <span>Live Active Swings:</span>
                               <span className="text-white font-bold flex items-center gap-1.5">
@@ -2206,11 +2206,11 @@ export default function TerminalPage() {
                             {/* Card 1: Total PnL */}
                             <div className="bg-[#090909] border border-zinc-800 rounded-none p-6 text-left flex flex-col justify-between text-white">
                               <div className="flex justify-between items-start border-b border-zinc-800 pb-2 mb-4">
-                                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#ff4500]">Total PnL Return</span>
-                                <span className="text-white text-[10px] font-mono">All Closed Trades</span>
+                                <span className="text-[10px] font-satoshi font-bold uppercase tracking-widest text-[#ff4500]">Total PnL Return</span>
+                                <span className="text-white text-[10px] font-satoshi">All Closed Trades</span>
                               </div>
                               <div className="my-4">
-                                <span className={`text-5xl font-black font-mono tracking-tighter block ${
+                                <span className={`text-5xl font-black font-satoshi tracking-tighter block ${
                                   (computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
                                 }`}>
                                   {computedStats?.raw_pnl_sum != null
@@ -2218,7 +2218,7 @@ export default function TerminalPage() {
                                     : '0.00%'}
                                 </span>
                               </div>
-                              <div className="pt-3 border-t border-zinc-800 flex justify-between items-center text-xs font-mono">
+                              <div className="pt-3 border-t border-zinc-800 flex justify-between items-center text-xs font-satoshi">
                                 <span className="text-white font-bold">Cumulative Gain/Loss:</span>
                                 <span className={`font-black ${
                                   (computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
@@ -2233,15 +2233,15 @@ export default function TerminalPage() {
                             {/* Card 2: Profit Factor */}
                             <div className="bg-[#090909] border border-zinc-800 rounded-none p-6 text-left flex flex-col justify-between text-white">
                               <div className="flex justify-between items-start border-b border-zinc-800 pb-2 mb-4">
-                                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-white">PROFIT FACTOR</span>
-                                <span className="text-white text-[10px] font-mono">EFFICIENCY</span>
+                                <span className="text-[10px] font-satoshi font-bold uppercase tracking-widest text-white">PROFIT FACTOR</span>
+                                <span className="text-white text-[10px] font-satoshi">EFFICIENCY</span>
                               </div>
                               <div className="my-4">
-                                <span className="text-5xl font-black font-mono tracking-tighter text-white block">
+                                <span className="text-5xl font-black font-satoshi tracking-tighter text-white block">
                                   {computedStats?.profit_factor ?? '0.00'}
                                 </span>
                               </div>
-                              <div className="pt-3 border-t border-zinc-800 flex flex-col gap-1 text-[10px] font-mono text-white">
+                              <div className="pt-3 border-t border-zinc-800 flex flex-col gap-1 text-[10px] font-satoshi text-white">
                                 <div className="flex justify-between font-bold">
                                   <span>Gains / Losses Winrate Ratio:</span>
                                   <span>{computedStats ? `${computedStats.wins} Wins` : '0'}</span>
@@ -2259,16 +2259,16 @@ export default function TerminalPage() {
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-zinc-800 pb-3">
                               <div>
                                 <h3 className="text-lg font-extrabold text-white uppercase tracking-tighter">Compound Capital Estimator</h3>
-                                <p className="text-xs text-white font-mono mt-0.5">Drag to calibrate starting capital and view simulated growth telemetry.</p>
+                                <p className="text-xs text-white font-satoshi mt-0.5">Drag to calibrate starting capital and view simulated growth telemetry.</p>
                               </div>
-                              <span className="px-4 py-1.5 bg-[#ff4500] text-white text-xs font-mono font-bold uppercase rounded-none">
+                              <span className="px-4 py-1.5 bg-[#ff4500] text-white text-xs font-satoshi font-bold uppercase rounded-none">
                                 Compounding Model
                               </span>
                             </div>
 
                             {/* Range slider input */}
                             <div className="space-y-2 pt-2">
-                              <div className="flex justify-between font-mono text-sm text-white font-bold">
+                              <div className="flex justify-between font-satoshi text-sm text-white font-bold">
                                 <span>$1,000</span>
                                 <span className="text-white font-black text-lg underline decoration-[#ff4500] decoration-2">${startingCapital.toLocaleString()}</span>
                                 <span>$100,000</span>
@@ -2285,7 +2285,7 @@ export default function TerminalPage() {
                             </div>
 
                             {/* Telemetry data grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-black rounded-none border border-zinc-800 font-mono text-center text-xs">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-black rounded-none border border-zinc-800 font-satoshi text-center text-xs">
                               <div>
                                 <span className="block text-[9px] text-white uppercase tracking-widest font-bold">Starting Capital</span>
                                 <span className="text-sm font-bold text-white mt-1 block">${startingCapital.toLocaleString()}</span>
@@ -2317,7 +2317,7 @@ export default function TerminalPage() {
 
                       {/* 2x3 Metric Grid expanded full width below both cards */}
                       <div className="w-full border border-zinc-800 rounded-none p-6 bg-[#090909] shadow-none">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 font-mono text-white">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 font-satoshi text-white">
                           {[
                             { label: 'Average Outcome', val: computedStats?.avg_pnl != null ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${computedStats.avg_pnl}%` : '-', note: 'per closed trade' },
                             { label: 'Total Logs', val: computedStats?.total_signals ?? '-', note: 'closed swings' },
@@ -2341,7 +2341,7 @@ export default function TerminalPage() {
                   {!perfLoading && (
                     <div className="w-full bg-[#090909] border border-zinc-800 rounded-none p-6 text-white">
                       <div className="flex justify-between items-center mb-6 border-b border-zinc-800 pb-3">
-                        <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff4500]">OUTCOME DISTRIBUTION</span>
+                        <span className="text-xs font-satoshi font-bold uppercase tracking-widest text-[#ff4500]">OUTCOME DISTRIBUTION</span>
                         <span className="text-xs font-bold text-white uppercase tracking-wider">Equity Growth curve</span>
                       </div>
                       <PerformanceChart signals={perfSignals} />
@@ -2358,21 +2358,21 @@ export default function TerminalPage() {
               <div className="space-y-6 max-w-xl text-left">
                 <div className="space-y-1 border-b border-zinc-800 pb-4">
                   <h2 className="text-[18px] font-bold uppercase tracking-wider text-white">Console Settings</h2>
-                  <p className="text-[13px] text-white font-mono">Update experience profile, risk tolerance, alerts, and display parameters.</p>
+                  <p className="text-[13px] text-white font-satoshi">Update experience profile, risk tolerance, alerts, and display parameters.</p>
                 </div>
 
                 <form onSubmit={handleUpdateSettings} className="space-y-6">
 
                   {/* TRADING PROFILE */}
                   <div className="space-y-4">
-                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                    <h3 className="text-xs font-satoshi font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
                       <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                       Trading Profile
                     </h3>
                     
-                    <div className="space-y-3 font-mono">
+                    <div className="space-y-3 font-satoshi">
                       <div className="space-y-1">
                         <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Experience level</label>
                         <select value={settingsExperience} onChange={e => setSettingsExperience(e.target.value)}
@@ -2435,14 +2435,14 @@ export default function TerminalPage() {
 
                   {/* SIGNAL PREFERENCES */}
                   <div className="space-y-4">
-                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                    <h3 className="text-xs font-satoshi font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
                       <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                       Signal Preferences
                     </h3>
 
-                    <div className="space-y-3 font-mono">
+                    <div className="space-y-3 font-satoshi">
                       <div className="space-y-1">
                         <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Minimum confidence: {settingsMinConfidence}%</label>
                         <input type="range" min="65" max="95" step="5" value={settingsMinConfidence} onChange={e => setSettingsMinConfidence(Number(e.target.value))}
@@ -2474,7 +2474,7 @@ export default function TerminalPage() {
 
                   {/* ALERT DELIVERY */}
                   <div className="space-y-4">
-                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                    <h3 className="text-xs font-satoshi font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
                       <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                       </svg>
@@ -2482,7 +2482,7 @@ export default function TerminalPage() {
                     </h3>
 
                     {/* Telegram Section */}
-                    <div className="p-4 bg-[#090e1a] border border-zinc-800 space-y-3 font-mono text-xs">
+                    <div className="p-4 bg-[#090e1a] border border-zinc-800 space-y-3 font-satoshi text-xs">
                       <span className="block text-[10px] text-white font-bold uppercase tracking-widest">Telegram Integration</span>
                       
                       <div className="space-y-4">
@@ -2627,7 +2627,7 @@ export default function TerminalPage() {
                     </div>
 
                     {/* Email Notifications List */}
-                    <div className="space-y-2 font-mono text-xs">
+                    <div className="space-y-2 font-satoshi text-xs">
                       <span className="block text-[10px] text-white font-bold uppercase tracking-widest">Email Notifications</span>
                       
                       {[
@@ -2647,20 +2647,20 @@ export default function TerminalPage() {
                           </button>
                         </div>
                       ))}
-                      <span className="block text-[9px] text-white font-mono italic">Emails go to: {profile.email}</span>
+                      <span className="block text-[9px] text-white font-satoshi italic">Emails go to: {profile.email}</span>
                     </div>
                   </div>
 
                   {/* DISPLAY */}
                   <div className="space-y-4">
-                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                    <h3 className="text-xs font-satoshi font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
                       <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                       Display
                     </h3>
 
-                    <div className="space-y-3 font-mono">
+                    <div className="space-y-3 font-satoshi">
                       <div className="space-y-1">
                         <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Timezone</label>
                         <select value={settingsTimezone} onChange={e => setSettingsTimezone(e.target.value)}
@@ -2687,7 +2687,7 @@ export default function TerminalPage() {
 
                   {/* BILLING SHORTCUT */}
                   <div className="pt-4 border-t border-zinc-800 flex justify-between items-center gap-4 flex-wrap">
-                    <a href="/billing" className="text-xs text-[#3D5AFE] hover:underline font-mono uppercase tracking-wider flex items-center gap-1 font-bold no-underline">
+                    <a href="/billing" className="text-xs text-[#3D5AFE] hover:underline font-satoshi uppercase tracking-wider flex items-center gap-1 font-bold no-underline">
                       Manage Billing &amp; View Invoices &rarr;
                     </a>
                     
@@ -2732,11 +2732,11 @@ export default function TerminalPage() {
           <div onClick={() => setUpgradeModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="relative w-full max-w-md bg-[#0d1426] border border-zinc-800 p-7 shadow-2xl space-y-5 z-10 text-left">
             <button onClick={() => setUpgradeModal(false)}
-              className="absolute top-4 right-4 text-white hover:text-white text-[20px] font-bold font-mono bg-transparent border-0 cursor-pointer">
+              className="absolute top-4 right-4 text-white hover:text-white text-[20px] font-bold font-satoshi bg-transparent border-0 cursor-pointer">
               &times;
             </button>
             <div className="space-y-1.5">
-              <span className="text-[11px] font-mono font-bold text-brand-orange uppercase tracking-wider">Console Upgrade</span>
+              <span className="text-[11px] font-satoshi font-bold text-brand-orange uppercase tracking-wider">Console Upgrade</span>
               <h3 className="text-[20px] font-extrabold uppercase tracking-tight text-white">{upgradeTriggerText.title}</h3>
               <p className="text-[13px] text-white leading-relaxed normal-case">{upgradeTriggerText.desc}</p>
             </div>
@@ -2775,12 +2775,12 @@ export default function TerminalPage() {
               setShowFreeSuccessModal(false);
               router.replace('/terminal');
             }}
-              className="absolute top-4 right-4 text-white hover:text-white text-[20px] font-bold font-mono bg-transparent border-0 cursor-pointer">
+              className="absolute top-4 right-4 text-white hover:text-white text-[20px] font-bold font-satoshi bg-transparent border-0 cursor-pointer">
               &times;
             </button>
             <div className="space-y-1.5 text-center">
               <span className="text-4xl block mb-2">Success!</span>
-              <span className="text-[11px] font-mono font-bold text-brand-orange uppercase tracking-wider">Welcome to Sanddock</span>
+              <span className="text-[11px] font-satoshi font-bold text-brand-orange uppercase tracking-wider">Welcome to Sanddock</span>
               <h3 className="text-[20px] font-extrabold uppercase tracking-tight text-white">Account Created Successfully!</h3>
               <p className="text-[13px] text-white leading-relaxed normal-case">
                 You now have unlimited access to live BTC/USDT signals, AI explanations, and chart setups.

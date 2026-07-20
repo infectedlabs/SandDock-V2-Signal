@@ -331,7 +331,7 @@ export default function SignalDetailPage() {
 
   if (loading || sigLoading) {
     return (
-      <div className="h-screen bg-[#020617] text-white flex items-center justify-center font-mono">
+      <div className="h-screen bg-[#020617] text-white flex items-center justify-center font-satoshi">
         <div className="flex flex-col items-center gap-3">
           <div className="w-6 h-6 border-2 border-[#3D5AFE] border-t-transparent rounded-full animate-spin" />
           <span className="text-xs font-bold tracking-widest uppercase">Initializing Hub...</span>
@@ -342,7 +342,7 @@ export default function SignalDetailPage() {
 
   if (error || !signal) {
     return (
-      <div className="h-screen bg-[#020617] text-white flex flex-col items-center justify-center p-6 text-center font-mono border border-slate-800 m-4 rounded-none glass">
+      <div className="h-screen bg-[#020617] text-white flex flex-col items-center justify-center p-6 text-center font-satoshi border border-slate-800 m-4 rounded-none glass">
         <span className="text-3xl mb-3">📡</span>
         <h1 className="text-[18px] font-extrabold uppercase tracking-widest text-white">Signal Hub Error</h1>
         <p className="text-slate-400 text-sm max-w-sm mt-1 mb-6 leading-relaxed normal-case">
@@ -413,7 +413,7 @@ export default function SignalDetailPage() {
   const targetInvalidate = formatPrice(isBuy ? signal.entry_price * 0.99 : signal.entry_price * 1.01, profile);
 
   return (
-    <div className="h-screen bg-[#020617] text-white font-mono antialiased overflow-hidden flex flex-col selection:bg-[#3D5AFE]/20 selection:text-[#3D5AFE] animate-fade-in">
+    <div className="h-screen bg-[#020617] text-white font-satoshi antialiased overflow-hidden flex flex-col selection:bg-[#3D5AFE]/20 selection:text-[#3D5AFE] animate-fade-in">
       
       {/* HEADER */}
       <header className="h-16 w-full flex-shrink-0 bg-[#020617]/85 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 flex justify-between items-center z-30 select-none">
@@ -422,7 +422,7 @@ export default function SignalDetailPage() {
           <span className="text-xs sm:text-[14px] font-extrabold uppercase tracking-widest text-white">
             Sanddock <span className="text-[#3D5AFE]">Hub</span>
           </span>
-          <span className="text-[10px] sm:text-xs font-mono font-bold bg-[#111827] border border-slate-800 px-2 py-0.5 text-slate-300 uppercase rounded-none">
+          <span className="text-[10px] sm:text-xs font-satoshi font-bold bg-[#111827] border border-slate-800 px-2 py-0.5 text-slate-300 uppercase rounded-none">
             #{signal.id.toString().slice(-6)}
           </span>
         </div>
@@ -465,22 +465,22 @@ export default function SignalDetailPage() {
                     {isBuy ? <Icons.TrendUp /> : <Icons.TrendDown />}
                     {isBuy ? 'BUY TARGET' : 'SELL TARGET'}
                   </span>
-                  <span className="text-xs font-mono font-bold bg-slate-900 border border-slate-800 px-1.5 py-0.2 uppercase rounded-none">
+                  <span className="text-xs font-satoshi font-bold bg-slate-900 border border-slate-800 px-1.5 py-0.2 uppercase rounded-none">
                     {signal.interval} HA
                   </span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tighter leading-none pt-1">{symbolFormatted}</h1>
-                <p className="text-slate-400 text-xs font-bold font-mono tracking-tight pt-1">
+                <h1 className="text-3xl sm:text-4xl font-black text-white font-satoshi tracking-tighter leading-none pt-1">{symbolFormatted}</h1>
+                <p className="text-slate-400 text-xs font-bold font-satoshi tracking-tight pt-1">
                   {formatLogDate(signal.created_at, profile)} &middot; <span className="text-brand-orange">{timeAgoText}</span>
                 </p>
               </div>
               
               <div className="relative group bg-[#111827] border border-slate-800/80 p-3 text-right rounded-none shrink-0 cursor-help">
                 <span className="block text-[10px] uppercase tracking-widest text-slate-400 font-extrabold border-b border-dashed border-slate-500/50">Confidence</span>
-                <span className="text-2xl sm:text-3xl font-black font-mono text-white mt-0.5 block">{signal.confidence}%</span>
+                <span className="text-2xl sm:text-3xl font-black font-satoshi text-white mt-0.5 block">{signal.confidence}%</span>
                 
                 {/* Tooltip Popup */}
-                <div className="absolute right-0 top-full mt-2 w-48 p-2.5 bg-slate-950/95 border border-slate-800 rounded shadow-xl text-left hidden group-hover:block z-50 font-mono text-[9px] text-zinc-300 leading-normal normal-case">
+                <div className="absolute right-0 top-full mt-2 w-48 p-2.5 bg-slate-950/95 border border-slate-800 rounded shadow-xl text-left hidden group-hover:block z-50 font-satoshi text-[9px] text-zinc-300 leading-normal normal-case">
                   AI conviction strength. Signals with <span className="text-[#00e676] font-bold">&gt;75%</span> confidence have a historically higher probability of hitting Take Profit target confirmation.
                 </div>
               </div>
@@ -497,17 +497,17 @@ export default function SignalDetailPage() {
             <div className="flex justify-between items-center text-sm sm:text-base">
               <div>
                 <span className="block text-[9px] text-slate-400 font-bold uppercase">ENTRY</span>
-                <span className="font-bold text-white font-mono">{formatPrice(signal.entry_price, profile)}</span>
+                <span className="font-bold text-white font-satoshi">{formatPrice(signal.entry_price, profile)}</span>
               </div>
               <div className="text-center">
                 <span className="block text-[9px] text-slate-400 font-bold uppercase">{isClosed ? 'EXIT PRICE' : 'CURRENT NOW'}</span>
-                <span className={`font-bold font-mono ${directionalDiff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <span className={`font-bold font-satoshi ${directionalDiff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {formatPrice(finalPrice, profile)} {directionalDiff >= 0 ? '▲' : '▼'}
                 </span>
               </div>
               <div className="text-right">
                 <span className="block text-[9px] text-slate-400 font-bold uppercase">{isClosed ? 'FINAL P&L' : 'P&L REALTIME'}</span>
-                <span className={`font-bold font-mono px-2 py-0.5 text-xs sm:text-sm ${directionalDiff >= 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
+                <span className={`font-bold font-satoshi px-2 py-0.5 text-xs sm:text-sm ${directionalDiff >= 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
                   {pnlFormatted}
                 </span>
               </div>
@@ -531,7 +531,7 @@ export default function SignalDetailPage() {
               />
             </div>
 
-            <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 font-mono">
+            <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 font-satoshi">
               <div className="text-left">
                 <span>SL: </span>
                 {isFreePlan ? (
@@ -571,7 +571,7 @@ export default function SignalDetailPage() {
                     <Icons.Lock /> protect downside.
                   </span>
                 ) : (
-                  <span className="text-sm sm:text-base text-rose-400 font-bold font-mono">{formatPrice(signal.sl_price, profile)}</span>
+                  <span className="text-sm sm:text-base text-rose-400 font-bold font-satoshi">{formatPrice(signal.sl_price, profile)}</span>
                 )}
               </div>
               <div>
@@ -584,7 +584,7 @@ export default function SignalDetailPage() {
                     <Icons.Lock /> Know exit before enter.
                   </span>
                 ) : (
-                  <span className="text-sm sm:text-base text-emerald-400 font-bold font-mono">{formatPrice(signal.tp_price, profile)}</span>
+                  <span className="text-sm sm:text-base text-emerald-400 font-bold font-satoshi">{formatPrice(signal.tp_price, profile)}</span>
                 )}
               </div>
             </div>
@@ -595,7 +595,7 @@ export default function SignalDetailPage() {
             <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
               Market Context at Signal Time
             </span>
-            <div className="divide-y divide-slate-800/60 text-xs font-mono font-medium text-slate-300">
+            <div className="divide-y divide-slate-800/60 text-xs font-satoshi font-medium text-slate-300">
               <div className="flex justify-between py-2">
                 <span className="text-slate-500 uppercase">{coinLabel} 24H Change:</span>
                 <span className={isBuy ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>{market24h}</span>
@@ -619,10 +619,10 @@ export default function SignalDetailPage() {
           <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-none space-y-3 text-left glass shadow-xl">
             <div className="flex items-center gap-1.5">
               <Icons.Brain />
-              <span className="text-xs text-[#3D5AFE] font-extrabold uppercase tracking-widest font-mono">AI Logic Rationale</span>
+              <span className="text-xs text-[#3D5AFE] font-extrabold uppercase tracking-widest font-satoshi">AI Logic Rationale</span>
             </div>
             
-            <p className="text-slate-200 text-sm leading-relaxed bg-slate-950/40 p-4 border border-slate-800/60 font-medium rounded-none font-sans normal-case">
+            <p className="text-slate-200 text-sm leading-relaxed bg-slate-950/40 p-4 border border-slate-800/60 font-medium rounded-none font-satoshi normal-case">
               {detailedRationale}
             </p>
 
@@ -643,11 +643,11 @@ export default function SignalDetailPage() {
             </span>
             <div className="space-y-2.5 text-xs text-slate-300 font-medium">
               <div className="flex items-start gap-2">
-                <span className="text-emerald-400 font-bold font-mono">✓</span>
+                <span className="text-emerald-400 font-bold font-satoshi">✓</span>
                 <span>Signal confirmed when {coinLabel} closes {isBuy ? 'above' : 'below'} {targetConfirm} on the next {signal.interval} close.</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-rose-400 font-bold font-mono">⚠</span>
+                <span className="text-rose-400 font-bold font-satoshi">⚠</span>
                 <span>Invalidated if {coinLabel} {isBuy ? 'drops below' : 'rises above'} {targetInvalidate} in the next 6 bars.</span>
               </div>
               <div className="flex items-start gap-2 pt-2 border-t border-slate-800/60 text-[11px] text-slate-500 font-bold">
@@ -662,7 +662,7 @@ export default function SignalDetailPage() {
             <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
               Position Size Calculator
             </span>
-            <div className="space-y-3 text-xs font-mono">
+            <div className="space-y-3 text-xs font-satoshi">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[9px] text-slate-500 uppercase font-bold mb-1">Account Size ($)</label>
@@ -728,7 +728,7 @@ export default function SignalDetailPage() {
             <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
               Multi-Timeframe Alignment
             </span>
-            <div className="divide-y divide-slate-800/60 text-xs font-mono">
+            <div className="divide-y divide-slate-800/60 text-xs font-satoshi">
               <div className="flex justify-between py-2.5">
                 <span className="text-slate-500 uppercase">15m HA Timeframe:</span>
                 <span className={`font-bold ${isBuy ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -771,10 +771,10 @@ export default function SignalDetailPage() {
           {/* Telegram Setup inline CTA */}
           {isFreePlan && (
             <div className="bg-brand-orange/10 border border-brand-orange/20 p-5 sm:p-6 rounded-none text-left space-y-3 shadow-xl">
-              <span className="block text-[11px] font-bold text-brand-orange uppercase tracking-wider font-mono">
+              <span className="block text-[11px] font-bold text-brand-orange uppercase tracking-wider font-satoshi">
                 🔔 GET THIS SIGNAL ON YOUR PHONE
               </span>
-              <p className="text-xs sm:text-sm leading-relaxed text-zinc-300 normal-case font-sans font-medium">
+              <p className="text-xs sm:text-sm leading-relaxed text-zinc-300 normal-case font-satoshi font-medium">
                 Pro and Master users get this signal in Telegram within 5 seconds of it firing. You saw it {hoursAgo}h {minutesAgo}m late.
               </p>
               <button 
@@ -788,16 +788,16 @@ export default function SignalDetailPage() {
 
           {/* Educational Accordions */}
           <div className="space-y-2 text-left">
-            <span className="block text-[11px] text-slate-500 font-extrabold uppercase tracking-widest font-mono">Educational Layer</span>
+            <span className="block text-[11px] text-slate-500 font-extrabold uppercase tracking-widest font-satoshi">Educational Layer</span>
             
             <div className="border border-slate-800/80 bg-[#0a0f1d] rounded-none glass shadow-md overflow-hidden">
               <button onClick={() => toggleAccordion('ha')}
                 className="w-full flex justify-between items-center p-3 text-xs font-bold uppercase tracking-wider border-0 bg-transparent text-white cursor-pointer">
                 <span>What is a Heikin Ashi Signal?</span>
-                <span className="text-slate-400 font-mono text-sm">{accordionOpen.ha ? '−' : '+'}</span>
+                <span className="text-slate-400 font-satoshi text-sm">{accordionOpen.ha ? '−' : '+'}</span>
               </button>
               {accordionOpen.ha && (
-                <div className="p-3 pt-0 text-slate-400 text-sm leading-relaxed border-t border-slate-800/60 normal-case font-sans">
+                <div className="p-3 pt-0 text-slate-400 text-sm leading-relaxed border-t border-slate-800/60 normal-case font-satoshi">
                   Heikin Ashi candles filter out market noise by averaging price movements. When the engine detects a consecutive run of specific colored candles matching local highs or lows, it flags potential market trend shifts.
                 </div>
               )}
@@ -807,10 +807,10 @@ export default function SignalDetailPage() {
               <button onClick={() => toggleAccordion('confidence')}
                 className="w-full flex justify-between items-center p-3 text-xs font-bold uppercase tracking-wider border-0 bg-transparent text-white cursor-pointer">
                 <span>What does Confidence Score mean?</span>
-                <span className="text-slate-400 font-mono text-sm">{accordionOpen.confidence ? '−' : '+'}</span>
+                <span className="text-slate-400 font-satoshi text-sm">{accordionOpen.confidence ? '−' : '+'}</span>
               </button>
               {accordionOpen.confidence && (
-                <div className="p-3 pt-0 text-slate-400 text-sm leading-relaxed border-t border-slate-800/60 normal-case font-sans">
+                <div className="p-3 pt-0 text-slate-400 text-sm leading-relaxed border-t border-slate-800/60 normal-case font-satoshi">
                   The score reflects indicators such as relative volume strength, trend strength, and previous success metrics. Higher scores suggest reversals with high confirmations.
                 </div>
               )}
@@ -824,7 +824,7 @@ export default function SignalDetailPage() {
           
           {/* Performance Chart container */}
           <div className="bg-[#0a0f1d] border border-slate-800/80 p-4 sm:p-5 rounded-none glass shadow-2xl flex flex-col justify-between shrink-0">
-            <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest font-mono text-left mb-3">
+            <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest font-satoshi text-left mb-3">
               Interactive Signal Performance Chart
             </span>
             <div className="w-full overflow-hidden">
@@ -835,7 +835,7 @@ export default function SignalDetailPage() {
           {/* Timeframe Filter for Signal History & Performance */}
           <div className="bg-[#0a0f1d] border border-slate-800/80 p-4 sm:p-5 rounded-none glass shadow-2xl flex flex-col justify-between shrink-0 text-left space-y-4">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-              <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest font-mono">
+              <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest font-satoshi">
                 Signal History Filter
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -849,7 +849,7 @@ export default function SignalDetailPage() {
                   <button
                     key={opt.v}
                     onClick={() => setTimeFilter(opt.v)}
-                    className={`px-2.5 py-1 text-[10px] font-mono font-bold uppercase transition-colors border cursor-pointer ${
+                    className={`px-2.5 py-1 text-[10px] font-satoshi font-bold uppercase transition-colors border cursor-pointer ${
                       timeFilter === opt.v
                         ? 'bg-brand-orange border-brand-orange text-white font-extrabold'
                         : 'bg-transparent border-slate-800 text-slate-400 hover:text-white'
@@ -866,7 +866,7 @@ export default function SignalDetailPage() {
               {historyLoading ? (
                 <div className="h-64 flex flex-col items-center justify-center border border-slate-800 bg-[#070b19]/60 p-6 text-center">
                   <div className="w-5 h-5 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
-                  <p className="text-white font-mono text-[10px] uppercase tracking-wider mt-3">Loading stats & chart...</p>
+                  <p className="text-white font-satoshi text-[10px] uppercase tracking-wider mt-3">Loading stats & chart...</p>
                 </div>
               ) : (
                 <PerformanceChart signals={historySignals} />
@@ -887,14 +887,14 @@ export default function SignalDetailPage() {
               {historyLoading ? (
                 <div className="flex items-center justify-center py-8 gap-3">
                   <div className="w-4 h-4 border border-slate-600 border-t-[#3D5AFE] rounded-full animate-spin" />
-                  <span className="text-[12px] font-mono text-slate-500 uppercase">Loading history...</span>
+                  <span className="text-[12px] font-satoshi text-slate-500 uppercase">Loading history...</span>
                 </div>
               ) : historySignals.length === 0 ? (
                 <div className="text-center py-8 border border-dashed border-slate-800 text-[12px] text-white">
                   No historical closed signals found in this window.
                 </div>
               ) : (
-                <table className="w-full border-collapse text-left text-xs font-mono text-slate-300">
+                <table className="w-full border-collapse text-left text-xs font-satoshi text-slate-300">
                   <thead>
                     <tr className="border-b border-slate-800 text-slate-500 uppercase text-[10px] font-bold">
                       <th className="pb-2">Date</th>
@@ -969,14 +969,14 @@ export default function SignalDetailPage() {
           <div className="relative w-full max-w-sm bg-slate-900 border border-slate-800 rounded-none p-6 shadow-2xl space-y-4 z-10 text-left">
             <button 
               onClick={() => setModalOpen(false)}
-              className="absolute top-3 right-3 text-slate-400 hover:text-white text-lg font-bold font-mono cursor-pointer"
+              className="absolute top-3 right-3 text-slate-400 hover:text-white text-lg font-bold font-satoshi cursor-pointer"
             >
               &times;
             </button>
             <div className="space-y-1">
-              <span className="text-[10px] font-bold text-[#3D5AFE] uppercase tracking-wider font-mono">SANDDOCK CONSOLE GATEWAY</span>
-              <h3 className="text-base font-extrabold uppercase tracking-tight text-white font-sans">{modalContent.title}</h3>
-              <p className="text-slate-400 text-xs leading-relaxed normal-case font-sans">
+              <span className="text-[10px] font-bold text-[#3D5AFE] uppercase tracking-wider font-satoshi">SANDDOCK CONSOLE GATEWAY</span>
+              <h3 className="text-base font-extrabold uppercase tracking-tight text-white font-satoshi">{modalContent.title}</h3>
+              <p className="text-slate-400 text-xs leading-relaxed normal-case font-satoshi">
                 {modalContent.body}
               </p>
             </div>

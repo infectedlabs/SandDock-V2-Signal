@@ -45,7 +45,7 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col justify-center items-center px-6 py-12 selection:bg-brand-orange selection:text-white">
+    <div className="min-h-screen bg-white text-black flex flex-col justify-center items-center px-6 py-12 selection:bg-brand-orange selection:text-white font-satoshi">
       {/* Brand Header */}
       <div className="mb-8 flex flex-col items-center">
         <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain mb-6" />
@@ -67,13 +67,13 @@ export default function VerifyEmailPage() {
           <p className="text-sm text-text-secondary leading-relaxed">
             Please click the activation link in the email sent to:
           </p>
-          <p className="text-base font-bold font-mono text-black break-all">
+          <p className="text-base font-bold font-satoshi text-black break-all">
             {email}
           </p>
         </div>
 
         {resendStatus && (
-          <div className="p-3 bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-xs font-semibold uppercase tracking-wider font-mono">
+          <div className="p-3 bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-xs font-semibold uppercase tracking-wider font-satoshi">
             {resendStatus}
           </div>
         )}

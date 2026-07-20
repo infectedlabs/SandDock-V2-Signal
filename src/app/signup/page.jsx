@@ -23,10 +23,10 @@ export default function SignupPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center font-sans">
+      <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center font-satoshi">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
           <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-12 h-12 animate-pulse object-contain" />
-          <span className="text-xs font-bold uppercase tracking-widest font-mono text-black animate-pulse">
+          <span className="text-xs font-bold uppercase tracking-widest font-satoshi text-black animate-pulse">
             Loading...
           </span>
         </div>
@@ -70,7 +70,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-white text-black grid grid-cols-1 lg:grid-cols-2 selection:bg-brand-orange selection:text-white">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-white text-black grid grid-cols-1 lg:grid-cols-2 selection:bg-brand-orange selection:text-white font-satoshi">
       
       {/* Left Column: Product Branding & Features (Hidden on mobile) */}
       <div className="hidden lg:flex flex-col justify-between bg-black text-white p-10 border-r border-black relative overflow-hidden h-full">
@@ -81,7 +81,7 @@ export default function SignupPage() {
         <div className="relative z-10">
           <a href="/" className="flex items-center gap-2.5">
             <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-extrabold tracking-tighter uppercase font-mono text-black">
+            <span className="text-xl font-extrabold tracking-tighter uppercase font-satoshi text-black">
               Sanddock
             </span>
           </a>
@@ -110,10 +110,10 @@ export default function SignupPage() {
 
           {/* Testimonial Quote */}
           <div className="pt-6 border-t border-zinc-800">
-            <p className="text-xs text-black italic font-sans normal-case font-normal leading-relaxed">
+            <p className="text-xs text-black italic font-satoshi normal-case font-normal leading-relaxed">
               &ldquo;The AI rationale changes everything. I don&apos;t just blindly follow calls anymore - I understand the market structure behind each swing.&rdquo;
             </p>
-            <span className="block text-[9px] font-bold text-brand-orange uppercase tracking-wider mt-2 font-mono">
+            <span className="block text-[9px] font-bold text-brand-orange uppercase tracking-wider mt-2 font-satoshi">
               - Verified Trader
             </span>
           </div>
@@ -131,7 +131,7 @@ export default function SignupPage() {
         <div className="flex justify-center mb-4">
           <a href="/" className="flex items-center gap-2.5">
             <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-extrabold tracking-tighter uppercase font-sans text-black">
+            <span className="text-xl font-extrabold tracking-tighter uppercase font-satoshi text-black">
               Sanddock
             </span>
           </a>
@@ -151,7 +151,7 @@ export default function SignupPage() {
           <div className="border border-black bg-white p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <form onSubmit={handleSignup} className="space-y-4">
               {errorMsg && (
-                <div className="p-2.5 bg-signal-sell/10 border border-signal-sell/20 text-signal-sell text-xs font-semibold uppercase tracking-wider font-mono">
+                <div className="p-2.5 bg-signal-sell/10 border border-signal-sell/20 text-signal-sell text-xs font-semibold uppercase tracking-wider font-satoshi">
                   ⚠️ {errorMsg}
                 </div>
               )}
@@ -165,7 +165,7 @@ export default function SignupPage() {
                   placeholder="Alex Honnold"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[#f4f6fa] border border-black rounded-none px-3.5 py-2.5 text-xs text-black focus:outline-none focus:border-brand-orange font-mono"
+                  className="w-full bg-[#f4f6fa] border border-black rounded-none px-3.5 py-2.5 text-xs text-black focus:outline-none focus:border-brand-orange font-satoshi"
                   required
                 />
               </div>
@@ -179,7 +179,7 @@ export default function SignupPage() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#f4f6fa] border border-black rounded-none px-3.5 py-2.5 text-xs text-black focus:outline-none focus:border-brand-orange font-mono"
+                  className="w-full bg-[#f4f6fa] border border-black rounded-none px-3.5 py-2.5 text-xs text-black focus:outline-none focus:border-brand-orange font-satoshi"
                   required
                 />
               </div>
@@ -194,13 +194,13 @@ export default function SignupPage() {
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#f4f6fa] border border-black rounded-none px-3.5 py-2.5 text-xs text-black focus:outline-none focus:border-brand-orange font-mono pr-12"
+                    className="w-full bg-[#f4f6fa] border border-black rounded-none px-3.5 py-2.5 text-xs text-black focus:outline-none focus:border-brand-orange font-satoshi pr-12"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-black font-mono cursor-pointer"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-black font-satoshi cursor-pointer"
                   >
                     {showPassword ? 'Hide' : 'Show'}
                   </button>

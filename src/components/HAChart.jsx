@@ -954,7 +954,7 @@ export default function HAChart({
             <div className="relative z-50">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold font-mono tracking-wider transition-all duration-200 flex items-center gap-2 border cursor-pointer select-none ${
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold font-satoshi tracking-wider transition-all duration-200 flex items-center gap-2 border cursor-pointer select-none ${
                   isLight 
                     ? 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800' 
                     : 'bg-slate-950/40 hover:bg-slate-900 border-slate-800/50 text-white'
@@ -990,7 +990,7 @@ export default function HAChart({
                                 onSymbolChange?.(sym);
                               }
                             }}
-                            className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-mono font-bold tracking-wide transition-all duration-200 flex items-center justify-between cursor-pointer border-0 ${
+                            className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-satoshi font-bold tracking-wide transition-all duration-200 flex items-center justify-between cursor-pointer border-0 ${
                               active
                                 ? 'bg-[#3D5AFE] text-white shadow-md'
                                 : isLocked
@@ -1018,7 +1018,7 @@ export default function HAChart({
                 <button
                   key={tf}
                   onClick={() => onIntervalChange?.(tf)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-bold font-mono tracking-wider transition-all duration-300 cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold font-satoshi tracking-wider transition-all duration-300 cursor-pointer ${
                     active
                       ? 'bg-slate-800 text-white border border-slate-700 shadow-md'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -1033,7 +1033,7 @@ export default function HAChart({
           {/* Hide Old Signals Toggle */}
           <button
             onClick={() => setHideOldSignals(!hideOldSignals)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono tracking-wider transition-all duration-300 cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold font-satoshi tracking-wider transition-all duration-300 cursor-pointer border ${
               hideOldSignals
                 ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-amber-500/20 shadow-sm'
                 : 'bg-slate-950/40 text-slate-400 border-slate-800/50 hover:text-slate-300'
@@ -1046,7 +1046,7 @@ export default function HAChart({
 
         <div className="flex items-center gap-3 px-3 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-sm shadow-emerald-500/5 transition-all">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs font-mono font-bold tracking-widest text-emerald-400">
+          <span className="text-xs font-satoshi font-bold tracking-widest text-emerald-400">
             {formatSymbolDisplay(selectedSymbol)} LIVE FEED
           </span>
         </div>
@@ -1059,7 +1059,7 @@ export default function HAChart({
         {loading && (
           <div className={`absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 ${isLight ? 'bg-white' : 'bg-[#0a0f1d]'}`}>
             <div className="w-8 h-8 border-3 border-[#3D5AFE] border-t-transparent rounded-full animate-spin shadow-[#3D5AFE]/30" />
-            <span className="text-xs font-mono text-slate-400 uppercase tracking-widest animate-pulse">Initializing Live Charts...</span>
+            <span className="text-xs font-satoshi text-slate-400 uppercase tracking-widest animate-pulse">Initializing Live Charts...</span>
           </div>
         )}
 
@@ -1137,7 +1137,7 @@ export default function HAChart({
                           </span>
                         )}
                       </div>
-                      <span className={`text-[10px] font-mono font-bold ${
+                      <span className={`text-[10px] font-satoshi font-bold ${
                         pnlVal === null ? 'text-cyan-400 animate-pulse' : pnlVal >= 0 ? 'text-emerald-400' : 'text-red-400'
                       }`}>
                         {formattedPnl}
@@ -1145,7 +1145,7 @@ export default function HAChart({
                     </div>
                     
                     {/* Expandable Body Content on Hover */}
-                    <div className="max-h-0 opacity-0 group-hover:max-h-64 group-hover:opacity-100 transition-all duration-300 ease-out border-t border-slate-800/40 pt-1.5 mt-1 space-y-1 font-mono text-[8.5px] text-slate-400 overflow-y-auto">
+                    <div className="max-h-0 opacity-0 group-hover:max-h-64 group-hover:opacity-100 transition-all duration-300 ease-out border-t border-slate-800/40 pt-1.5 mt-1 space-y-1 font-satoshi text-[8.5px] text-slate-400 overflow-y-auto">
                       <div>Entry: <span className="text-white font-bold">${card.entry_price?.toLocaleString()}</span></div>
                       <div>Time: <span className="text-slate-300">{new Date(card.bar_time).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false})}</span></div>
                       {isClosed && card.close_price !== null && card.close_price !== undefined && (
@@ -1191,7 +1191,7 @@ export default function HAChart({
           {activeSignal && !loading && !noData && (
             <>
 
-              <div className="absolute right-24 top-6 z-30 bg-[#0b1224]/90 border border-slate-800/80 rounded px-3 py-2 font-mono text-[10px] shadow-2xl text-left select-none pointer-events-none select-none">
+              <div className="absolute right-24 top-6 z-30 bg-[#0b1224]/90 border border-slate-800/80 rounded px-3 py-2 font-satoshi text-[10px] shadow-2xl text-left select-none pointer-events-none select-none">
                 <div className="text-white font-extrabold uppercase tracking-wider">Risk : Reward</div>
                 <div className="text-[#00e676] font-black text-[13px] mt-0.5">
                   1 : {(Math.abs(parseFloat(activeSignal.tp_price) - parseFloat(activeSignal.entry_price)) / Math.abs(parseFloat(activeSignal.entry_price) - parseFloat(activeSignal.sl_price)) || 1.0).toFixed(1)}
@@ -1201,7 +1201,7 @@ export default function HAChart({
                 </div>
               </div>
               {livePriceRef.current && (
-                <div className="absolute left-6 top-6 z-30 bg-[#0b1224]/90 border border-slate-800/80 rounded px-3 py-2 font-mono text-[10px] shadow-2xl text-left select-none pointer-events-none select-none">
+                <div className="absolute left-6 top-6 z-30 bg-[#0b1224]/90 border border-slate-800/80 rounded px-3 py-2 font-satoshi text-[10px] shadow-2xl text-left select-none pointer-events-none select-none">
                   <div className="text-white font-extrabold uppercase tracking-wider">Live Position Gain</div>
                   {(() => {
                     const isBuy = activeSignal.signal_type === 'buy';
@@ -1229,7 +1229,7 @@ export default function HAChart({
 
       {/* Modern Legend */}
       {!noData && !loading && (
-        <div className={`flex flex-wrap items-center gap-6 p-4 rounded-xl border border-slate-800/50 bg-[#0f172a]/30 backdrop-blur-sm text-xs font-mono tracking-wider text-slate-400 animate-slide-up shadow-lg`}>
+        <div className={`flex flex-wrap items-center gap-6 p-4 rounded-xl border border-slate-800/50 bg-[#0f172a]/30 backdrop-blur-sm text-xs font-satoshi tracking-wider text-slate-400 animate-slide-up shadow-lg`}>
           <span className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-[#10b981] shadow shadow-[#10b981]/50" /> Bullish HA
           </span>

@@ -22,10 +22,10 @@ export default function LoginPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center font-sans">
+      <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center font-satoshi">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
           <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-12 h-12 animate-pulse object-contain" />
-          <span className="text-xs font-bold uppercase tracking-widest font-mono text-black animate-pulse">
+          <span className="text-xs font-bold uppercase tracking-widest font-satoshi text-black animate-pulse">
             Loading...
           </span>
         </div>
@@ -63,7 +63,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-white text-black grid grid-cols-1 lg:grid-cols-2 selection:bg-brand-orange selection:text-white">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-white text-black grid grid-cols-1 lg:grid-cols-2 selection:bg-brand-orange selection:text-white font-satoshi">
       
       {/* Left Column: Product Branding & Live Open Signal Card Mockup (Hidden on mobile) */}
       <div className="hidden lg:flex flex-col justify-between bg-black text-white p-10 border-r border-black relative overflow-hidden h-full">
@@ -74,7 +74,7 @@ export default function LoginPage() {
         <div className="relative z-10">
           <a href="/" className="flex items-center gap-2.5">
             <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-extrabold tracking-tighter uppercase font-mono text-black">
+            <span className="text-xl font-extrabold tracking-tighter uppercase font-satoshi text-black">
               Sanddock
             </span>
           </a>
@@ -94,34 +94,34 @@ export default function LoginPage() {
           {/* Open Signal Mockup Card */}
           <div className="bg-[#111] border border-zinc-800 p-5 space-y-3 rounded-none relative">
             <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-satoshi">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Live Setup Open
               </span>
-              <span className="text-[9px] font-mono text-white uppercase">BTC/USDT (15m HA)</span>
+              <span className="text-[9px] font-satoshi text-white uppercase">BTC/USDT (15m HA)</span>
             </div>
 
             <div className="grid grid-cols-3 gap-3 border-y border-zinc-900 py-2.5 text-left">
               <div>
                 <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Entry Target</span>
-                <span className="font-mono text-xs font-bold text-white">$67,420.00</span>
+                <span className="font-satoshi text-xs font-bold text-white">$67,420.00</span>
               </div>
               <div>
                 <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Stop Loss</span>
-                <span className="font-mono text-xs font-bold text-white">$66,850.00</span>
+                <span className="font-satoshi text-xs font-bold text-white">$66,850.00</span>
               </div>
               <div>
                 <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Take Profit</span>
-                <span className="font-mono text-xs font-bold text-[#00e676]">$69,200.00</span>
+                <span className="font-satoshi text-xs font-bold text-[#00e676]">$69,200.00</span>
               </div>
             </div>
 
             <div className="space-y-1.5 text-left">
               <div className="flex items-center gap-2">
-                <span className="text-[8px] font-bold bg-brand-orange text-white px-1.5 py-0.5 uppercase tracking-widest font-mono">AI Rating</span>
-                <span className="font-mono text-xs font-bold text-white">87% Confidence</span>
+                <span className="text-[8px] font-bold bg-brand-orange text-white px-1.5 py-0.5 uppercase tracking-widest font-satoshi">AI Rating</span>
+                <span className="font-satoshi text-xs font-bold text-white">87% Confidence</span>
               </div>
-              <p className="text-[11px] text-white font-mono leading-relaxed normal-case">
+              <p className="text-[11px] text-white font-satoshi leading-relaxed normal-case">
                 &ldquo;BTC swing bottom confirmed on Heikin Ashi candles. Spot volume shows strong absorption at local support levels. Proceeding with alternating swing structure.&rdquo;
               </p>
             </div>
@@ -140,7 +140,7 @@ export default function LoginPage() {
         <div className="flex justify-center mb-4">
           <a href="/" className="flex items-center gap-2.5">
             <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-extrabold tracking-tighter uppercase font-sans text-black">
+            <span className="text-xl font-extrabold tracking-tighter uppercase font-satoshi text-black">
               Sanddock
             </span>
           </a>
@@ -160,7 +160,7 @@ export default function LoginPage() {
           <div className="border border-black bg-white p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <form onSubmit={handleLogin} className="space-y-4">
               {errorMsg && (
-                <div className="p-2.5 bg-signal-sell/10 border border-signal-sell/20 text-signal-sell text-xs font-semibold uppercase tracking-wider font-mono">
+                <div className="p-2.5 bg-signal-sell/10 border border-signal-sell/20 text-signal-sell text-xs font-semibold uppercase tracking-wider font-satoshi">
                   ⚠️ {errorMsg}
                 </div>
               )}
@@ -174,7 +174,7 @@ export default function LoginPage() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#f4f6fa] border border-black rounded-none px-3.5 py-2.5 text-xs text-black focus:outline-none focus:border-brand-orange font-mono"
+                  className="w-full bg-[#f4f6fa] border border-black rounded-none px-3.5 py-2.5 text-xs text-black focus:outline-none focus:border-brand-orange font-satoshi"
                   required
                 />
               </div>
@@ -189,13 +189,13 @@ export default function LoginPage() {
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#f4f6fa] border border-black rounded-none px-3.5 py-2.5 text-xs text-black focus:outline-none focus:border-brand-orange font-mono pr-12"
+                    className="w-full bg-[#f4f6fa] border border-black rounded-none px-3.5 py-2.5 text-xs text-black focus:outline-none focus:border-brand-orange font-satoshi pr-12"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-black font-mono cursor-pointer"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:text-black font-satoshi cursor-pointer"
                   >
                     {showPassword ? 'Hide' : 'Show'}
                   </button>

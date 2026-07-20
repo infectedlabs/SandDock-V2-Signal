@@ -58,7 +58,7 @@ export default function OnboardingPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-[#080d1a] text-white flex items-center justify-center font-mono">
+      <div className="min-h-screen bg-[#080d1a] text-white flex items-center justify-center font-satoshi">
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
           <span>Syncing layout session...</span>
@@ -196,7 +196,7 @@ export default function OnboardingPage() {
   const renderProgress = () => {
     if (step > 5) return null;
     return (
-      <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-[#8892a4] mb-8">
+      <div className="flex items-center gap-2 text-xs font-satoshi font-bold uppercase tracking-widest text-[#8892a4] mb-8">
         <div className="flex gap-1.5">
           {[1, 2, 3, 4, 5].map((i) => (
             <span
@@ -253,7 +253,7 @@ export default function OnboardingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#080d1a] text-white flex flex-col justify-between p-4 sm:p-6 md:p-8 relative overflow-hidden font-sans selection:bg-brand-orange selection:text-white">
+    <div className="min-h-screen bg-[#080d1a] text-white flex flex-col justify-between p-4 sm:p-6 md:p-8 relative overflow-hidden font-satoshi selection:bg-brand-orange selection:text-white">
       
       {/* Decorative Glow Grid */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-brand-orange/5 to-transparent pointer-events-none z-0" />
@@ -263,7 +263,7 @@ export default function OnboardingPage() {
       <header className="relative z-10 w-full flex justify-between items-center max-w-4xl mx-auto border-b border-zinc-900 pb-3">
         <div className="flex items-center gap-2.5">
           <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-          <span className="text-xl font-extrabold tracking-tighter uppercase font-mono">
+          <span className="text-xl font-extrabold tracking-tighter uppercase font-satoshi">
             Sanddock
           </span>
         </div>
@@ -276,7 +276,7 @@ export default function OnboardingPage() {
           {renderProgress()}
 
           {errorMsg && (
-            <div className="mb-5 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold uppercase tracking-wider font-mono">
+            <div className="mb-5 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold uppercase tracking-wider font-satoshi">
               ⚠️ {errorMsg}
             </div>
           )}
@@ -313,7 +313,7 @@ export default function OnboardingPage() {
                     </div>
                     <div>
                       <div className="border-t border-zinc-800/80 my-2.5 w-full" />
-                      <span className="block text-[10px] text-black normal-case leading-relaxed font-mono">{opt.preview}</span>
+                      <span className="block text-[10px] text-black normal-case leading-relaxed font-satoshi">{opt.preview}</span>
                     </div>
                   </div>
                 ))}
@@ -369,9 +369,9 @@ export default function OnboardingPage() {
                         <span className="block text-[10px] text-white normal-case">{coin.name}</span>
                       </div>
                       {isBtc ? (
-                        <span className="text-[9px] font-mono font-bold bg-brand-orange text-white px-1.5 py-0.2 uppercase">Selected</span>
+                        <span className="text-[9px] font-satoshi font-bold bg-brand-orange text-white px-1.5 py-0.2 uppercase">Selected</span>
                       ) : !coin.free && (
-                        <span className="text-[8px] font-mono font-bold bg-zinc-800 text-white px-1.5 py-0.2 uppercase">PRO</span>
+                        <span className="text-[8px] font-satoshi font-bold bg-zinc-800 text-white px-1.5 py-0.2 uppercase">PRO</span>
                       )}
                     </button>
                   );
@@ -379,7 +379,7 @@ export default function OnboardingPage() {
               </div>
 
               {selectedCoins.some((c) => c !== 'BTC') && (
-                <div className="p-3 bg-brand-orange/10 border border-brand-orange/20 text-zinc-300 text-xs font-semibold uppercase tracking-wider font-mono mt-4">
+                <div className="p-3 bg-brand-orange/10 border border-brand-orange/20 text-zinc-300 text-xs font-semibold uppercase tracking-wider font-satoshi mt-4">
                   ℹ️ Pro and Master coins selected will appear as preview cards on your console.
                 </div>
               )}
@@ -425,7 +425,7 @@ export default function OnboardingPage() {
                     <div className="space-y-1 flex-1">
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-sm uppercase tracking-wide">{opt.label}</span>
-                        <span className="text-[10px] font-mono font-bold text-white">{opt.specs}</span>
+                        <span className="text-[10px] font-satoshi font-bold text-white">{opt.specs}</span>
                       </div>
                       <span className="block text-xs text-white normal-case leading-relaxed">{opt.desc}</span>
                     </div>
@@ -485,7 +485,7 @@ export default function OnboardingPage() {
           {step === 5 && (
             <div className="space-y-6 text-left">
               <div className="space-y-2 border-b border-zinc-800 pb-4">
-                <span className="text-[10px] font-mono text-brand-orange font-bold uppercase tracking-widest">Connect Telegram</span>
+                <span className="text-[10px] font-satoshi text-brand-orange font-bold uppercase tracking-widest">Connect Telegram</span>
                 <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
                   Connect Your Telegram Bot
                 </h2>
@@ -494,7 +494,7 @@ export default function OnboardingPage() {
                 </p>
               </div>
 
-              <div className="space-y-6 pt-2 font-mono text-xs">
+              <div className="space-y-6 pt-2 font-satoshi text-xs">
                 {/* Step 1 */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -509,7 +509,7 @@ export default function OnboardingPage() {
                       href="https://t.me/SanddockBot"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block py-2.5 px-6 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-xs uppercase tracking-widest transition-colors font-sans"
+                      className="inline-block py-2.5 px-6 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-xs uppercase tracking-widest transition-colors font-satoshi"
                     >
                       Open @SanddockBot ↗
                     </a>
@@ -560,7 +560,7 @@ export default function OnboardingPage() {
                     <button
                       onClick={handleVerifyTelegram}
                       disabled={pairingCode.some(c => !c) || telegramStatus === 'loading'}
-                      className="py-3 px-6 bg-[#00e676] hover:bg-emerald-600 text-black font-bold text-xs uppercase tracking-widest transition-colors font-sans flex-shrink-0 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="py-3 px-6 bg-[#00e676] hover:bg-emerald-600 text-black font-bold text-xs uppercase tracking-widest transition-colors font-satoshi flex-shrink-0 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {telegramStatus === 'loading' ? 'Verifying...' : 'Pair Account →'}
                     </button>
@@ -628,7 +628,7 @@ export default function OnboardingPage() {
       </main>
 
       {/* Footer Branding info */}
-      <footer className="relative z-10 w-full max-w-4xl mx-auto border-t border-zinc-900 pt-4 text-center text-[10px] text-white uppercase font-mono tracking-wider">
+      <footer className="relative z-10 w-full max-w-4xl mx-auto border-t border-zinc-900 pt-4 text-center text-[10px] text-white uppercase font-satoshi tracking-wider">
         © 2025 Sanddock Technical Systems. All data signals are for educational purposes.
       </footer>
 

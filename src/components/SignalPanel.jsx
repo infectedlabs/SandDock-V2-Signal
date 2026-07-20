@@ -19,7 +19,7 @@ export default function SignalPanel({ signals = [] }) {
   const tabSignals = activeTab === 'live' ? liveSignals : closedSignals;
 
   return (
-    <div className="rounded-lg border border-slate-800/50 bg-[#0f172a]/50 backdrop-blur-sm overflow-hidden flex flex-col h-full font-sans">
+    <div className="rounded-lg border border-slate-800/50 bg-[#0f172a]/50 backdrop-blur-sm overflow-hidden flex flex-col h-full font-satoshi">
       {/* Header with Inline Toggle */}
       <div className="px-5 py-4 border-b border-slate-800/50 flex items-center gap-4 shrink-0">
         <h2 className="text-sm font-bold uppercase tracking-widest text-white">Live & Closed Signals</h2>
@@ -103,17 +103,17 @@ export default function SignalPanel({ signals = [] }) {
                     </td>
 
                     {/* Entry */}
-                    <td className="px-3 py-2 text-right font-mono text-white">
+                    <td className="px-3 py-2 text-right font-satoshi text-white">
                       ${sig.entry_price?.toFixed(2)}
                     </td>
 
                     {/* SL */}
-                    <td className="px-3 py-2 text-right font-mono text-slate-400">
+                    <td className="px-3 py-2 text-right font-satoshi text-slate-400">
                       ${sig.sl_price?.toFixed(2)}
                     </td>
 
                     {/* TP */}
-                    <td className="px-3 py-2 text-right font-mono text-slate-400">
+                    <td className="px-3 py-2 text-right font-satoshi text-slate-400">
                       ${sig.tp_price?.toFixed(2)}
                     </td>
 
@@ -123,12 +123,12 @@ export default function SignalPanel({ signals = [] }) {
                     </td>
 
                     {/* Time */}
-                    <td className="px-3 py-2 font-mono text-slate-400 whitespace-nowrap">
+                    <td className="px-3 py-2 font-satoshi text-slate-400 whitespace-nowrap">
                       {formatTime(sig.bar_time)}
                     </td>
 
                     {/* PnL */}
-                    <td className="px-3 py-2 text-right font-bold font-mono">
+                    <td className="px-3 py-2 text-right font-bold font-satoshi">
                       <span className={`${
                         isLive ? 'text-cyan-400 animate-pulse' : sig.pnl_pct >= 0 ? 'text-green-400' : 'text-red-400'
                       }`}>

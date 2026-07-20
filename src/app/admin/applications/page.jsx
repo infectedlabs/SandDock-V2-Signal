@@ -75,7 +75,7 @@ export default function AdminApplicationsPage() {
 
   if (!user || !isAdmin) {
     return (
-      <div className="min-h-screen bg-white text-black flex items-center justify-center">
+      <div className="min-h-screen bg-white text-black flex items-center justify-center font-satoshi">
         <div className="text-center space-y-4">
           <p className="text-xl font-bold">Access Denied</p>
           <p className="text-black">Only ghuruprasaath@gmail.com has access to this page.</p>
@@ -88,7 +88,7 @@ export default function AdminApplicationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0e27] text-white">
+    <div className="min-h-screen bg-[#0a0e27] text-white font-satoshi">
       <header className="sticky top-0 z-40 w-full border-b border-zinc-800 bg-[#0a0e27]/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
           <h1 className="text-sm font-bold uppercase tracking-wider">Applications Admin</h1>

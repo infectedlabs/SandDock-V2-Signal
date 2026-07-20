@@ -50,7 +50,7 @@ export default function BillingPage() {
 
   if (loading || loadingData) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center font-satoshi">
         <div className="w-8 h-8 border-2 border-black border-t-brand-orange rounded-full animate-spin" />
       </div>
     );
@@ -65,7 +65,7 @@ export default function BillingPage() {
   const appliedFor = applicationStatus?.plan_applied_for;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white font-satoshi">
       {/* Header */}
       <header className="border-b border-black bg-white sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">

@@ -64,7 +64,7 @@ export default function ArticleRenderer({ article, category }) {
             let updated = html;
             updated = updated.replace(
               /\[live signal count - pulled dynamically from the signals database\]/g,
-              `<span class="font-mono font-bold text-[#ff5722] bg-[#ff5722]/5 px-1.5 py-0.5 rounded border border-[#ff5722]/20">${data.total_signals}</span>`
+              `<span class="font-satoshi font-bold text-[#ff5722] bg-[#ff5722]/5 px-1.5 py-0.5 rounded border border-[#ff5722]/20">${data.total_signals}</span>`
             );
             
             const winRateText = data.win_rate_pct 
@@ -73,7 +73,7 @@ export default function ArticleRenderer({ article, category }) {
             
             updated = updated.replace(
               /\[live win\/loss breakdown - pulled dynamically\]/g,
-              `<span class="font-mono font-bold text-black bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200">${winRateText}</span>`
+              `<span class="font-satoshi font-bold text-black bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200">${winRateText}</span>`
             );
             setRenderedHtml(updated);
           }
@@ -95,7 +95,7 @@ export default function ArticleRenderer({ article, category }) {
   };
 
   return (
-    <div className="relative min-h-screen bg-white text-black selection:bg-brand-orange selection:text-white overflow-x-hidden font-sans">
+    <div className="relative min-h-screen bg-white text-black selection:bg-brand-orange selection:text-white overflow-x-hidden font-satoshi">
       
       {/* Dynamic Reading Progress Bar */}
       <div 
@@ -111,7 +111,7 @@ export default function ArticleRenderer({ article, category }) {
           <div className="flex items-center px-6 h-16 border-r border-black relative">
             <a href="/" className="flex items-center gap-2.5">
               <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" onError={(e) => { e.target.src = 'https://placehold.co/32x32/orange/white?text=S' }} />
-              <span className="text-lg font-bold tracking-tighter uppercase font-sans text-black">
+              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">
                 Sanddock
               </span>
             </a>
@@ -156,7 +156,7 @@ export default function ArticleRenderer({ article, category }) {
             <span className="text-black font-medium truncate max-w-[200px] md:max-w-none">{frontmatter.title}</span>
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold font-sans tracking-tight text-black leading-tight max-w-5xl">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold font-satoshi tracking-tight text-black leading-tight max-w-5xl">
             {frontmatter.title}
           </h1>
 
@@ -164,7 +164,7 @@ export default function ArticleRenderer({ article, category }) {
             {frontmatter.meta_description}
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-y-4 gap-x-8 text-xs font-mono text-black border-t border-zinc-200 pt-6">
+          <div className="mt-8 flex flex-wrap items-center gap-y-4 gap-x-8 text-xs font-satoshi text-black border-t border-zinc-200 pt-6">
             <div>
               <span className="uppercase text-black">Written by:</span>
               <span className="ml-2 font-bold text-black">{frontmatter.author || 'Sanddock Research Team'}</span>
@@ -190,7 +190,7 @@ export default function ArticleRenderer({ article, category }) {
           {/* LEFT COLUMN: Table of Contents (Sticky on Desktop) */}
           <aside className="lg:col-span-3 order-2 lg:order-1">
             <div className="sticky top-24 border border-black p-6 rounded-lg bg-zinc-50">
-              <h4 className="font-mono text-xs uppercase tracking-wider text-black font-bold border-b border-black pb-3 mb-4 flex items-center justify-between">
+              <h4 className="font-satoshi text-xs uppercase tracking-wider text-black font-bold border-b border-black pb-3 mb-4 flex items-center justify-between">
                 <span>Table of Contents</span>
                 <span className="text-[#ff5722]">&sect;</span>
               </h4>
@@ -220,13 +220,13 @@ export default function ArticleRenderer({ article, category }) {
           {/* MIDDLE COLUMN: Article Content */}
           <article className="lg:col-span-6 order-1 lg:order-2">
             <div 
-              className="prose prose-zinc max-w-none prose-headings:font-sans prose-a:text-[#ff5722] prose-strong:font-bold prose-table:my-6"
+              className="prose prose-zinc max-w-none prose-headings:font-satoshi prose-a:text-[#ff5722] prose-strong:font-bold prose-table:my-6"
               dangerouslySetInnerHTML={{ __html: renderedHtml }}
             />
 
             {/* Disclaimer block (E-E-A-T trust signal) */}
             <div className="mt-16 p-6 border border-zinc-200 rounded-lg bg-zinc-50 text-xs text-black space-y-2 leading-relaxed">
-              <p className="font-mono font-bold uppercase tracking-wider text-zinc-700">⚠️ Risk Warning & Disclaimer</p>
+              <p className="font-satoshi font-bold uppercase tracking-wider text-zinc-700">⚠️ Risk Warning & Disclaimer</p>
               <p>
                 Trading cryptocurrencies involves substantial risk and can result in the loss of your capital. The information provided in this article, including technical indicators, charts, formulas, and signals, is for educational and informational purposes only. It does not constitute investment advice, financial advice, trading advice, or any other sort of advice.
               </p>
@@ -242,16 +242,16 @@ export default function ArticleRenderer({ article, category }) {
               
               {/* Main Conversion CTA Block */}
               <div className="border border-black p-6 rounded-lg bg-white relative overflow-hidden group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-200">
-                <div className="absolute top-0 right-0 w-16 h-16 bg-[#ff5722]/10 rounded-bl-full flex items-center justify-center text-[#ff5722] font-mono text-xl font-bold group-hover:scale-110 transition-transform duration-200">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-[#ff5722]/10 rounded-bl-full flex items-center justify-center text-[#ff5722] font-satoshi text-xl font-bold group-hover:scale-110 transition-transform duration-200">
                   ⚡
                 </div>
-                <h4 className="font-sans font-bold text-lg text-black uppercase tracking-tight mb-2">
+                <h4 className="font-satoshi font-bold text-lg text-black uppercase tracking-tight mb-2">
                   Are You Trading Blind?
                 </h4>
                 <p className="text-black text-sm leading-relaxed mb-6">
                   Get real-time, Heikin Ashi-smooth swing signals for Bitcoin with full plain-English AI explanations.
                 </p>
-                <div className="space-y-3 font-mono text-[11px] text-black mb-6 bg-zinc-50 p-3 rounded border border-zinc-200">
+                <div className="space-y-3 font-satoshi text-[11px] text-black mb-6 bg-zinc-50 p-3 rounded border border-zinc-200">
                   <div className="flex justify-between">
                     <span>Active pair:</span>
                     <span className="font-bold text-black">BTC/USDT</span>
@@ -307,7 +307,7 @@ export default function ArticleRenderer({ article, category }) {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-6 h-6 object-contain" onError={(e) => { e.target.src = 'https://placehold.co/24x24/orange/white?text=S' }} />
-            <span className="text-sm font-bold tracking-tighter uppercase font-sans text-black">
+            <span className="text-sm font-bold tracking-tighter uppercase font-satoshi text-black">
               Sanddock &copy; 2026
             </span>
           </div>

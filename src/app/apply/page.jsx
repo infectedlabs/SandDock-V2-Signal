@@ -211,12 +211,12 @@ function ApplyPageContent() {
 
   if (submitSuccess) {
     return (
-      <div className="relative min-h-screen bg-white text-black overflow-hidden">
+      <div className="relative min-h-screen bg-white text-black overflow-hidden font-satoshi">
         <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
           <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
             <a href="/" className="flex items-center gap-2.5">
               <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg font-bold tracking-tighter uppercase font-sans text-black">Sanddock</span>
+              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">Sanddock</span>
             </a>
           </div>
         </header>
@@ -266,13 +266,13 @@ function ApplyPageContent() {
   }
 
   return (
-    <div className="relative min-h-screen bg-white text-black overflow-hidden">
+    <div className="relative min-h-screen bg-white text-black overflow-hidden font-satoshi">
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6 relative">
           <a href="/" className="flex items-center gap-2.5">
             <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-            <span className="text-lg font-bold tracking-tighter uppercase font-sans text-black">Sanddock</span>
+            <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">Sanddock</span>
           </a>
           <a href="/pricing" className="text-[11px] font-bold uppercase tracking-wider hover:text-brand-orange transition-colors">
             Back to Pricing →
@@ -396,7 +396,7 @@ function ApplyPageContent() {
 
 export default function ApplyPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-satoshi">Loading...</div>}>
       <ApplyPageContent />
     </Suspense>
   );

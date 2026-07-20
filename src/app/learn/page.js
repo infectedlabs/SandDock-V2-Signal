@@ -32,7 +32,7 @@ export default function LearnIndexPage() {
   const articles = getArticles();
 
   return (
-    <div className="relative min-h-screen bg-white text-black selection:bg-brand-orange selection:text-white font-sans">
+    <div className="relative min-h-screen bg-white text-black selection:bg-brand-orange selection:text-white font-satoshi">
       
       {/* HEADER / NAVIGATION BAR (SWISS STYLE) */}
       <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
@@ -42,7 +42,7 @@ export default function LearnIndexPage() {
           <div className="flex items-center px-6 h-16 border-r border-black relative">
             <a href="/" className="flex items-center gap-2.5">
               <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg font-bold tracking-tighter uppercase font-sans text-black">
+              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">
                 Sanddock
               </span>
             </a>
@@ -77,7 +77,7 @@ export default function LearnIndexPage() {
       <section className="border-b border-black bg-zinc-50 py-16 md:py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-xs font-bold uppercase tracking-widest text-[#ff5722] mb-3">Sanddock Academy</div>
-          <h1 className="text-4xl md:text-6xl font-extrabold font-sans tracking-tight text-black leading-tight max-w-4xl">
+          <h1 className="text-4xl md:text-6xl font-extrabold font-satoshi tracking-tight text-black leading-tight max-w-4xl">
             Master the Mechanics of Swing Trading
           </h1>
           <p className="mt-6 text-lg md:text-xl text-zinc-600 max-w-2xl font-medium leading-relaxed">
@@ -95,7 +95,7 @@ export default function LearnIndexPage() {
               href={`/learn/${article.slug}`}
               className="flex flex-col border border-black rounded-lg bg-white overflow-hidden p-6 group hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-200"
             >
-              <div className="text-[10px] font-mono text-zinc-400 uppercase font-bold tracking-wider mb-3">
+              <div className="text-[10px] font-satoshi text-zinc-400 uppercase font-bold tracking-wider mb-3">
                 {article.frontmatter.target_keyword || 'Trading Theory'}
               </div>
               <h3 className="text-xl font-bold tracking-tight text-black group-hover:text-[#ff5722] transition-colors mb-3 leading-snug">
@@ -104,7 +104,7 @@ export default function LearnIndexPage() {
               <p className="text-zinc-600 text-sm leading-relaxed mb-6 flex-grow">
                 {article.frontmatter.meta_description}
               </p>
-              <div className="flex items-center justify-between border-t border-zinc-100 pt-4 text-xs font-mono text-zinc-500">
+              <div className="flex items-center justify-between border-t border-zinc-100 pt-4 text-xs font-satoshi text-zinc-500">
                 <span>By {article.frontmatter.author || 'Sanddock Team'}</span>
                 <span className="font-bold text-black group-hover:translate-x-1 transition-transform duration-200">Read &rarr;</span>
               </div>
@@ -118,7 +118,7 @@ export default function LearnIndexPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-6 h-6 object-contain" />
-            <span className="text-sm font-bold tracking-tighter uppercase font-sans text-black">
+            <span className="text-sm font-bold tracking-tighter uppercase font-satoshi text-black">
               Sanddock &copy; 2026
             </span>
           </div>

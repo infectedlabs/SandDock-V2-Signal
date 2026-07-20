@@ -119,7 +119,7 @@ export default function PerformanceChart({ signals = [] }) {
     return (
       <div className="h-64 flex flex-col items-center justify-center border border-slate-800 bg-[#070b19]/60 p-6 text-center">
         <span className="text-xl">📈</span>
-        <p className="text-white font-mono text-xs uppercase tracking-wider mt-2">No completed trades in this window.</p>
+        <p className="text-white font-satoshi text-xs uppercase tracking-wider mt-2">No completed trades in this window.</p>
       </div>
     );
   }
@@ -141,7 +141,7 @@ export default function PerformanceChart({ signals = [] }) {
         <div className="flex p-1 bg-slate-950/50 rounded-full border border-slate-800/60 shadow-inner self-start">
           <button
             onClick={() => setActiveTab('pnl')}
-            className={`px-4 py-2 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+            className={`px-4 py-2 rounded-full font-satoshi text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
               activeTab === 'pnl'
                 ? 'bg-[#3D5AFE] text-white shadow-lg shadow-[#3D5AFE]/20 font-extrabold'
                 : 'bg-transparent text-slate-400 hover:text-white border-0'
@@ -151,7 +151,7 @@ export default function PerformanceChart({ signals = [] }) {
           </button>
           <button
             onClick={() => setActiveTab('winrate')}
-            className={`px-4 py-2 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+            className={`px-4 py-2 rounded-full font-satoshi text-[10px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
               activeTab === 'winrate'
                 ? 'bg-[#3D5AFE] text-white shadow-lg shadow-[#3D5AFE]/20 font-extrabold'
                 : 'bg-transparent text-slate-400 hover:text-white border-0'
@@ -165,7 +165,7 @@ export default function PerformanceChart({ signals = [] }) {
           <span className="text-[9px] text-slate-500 uppercase block tracking-widest font-extrabold">
             {activeTab === 'pnl' ? 'Cumulative PnL Return' : 'Cumulative Success Accuracy'}
           </span>
-          <span className={`text-xl font-black font-mono tracking-tight ${
+          <span className={`text-xl font-black font-satoshi tracking-tight ${
             activeTab === 'pnl'
               ? points[points.length - 1].cumulativePnl >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
               : 'text-[#06b6d4]'
@@ -299,7 +299,7 @@ export default function PerformanceChart({ signals = [] }) {
         {/* Hover Tooltip Overlay */}
         {hoveredIndex !== null && points[hoveredIndex] && (
           <div 
-            className="absolute z-20 bg-slate-950/90 backdrop-blur-md border border-slate-800/80 p-3 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.65)] pointer-events-none font-mono text-[10px] min-w-[155px] text-white"
+            className="absolute z-20 bg-slate-950/90 backdrop-blur-md border border-slate-800/80 p-3 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.65)] pointer-events-none font-satoshi text-[10px] min-w-[155px] text-white"
             style={{ 
               left: `${Math.min(width - 165, Math.max(10, xScale(hoveredIndex) - 77))}px`,
               top: '40px' 

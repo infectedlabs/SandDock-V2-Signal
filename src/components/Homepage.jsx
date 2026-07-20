@@ -436,7 +436,7 @@ export default function Homepage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-white text-black selection:bg-brand-orange selection:text-white overflow-hidden">
+    <div className="relative min-h-screen bg-white text-black selection:bg-brand-orange selection:text-white overflow-hidden font-satoshi">
       
       {/* HEADER / NAVIGATION BAR (SWISS STYLE) */}
       <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
@@ -446,7 +446,7 @@ export default function Homepage() {
           <div className="flex items-center px-6 h-16 border-r border-black relative">
             <a href="/" className="flex items-center gap-2.5">
               <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg font-bold tracking-tighter uppercase font-sans text-black">
+              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">
                 Sanddock
               </span>
             </a>
@@ -525,7 +525,7 @@ export default function Homepage() {
           {/* Left Column: Huge typography & description & CTAs */}
           <div className="lg:col-span-7 space-y-5 text-left">
             <div className="space-y-3">
-              <h1 className="text-[28px] sm:text-[36px] md:text-[44px] font-extrabold tracking-tighter leading-snug font-sans text-black max-w-full">
+              <h1 className="text-[28px] sm:text-[36px] md:text-[44px] font-extrabold tracking-tighter leading-snug font-satoshi text-black max-w-full">
                 Trading signals backed by data,<br className="hidden md:block" /> not promises.
               </h1>
             </div>
@@ -535,19 +535,19 @@ export default function Homepage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 mb-3">
                 <div className="space-y-1">
                   <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-text-muted">Win Rate</p>
-                  <p className="text-xl md:text-3xl font-extrabold text-black font-mono">
+                  <p className="text-xl md:text-3xl font-extrabold text-black font-satoshi">
                     {isLoadingStats ? '...' : heroStats.win_rate.toFixed(1)}%
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-text-muted">Total PnL</p>
-                  <p className={`text-xl md:text-3xl font-extrabold font-mono ${heroStats.total_pnl >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <p className={`text-xl md:text-3xl font-extrabold font-satoshi ${heroStats.total_pnl >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                     {isLoadingStats ? '...' : (heroStats.total_pnl >= 0 ? '+' : '') + heroStats.total_pnl.toFixed(2)}%
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-text-muted">Total Signals</p>
-                  <p className="text-xl md:text-3xl font-extrabold text-black font-mono">
+                  <p className="text-xl md:text-3xl font-extrabold text-black font-satoshi">
                     {isLoadingStats ? '...' : heroStats.total_signals.toLocaleString()}
                   </p>
                 </div>
@@ -703,11 +703,11 @@ export default function Homepage() {
                 </span>
                 <span className="text-black">{item.coin}</span>
                 
-                <span className="font-mono text-text-secondary">{item.price}</span>
+                <span className="font-satoshi text-text-secondary">{item.price}</span>
                 <span className="text-text-muted">·</span>
                 <span className="text-brand-orange">{item.confidence}%</span>
                 <span className="text-text-muted">·</span>
-                <span className="text-text-muted font-mono">{item.time}</span>
+                <span className="text-text-muted font-satoshi">{item.time}</span>
 
                 {!item.free && (
                   <span className="flex items-center gap-1 text-[9px] bg-brand-orange text-white px-2 py-0.2 rounded-none font-bold uppercase tracking-wider ml-1">
@@ -733,11 +733,11 @@ export default function Homepage() {
                 </span>
                 <span className="text-black">{item.coin}</span>
 
-                <span className="font-mono text-text-secondary">{item.price}</span>
+                <span className="font-satoshi text-text-secondary">{item.price}</span>
                 <span className="text-text-muted">·</span>
                 <span className="text-brand-orange">{item.confidence}%</span>
                 <span className="text-text-muted">·</span>
-                <span className="text-text-muted font-mono">{item.time}</span>
+                <span className="text-text-muted font-satoshi">{item.time}</span>
 
                 {!item.free && (
                   <span className="flex items-center gap-1 text-[9px] bg-brand-orange text-white px-2 py-0.2 rounded-none font-bold uppercase tracking-wider ml-1">
@@ -758,7 +758,7 @@ export default function Homepage() {
             <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
               Verified Performance
             </span>
-            <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
+            <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none">
               Real Data, Real Results
             </h2>
           </div>
@@ -773,7 +773,7 @@ export default function Homepage() {
           {/* Column 1: The Old Way (Anxiety) */}
           <div className="border border-black p-8 bg-zinc-50 flex flex-col justify-between space-y-8">
             <div>
-              <span className="inline-block text-[10px] font-bold px-2.5 py-0.5 bg-signal-sell/10 text-signal-sell uppercase tracking-widest font-mono border border-signal-sell/20 mb-6">
+              <span className="inline-block text-[10px] font-bold px-2.5 py-0.5 bg-signal-sell/10 text-signal-sell uppercase tracking-widest font-satoshi border border-signal-sell/20 mb-6">
                 Without Real Data
               </span>
               <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-8">
@@ -785,7 +785,7 @@ export default function Homepage() {
                   <span className="text-signal-sell mt-0.5">&#x2715;</span>
                   <div>
                     <span className="block text-black font-bold mb-1">Cherry-Picked Results</span>
-                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
+                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-satoshi">
                       Signal groups post only winning screenshots, hiding losers and accuracy behind unverifiable claims.
                     </span>
                   </div>
@@ -794,7 +794,7 @@ export default function Homepage() {
                   <span className="text-signal-sell mt-0.5">&#x2715;</span>
                   <div>
                     <span className="block text-black font-bold mb-1">No Historical Record</span>
-                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
+                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-satoshi">
                       No public track record. No audit trail. Impossible to verify if 80% or 20% are real.
                     </span>
                   </div>
@@ -803,7 +803,7 @@ export default function Homepage() {
                   <span className="text-signal-sell mt-0.5">&#x2715;</span>
                   <div>
                     <span className="block text-black font-bold mb-1">Hidden Losses</span>
-                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
+                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-satoshi">
                       Bad signals get deleted or ignored. Real lose rates stay secret.
                     </span>
                   </div>
@@ -812,7 +812,7 @@ export default function Homepage() {
                   <span className="text-signal-sell mt-0.5">&#x2715;</span>
                   <div>
                     <span className="block text-black font-bold mb-1">No Risk Framework</span>
-                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
+                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-satoshi">
                       Signals without stop-loss or position sizing guidance. Your capital is unprotected.
                     </span>
                   </div>
@@ -824,7 +824,7 @@ export default function Homepage() {
           {/* Column 2: The Sanddock Way (Clarity) */}
           <div className="border-2 border-black p-8 bg-white flex flex-col justify-between space-y-8 relative shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <div>
-              <span className="inline-block text-[10px] font-bold px-2.5 py-0.5 bg-signal-buy/15 text-[#00b050] uppercase tracking-widest font-mono border border-signal-buy/20 mb-6">
+              <span className="inline-block text-[10px] font-bold px-2.5 py-0.5 bg-signal-buy/15 text-[#00b050] uppercase tracking-widest font-satoshi border border-signal-buy/20 mb-6">
                 Sanddock Approach
               </span>
               <h3 className="text-2xl font-bold uppercase tracking-tight text-black mb-8">
@@ -836,7 +836,7 @@ export default function Homepage() {
                   <span className="text-[#00b050] mt-0.5">&#x2713;</span>
                   <div>
                     <span className="block text-black font-bold mb-1">24/7 Market Scanning</span>
-                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
+                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-satoshi">
                       Our AI monitors major coins around the clock. When a buy or sell opportunity appears, you get alerted instantly.
                     </span>
                   </div>
@@ -845,7 +845,7 @@ export default function Homepage() {
                   <span className="text-[#00b050] mt-0.5">&#x2713;</span>
                   <div>
                     <span className="block text-black font-bold mb-1">Complete Trade Setup</span>
-                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
+                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-satoshi">
                       Entry price, stop-loss, and take-profit calculated for you. Everything you need to execute the trade immediately.
                     </span>
                   </div>
@@ -854,7 +854,7 @@ export default function Homepage() {
                   <span className="text-[#00b050] mt-0.5">&#x2713;</span>
                   <div>
                     <span className="block text-black font-bold mb-1">Immutable Track Record</span>
-                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
+                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-satoshi">
                       6,500+ signals. All logged publicly. 80% win rate. Real data you can audit yourself.
                     </span>
                   </div>
@@ -863,7 +863,7 @@ export default function Homepage() {
                   <span className="text-[#00b050] mt-0.5">&#x2713;</span>
                   <div>
                     <span className="block text-black font-bold mb-1">Instant Alerts</span>
-                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-sans">
+                    <span className="text-xs md:text-sm leading-relaxed text-text-secondary block normal-case font-normal font-satoshi">
                       Live Telegram notifications. Dashboard signals. Entry, exit, and risk management pre-calculated.
                     </span>
                   </div>
@@ -877,19 +877,19 @@ export default function Homepage() {
         {/* Outcomes bottom grid */}
         <div className="border-t border-black pt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-2">
-            <h4 className="text-lg font-bold uppercase text-black font-sans">01 - Stop Guessing</h4>
+            <h4 className="text-lg font-bold uppercase text-black font-satoshi">01 - Stop Guessing</h4>
             <p className="text-text-secondary text-base leading-relaxed">
               Every signal backed by 6,500+ verified trades. Real win rate (80%). Real PnL (+3228%). No promises.
             </p>
           </div>
           <div className="space-y-2">
-            <h4 className="text-lg font-bold uppercase text-black font-sans">02 - Automated Entry</h4>
+            <h4 className="text-lg font-bold uppercase text-black font-satoshi">02 - Automated Entry</h4>
             <p className="text-text-secondary text-base leading-relaxed">
               Signal fires. Entry price is pre-set. Stop-loss and take-profit already calculated. Copy the exact setup in 30 seconds.
             </p>
           </div>
           <div className="space-y-2">
-            <h4 className="text-lg font-bold uppercase text-black font-sans">03 - Verified Results</h4>
+            <h4 className="text-lg font-bold uppercase text-black font-satoshi">03 - Verified Results</h4>
             <p className="text-text-secondary text-base leading-relaxed">
               Check our public track record anytime. Every win, every loss. No hidden signals. No cherry-picked data. Pure math.
             </p>
@@ -903,7 +903,7 @@ export default function Homepage() {
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             How It Works
           </span>
-          <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans">
+          <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-satoshi">
             Get Alerts. Trade. Profit. &rarr;
           </h2>
           <p className="text-text-secondary text-base md:text-lg max-w-md">
@@ -975,7 +975,7 @@ export default function Homepage() {
               <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
                 Sanddock Platform
               </span>
-              <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none mb-12">
+              <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none mb-12">
                 Every signal<br />explained &rarr;
               </h2>
 
@@ -989,8 +989,8 @@ export default function Homepage() {
                         onClick={() => handleFeatureAccordionClick(idx)}
                         className="w-full text-left flex items-center justify-between gap-4 font-bold uppercase tracking-wide text-lg text-black hover:text-brand-orange transition-colors"
                       >
-                        <span className="font-sans">{feat.title}</span>
-                        <span className="text-xl font-bold font-mono">
+                        <span className="font-satoshi">{feat.title}</span>
+                        <span className="text-xl font-bold font-satoshi">
                           {isActive ? "\u2212" : "+"}
                         </span>
                       </button>
@@ -1018,9 +1018,9 @@ export default function Homepage() {
                     <span className="w-2 h-2 rounded-full bg-red-500" />
                     <span className="w-2 h-2 rounded-full bg-yellow-500" />
                     <span className="w-2 h-2 rounded-full bg-green-500" />
-                    <span className="ml-2 font-mono text-white text-[10px] tracking-wider">SANDDOCK ACTIVE TERMINAL</span>
+                    <span className="ml-2 font-satoshi text-white text-[10px] tracking-wider">SANDDOCK ACTIVE TERMINAL</span>
                   </div>
-                  <span className="text-[9px] font-mono text-brand-orange bg-brand-orange/15 px-2 py-0.5 rounded-none font-bold">
+                  <span className="text-[9px] font-satoshi text-brand-orange bg-brand-orange/15 px-2 py-0.5 rounded-none font-bold">
                     {activeSignal.timeframe}
                   </span>
                 </div>
@@ -1032,11 +1032,11 @@ export default function Homepage() {
                   <div className="md:col-span-7 flex flex-col space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-xs font-bold font-mono text-white">{activeSignal.coin}</h4>
-                        <span className="text-[9px] font-mono text-text-secondary">Price Movement Chart</span>
+                        <h4 className="text-xs font-bold font-satoshi text-white">{activeSignal.coin}</h4>
+                        <span className="text-[9px] font-satoshi text-text-secondary">Price Movement Chart</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs font-mono font-bold text-[#00e676] bg-[#00e676]/15 px-2 py-0.5 rounded-none">
+                        <span className="text-xs font-satoshi font-bold text-[#00e676] bg-[#00e676]/15 px-2 py-0.5 rounded-none">
                           {activeSignal.price}
                         </span>
                       </div>
@@ -1124,7 +1124,7 @@ export default function Homepage() {
                                 y={isBuy ? p.y - 12 : p.y + 16} 
                                 textAnchor="middle" 
                                 fill={isBuy ? "#00e676" : "#ff1744"} 
-                                className="text-[8px] font-mono font-bold"
+                                className="text-[8px] font-satoshi font-bold"
                               >
                                 {p.signal.type}
                               </text>
@@ -1161,21 +1161,21 @@ export default function Homepage() {
                       {/* Trade Parameters Horizontal Lines */}
                       {/* Take Profit Target Line */}
                       <div className="absolute left-0 right-10 border-t border-dashed border-[#00e676]/40 top-[20%] z-20 pointer-events-none flex items-center justify-between pl-2">
-                        <span className="bg-[#080d1a] px-1 text-[7px] text-[#00e676] font-mono tracking-wider font-bold">TP TARGET ({activeSignal.tp})</span>
+                        <span className="bg-[#080d1a] px-1 text-[7px] text-[#00e676] font-satoshi tracking-wider font-bold">TP TARGET ({activeSignal.tp})</span>
                       </div>
 
                       {/* Entry Price Line */}
                       <div className="absolute left-0 right-10 border-t border-dashed border-white/30 top-[50%] z-20 pointer-events-none flex items-center justify-between pl-2">
-                        <span className="bg-[#080d1a] px-1 text-[7px] text-white/50 font-mono tracking-wider font-bold">ENTRY PRICE ({activeSignal.price})</span>
+                        <span className="bg-[#080d1a] px-1 text-[7px] text-white/50 font-satoshi tracking-wider font-bold">ENTRY PRICE ({activeSignal.price})</span>
                       </div>
 
                       {/* Stop Loss Target Line */}
                       <div className="absolute left-0 right-10 border-t border-dashed border-signal-sell/40 top-[80%] z-20 pointer-events-none flex items-center justify-between pl-2">
-                        <span className="bg-[#080d1a] px-1 text-[7px] text-signal-sell font-mono tracking-wider font-bold">STOP LOSS ({activeSignal.sl})</span>
+                        <span className="bg-[#080d1a] px-1 text-[7px] text-signal-sell font-satoshi tracking-wider font-bold">STOP LOSS ({activeSignal.sl})</span>
                       </div>
 
                       {/* Y-Axis Price Panel (Right aligned) */}
-                      <div className="absolute right-0 top-0 bottom-6 w-10 border-l border-white/10 flex flex-col justify-between items-center py-2 text-[7px] text-text-muted font-mono bg-black/20 pointer-events-none">
+                      <div className="absolute right-0 top-0 bottom-6 w-10 border-l border-white/10 flex flex-col justify-between items-center py-2 text-[7px] text-text-muted font-satoshi bg-black/20 pointer-events-none">
                         <span>$71k</span>
                         <span>$69k</span>
                         <span>$67k</span>
@@ -1183,7 +1183,7 @@ export default function Homepage() {
                       </div>
 
                       {/* X-Axis Time Panel (Bottom aligned) */}
-                      <div className="absolute bottom-0 left-0 right-10 h-6 border-t border-white/10 flex justify-between items-center px-4 text-[7px] text-text-muted font-mono bg-black/20 pointer-events-none">
+                      <div className="absolute bottom-0 left-0 right-10 h-6 border-t border-white/10 flex justify-between items-center px-4 text-[7px] text-text-muted font-satoshi bg-black/20 pointer-events-none">
                         <span>09:30</span>
                         <span>10:15</span>
                         <span>11:00</span>
@@ -1200,28 +1200,28 @@ export default function Homepage() {
                     }`}>
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-none font-mono ${
+                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-none font-satoshi ${
                             activeSignal.type === "BUY" ? "bg-[#00e676]/15 text-[#00e676]" : "bg-signal-sell/15 text-signal-sell"
                           }`}>
                             {activeSignal.type}
                           </span>
-                          <span className="text-[9px] font-mono text-text-muted">{activeSignal.time}</span>
+                          <span className="text-[9px] font-satoshi text-text-muted">{activeSignal.time}</span>
                         </div>
 
-                        <h4 className="text-xs font-bold text-white font-mono">{activeSignal.coin}</h4>
+                        <h4 className="text-xs font-bold text-white font-satoshi">{activeSignal.coin}</h4>
 
                         <div className="grid grid-cols-3 gap-1 my-2">
                           <div className="bg-black/50 p-1.5 rounded-none border border-white/5">
-                            <span className="block text-[6px] text-text-muted font-bold font-mono">ENTRY</span>
-                            <span className="text-[8px] font-mono text-white font-bold">{activeSignal.price}</span>
+                            <span className="block text-[6px] text-text-muted font-bold font-satoshi">ENTRY</span>
+                            <span className="text-[8px] font-satoshi text-white font-bold">{activeSignal.price}</span>
                           </div>
                           <div className="bg-black/50 p-1.5 rounded-none border border-white/5">
-                            <span className="block text-[6px] text-text-muted font-bold font-mono">STOP LOSS</span>
-                            <span className="text-[8px] font-mono text-signal-sell font-bold">{activeSignal.sl}</span>
+                            <span className="block text-[6px] text-text-muted font-bold font-satoshi">STOP LOSS</span>
+                            <span className="text-[8px] font-satoshi text-signal-sell font-bold">{activeSignal.sl}</span>
                           </div>
                           <div className="bg-black/50 p-1.5 rounded-none border border-white/5">
-                            <span className="block text-[6px] text-text-muted font-bold font-mono">TAKE PROFIT</span>
-                            <span className="text-[8px] font-mono text-[#00e676] font-bold">{activeSignal.tp}</span>
+                            <span className="block text-[6px] text-text-muted font-bold font-satoshi">TAKE PROFIT</span>
+                            <span className="text-[8px] font-satoshi text-[#00e676] font-bold">{activeSignal.tp}</span>
                           </div>
                         </div>
 
@@ -1242,7 +1242,7 @@ export default function Homepage() {
 
                       <div>
                         <span className="block text-[7px] text-text-muted font-bold tracking-wider uppercase mb-1">AI Rationale & Strategy</span>
-                        <p className="text-[9px] text-text-secondary leading-relaxed font-sans line-clamp-3">
+                        <p className="text-[9px] text-text-secondary leading-relaxed font-satoshi line-clamp-3">
                           {activeSignal.rationale}
                         </p>
                       </div>
@@ -1253,7 +1253,7 @@ export default function Homepage() {
               </div>
 
               {/* Terminal Log Console */}
-              <div className="mt-6 pt-4 border-t border-white/10 font-mono text-[9px] text-white space-y-1.5 text-left">
+              <div className="mt-6 pt-4 border-t border-white/10 font-satoshi text-[9px] text-white space-y-1.5 text-left">
                 <div className="flex items-center justify-between text-[8px] font-bold text-white uppercase tracking-widest mb-1">
                   <span>System Console Logs</span>
                   <span className="text-[#00e676] animate-pulse">● Live Connection</span>
@@ -1283,7 +1283,7 @@ export default function Homepage() {
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             Coin Unlocks
           </span>
-          <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
+          <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none">
             Sanddock has got<br />you covered &rarr;
           </h2>
         </div>
@@ -1308,10 +1308,10 @@ export default function Homepage() {
             {/* Visual: BTC icon unlocked, others locked */}
             <div className="space-y-4 pt-4 border-t border-black/10">
               <div className="flex items-center gap-3 bg-white border border-black p-3 w-max">
-                <span className="w-8 h-8 rounded-none bg-brand-orange/10 text-brand-orange flex items-center justify-center font-bold font-mono">₿</span>
+                <span className="w-8 h-8 rounded-none bg-brand-orange/10 text-brand-orange flex items-center justify-center font-bold font-satoshi">₿</span>
                 <div>
                   <span className="block text-xs font-bold text-black">BTC/USDT</span>
-                  <span className="text-[8px] text-brand-orange uppercase tracking-wider font-mono font-bold">Unlocked · Free</span>
+                  <span className="text-[8px] text-brand-orange uppercase tracking-wider font-satoshi font-bold">Unlocked · Free</span>
                 </div>
               </div>
 
@@ -1367,7 +1367,7 @@ export default function Homepage() {
                 {["ETH", "SOL", "BNB", "ADA", "AVAX", "XRP", "DOT", "LINK"].map((coin) => (
                   <div key={coin} className="bg-white border border-black p-2 text-center transition-colors hover:border-brand-orange">
                     <span className="text-xs font-bold text-black block">{coin}</span>
-                    <span className="text-[7px] text-[#00e676] uppercase tracking-wider font-mono font-bold block mt-0.5">Live</span>
+                    <span className="text-[7px] text-[#00e676] uppercase tracking-wider font-satoshi font-bold block mt-0.5">Live</span>
                   </div>
                 ))}
               </div>
@@ -1394,12 +1394,12 @@ export default function Homepage() {
             <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
               Success Stories
             </span>
-            <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
+            <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none">
               What Traders Are Saying
             </h2>
           </div>
           
-          <div className="text-2xl font-bold font-sans text-black select-none">
+          <div className="text-2xl font-bold font-satoshi text-black select-none">
             {activeTestimonialIdx + 1}/{testimonials.length - 1}
           </div>
         </div>
@@ -1421,7 +1421,7 @@ export default function Homepage() {
                   </span>
                   
                   {/* Mixed weight segment quote */}
-                  <p className="text-lg text-text-secondary leading-relaxed font-sans">
+                  <p className="text-lg text-text-secondary leading-relaxed font-satoshi">
                     {t.segments.map((seg, sIdx) => (
                       <span key={sIdx} className={seg.bold ? "font-bold text-black" : "text-text-secondary font-light"}>
                         {seg.text}
@@ -1431,7 +1431,7 @@ export default function Homepage() {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-bold text-black font-sans">{t.author}</h4>
+                  <h4 className="text-sm font-bold text-black font-satoshi">{t.author}</h4>
                   <span className="text-xs text-text-secondary font-light">{t.role}</span>
                 </div>
               </div>
@@ -1461,7 +1461,7 @@ export default function Homepage() {
             <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
               Radical Transparency
             </span>
-            <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
+            <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none">
               Wins & losses.<br />On the record.
             </h2>
           </div>
@@ -1478,25 +1478,25 @@ export default function Homepage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-black border border-black mb-12">
           <div className="bg-white p-6 text-left">
             <span className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Total signals</span>
-            <span className="text-3xl font-bold font-mono text-black">
+            <span className="text-3xl font-bold font-satoshi text-black">
               {isLoadingStats ? '...' : heroStats.total_signals.toLocaleString()}
             </span>
           </div>
           <div className="bg-white p-6 text-left">
             <span className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Verified win rate</span>
-            <span className="text-3xl font-bold font-mono text-signal-buy">
+            <span className="text-3xl font-bold font-satoshi text-signal-buy">
               {isLoadingStats ? '...' : heroStats.win_rate.toFixed(1)}%
             </span>
           </div>
           <div className="bg-white p-6 text-left">
             <span className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Total PnL</span>
-            <span className={`text-3xl font-bold font-mono ${heroStats.total_pnl >= 0 ? 'text-signal-buy' : 'text-signal-sell'}`}>
+            <span className={`text-3xl font-bold font-satoshi ${heroStats.total_pnl >= 0 ? 'text-signal-buy' : 'text-signal-sell'}`}>
               {isLoadingStats ? '...' : (heroStats.total_pnl >= 0 ? '+' : '') + heroStats.total_pnl.toFixed(2)}%
             </span>
           </div>
           <div className="bg-white p-6 text-left">
             <span className="block text-[10px] font-bold text-text-secondary uppercase mb-1">Updated</span>
-            <span className="text-xs font-mono text-black">
+            <span className="text-xs font-satoshi text-black">
               {isLoadingStats ? '...' : new Date(heroStats.last_updated).toLocaleDateString()}
             </span>
           </div>
@@ -1510,7 +1510,7 @@ export default function Homepage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-black bg-white text-text-secondary font-mono text-xs uppercase font-bold">
+                <tr className="border-b border-black bg-white text-text-secondary font-satoshi text-xs uppercase font-bold">
                   <th className="p-4">Date</th>
                   <th className="p-4">Pair</th>
                   <th className="p-4">Type</th>
@@ -1519,7 +1519,7 @@ export default function Homepage() {
                   <th className="p-4">Result</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-black/10 font-mono text-xs">
+              <tbody className="divide-y divide-black/10 font-satoshi text-xs">
                 {isLoadingSignals ? (
                   <tr>
                     <td colSpan="6" className="p-8 text-center text-text-secondary">
@@ -1538,7 +1538,7 @@ export default function Homepage() {
                       <td className="p-4 text-text-secondary">{sig.date}</td>
                       <td className="p-4 font-bold text-black">{sig.pair}</td>
                       <td className="p-4">
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-none font-mono ${
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-none font-satoshi ${
                           sig.type === "BUY" ? "bg-signal-buy/15 text-signal-buy" : "bg-signal-sell/15 text-signal-sell"
                         }`}>
                           {sig.type}
@@ -1585,7 +1585,7 @@ export default function Homepage() {
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             GrandMaster Offer
           </span>
-          <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
+          <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none">
             No recurring fees.<br />Own it forever.
           </h2>
           <p className="text-text-secondary text-base md:text-lg max-w-xl">
@@ -1598,19 +1598,19 @@ export default function Homepage() {
           <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-brand-orange/15 to-transparent pointer-events-none" />
           
           <div className="space-y-4 text-left max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-brand-orange text-white text-[9px] font-bold uppercase tracking-wider font-mono">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none bg-brand-orange text-white text-[9px] font-bold uppercase tracking-wider font-satoshi">
               <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
                 <path d="M12 2L2 22h20L12 2z" />
               </svg>
               GrandMaster Lifetime Spot
             </div>
-            <h3 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-black font-sans leading-none">
+            <h3 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-black font-satoshi leading-none">
               GrandMaster Lifetime Access
             </h3>
             <p className="text-text-secondary text-sm md:text-base leading-relaxed">
               Get permanent Master-level access to Sanddock forever with a single one-time payment. This includes all future features, altcoins, API webhooks, and core logic upgrades without any compromise or recurring fees.
             </p>
-            <div className="text-brand-orange font-mono text-xs font-bold uppercase tracking-wide">
+            <div className="text-brand-orange font-satoshi text-xs font-bold uppercase tracking-wide">
               🔥 312 of 500 GrandMaster spots remaining
             </div>
           </div>
@@ -1630,7 +1630,7 @@ export default function Homepage() {
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             FAQ
           </span>
-          <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
+          <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none">
             Everything you<br />need to know
           </h2>
         </div>
@@ -1645,8 +1645,8 @@ export default function Homepage() {
                   onClick={() => toggleFAQ(idx)}
                   className="w-full text-left flex items-center justify-between gap-4 font-bold uppercase text-base text-black hover:text-brand-orange transition-colors"
                 >
-                  <span className="font-sans">{item.q}</span>
-                  <span className="text-xl font-bold font-mono">
+                  <span className="font-satoshi">{item.q}</span>
+                  <span className="text-xl font-bold font-satoshi">
                     {isOpen ? "\u2212" : "+"}
                   </span>
                 </button>
@@ -1666,7 +1666,7 @@ export default function Homepage() {
         <div className="relative rounded-none border border-black bg-[#f4f6fa] p-12 text-left overflow-hidden">
           
           <div className="max-w-2xl space-y-6 relative z-10">
-            <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
+            <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none">
               Your next trade<br />deserves <span className="text-brand-orange">a reason.</span>
             </h2>
             <p className="text-text-secondary text-base md:text-lg leading-relaxed max-w-md">
@@ -1709,7 +1709,7 @@ export default function Homepage() {
             <div className="md:col-span-5 space-y-4 text-left">
               <div className="flex items-center gap-2">
                 <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-6 h-6 object-contain" />
-                <span className="text-base font-bold uppercase tracking-wider font-sans text-white">
+                <span className="text-base font-bold uppercase tracking-wider font-satoshi text-white">
                   Sanddock
                 </span>
               </div>
@@ -1752,7 +1752,7 @@ export default function Homepage() {
               
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Product</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
                   <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
                   <li><a href="/terminal" className="hover:text-white transition-colors">Terminal</a></li>
                   <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
@@ -1763,7 +1763,7 @@ export default function Homepage() {
 
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Support</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
                   <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
                   <li><a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Telegram Community</a></li>
                   <li><a href="#docs" className="hover:text-white transition-colors">Help Center</a></li>
@@ -1774,7 +1774,7 @@ export default function Homepage() {
 
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Legal</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
                   <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
                   <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
                   <li><a href="#disclaimer" className="hover:text-white transition-colors">Disclaimer</a></li>
@@ -1813,8 +1813,8 @@ export default function Homepage() {
             </button>
 
             <div className="space-y-2">
-              <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider font-mono">SANDDOCK GATEWAY</span>
-              <h3 className="text-2xl font-extrabold uppercase tracking-tight text-black font-sans">{modalContent.title}</h3>
+              <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider font-satoshi">SANDDOCK GATEWAY</span>
+              <h3 className="text-2xl font-extrabold uppercase tracking-tight text-black font-satoshi">{modalContent.title}</h3>
               <p className="text-text-secondary text-sm leading-relaxed">
                 {modalContent.body}
               </p>
@@ -1826,7 +1826,7 @@ export default function Homepage() {
               <input 
                 type="email" 
                 placeholder="you@example.com" 
-                className="w-full bg-[#f4f6fa] border border-black rounded-none px-4 py-3 text-sm text-black focus:outline-none focus:border-brand-orange font-mono"
+                className="w-full bg-[#f4f6fa] border border-black rounded-none px-4 py-3 text-sm text-black focus:outline-none focus:border-brand-orange font-satoshi"
               />
             </div>
 

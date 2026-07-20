@@ -41,8 +41,8 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-white text-black selection:bg-brand-orange selection:text-white overflow-hidden">
-      
+    <div className="relative min-h-screen bg-white text-black selection:bg-brand-orange selection:text-white overflow-hidden font-satoshi">
+
       {/* HEADER / NAVIGATION BAR (SWISS STYLE) */}
       <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
         <div className="max-w-7xl mx-auto flex items-center justify-between relative">
@@ -51,7 +51,7 @@ export default function ContactPage() {
           <div className="flex items-center px-6 h-16 border-r border-black relative">
             <a href="/" className="flex items-center gap-2.5">
               <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg font-bold tracking-tighter uppercase font-sans text-black">
+              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">
                 Sanddock
               </span>
             </a>
@@ -103,7 +103,7 @@ export default function ContactPage() {
         <span className="text-xs font-bold uppercase tracking-widest text-brand-orange block mb-3">
           Get in Touch
         </span>
-        <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none mb-6">
+        <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none mb-6">
           Connect With Us
         </h1>
         <p className="text-text-secondary text-base md:text-lg max-w-2xl leading-relaxed">
@@ -118,11 +118,11 @@ export default function ContactPage() {
           {/* Card 1: Email */}
           <a href="mailto:alex@sanddock.com" className="bg-[#f4f6fa] border border-black p-8 rounded-none flex flex-col justify-between h-56 hover:bg-black hover:text-white transition-colors group">
             <div>
-              <span className="text-[10px] font-mono font-bold tracking-wider block text-brand-orange uppercase mb-4">Direct Email</span>
+              <span className="text-[10px] font-satoshi font-bold tracking-wider block text-brand-orange uppercase mb-4">Direct Email</span>
               <h3 className="text-2xl font-bold uppercase tracking-tight text-black group-hover:text-white">Email Us</h3>
               <p className="text-text-secondary text-sm group-hover:text-zinc-300 mt-2">Get quick support and technical answers.</p>
             </div>
-            <div className="font-mono text-xs font-bold uppercase tracking-wider mt-4">
+            <div className="font-satoshi text-xs font-bold uppercase tracking-wider mt-4">
               alex@sanddock.com &rarr;
             </div>
           </a>
@@ -130,11 +130,11 @@ export default function ContactPage() {
           {/* Card 2: Telegram */}
           <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="bg-[#f4f6fa] border border-black p-8 rounded-none flex flex-col justify-between h-56 hover:bg-black hover:text-white transition-colors group">
             <div>
-              <span className="text-[10px] font-mono font-bold tracking-wider block text-brand-orange uppercase mb-4">Instant Chat</span>
+              <span className="text-[10px] font-satoshi font-bold tracking-wider block text-brand-orange uppercase mb-4">Instant Chat</span>
               <h3 className="text-2xl font-bold uppercase tracking-tight text-black group-hover:text-white">Telegram</h3>
               <p className="text-text-secondary text-sm group-hover:text-zinc-300 mt-2">Chat with admins and our trading community.</p>
             </div>
-            <div className="font-mono text-xs font-bold uppercase tracking-wider mt-4">
+            <div className="font-satoshi text-xs font-bold uppercase tracking-wider mt-4">
               @sanddockcom &rarr;
             </div>
           </a>
@@ -142,11 +142,11 @@ export default function ContactPage() {
           {/* Card 3: Twitter/X */}
           <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="bg-[#f4f6fa] border border-black p-8 rounded-none flex flex-col justify-between h-56 hover:bg-black hover:text-white transition-colors group">
             <div>
-              <span className="text-[10px] font-mono font-bold tracking-wider block text-brand-orange uppercase mb-4">Updates & News</span>
+              <span className="text-[10px] font-satoshi font-bold tracking-wider block text-brand-orange uppercase mb-4">Updates & News</span>
               <h3 className="text-2xl font-bold uppercase tracking-tight text-black group-hover:text-white">Twitter / X</h3>
               <p className="text-text-secondary text-sm group-hover:text-zinc-300 mt-2">Follow our signal announcements and reviews.</p>
             </div>
-            <div className="font-mono text-xs font-bold uppercase tracking-wider mt-4">
+            <div className="font-satoshi text-xs font-bold uppercase tracking-wider mt-4">
               @sanddockcom &rarr;
             </div>
           </a>
@@ -154,11 +154,11 @@ export default function ContactPage() {
           {/* Card 4: Instagram */}
           <a href="https://instagram.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="bg-[#f4f6fa] border border-black p-8 rounded-none flex flex-col justify-between h-56 hover:bg-black hover:text-white transition-colors group">
             <div>
-              <span className="text-[10px] font-mono font-bold tracking-wider block text-brand-orange uppercase mb-4">Visual Feed</span>
+              <span className="text-[10px] font-satoshi font-bold tracking-wider block text-brand-orange uppercase mb-4">Visual Feed</span>
               <h3 className="text-2xl font-bold uppercase tracking-tight text-black group-hover:text-white">Instagram</h3>
               <p className="text-text-secondary text-sm group-hover:text-zinc-300 mt-2">Check visual walkthroughs and trade examples.</p>
             </div>
-            <div className="font-mono text-xs font-bold uppercase tracking-wider mt-4">
+            <div className="font-satoshi text-xs font-bold uppercase tracking-wider mt-4">
               @sanddockcom &rarr;
             </div>
           </a>
@@ -172,7 +172,7 @@ export default function ContactPage() {
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange block mb-2">
             Support FAQs
           </span>
-          <h2 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none">
+          <h2 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none">
             Basic Support Queries
           </h2>
         </div>
@@ -186,13 +186,13 @@ export default function ContactPage() {
                   onClick={() => toggleFAQ(idx)}
                   className="w-full text-left flex items-center justify-between gap-4 font-bold uppercase text-base text-black hover:text-brand-orange transition-colors"
                 >
-                  <span className="font-sans">{item.q}</span>
-                  <span className="text-xl font-bold font-mono">
+                  <span className="font-satoshi">{item.q}</span>
+                  <span className="text-xl font-bold font-satoshi">
                     {isOpen ? "\u2212" : "+"}
                   </span>
                 </button>
                 {isOpen && (
-                  <div className="text-text-secondary text-base leading-relaxed pt-3 pr-8 transition-all normal-case font-sans">
+                  <div className="text-text-secondary text-base leading-relaxed pt-3 pr-8 transition-all normal-case font-satoshi">
                     {item.a}
                   </div>
                 )}
@@ -210,7 +210,7 @@ export default function ContactPage() {
             <div className="md:col-span-5 space-y-4 text-left">
               <div className="flex items-center gap-2">
                 <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-6 h-6 object-contain" />
-                <span className="text-base font-bold uppercase tracking-wider font-sans text-white">
+                <span className="text-base font-bold uppercase tracking-wider font-satoshi text-white">
                   Sanddock
                 </span>
               </div>
@@ -251,7 +251,7 @@ export default function ContactPage() {
             <div className="md:col-span-7 grid grid-cols-3 gap-8 text-left">
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Product</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
                   <li><a href="/#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
                   <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
                   <li><a href="/#track-record" className="hover:text-white transition-colors">Track Record</a></li>
@@ -262,7 +262,7 @@ export default function ContactPage() {
 
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Support</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
                   <li><a href="/#faq" className="hover:text-white transition-colors">FAQ</a></li>
                   <li><a href="#docs" className="hover:text-white transition-colors">Documentation</a></li>
                   <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
@@ -273,7 +273,7 @@ export default function ContactPage() {
 
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Legal</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
                   <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
                   <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
                   <li><a href="#disclaimer" className="hover:text-white transition-colors">Disclaimer</a></li>
@@ -300,14 +300,14 @@ export default function ContactPage() {
           <div className="relative w-full max-w-md bg-white border border-black rounded-none p-8 shadow-2xl space-y-6 z-10 text-left">
             <button 
               onClick={() => setModalOpen(false)}
-              className="absolute top-4 right-4 text-black hover:text-brand-orange text-xl font-bold font-mono"
+              className="absolute top-4 right-4 text-black hover:text-brand-orange text-xl font-bold font-satoshi"
             >
               &times;
             </button>
             <div className="space-y-2">
-              <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider font-mono">SANDDOCK GATEWAY</span>
-              <h3 className="text-2xl font-extrabold uppercase tracking-tight text-black font-sans">{modalContent.title}</h3>
-              <p className="text-text-secondary text-base leading-relaxed normal-case font-sans">
+              <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider font-satoshi">SANDDOCK GATEWAY</span>
+              <h3 className="text-2xl font-extrabold uppercase tracking-tight text-black font-satoshi">{modalContent.title}</h3>
+              <p className="text-text-secondary text-base leading-relaxed normal-case font-satoshi">
                 {modalContent.body}
               </p>
             </div>
@@ -316,7 +316,7 @@ export default function ContactPage() {
               <input 
                 type="email" 
                 placeholder="you@example.com" 
-                className="w-full bg-[#f4f6fa] border border-black rounded-none px-4 py-3 text-sm text-black focus:outline-none focus:border-brand-orange font-mono"
+                className="w-full bg-[#f4f6fa] border border-black rounded-none px-4 py-3 text-sm text-black focus:outline-none focus:border-brand-orange font-satoshi"
               />
             </div>
             <div className="flex gap-4 pt-2">

@@ -24,12 +24,12 @@ export default function QualityMetricsDisplay({ metrics, symbol = 'BTCUSDT', int
       <div className="bg-gradient-to-r from-[#3D5AFE]/20 to-[#00e676]/20 border border-[#3D5AFE]/30 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-bold uppercase tracking-wider text-white">Quality Targets</h3>
-          <span className="text-xs font-mono bg-[#3D5AFE]/20 px-2 py-1 rounded border border-[#3D5AFE]/40 text-[#3D5AFE]">
+          <span className="text-xs font-satoshi bg-[#3D5AFE]/20 px-2 py-1 rounded border border-[#3D5AFE]/40 text-[#3D5AFE]">
             V2 Optimized
           </span>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] font-mono">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] font-satoshi">
           <div className="bg-slate-950/40 px-2 py-2 rounded border border-slate-800">
             <div className="text-white">Signals/Day</div>
             <div className="text-white font-bold">2-4</div>
@@ -55,12 +55,12 @@ export default function QualityMetricsDisplay({ metrics, symbol = 'BTCUSDT', int
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div>
-            <div className="text-[11px] text-white font-mono uppercase mb-1">Total Trades</div>
+            <div className="text-[11px] text-white font-satoshi uppercase mb-1">Total Trades</div>
             <div className="text-lg font-bold text-white">{ws.total_trades}</div>
           </div>
 
           <div>
-            <div className="text-[11px] text-white font-mono uppercase mb-1">Wins / Losses</div>
+            <div className="text-[11px] text-white font-satoshi uppercase mb-1">Wins / Losses</div>
             <div className="text-lg font-bold">
               <span className="text-[#10b981]">{ws.wins}</span>
               <span className="text-white"> / </span>
@@ -69,7 +69,7 @@ export default function QualityMetricsDisplay({ metrics, symbol = 'BTCUSDT', int
           </div>
 
           <div>
-            <div className="text-[11px] text-white font-mono uppercase mb-1">Win Rate</div>
+            <div className="text-[11px] text-white font-satoshi uppercase mb-1">Win Rate</div>
             <div className={`text-lg font-bold ${meetsWinRate ? 'text-[#10b981]' : 'text-[#ef4444]'}`}>
               {ws.win_rate}
               {meetsWinRate ? ' ✓' : ' ✗'}
@@ -77,7 +77,7 @@ export default function QualityMetricsDisplay({ metrics, symbol = 'BTCUSDT', int
           </div>
 
           <div>
-            <div className="text-[11px] text-white font-mono uppercase mb-1">Weekly PnL</div>
+            <div className="text-[11px] text-white font-satoshi uppercase mb-1">Weekly PnL</div>
             <div className={`text-lg font-bold ${meetsPnL ? 'text-[#10b981]' : 'text-[#ef4444]'}`}>
               {ws.total_pnl}
               {meetsPnL ? ' ✓' : ' ✗'}
@@ -86,7 +86,7 @@ export default function QualityMetricsDisplay({ metrics, symbol = 'BTCUSDT', int
         </div>
 
         <div className="mt-3 pt-3 border-t border-slate-800">
-          <div className="text-[10px] text-white font-mono">
+          <div className="text-[10px] text-white font-satoshi">
             Avg Daily PnL: <span className="text-white font-bold">{ws.avg_daily_pnl}</span>
             {' '} | Target: <span className="text-[#3D5AFE] font-bold">+3.00%</span>
           </div>
@@ -111,7 +111,7 @@ export default function QualityMetricsDisplay({ metrics, symbol = 'BTCUSDT', int
 
           <div className="space-y-2">
             {dailyData.map((day, idx) => (
-              <div key={idx} className="flex items-center justify-between text-[11px] font-mono p-2 bg-slate-950 rounded border border-slate-900">
+              <div key={idx} className="flex items-center justify-between text-[11px] font-satoshi p-2 bg-slate-950 rounded border border-slate-900">
                 <div className="flex items-center gap-3 flex-1">
                   <span className="text-white">{day.date}</span>
                   <span className="text-white">

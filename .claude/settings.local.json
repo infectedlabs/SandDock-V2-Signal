@@ -211,7 +211,10 @@
       "Bash(sed -i 's/className=\"text-center py-3 px-4 text-sm text-white\">Free BTC Group<\\\\/td>/className=\"text-center py-3 px-4 text-sm text-black\">Free BTC Group<\\\\/td>/g' src/app/pricing/page.jsx)",
       "Bash(sed -i 's/className=\"text-center py-3 px-4 text-sm text-white\">Yes<\\\\/td>/className=\"text-center py-3 px-4 text-sm text-black\">Yes<\\\\/td>/g' src/app/pricing/page.jsx)",
       "Bash(sed -i 's/className=\"text-center py-3 px-4 text-sm text-white\">48h response<\\\\/td>/className=\"text-center py-3 px-4 text-sm text-black\">48h response<\\\\/td>/g' src/app/pricing/page.jsx)",
-      "Bash(sed -i 's/className=\"text-white text-sm mb-8 max-w-2xl mx-auto\">The application/className=\"text-black text-sm mb-8 max-w-2xl mx-auto\">The application/g' src/app/pricing/page.jsx)"
+      "Bash(sed -i 's/className=\"text-white text-sm mb-8 max-w-2xl mx-auto\">The application/className=\"text-black text-sm mb-8 max-w-2xl mx-auto\">The application/g' src/app/pricing/page.jsx)",
+      "Bash(xargs sed -i 's/font-sans/font-satoshi/g')",
+      "Bash(xargs sed -i 's/font-mono/font-cabinet/g')",
+      "Bash(xargs sed -i 's/font-cabinet/font-satoshi/g')"
     ]
   }
 }
