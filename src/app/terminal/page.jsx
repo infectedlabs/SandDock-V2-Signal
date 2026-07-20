@@ -39,7 +39,7 @@ const Icons = {
     </svg>
   ),
   Bell: ({ active }) => (
-    <svg className="w-5 h-5 text-zinc-400 hover:text-white transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <svg className="w-5 h-5 text-white hover:text-white transition-colors" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
       {active && <circle cx="18" cy="6" r="3" fill="#ff4500" stroke="#000000" strokeWidth="1.5" />}
     </svg>
@@ -129,7 +129,7 @@ const COIN_LOGOS = {
 
 function LockedSignalCard({ symbol, timeframe, type, onUpgrade, plan = 'free', confidence }) {
   const coin = symbol.split('/')[0];
-  const logo = COIN_LOGOS[coin] || { char: coin.slice(0, 1), bg: 'bg-zinc-800 text-zinc-400 border-zinc-700' };
+  const logo = COIN_LOGOS[coin] || { char: coin.slice(0, 1), bg: 'bg-zinc-800 text-white border-zinc-700' };
   const isBuy = type === 'BUY';
 
   return (
@@ -144,24 +144,24 @@ function LockedSignalCard({ symbol, timeframe, type, onUpgrade, plan = 'free', c
         </div>
         <div>
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-zinc-400 tracking-wide text-xs">{coin} <span className="text-zinc-600 font-normal">/ USDT</span></span>
-            <span className="text-[9px] font-mono font-bold bg-slate-950/60 px-1.5 py-0.2 rounded border border-slate-800 text-zinc-500 tracking-wider">
+            <span className="font-bold text-white tracking-wide text-xs">{coin} <span className="text-white font-normal">/ USDT</span></span>
+            <span className="text-[9px] font-mono font-bold bg-slate-950/60 px-1.5 py-0.2 rounded border border-slate-800 text-white tracking-wider">
               {timeframe}
             </span>
           </div>
-          <span className="text-[10px] text-zinc-600 font-mono tracking-normal">Locked for your tier</span>
+          <span className="text-[10px] text-white font-mono tracking-normal">Locked for your tier</span>
         </div>
       </div>
 
       {/* 2. Direction */}
       <div className="w-full md:w-[8%] flex items-center shrink-0">
-        <span className="inline-flex items-center px-2.5 py-0.5 text-[9px] font-extrabold tracking-widest border uppercase rounded bg-zinc-800/40 text-zinc-500 border-zinc-700/20">
+        <span className="inline-flex items-center px-2.5 py-0.5 text-[9px] font-extrabold tracking-widest border uppercase rounded bg-zinc-800/40 text-white border-zinc-700/20">
           {type}
         </span>
       </div>
 
       {/* 3. Locked Content Area */}
-      <div className="w-full md:w-[56%] flex items-center justify-between text-zinc-600 text-xs font-mono">
+      <div className="w-full md:w-[56%] flex items-center justify-between text-white text-xs font-mono">
         <span>🔒 HA entry, targets, and live floating performance locked.</span>
         {confidence && (
           <span className="inline-flex items-center gap-1 text-[9px] font-bold text-[#3D5AFE] bg-[#3D5AFE]/10 border border-[#3D5AFE]/20 px-2 py-0.5 rounded uppercase tracking-wider shrink-0">
@@ -184,7 +184,7 @@ function LockedSignalCard({ symbol, timeframe, type, onUpgrade, plan = 'free', c
 function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, onToggle, onUpgrade, onViewDetails, livePrice, isLive = false, nextSignal = null, rank = null, isLatest = false }) {
   const isBuy = sig.signal_type === 'buy';
   const coin = sig.symbol.replace('USDT', '');
-  const logo = COIN_LOGOS[coin] || { char: coin.slice(0, 1), bg: 'bg-zinc-800 text-zinc-400 border-zinc-700' };
+  const logo = COIN_LOGOS[coin] || { char: coin.slice(0, 1), bg: 'bg-zinc-800 text-white border-zinc-700' };
 
   let pnlText = '';
   let pnlColorClass = '';
@@ -210,12 +210,12 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
         </div>
         <div>
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-white tracking-wide text-xs sm:text-sm">{coin} <span className="text-zinc-500 font-normal">/ USDT</span></span>
-            <span className="text-[9px] font-mono font-bold bg-slate-950/60 px-1.5 py-0.2 rounded border border-slate-800 text-zinc-400 tracking-wider">
+            <span className="font-bold text-white tracking-wide text-xs sm:text-sm">{coin} <span className="text-white font-normal">/ USDT</span></span>
+            <span className="text-[9px] font-mono font-bold bg-slate-950/60 px-1.5 py-0.2 rounded border border-slate-800 text-white tracking-wider">
               {sig.interval}
             </span>
           </div>
-          <span className="text-[10px] text-zinc-500 font-mono tracking-normal">Fired {formatRelativeTime(sig.bar_time)}</span>
+          <span className="text-[10px] text-white font-mono tracking-normal">Fired {formatRelativeTime(sig.bar_time)}</span>
         </div>
       </div>
 
@@ -232,33 +232,33 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
 
       {/* 3. Entry Price */}
       <div className="w-full md:w-[10%] flex flex-col justify-center">
-        <span className="block text-[9px] text-zinc-500 font-mono uppercase tracking-widest">Entry Price</span>
+        <span className="block text-[9px] text-white font-mono uppercase tracking-widest">Entry Price</span>
         <span className="font-mono text-xs sm:text-sm font-bold text-white mt-0.5 block">{formatPrice(sig.entry_price)}</span>
       </div>
 
       {/* 4. Stop Loss */}
       <div className="w-full md:w-[10%] flex flex-col justify-center">
-        <span className="block text-[9px] text-zinc-500 font-mono uppercase tracking-widest">Stop Loss</span>
-        <span className="font-mono text-xs text-zinc-400 mt-0.5 block">{sig.sl_price ? formatPrice(sig.sl_price) : '-'}</span>
+        <span className="block text-[9px] text-white font-mono uppercase tracking-widest">Stop Loss</span>
+        <span className="font-mono text-xs text-white mt-0.5 block">{sig.sl_price ? formatPrice(sig.sl_price) : '-'}</span>
       </div>
 
       {/* 5. Take Profit */}
       <div className="w-full md:w-[10%] flex flex-col justify-center">
-        <span className="block text-[9px] text-zinc-500 font-mono uppercase tracking-widest">Take Profit</span>
-        <span className="font-mono text-xs text-zinc-400 mt-0.5 block">{sig.tp_price ? formatPrice(sig.tp_price) : '-'}</span>
+        <span className="block text-[9px] text-white font-mono uppercase tracking-widest">Take Profit</span>
+        <span className="font-mono text-xs text-white mt-0.5 block">{sig.tp_price ? formatPrice(sig.tp_price) : '-'}</span>
       </div>
 
       {/* R:R Ratio */}
       <div className="w-full md:w-[8%] flex flex-col justify-center">
-        <span className="block text-[9px] text-zinc-500 font-mono uppercase tracking-widest">R:R Ratio</span>
-        <span className="font-mono text-xs text-zinc-400 mt-0.5 block">
+        <span className="block text-[9px] text-white font-mono uppercase tracking-widest">R:R Ratio</span>
+        <span className="font-mono text-xs text-white mt-0.5 block">
           1:{sig.sl_pct && sig.tp_pct && sig.sl_pct > 0 ? (sig.tp_pct / sig.sl_pct).toFixed(1) : '2.0'}
         </span>
       </div>
 
       {/* 6. Confidence */}
       <div className="relative group/tooltip w-full md:w-[10%] flex flex-col justify-center cursor-help">
-        <span className="block text-[9px] text-zinc-500 font-mono uppercase tracking-widest border-b border-dashed border-zinc-600/50 w-max">Confidence</span>
+        <span className="block text-[9px] text-white font-mono uppercase tracking-widest border-b border-dashed border-zinc-600/50 w-max">Confidence</span>
         <span className="font-mono text-xs font-bold text-zinc-300 mt-0.5 block">{sig.confidence || 75}%</span>
         <div className="absolute left-0 bottom-full mb-2 w-40 p-2 bg-slate-950/95 border border-slate-800 rounded shadow-xl text-left hidden group-hover/tooltip:block z-50 font-mono text-[9px] text-zinc-300 leading-normal normal-case">
           AI conviction strength. Signals &gt;75% have higher historical accuracy.
@@ -267,7 +267,7 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
 
       {/* 7. PNL */}
       <div className="w-full md:w-[9%] flex flex-col justify-center min-w-[70px]">
-        <span className="block text-[9px] text-zinc-500 font-mono uppercase tracking-widest">PNL</span>
+        <span className="block text-[9px] text-white font-mono uppercase tracking-widest">PNL</span>
         <span className={`font-mono text-xs sm:text-sm font-bold mt-0.5 block ${pnlColorClass}`}>
           {pnlText || '0.00%'}
         </span>
@@ -281,12 +281,12 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
             Active
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 text-[9px] font-mono font-bold bg-zinc-800/80 text-zinc-400 border border-zinc-700/40 px-2 py-0.5 uppercase rounded-full shrink-0">
+          <span className="inline-flex items-center gap-1.5 text-[9px] font-mono font-bold bg-zinc-800/80 text-white border border-zinc-700/40 px-2 py-0.5 uppercase rounded-full shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
             Closed
           </span>
         )}
-        <span className="text-zinc-500 group-hover:text-white transition-colors pl-1">
+        <span className="text-white group-hover:text-white transition-colors pl-1">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
@@ -324,7 +324,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-[20px] font-bold font-mono text-white">{symbolFormatted}</h2>
-            <span className="text-[12px] font-mono bg-zinc-800 text-zinc-400 px-2 py-0.5 uppercase">
+            <span className="text-[12px] font-mono bg-zinc-800 text-white px-2 py-0.5 uppercase">
               {sig.interval} HA
             </span>
           </div>
@@ -337,7 +337,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
             </span>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 text-zinc-500 hover:text-white transition-colors cursor-pointer bg-transparent border-0">
+        <button onClick={onClose} className="p-2 text-white hover:text-white transition-colors cursor-pointer bg-transparent border-0">
           <Icons.Close />
         </button>
       </div>
@@ -354,35 +354,35 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
               }`}>
                 {isBuy ? 'Active BUY Target' : 'Active SELL Target'}
               </span>
-              <span className="text-[11px] text-zinc-500">
+              <span className="text-[11px] text-white">
                 Fired {formatRelativeTime(sig.created_at)}
               </span>
             </div>
-            <span className="text-zinc-400 font-mono text-[13px]">
+            <span className="text-white font-mono text-[13px]">
               Conf: <span className="font-bold text-white">{sig.confidence}%</span>
             </span>
           </div>
 
           <div className="grid grid-cols-3 gap-2 bg-zinc-950 px-3 py-2.5 border border-zinc-900">
             <div>
-              <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Entry Target</span>
+              <span className="block text-[10px] text-white font-bold uppercase tracking-wider">Entry Target</span>
               <span className="text-[14px] text-white font-bold font-mono">{formatPrice(sig.entry_price, profile)}</span>
             </div>
             <div>
-              <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Stop Loss</span>
+              <span className="block text-[10px] text-white font-bold uppercase tracking-wider">Stop Loss</span>
               {isFreePlan ? (
                 <button onClick={() => onUpgrade('Unlock Stop Loss Levels', 'Upgrade to view SL values.')}
                   className="text-[11px] font-bold text-[#3D5AFE] uppercase bg-transparent border-0 p-0 block text-left">
                   🔒 Pro Only
                 </button>
               ) : (
-                <span className="text-[14px] text-zinc-400 font-bold font-mono">
+                <span className="text-[14px] text-white font-bold font-mono">
                   {formatPrice(sig.sl_price, profile)} ({sig.sl_pct}%)
                 </span>
               )}
             </div>
             <div>
-              <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Take Profit</span>
+              <span className="block text-[10px] text-white font-bold uppercase tracking-wider">Take Profit</span>
               {isFreePlan ? (
                 <button onClick={() => onUpgrade('Unlock Take Profit Targets', 'Upgrade to view TP values.')}
                   className="text-[11px] font-bold text-[#3D5AFE] uppercase bg-transparent border-0 p-0 block text-left">
@@ -398,7 +398,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
 
           {sig.rationale && (
             <div className="space-y-1">
-              <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase">AI Analysis Rationale</span>
+              <span className="text-[10px] font-mono text-white font-bold uppercase">AI Analysis Rationale</span>
               <p className="text-[13px] text-zinc-300 normal-case leading-relaxed bg-zinc-950 p-3 border border-zinc-900/60">
                 {sig.rationale}
               </p>
@@ -408,7 +408,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
 
         {/* Section 2: HA Chart */}
         <div className="space-y-2">
-          <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest text-left">
+          <span className="block text-[11px] font-mono text-white uppercase tracking-widest text-left">
             Signal Performance Chart
           </span>
           <HAChart
@@ -422,18 +422,18 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
 
         {/* Section 3: Signal History list */}
         <div className="space-y-3">
-          <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest text-left">
+          <span className="block text-[11px] font-mono text-white uppercase tracking-widest text-left">
             Completed signals for {symbolFormatted}
           </span>
           {coinLog.length === 0 ? (
-            <div className="bg-zinc-950/20 border border-zinc-900 p-8 text-center text-zinc-500 text-[12px]">
+            <div className="bg-zinc-950/20 border border-zinc-900 p-8 text-center text-white text-[12px]">
               No past trade logs available for this coin pair yet.
             </div>
           ) : (
             <div className="overflow-x-auto bg-[#090909] border border-[#1e2a3a]">
               <table className="w-full text-left font-mono border-collapse text-[12px]">
                 <thead>
-                  <tr className="border-b border-[#1e2a3a] text-zinc-500 uppercase tracking-wider text-[10px] bg-zinc-950/20">
+                  <tr className="border-b border-[#1e2a3a] text-white uppercase tracking-wider text-[10px] bg-zinc-950/20">
                     <th className="p-3">Date</th>
                     <th className="p-3">Type</th>
                     <th className="p-3">Entry</th>
@@ -449,7 +449,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
                     const isProfit = isTrulyClosed ? item.is_win : (pnlValue >= 0);
                     return (
                       <tr key={item.id} className="border-b border-[#1e2a3a]/40 last:border-0 hover:bg-zinc-900/10">
-                        <td className="p-3 text-zinc-400">{formatLogDate(item.created_at, profile)}</td>
+                        <td className="p-3 text-white">{formatLogDate(item.created_at, profile)}</td>
                         <td className="p-3">
                           <span className={`inline-block px-1 py-0.2 text-[9px] font-bold ${
                             item.signal_type === 'buy' ? 'bg-[#00e676]/10 text-[#00e676]' : 'bg-[#ff1744]/10 text-[#ff1744]'
@@ -459,7 +459,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
                         </td>
                         <td className="p-3">{formatPrice(item.entry_price, profile)}</td>
                         <td className="p-3">{isTrulyClosed ? formatPrice(item.close_price, profile) : '-'}</td>
-                        <td className="p-3 text-zinc-400 capitalize">{item.close_reason ? item.close_reason.replace('_', ' ') : 'Open'}</td>
+                        <td className="p-3 text-white capitalize">{item.close_reason ? item.close_reason.replace('_', ' ') : 'Open'}</td>
                         <td className="p-3">
                           <span className={`font-bold ${isProfit ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
                             {isProfit ? '+' : ''}{pnlValue.toFixed(2)}%
@@ -476,7 +476,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
 
         {/* Section 4: About This Signal accordion */}
         <div className="space-y-2 text-left">
-          <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest">
+          <span className="block text-[11px] font-mono text-white uppercase tracking-widest">
             Trading Educational Guides
           </span>
 
@@ -488,7 +488,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
               <span>{accordionOpen.ha ? '−' : '+'}</span>
             </button>
             {accordionOpen.ha && (
-              <div className="p-3 pt-0 text-[12px] text-zinc-400 normal-case leading-relaxed">
+              <div className="p-3 pt-0 text-[12px] text-white normal-case leading-relaxed">
                 Heikin Ashi candles filter out market noise by averaging price movements. When the engine detects a consecutive run of specific colored candles matching local highs or lows, it flags potential market trend shifts.
               </div>
             )}
@@ -502,7 +502,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
               <span>{accordionOpen.confidence ? '−' : '+'}</span>
             </button>
             {accordionOpen.confidence && (
-              <div className="p-3 pt-0 text-[12px] text-zinc-400 normal-case leading-relaxed">
+              <div className="p-3 pt-0 text-[12px] text-white normal-case leading-relaxed">
                 The score ranges from 40% to 95%. It reflects indicators such as relative volume strength, trend strength, and previous success metrics. Higher scores suggest clean reversals with high confirmations.
               </div>
             )}
@@ -516,7 +516,7 @@ function DetailDrawer({ sig, profile, isFreePlan, experienceLevel, onClose, onUp
               <span>{accordionOpen.sltp ? '−' : '+'}</span>
             </button>
             {accordionOpen.sltp && (
-              <div className="p-3 pt-0 text-[12px] text-zinc-400 normal-case leading-relaxed">
+              <div className="p-3 pt-0 text-[12px] text-white normal-case leading-relaxed">
                 These are automated rules designed to manage risk. Stop Loss limits your potential losses if the market moves against the signal, while Take Profit locks in gains when target levels are reached.
               </div>
             )}
@@ -563,8 +563,8 @@ function CustomCoinsList({ userId, plan }) {
   return (
     <div className="bg-[#000000]/40 border border-slate-800/50 rounded-2xl p-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">Custom Coins</span>
-        <span className="text-[11px] font-mono text-zinc-400">{coins.length} / 5</span>
+        <span className="text-[11px] font-bold uppercase tracking-widest text-white">Custom Coins</span>
+        <span className="text-[11px] font-mono text-white">{coins.length} / 5</span>
       </div>
       <div className="flex flex-wrap gap-2">
         {coins.map(coin => (
@@ -608,6 +608,7 @@ export default function TerminalPage() {
   const [activeSubTab,      setActiveSubTab]       = useState('performance');
   const [signalTypeFilter,  setSignalTypeFilter]   = useState('all');
   const [timeframeFilter,   setTimeframeFilter]    = useState('all');
+  const [sortBy,            setSortBy]             = useState('recent'); // recent, highest-pnl, lowest-pnl, highest-confidence, lowest-confidence, win-rate
   const [settingsExperience,setSettingsExperience] = useState('comfortable');
   const [settingsRisk,      setSettingsRisk]       = useState('balanced');
   const [settingsGoal,      setSettingsGoal]       = useState('grow');
@@ -623,6 +624,12 @@ export default function TerminalPage() {
   const [settingsEmailSignalClosed, setSettingsEmailSignalClosed] = useState(true);
   const [settingsEmailWeeklyDebrief, setSettingsEmailWeeklyDebrief] = useState(true);
   const [settingsEmailSystemAlerts, setSettingsEmailSystemAlerts] = useState(true);
+
+  // Weekly PnL for free users
+  const [weeklyPnL, setWeeklyPnL] = useState({ BTC: 0, ETH: 0, BNB: 0, total: 0 });
+
+  // Weekly stats for "This Week's Signal Activity"
+  const [weeklyStats, setWeeklyStats] = useState({ total: 0, wins: 0, pnlSum: 0, seen: 0 });
 
   // local states for Telegram pairing step status
   const [tgPairingStep, setTgPairingStep] = useState(1); // 1: disconnected, 2: pairing code input
@@ -640,6 +647,23 @@ export default function TerminalPage() {
         setShowFreeSuccessModal(true);
       }
     }
+  }, []);
+
+  // Fetch weekly PnL data from past 7 days
+  useEffect(() => {
+    const fetchWeeklyPnL = async () => {
+      try {
+        const response = await fetch('/api/weekly-pnl');
+        const data = await response.json();
+        setWeeklyPnL(data);
+      } catch (error) {
+        console.error('Failed to fetch weekly PnL:', error);
+      }
+    };
+
+    fetchWeeklyPnL();
+    const interval = setInterval(fetchWeeklyPnL, 300000);
+    return () => clearInterval(interval);
   }, []);
   const [upgradeModal,      setUpgradeModal]       = useState(false);
   const [upgradeTriggerText,setUpgradeTriggerText] = useState({ title: '', desc: '' });
@@ -971,11 +995,47 @@ export default function TerminalPage() {
 
   const cleanLiveSignals = useMemo(() => {
     let filtered = liveSignals;
+
+    // Apply confidence filter
     if (profile?.min_confidence != null) {
       filtered = filtered.filter(s => (s.confidence || 75) >= profile.min_confidence);
     }
-    return filtered;
-  }, [liveSignals, profile?.min_confidence]);
+
+    // Apply signal type filter (buy/sell)
+    if (signalTypeFilter !== 'all') {
+      filtered = filtered.filter(s => s.signal_type?.toLowerCase() === signalTypeFilter.toLowerCase());
+    }
+
+    // Apply sorting
+    const sorted = [...filtered];
+    switch (sortBy) {
+      case 'highest-pnl':
+        sorted.sort((a, b) => (parseFloat(b.pnl_pct) || 0) - (parseFloat(a.pnl_pct) || 0));
+        break;
+      case 'lowest-pnl':
+        sorted.sort((a, b) => (parseFloat(a.pnl_pct) || 0) - (parseFloat(b.pnl_pct) || 0));
+        break;
+      case 'highest-confidence':
+        sorted.sort((a, b) => (b.confidence || 0) - (a.confidence || 0));
+        break;
+      case 'lowest-confidence':
+        sorted.sort((a, b) => (a.confidence || 0) - (b.confidence || 0));
+        break;
+      case 'win-rate':
+        sorted.sort((a, b) => {
+          const aWin = a.is_win ? 1 : 0;
+          const bWin = b.is_win ? 1 : 0;
+          return bWin - aWin;
+        });
+        break;
+      case 'recent':
+      default:
+        sorted.sort((a, b) => new Date(b.bar_time || b.created_at) - new Date(a.bar_time || a.created_at));
+        break;
+    }
+
+    return sorted;
+  }, [liveSignals, profile?.min_confidence, signalTypeFilter, sortBy]);
 
   const { activeSignals, closedSignals } = useMemo(() => {
     const active = [];
@@ -989,6 +1049,34 @@ export default function TerminalPage() {
     });
     return { activeSignals: active, closedSignals: closed };
   }, [cleanLiveSignals]);
+
+  // Calculate weekly stats from signals
+  useEffect(() => {
+    if (!perfSignals || perfSignals.length === 0) {
+      setWeeklyStats({ total: 0, wins: 0, pnlSum: 0, seen: 0 });
+      return;
+    }
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const weeklySignals = perfSignals.filter(s => {
+      const sigTime = new Date(s.bar_time || s.created_at);
+      return sigTime >= sevenDaysAgo;
+    });
+
+    const weeklyWins = weeklySignals.filter(s => s.is_win === true).length;
+    const pnlValues = weeklySignals.map(s => parseFloat(s.pnl_pct || 0));
+    const pnlSum = pnlValues.reduce((sum, p) => sum + p, 0);
+    const seenCount = activeSignals.length;
+
+    setWeeklyStats({
+      total: weeklySignals.length,
+      wins: weeklyWins,
+      pnlSum: pnlSum,
+      seen: seenCount
+    });
+  }, [perfSignals, activeSignals]);
 
   const todayStats = useMemo(() => {
     // Scope to the currently-selected coin — cleanLiveSignals spans every coin
@@ -1061,18 +1149,56 @@ export default function TerminalPage() {
   const allRecentSignals = useMemo(() => {
     const seen = new Set();
     const merged = [];
-    [...cleanLiveSignals, ...recentBtcSignals].forEach(s => {
+
+    // Apply signal type filter to both cleanLiveSignals and recentBtcSignals
+    const filteredRecentBtc = recentBtcSignals.filter(s => {
+      if (signalTypeFilter !== 'all') {
+        return s.signal_type?.toLowerCase() === signalTypeFilter.toLowerCase();
+      }
+      return true;
+    });
+
+    [...cleanLiveSignals, ...filteredRecentBtc].forEach(s => {
       if (!seen.has(s.id)) {
         seen.add(s.id);
         merged.push(s);
       }
     });
-    return merged.sort((a, b) => {
-      const tA = new Date(a.bar_time || a.created_at).getTime();
-      const tB = new Date(b.bar_time || b.created_at).getTime();
-      return tB - tA;
-    });
-  }, [cleanLiveSignals, recentBtcSignals]);
+
+    // Apply sorting based on sortBy state
+    const sorted = [...merged];
+    switch (sortBy) {
+      case 'highest-pnl':
+        sorted.sort((a, b) => (parseFloat(b.pnl_pct) || 0) - (parseFloat(a.pnl_pct) || 0));
+        break;
+      case 'lowest-pnl':
+        sorted.sort((a, b) => (parseFloat(a.pnl_pct) || 0) - (parseFloat(b.pnl_pct) || 0));
+        break;
+      case 'highest-confidence':
+        sorted.sort((a, b) => (b.confidence || 0) - (a.confidence || 0));
+        break;
+      case 'lowest-confidence':
+        sorted.sort((a, b) => (a.confidence || 0) - (b.confidence || 0));
+        break;
+      case 'win-rate':
+        sorted.sort((a, b) => {
+          const aWin = a.is_win ? 1 : 0;
+          const bWin = b.is_win ? 1 : 0;
+          return bWin - aWin;
+        });
+        break;
+      case 'recent':
+      default:
+        sorted.sort((a, b) => {
+          const tA = new Date(a.bar_time || a.created_at).getTime();
+          const tB = new Date(b.bar_time || b.created_at).getTime();
+          return tB - tA;
+        });
+        break;
+    }
+
+    return sorted;
+  }, [cleanLiveSignals, recentBtcSignals, sortBy, signalTypeFilter]);
 
   const triggerUpgradeGate = (title, desc) => {
     setUpgradeTriggerText({ title, desc });
@@ -1121,7 +1247,7 @@ export default function TerminalPage() {
       'Success Story': 'border-emerald-500 text-emerald-400 bg-emerald-500/5',
       'Motivation': 'border-[#3D5AFE] text-[#3D5AFE] bg-[#3D5AFE]/5'
     };
-    const categoryBorderColor = categoryColors[prompt.type] || 'border-zinc-500 text-zinc-400';
+    const categoryBorderColor = categoryColors[prompt.type] || 'border-zinc-500 text-white';
 
     return (
       <div className="min-h-screen bg-[#000000] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -1154,7 +1280,7 @@ export default function TerminalPage() {
               <span className="text-[10px] font-bold font-mono uppercase tracking-widest opacity-80">
                 {prompt.type}
               </span>
-              <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
+              <span className="text-[9px] font-mono text-white uppercase tracking-wider">
                 Console Sync
               </span>
             </div>
@@ -1165,7 +1291,7 @@ export default function TerminalPage() {
 
           {/* Subtle loading label */}
           <div className="flex items-center gap-2">
-            <span className="text-zinc-500 uppercase tracking-widest text-[9px] font-mono animate-pulse">
+            <span className="text-white uppercase tracking-widest text-[9px] font-mono animate-pulse">
               Restoring secure terminal session...
             </span>
           </div>
@@ -1191,7 +1317,7 @@ export default function TerminalPage() {
           <span className="text-[15px] font-bold uppercase tracking-wider font-mono">
             Sanddock <span className="text-brand-orange">Console</span>
           </span>
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-mono font-bold bg-[#000000] border border-zinc-800 text-zinc-400 uppercase">
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-mono font-bold bg-[#000000] border border-zinc-800 text-white uppercase">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Signals Live
           </span>
@@ -1208,7 +1334,7 @@ export default function TerminalPage() {
               isTrialExpired
                 ? 'bg-red-900/60 text-red-400 border border-red-700/50'
                 : isFreePlan
-                ? 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                ? 'bg-zinc-800 text-white border border-zinc-700'
                 : userPlan === 'lifetime'
                 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                 : 'bg-brand-orange text-white'
@@ -1222,7 +1348,7 @@ export default function TerminalPage() {
 
           <button
             onClick={() => alert('All signal notification systems active.')}
-            className="text-zinc-400 hover:text-white transition-colors cursor-pointer relative p-1 bg-transparent border-0"
+            className="text-white hover:text-white transition-colors cursor-pointer relative p-1 bg-transparent border-0"
           >
             <Icons.Bell active={isFreePlan} />
           </button>
@@ -1239,7 +1365,7 @@ export default function TerminalPage() {
               <div className="absolute right-0 mt-2 w-52 bg-[#000000] border border-[#1e2a3a] shadow-xl py-1 z-50 text-left">
                 <div className="px-4 py-2.5 border-b border-zinc-900">
                   <span className="block font-bold text-[13px] text-white uppercase tracking-wider">{profile.name}</span>
-                  <span className="block text-[11px] text-zinc-500 font-mono truncate mt-0.5">{profile.email}</span>
+                  <span className="block text-[11px] text-white font-mono truncate mt-0.5">{profile.email}</span>
                 </div>
                 <button onClick={() => { setActiveTab('settings'); setProfileMenuOpen(false); }}
                   className="w-full text-left px-4 py-2.5 text-[13px] text-zinc-300 hover:bg-[#111827] hover:text-white uppercase font-bold tracking-wider cursor-pointer bg-transparent border-0">
@@ -1269,10 +1395,10 @@ export default function TerminalPage() {
       <div className="flex-1 flex overflow-hidden">
 
         {/* SIDEBAR */}
-        <aside className="hidden lg:flex flex-col w-56 bg-[#000000] border-r border-[#1e2a3a] p-4 justify-between select-none h-full overflow-y-auto flex-shrink-0">
+        <aside className="hidden lg:flex flex-col w-72 bg-[#000000] border-r border-[#1e2a3a] p-4 justify-between select-none h-full overflow-y-auto flex-shrink-0">
           <div className="space-y-5">
             <div className="space-y-1">
-              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest block px-3 text-left">Trading Room</span>
+              <span className="text-[11px] font-bold text-white uppercase tracking-widest block px-3 text-left">Trading Room</span>
               <nav className="space-y-0.5">
                 {NAV_ITEMS.map(item => {
                   const Icon = item.icon;
@@ -1281,7 +1407,7 @@ export default function TerminalPage() {
                       className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-[13px] font-bold uppercase tracking-wide transition-colors text-left cursor-pointer border-0 bg-transparent ${
                         activeTab === item.id
                           ? 'text-brand-orange bg-[#000000] border-l-2 border-brand-orange'
-                          : 'text-zinc-400 hover:text-white hover:bg-zinc-950/20'
+                          : 'text-white hover:text-white hover:bg-zinc-950/20'
                       }`}>
                       <Icon />
                       <span>{item.label}</span>
@@ -1292,13 +1418,13 @@ export default function TerminalPage() {
             </div>
 
             <div className="space-y-1">
-              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest block px-3 text-left">Configuration</span>
+              <span className="text-[11px] font-bold text-white uppercase tracking-widest block px-3 text-left">Configuration</span>
               <nav>
                 <button onClick={() => setActiveTab('settings')}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-[13px] font-bold uppercase tracking-wide transition-colors text-left cursor-pointer border-0 bg-transparent ${
                     activeTab === 'settings'
                       ? 'text-brand-orange bg-[#000000] border-l-2 border-brand-orange'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-950/20'
+                      : 'text-white hover:text-white hover:bg-zinc-950/20'
                   }`}>
                   <Icons.Settings />
                   <span>Console Settings</span>
@@ -1315,42 +1441,55 @@ export default function TerminalPage() {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Alerts Active</span>
                 </div>
-                <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Telegram delivery synced.</p>
+                <p className="text-[11px] text-white normal-case leading-relaxed">Telegram delivery synced.</p>
               </div>
             ) : (
-              <div className="bg-[#000000] border border-yellow-500/20 p-3 space-y-1.5 text-left">
+              <div onClick={() => router.push('/pricing')} className="bg-[#000000] border border-yellow-500/20 p-3 space-y-1.5 text-left cursor-pointer hover:border-yellow-500/40 transition-colors">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-500 font-mono">Alerts Inactive</span>
                 </div>
-                <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Telegram not connected.</p>
-                <button onClick={() => setActiveTab('settings')}
+                <p className="text-[11px] text-white normal-case leading-relaxed">Telegram not connected.</p>
+                <button
                   className="text-[11px] font-bold uppercase tracking-wider text-yellow-500 hover:text-white transition-colors cursor-pointer bg-transparent border-0 underline block p-0">
-                  Set Up Alerts →
+                  Upgrade for Alerts →
                 </button>
               </div>
             )}
 
             {isFreePlan && (
               <>
-                <div className="bg-[#000000] border border-red-500/25 p-3 space-y-1.5 text-left">
-                  <span className="block text-[9px] font-bold uppercase tracking-widest text-red-400 font-mono">⚠️ Alerts Missed</span>
-                  <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">
-                    12 signals fired on locked coins this week. Upgrade to catch the next alert instantly.
-                  </p>
-                </div>
-
-                <div className="bg-[#000000] border border-zinc-800 p-3 space-y-2.5 text-left">
-                  <div className="space-y-0.5">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-[#3D5AFE]">Console Plan</span>
-                    <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Free - 1 of 11 coins active.</p>
+                <div className="bg-[#000000] border border-amber-900/50 p-3 space-y-2.5 text-left">
+                  <span className="block text-[10px] font-bold uppercase tracking-widest text-amber-600 font-mono">📊 1 Week PnL</span>
+                  <div className="space-y-2 text-[13px]">
+                    <div className="flex justify-between items-center">
+                      <span className="text-white">BTC:</span>
+                      <span className={weeklyPnL.BTC >= 0 ? 'text-emerald-500 font-semibold' : 'text-red-500 font-semibold'}>
+                        {weeklyPnL.BTC >= 0 ? '+' : ''}{weeklyPnL.BTC.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-white">ETH:</span>
+                      <span className={weeklyPnL.ETH >= 0 ? 'text-emerald-500 font-semibold' : 'text-red-500 font-semibold'}>
+                        {weeklyPnL.ETH >= 0 ? '+' : ''}{weeklyPnL.ETH.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-white">BNB:</span>
+                      <span className={weeklyPnL.BNB >= 0 ? 'text-emerald-500 font-semibold' : 'text-red-500 font-semibold'}>
+                        {weeklyPnL.BNB >= 0 ? '+' : ''}{weeklyPnL.BNB.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="border-t border-zinc-800 pt-1.5 mt-1.5 flex justify-between items-center font-bold">
+                      <span className="text-white">Total 1W PnL:</span>
+                      <span className={weeklyPnL.total >= 0 ? 'text-emerald-500' : 'text-orange-500'}>
+                        {weeklyPnL.total >= 0 ? '+' : ''}{weeklyPnL.total.toFixed(2)}%
+                      </span>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => triggerUpgradeGate('Upgrade to Pro', 'Full access to all signals and Telegram alerts.')}
-                    className="w-full py-1.5 bg-[#3D5AFE] hover:bg-[#2e4be6] text-white font-bold text-[11px] uppercase tracking-wider transition-colors border border-[#3D5AFE] cursor-pointer text-center block"
-                  >
-                    Upgrade to Pro
-                  </button>
+                  <p className="text-[10px] text-white normal-case leading-relaxed pt-1 border-t border-zinc-800">
+                    Upgrade to Pro to trade all coins and capture full opportunities.
+                  </p>
                 </div>
               </>
             )}
@@ -1359,7 +1498,7 @@ export default function TerminalPage() {
               <>
                 <div className="bg-[#000000] border border-purple-500/25 p-3 space-y-1.5 text-left">
                   <span className="block text-[9px] font-bold uppercase tracking-widest text-purple-400 font-mono">🔔 Master Alerts Missed</span>
-                  <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">
+                  <p className="text-[11px] text-white normal-case leading-relaxed">
                     18 signals fired on locked Master coins this week. Upgrade to Master to access SOL, XRP, and 10 other high-beta coins.
                   </p>
                 </div>
@@ -1367,7 +1506,7 @@ export default function TerminalPage() {
                 <div className="bg-[#000000] border border-zinc-800 p-3 space-y-2.5 text-left">
                   <div className="space-y-0.5">
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-purple-400 font-mono">Pro Plan Active</span>
-                    <p className="text-[11px] text-zinc-400 normal-case leading-relaxed">Pro - 3 of 15 coins active.</p>
+                    <p className="text-[11px] text-white normal-case leading-relaxed">Pro - 3 of 15 coins active.</p>
                   </div>
                   <button
                     onClick={() => triggerUpgradeGate('Upgrade to Master', 'Access SOL, XRP, and all 15 high-beta coins instantly.')}
@@ -1392,25 +1531,25 @@ export default function TerminalPage() {
                 {/* Today's Overview Banner */}
                 <div className="bg-[#000000] border border-slate-800/50 rounded-2xl p-6 grid grid-cols-2 lg:grid-cols-4 gap-6 text-left shadow-xl select-none">
                   <div className="space-y-1">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 font-mono">Signals Today</span>
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-mono">Signals Today</span>
                     <span className="block text-3xl font-extrabold font-mono text-white">
                       {todayStats.totalTrades}
                     </span>
                   </div>
                   <div className="space-y-1">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 font-mono">Active Signals</span>
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-mono">Active Signals</span>
                     <span className="block text-3xl font-extrabold font-mono text-white">
                       {activeSignals.length}
                     </span>
                   </div>
                   <div className="space-y-1">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 font-mono">Avg Confidence</span>
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-mono">Avg Confidence</span>
                     <span className="block text-3xl font-extrabold font-mono text-white">
                       {todayStats.avgConfidence}
                     </span>
                   </div>
                   <div className="space-y-1">
-                    <span className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 font-mono">Engine Status</span>
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white font-mono">Engine Status</span>
                     <div className="pt-0.5">
                       <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-0.5 rounded-full border border-emerald-500/20 uppercase font-mono">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
@@ -1428,7 +1567,7 @@ export default function TerminalPage() {
                       {['all', 'buy', 'sell'].map(type => (
                         <button key={type} onClick={() => setSignalTypeFilter(type)}
                           className={`px-4 py-1.5 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all duration-200 cursor-pointer border-0 ${
-                            signalTypeFilter === type ? 'bg-[#3D5AFE] text-white shadow-md' : 'text-zinc-500 hover:text-white bg-transparent'
+                            signalTypeFilter === type ? 'bg-[#3D5AFE] text-white shadow-md' : 'text-white hover:text-white bg-transparent'
                           }`}>
                           {type}
                         </button>
@@ -1439,17 +1578,34 @@ export default function TerminalPage() {
                         <button key={tf}
                           onClick={() => setSelectedInterval(tf)}
                           className={`px-4 py-1.5 text-[10px] font-extrabold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all duration-200 cursor-pointer border-0 ${
-                            selectedInterval === tf ? 'bg-[#3D5AFE] text-white shadow-md' : 'text-zinc-500 hover:text-white bg-transparent'
+                            selectedInterval === tf ? 'bg-[#3D5AFE] text-white shadow-md' : 'text-white hover:text-white bg-transparent'
                           }`}>
                           {tf}
                         </button>
                       ))}
                     </div>
 
+                    {/* Sort Dropdown */}
+                    <div className="flex items-center gap-2 border-l border-slate-800 pl-3">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-white">Sort:</label>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="bg-slate-950 text-xs text-white font-mono rounded-lg border border-slate-800 px-3 py-1.5 focus:outline-none focus:border-[#3D5AFE] cursor-pointer"
+                      >
+                        <option value="recent">Recent</option>
+                        <option value="highest-pnl">Highest PnL</option>
+                        <option value="lowest-pnl">Lowest PnL</option>
+                        <option value="highest-confidence">Highest Confidence</option>
+                        <option value="lowest-confidence">Lowest Confidence</option>
+                        <option value="win-rate">Winners First</option>
+                      </select>
+                    </div>
+
                     {/* Custom Coins Management - MASTER only */}
                     {['master', 'grandmaster'].includes(profile?.plan) && (
                       <div className="flex items-center gap-2 border-l border-slate-800 pl-3">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Custom:</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-white">Custom:</span>
                         <input
                           type="text"
                           placeholder="e.g. SOLUSDT"
@@ -1494,7 +1650,7 @@ export default function TerminalPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 text-zinc-500 font-mono text-xs">
+                  <div className="flex items-center gap-2 text-white font-mono text-xs">
                     {sigLoading && <div className="w-3.5 h-3.5 border-2 border-zinc-700 border-t-[#3D5AFE] rounded-full animate-spin" />}
                     <span>
                       {sigLoading ? 'Updating setups...' : `${cleanLiveSignals.length} signal${cleanLiveSignals.length !== 1 ? 's' : ''} today`}
@@ -1519,7 +1675,7 @@ export default function TerminalPage() {
                         </div>
                         <div>
                           <h3 className="font-bold text-[13px] uppercase tracking-wider text-white">Scanning market parameters...</h3>
-                          <p className="text-[12px] text-zinc-400 normal-case leading-relaxed">
+                          <p className="text-[12px] text-white normal-case leading-relaxed">
                             Watch the engine detect the next BTC signal - usually within a few hours.
                           </p>
                         </div>
@@ -1535,7 +1691,7 @@ export default function TerminalPage() {
                     {/* 1. Show the last BTC signal with a LAST SIGNAL badge */}
                     {lastBtcSignal && (
                       <div className="space-y-2">
-                        <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest text-left">
+                        <span className="block text-[11px] font-mono text-white uppercase tracking-widest text-left">
                           Previous Active Setup
                         </span>
                         <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl">
@@ -1558,10 +1714,10 @@ export default function TerminalPage() {
                     {recentBtcSignals.length > 0 && (
                       <div className="space-y-3">
                         <div className="text-left">
-                          <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest">
+                          <span className="block text-[11px] font-mono text-white uppercase tracking-widest">
                             Recent BTC Signals
                           </span>
-                          <p className="text-[11px] text-zinc-500 normal-case leading-relaxed">
+                          <p className="text-[11px] text-white normal-case leading-relaxed">
                             These signals fired in the past 7 days. New signals appear here as they fire.
                           </p>
                         </div>
@@ -1598,7 +1754,7 @@ export default function TerminalPage() {
                               {allRecentSignals.length} TOTAL
                             </span>
                           </div>
-                          <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Chronological feed of setups</span>
+                          <span className="text-[10px] text-white font-mono uppercase tracking-wider">Chronological feed of setups</span>
                         </div>
 
                         <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
@@ -1628,29 +1784,115 @@ export default function TerminalPage() {
 
                     {/* Locked/Teaser Signals Section */}
                     {teaserCoins.length > 0 && (
-                      <div className="space-y-3 pt-2">
-                        <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#3D5AFE]">{"Locked Asset Signals"}</span>
-                            <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-[#3D5AFE]/10 text-zinc-400 rounded border border-zinc-800">
-                              {teaserCoins.length} LOCKED
-                            </span>
+                      <div className="space-y-5 pt-2">
+                        {/* CTA Banner - Premium Dark Style */}
+                        <div className="relative rounded-lg border border-orange-500/30 bg-gradient-to-r from-[#1a1a1a] to-[#0f0f0f] p-8 overflow-hidden">
+                          {/* Accent bar */}
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#ff4500] via-orange-500 to-transparent" />
+
+                          <div className="space-y-4 relative z-10">
+                            <div className="flex items-start gap-3">
+                              <svg className="w-8 h-8 text-orange-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <h3 className="text-xl md:text-2xl font-extrabold uppercase tracking-tight text-white leading-tight pt-1">
+                                Unlock ETH & BNB
+                              </h3>
+                            </div>
+                            <p className="text-white/80 text-sm leading-relaxed max-w-2xl">
+                              Upgrade to Pro for full signal access across all 3 coins with live Telegram alerts, automated stop-losses, and take-profits.
+                            </p>
+                            <button
+                              onClick={() => router.push('/pricing')}
+                              className="bg-gradient-to-r from-[#ff4500] to-orange-500 hover:from-orange-500 hover:to-[#ff6b3d] font-bold text-white text-xs uppercase tracking-widest px-6 py-2.5 transition-all rounded-lg inline-block shadow-lg hover:shadow-orange-500/25"
+                            >
+                              Upgrade to Pro →
+                            </button>
                           </div>
-                          <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Available on higher tiers</span>
                         </div>
 
-                        <div className="bg-[#070b16]/40 border border-slate-850/40 rounded-2xl overflow-hidden divide-y divide-slate-850/40 shadow-2xl">
-                          {teaserCoins.map(coin => (
-                            <LockedSignalCard
-                              key={coin.symbol}
-                              symbol={coin.symbol}
-                              timeframe={coin.timeframe}
-                              type={coin.type}
-                              plan={userPlan}
-                              confidence={coin.confidence}
-                              onUpgrade={() => triggerUpgradeGate(`Unlock ${coin.symbol.split('/')[0]} Signals`, `HA signals for ${coin.symbol} are locked under your plan.`)}
-                            />
-                          ))}
+                        {/* This Week's Signal Activity - Enhanced Design */}
+                        <div className="border border-slate-800/60 bg-gradient-to-b from-[#0f0f0f] to-[#070707] rounded-lg p-6 space-y-6">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <svg className="w-4 h-4 text-[#ff4500]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                              <h4 className="text-xs font-extrabold uppercase tracking-widest text-[#ff4500] font-mono">THIS WEEK'S STATS</h4>
+                            </div>
+                            <p className="text-white/60 text-xs">Across all {weeklyStats.total} signals fired</p>
+                          </div>
+
+                          {/* Stats Grid */}
+                          <div className="grid grid-cols-2 gap-4">
+                            {/* Stat 1: Signals Fired */}
+                            <div className="border border-slate-800/40 bg-[#0a0a0a] rounded-lg p-4 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                <span className="text-xs text-white/60 uppercase font-mono tracking-wide">Signals</span>
+                              </div>
+                              <span className="text-2xl font-bold text-white">{weeklyStats.total}</span>
+                            </div>
+
+                            {/* Stat 2: Winners */}
+                            <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-lg p-4 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="text-xs text-white/60 uppercase font-mono tracking-wide">Wins</span>
+                              </div>
+                              <span className="text-2xl font-bold text-emerald-400">{weeklyStats.wins}</span>
+                            </div>
+
+                            {/* Stat 3: Combined PnL */}
+                            <div className="col-span-2 border border-orange-500/20 bg-orange-500/5 rounded-lg p-4 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7H5v12h8V7z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 13h6V7h-6v6z" />
+                                </svg>
+                                <span className="text-xs text-white/60 uppercase font-mono tracking-wide">Combined PnL (1% risk each)</span>
+                              </div>
+                              <span className={`text-2xl font-bold ${weeklyStats.pnlSum >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {weeklyStats.pnlSum >= 0 ? '+' : ''}{weeklyStats.pnlSum.toFixed(2)}%
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* FOMO Section */}
+                          <div className="border-t border-slate-800/40 pt-6 space-y-3">
+                            <div className="space-y-2">
+                              <div className="flex items-start gap-3">
+                                <svg className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <div>
+                                  <p className="text-white font-bold text-sm">
+                                    You saw {weeklyStats.seen} of {weeklyStats.total} signals
+                                  </p>
+                                  <p className="text-white/60 text-xs mt-1">(Free tier: BTC only)</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-[#1a0f00] border border-orange-500/20 rounded-lg p-4 space-y-2">
+                              <p className="text-white font-semibold text-sm">
+                                You missed <span className="text-orange-400 font-bold">{Math.max(0, weeklyStats.total - weeklyStats.seen)} signals</span> on ETH & BNB
+                              </p>
+                              <p className="text-white/70 text-xs leading-relaxed">
+                                That's {Math.max(0, weeklyStats.total - weeklyStats.seen)} opportunities other Pro members acted on.
+                              </p>
+                              <button
+                                onClick={() => router.push('/pricing')}
+                                className="text-xs font-bold uppercase tracking-wider text-[#ff4500] hover:text-orange-300 transition-colors cursor-pointer bg-transparent border-0 text-left mt-2 block"
+                              >
+                                → Upgrade to see them all
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1662,12 +1904,12 @@ export default function TerminalPage() {
                   <div className="space-y-3 pt-2">
                     <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-extrabold uppercase tracking-widest text-zinc-400">Completed Setups</span>
-                        <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-zinc-800 text-zinc-400 rounded border border-zinc-700/60">
+                        <span className="text-[11px] font-extrabold uppercase tracking-widest text-white">Completed Setups</span>
+                        <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-zinc-800 text-white rounded border border-zinc-700/60">
                           {closedSignals.length} CLOSED
                         </span>
                       </div>
-                      <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider hidden sm:block">Historical - read only</span>
+                      <span className="text-[10px] text-white font-mono uppercase tracking-wider hidden sm:block">Historical - read only</span>
                     </div>
                     <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
                       {closedSignals.map((sig) => (
@@ -1733,7 +1975,7 @@ export default function TerminalPage() {
                             className={`px-3 py-1.5 rounded-md text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer border-0 flex items-center gap-1 ${
                               selectedInterval === tf
                                 ? 'bg-[#3D5AFE] text-white shadow-md'
-                                : 'text-zinc-500 hover:text-white bg-transparent'
+                                : 'text-white hover:text-white bg-transparent'
                             }`}>
                             {tf} {locked && <span className="text-[#3D5AFE] text-[10px]">🔒</span>}
                           </button>
@@ -1743,7 +1985,7 @@ export default function TerminalPage() {
                     {/* Export button */}
                     <button
                       onClick={() => isFreePlan ? triggerUpgradeGate('CSV Export Locked', 'Downloading as CSV is a Pro feature.') : alert('CSV download triggered!')}
-                      className="px-3 py-1.5 border border-[#1e2d4a]/40 hover:bg-zinc-900 font-mono text-[12px] uppercase tracking-wider text-zinc-400 hover:text-white cursor-pointer bg-transparent rounded-lg"
+                      className="px-3 py-1.5 border border-[#1e2d4a]/40 hover:bg-zinc-900 font-mono text-[12px] uppercase tracking-wider text-white hover:text-white cursor-pointer bg-transparent rounded-lg"
                     >
                       Export CSV {isFreePlan && '🔒'}
                     </button>
@@ -1753,14 +1995,14 @@ export default function TerminalPage() {
                 {logLoading && (
                   <div className="flex items-center justify-center py-16 gap-3">
                     <div className="w-4 h-4 border border-zinc-600 border-t-brand-orange rounded-full animate-spin" />
-                    <span className="text-[12px] font-mono text-zinc-500 uppercase">Loading history...</span>
+                    <span className="text-[12px] font-mono text-white uppercase">Loading history...</span>
                   </div>
                 )}
 
                 {!logLoading && cleanLogSignals.length === 0 && (
                   <div className="bg-[#0d1426] border border-dashed border-[#1e2a3a] p-10 text-center space-y-3">
                     <span className="text-2xl">📋</span>
-                    <p className="text-[12px] text-zinc-400 normal-case max-w-sm mx-auto leading-relaxed">
+                    <p className="text-[12px] text-white normal-case max-w-sm mx-auto leading-relaxed">
                       History ledger populates as signals hit SL, TP, or are replaced by a new swing.
                     </p>
                   </div>
@@ -1770,7 +2012,7 @@ export default function TerminalPage() {
                   <div className="overflow-x-auto bg-[#0d1426] border border-[#1e2a3a]">
                     <table className="w-full text-left font-mono border-collapse">
                       <thead>
-                        <tr className="border-b border-[#1e2a3a] text-zinc-500 uppercase tracking-widest text-[11px] bg-zinc-950/20">
+                        <tr className="border-b border-[#1e2a3a] text-white uppercase tracking-widest text-[11px] bg-zinc-950/20">
                           {['Date', 'Pair', 'Type', 'TF', 'Entry', 'Exit', 'Result', 'Conf.'].map(h => (
                             <th key={h} className="p-3">{h}</th>
                           ))}
@@ -1784,19 +2026,19 @@ export default function TerminalPage() {
                           const isClosed = sig.is_closed;
                           return (
                             <tr key={sig.id} className={`border-b border-[#1e2a3a]/40 last:border-0 hover:bg-zinc-900/10 text-[12px] ${showBlur ? 'opacity-40 select-none' : ''}`}>
-                              <td className="p-3 text-zinc-400">{formatLogDate(sig.bar_time, profile)}</td>
+                              <td className="p-3 text-white">{formatLogDate(sig.bar_time, profile)}</td>
                               <td className="p-3 font-bold text-white">{formatSymbol(sig.symbol)}</td>
                               <td className="p-3">
                                 <span className={`inline-block px-1.5 py-0.5 text-[10px] font-bold ${isBuy ? 'bg-[#00e676]/10 text-[#00e676]' : 'bg-[#ff1744]/10 text-[#ff1744]'}`}>
                                   {isBuy ? 'BUY' : 'SELL'}
                                 </span>
                               </td>
-                              <td className="p-3 text-zinc-400">{sig.interval}</td>
+                              <td className="p-3 text-white">{sig.interval}</td>
                               <td className="p-3 text-zinc-300">{formatPrice(sig.entry_price, profile)}</td>
                               <td className="p-3 text-zinc-300">
                                 {showBlur ? <span className="blur-sm">$$$,$$$.$$</span>
                                   : isClosed ? formatPrice(sig.close_price, profile)
-                                  : <span className="text-zinc-500">Open</span>}
+                                  : <span className="text-white">Open</span>}
                               </td>
                               <td className="p-3">
                                 {showBlur ? (
@@ -1805,12 +2047,12 @@ export default function TerminalPage() {
                                     Upgrade
                                   </button>
                                 ) : (
-                                  <span className={!isClosed ? 'text-zinc-500' : sig.pnl_pct >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}>
+                                  <span className={!isClosed ? 'text-white' : sig.pnl_pct >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}>
                                     {isClosed ? `${sig.pnl_pct >= 0 ? '+' : ''}${sig.pnl_pct.toFixed(2)}%` : 'Active'}
                                   </span>
                                 )}
                               </td>
-                              <td className="p-3 text-zinc-400">{sig.confidence}%</td>
+                              <td className="p-3 text-white">{sig.confidence}%</td>
                             </tr>
                           );
                         })}
@@ -1830,9 +2072,9 @@ export default function TerminalPage() {
                       <span>Sanddock Conviction Matrix</span>
                       <span className="text-[#ff4500] font-light">&lowast;</span>
                     </h2>
-                    <p className="text-sm text-zinc-400 font-mono">Live conviction models & statistical performance verification.</p>
+                    <p className="text-sm text-white font-mono">Live conviction models & statistical performance verification.</p>
                   </div>
-                  <div className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 px-5 py-2.5 font-mono text-xs font-bold text-zinc-400 rounded-none">
+                  <div className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 px-5 py-2.5 font-mono text-xs font-bold text-white rounded-none">
                     <span className="w-2.5 h-2.5 bg-[#ff4500] animate-pulse rounded-none" />
                     <span>FEED LIVE</span>
                   </div>
@@ -1851,7 +2093,7 @@ export default function TerminalPage() {
                     <div className="flex flex-col md:flex-row gap-4 p-1.5 bg-black rounded-none border border-zinc-800 items-center w-full xl:w-auto">
                       {/* Coin Selector */}
                       <div className="flex gap-2.5 items-center border-b md:border-b-0 md:border-r border-zinc-800 pb-3 md:pb-0 md:pr-4 w-full md:w-auto justify-between md:justify-start">
-                        <span className="text-xs text-zinc-400 uppercase font-mono font-bold pl-2">Asset:</span>
+                        <span className="text-xs text-white uppercase font-mono font-bold pl-2">Asset:</span>
                         <select 
                           value={perfSymbol} 
                           onChange={(e) => setPerfSymbol(e.target.value)}
@@ -1878,7 +2120,7 @@ export default function TerminalPage() {
                             className={`px-5 py-2.5 rounded-none text-xs font-mono font-bold uppercase transition-colors cursor-pointer border ${
                               perfTimeFilter === opt.v
                                 ? 'bg-[#ff4500] text-white border-[#ff4500] font-extrabold'
-                                : 'bg-transparent text-zinc-400 hover:text-white border-transparent'
+                                : 'bg-transparent text-white hover:text-white border-transparent'
                             }`}
                           >
                             {opt.l}
@@ -1891,7 +2133,7 @@ export default function TerminalPage() {
                   {perfLoading ? (
                     <div className="flex flex-col items-center justify-center py-24 gap-3 bg-[#090909] border border-zinc-800 rounded-none">
                       <div className="w-8 h-8 border-2 border-[#ff4500] border-t-transparent rounded-none animate-spin" />
-                      <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest animate-pulse">Recompiling Engine...</span>
+                      <span className="text-xs font-mono text-white uppercase tracking-widest animate-pulse">Recompiling Engine...</span>
                     </div>
                   ) : (
                     <div className="space-y-8">
@@ -1909,7 +2151,7 @@ export default function TerminalPage() {
                           {/* Digital winrate value */}
                           <div className="py-6 text-left space-y-4">
                             <div className="space-y-1">
-                              <span className="text-xs text-zinc-400 block font-mono font-bold uppercase">SWING WIN RATE</span>
+                              <span className="text-xs text-white block font-mono font-bold uppercase">SWING WIN RATE</span>
                               <span className="text-6xl font-black font-mono tracking-tighter text-white block">
                                 {computedStats?.win_rate_pct != null ? `${computedStats.win_rate_pct}%` : '0.0%'}
                               </span>
@@ -1924,7 +2166,7 @@ export default function TerminalPage() {
                           </div>
 
                           {/* Live telemetry lines */}
-                          <div className="space-y-4 mt-4 pt-4 border-t border-zinc-800 font-mono text-xs text-zinc-400">
+                          <div className="space-y-4 mt-4 pt-4 border-t border-zinc-800 font-mono text-xs text-white">
                             <div className="flex justify-between items-center">
                               <span>Live Active Swings:</span>
                               <span className="text-white font-bold flex items-center gap-1.5">
@@ -1953,7 +2195,7 @@ export default function TerminalPage() {
                             <div className="bg-[#090909] border border-zinc-800 rounded-none p-6 text-left flex flex-col justify-between text-white">
                               <div className="flex justify-between items-start border-b border-zinc-800 pb-2 mb-4">
                                 <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#ff4500]">Total PnL Return</span>
-                                <span className="text-zinc-400 text-[10px] font-mono">All Closed Trades</span>
+                                <span className="text-white text-[10px] font-mono">All Closed Trades</span>
                               </div>
                               <div className="my-4">
                                 <span className={`text-5xl font-black font-mono tracking-tighter block ${
@@ -1965,7 +2207,7 @@ export default function TerminalPage() {
                                 </span>
                               </div>
                               <div className="pt-3 border-t border-zinc-800 flex justify-between items-center text-xs font-mono">
-                                <span className="text-zinc-400 font-bold">Cumulative Gain/Loss:</span>
+                                <span className="text-white font-bold">Cumulative Gain/Loss:</span>
                                 <span className={`font-black ${
                                   (computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'
                                 }`}>
@@ -1980,14 +2222,14 @@ export default function TerminalPage() {
                             <div className="bg-[#090909] border border-zinc-800 rounded-none p-6 text-left flex flex-col justify-between text-white">
                               <div className="flex justify-between items-start border-b border-zinc-800 pb-2 mb-4">
                                 <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-white">PROFIT FACTOR</span>
-                                <span className="text-zinc-400 text-[10px] font-mono">EFFICIENCY</span>
+                                <span className="text-white text-[10px] font-mono">EFFICIENCY</span>
                               </div>
                               <div className="my-4">
                                 <span className="text-5xl font-black font-mono tracking-tighter text-white block">
                                   {computedStats?.profit_factor ?? '0.00'}
                                 </span>
                               </div>
-                              <div className="pt-3 border-t border-zinc-800 flex flex-col gap-1 text-[10px] font-mono text-zinc-400">
+                              <div className="pt-3 border-t border-zinc-800 flex flex-col gap-1 text-[10px] font-mono text-white">
                                 <div className="flex justify-between font-bold">
                                   <span>Gains / Losses Winrate Ratio:</span>
                                   <span>{computedStats ? `${computedStats.wins} Wins` : '0'}</span>
@@ -2005,7 +2247,7 @@ export default function TerminalPage() {
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-zinc-800 pb-3">
                               <div>
                                 <h3 className="text-lg font-extrabold text-white uppercase tracking-tighter">Compound Capital Estimator</h3>
-                                <p className="text-xs text-zinc-400 font-mono mt-0.5">Drag to calibrate starting capital and view simulated growth telemetry.</p>
+                                <p className="text-xs text-white font-mono mt-0.5">Drag to calibrate starting capital and view simulated growth telemetry.</p>
                               </div>
                               <span className="px-4 py-1.5 bg-[#ff4500] text-white text-xs font-mono font-bold uppercase rounded-none">
                                 Compounding Model
@@ -2014,7 +2256,7 @@ export default function TerminalPage() {
 
                             {/* Range slider input */}
                             <div className="space-y-2 pt-2">
-                              <div className="flex justify-between font-mono text-sm text-zinc-400 font-bold">
+                              <div className="flex justify-between font-mono text-sm text-white font-bold">
                                 <span>$1,000</span>
                                 <span className="text-white font-black text-lg underline decoration-[#ff4500] decoration-2">${startingCapital.toLocaleString()}</span>
                                 <span>$100,000</span>
@@ -2033,11 +2275,11 @@ export default function TerminalPage() {
                             {/* Telemetry data grid */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-black rounded-none border border-zinc-800 font-mono text-center text-xs">
                               <div>
-                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">Starting Capital</span>
+                                <span className="block text-[9px] text-white uppercase tracking-widest font-bold">Starting Capital</span>
                                 <span className="text-sm font-bold text-white mt-1 block">${startingCapital.toLocaleString()}</span>
                               </div>
                               <div>
-                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">PnL Return Rate</span>
+                                <span className="block text-[9px] text-white uppercase tracking-widest font-bold">PnL Return Rate</span>
                                 <span className={`text-sm font-bold mt-1 block ${(computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
                                   {computedStats?.raw_pnl_sum != null
                                     ? `${(computedStats.raw_pnl_sum) >= 0 ? '+' : ''}${(computedStats.raw_pnl_sum).toFixed(2)}%`
@@ -2045,13 +2287,13 @@ export default function TerminalPage() {
                                 </span>
                               </div>
                               <div>
-                                <span className="block text-[9px] text-zinc-400 uppercase tracking-widest font-bold">Projected Gain</span>
+                                <span className="block text-[9px] text-white uppercase tracking-widest font-bold">Projected Gain</span>
                                 <span className={`text-sm font-bold mt-1 block ${(computedStats?.raw_pnl_sum || 0) >= 0 ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
                                   ${((computedStats?.raw_pnl_sum || 0) * startingCapital / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                               </div>
                               <div>
-                                <span className="block text-[9px] text-zinc-400 font-bold uppercase tracking-widest font-bold">Simulated Equity</span>
+                                <span className="block text-[9px] text-white font-bold uppercase tracking-widest font-bold">Simulated Equity</span>
                                 <span className="text-sm font-extrabold text-[#ff4500] mt-1 block">
                                   ${(startingCapital + (computedStats?.raw_pnl_sum || 0) * startingCapital / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
@@ -2073,9 +2315,9 @@ export default function TerminalPage() {
                             { label: 'Outcome Ratio', val: computedStats ? `${computedStats.wins}W - ${computedStats.losses}L` : '-', note: 'wins vs losses' },
                           ].map((s, i) => (
                             <div key={i} className="text-left py-2 px-4 border-r last:border-0 border-zinc-800/40 space-y-1">
-                              <span className="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-zinc-400 leading-none">{s.label}</span>
+                              <span className="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-white leading-none">{s.label}</span>
                               <span className="block text-2xl md:text-3xl font-black text-white tracking-tighter leading-none pt-1">{s.val}</span>
-                              <span className="block text-[10px] text-zinc-500 leading-none pt-0.5">{s.note}</span>
+                              <span className="block text-[10px] text-white leading-none pt-0.5">{s.note}</span>
                             </div>
                           ))}
                         </div>
@@ -2104,14 +2346,14 @@ export default function TerminalPage() {
               <div className="space-y-6 max-w-xl text-left">
                 <div className="space-y-1 border-b border-zinc-800 pb-4">
                   <h2 className="text-[18px] font-bold uppercase tracking-wider text-white">Console Settings</h2>
-                  <p className="text-[13px] text-zinc-400 font-mono">Update experience profile, risk tolerance, alerts, and display parameters.</p>
+                  <p className="text-[13px] text-white font-mono">Update experience profile, risk tolerance, alerts, and display parameters.</p>
                 </div>
 
                 <form onSubmit={handleUpdateSettings} className="space-y-6">
 
                   {/* TRADING PROFILE */}
                   <div className="space-y-4">
-                    <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
                       <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
@@ -2120,7 +2362,7 @@ export default function TerminalPage() {
                     
                     <div className="space-y-3 font-mono">
                       <div className="space-y-1">
-                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Experience level</label>
+                        <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Experience level</label>
                         <select value={settingsExperience} onChange={e => setSettingsExperience(e.target.value)}
                           className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
                           <option value="beginner">Just starting out</option>
@@ -2130,7 +2372,7 @@ export default function TerminalPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Risk style</label>
+                        <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Risk style</label>
                         <select value={settingsRisk} onChange={e => setSettingsRisk(e.target.value)}
                           className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
                           <option value="conservative">Conservative (SL -1.5% | TP +3.0%)</option>
@@ -2140,7 +2382,7 @@ export default function TerminalPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Primary goal</label>
+                        <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Primary goal</label>
                         <select value={settingsGoal} onChange={e => setSettingsGoal(e.target.value)}
                           className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
                           <option value="learn">Learn to trade smarter</option>
@@ -2150,20 +2392,20 @@ export default function TerminalPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Account size (USDT)</label>
+                        <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Account size (USDT)</label>
                         <input type="number" value={settingsAccountSize} onChange={e => setSettingsAccountSize(Number(e.target.value))}
                           className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none" />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Risk per trade</label>
+                        <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Risk per trade</label>
                         <div className="flex gap-2">
                           {['1%', '1.5%', '2%', 'custom'].map(type => (
                             <button key={type} type="button" onClick={() => setSettingsRiskPerTradeType(type)}
                               className={`px-4 py-2 text-xs font-bold uppercase transition-all border rounded-none cursor-pointer ${
                                 settingsRiskPerTradeType === type
                                   ? 'bg-[#3D5AFE] text-white border-[#3D5AFE]'
-                                  : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white'
+                                  : 'bg-zinc-950 text-white border-zinc-800 hover:text-white'
                               }`}>
                               {type}
                             </button>
@@ -2181,7 +2423,7 @@ export default function TerminalPage() {
 
                   {/* SIGNAL PREFERENCES */}
                   <div className="space-y-4">
-                    <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
                       <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
@@ -2190,17 +2432,17 @@ export default function TerminalPage() {
 
                     <div className="space-y-3 font-mono">
                       <div className="space-y-1">
-                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Minimum confidence: {settingsMinConfidence}%</label>
+                        <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Minimum confidence: {settingsMinConfidence}%</label>
                         <input type="range" min="65" max="95" step="5" value={settingsMinConfidence} onChange={e => setSettingsMinConfidence(Number(e.target.value))}
                           className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-brand-orange" />
-                        <div className="flex justify-between text-[9px] text-zinc-500">
+                        <div className="flex justify-between text-[9px] text-white">
                           <span>65% (More noise)</span>
                           <span>95% (Fewer setups)</span>
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Default timeframe</label>
+                        <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Default timeframe</label>
                         <select value={settingsDefaultTimeframe} onChange={e => setSettingsDefaultTimeframe(e.target.value)}
                           className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
                           <option value="30m">30m</option>
@@ -2208,7 +2450,7 @@ export default function TerminalPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Default view</label>
+                        <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Default view</label>
                         <select value={settingsDefaultView} onChange={e => setSettingsDefaultView(e.target.value)}
                           className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
                           <option value="Stream">Stream</option>
@@ -2220,7 +2462,7 @@ export default function TerminalPage() {
 
                   {/* ALERT DELIVERY */}
                   <div className="space-y-4">
-                    <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
                       <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                       </svg>
@@ -2229,18 +2471,18 @@ export default function TerminalPage() {
 
                     {/* Telegram Section */}
                     <div className="p-4 bg-[#090e1a] border border-zinc-800 space-y-3 font-mono text-xs">
-                      <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Telegram Integration</span>
+                      <span className="block text-[10px] text-white font-bold uppercase tracking-widest">Telegram Integration</span>
                       
                       <div className="space-y-4">
                         
                         {/* Step 1: Link Account */}
                         <div className="flex justify-between items-center gap-2 border-b border-zinc-900 pb-2">
                           <div>
-                            <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 1: Link account</span>
+                            <span className="block text-[10px] text-white uppercase font-bold">Step 1: Link account</span>
                             {profile.telegram_chat_id ? (
                               <span className="text-[#00e676] font-bold">● Connected — @ghuruprasaath</span>
                             ) : (
-                              <span className="text-zinc-400">○ Not linked</span>
+                              <span className="text-white">○ Not linked</span>
                             )}
                           </div>
                           {!profile.telegram_chat_id && tgPairingStep === 1 && (
@@ -2254,7 +2496,7 @@ export default function TerminalPage() {
                         {/* Interactive Verification code entry if in step 2 */}
                         {!profile.telegram_chat_id && tgPairingStep === 2 && (
                           <div className="p-3 bg-zinc-900/60 border border-zinc-800 space-y-2.5">
-                            <span className="block text-[10px] text-zinc-400 font-bold">Enter pairing code from @SanddockBot:</span>
+                            <span className="block text-[10px] text-white font-bold">Enter pairing code from @SanddockBot:</span>
                             <div className="flex gap-1.5 items-center justify-between flex-wrap">
                               <div className="flex gap-1">
                                 {tgPairingCode.map((char, index) => (
@@ -2300,13 +2542,13 @@ export default function TerminalPage() {
                         {['master', 'grandmaster'].includes(profile?.plan) && (
                           <div className="flex justify-between items-center gap-2">
                             <div>
-                              <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 2: Join {profile.plan === 'grandmaster' ? 'GrandMaster' : 'Master'} Private Channel</span>
+                              <span className="block text-[10px] text-white uppercase font-bold">Step 2: Join {profile.plan === 'grandmaster' ? 'GrandMaster' : 'Master'} Private Channel</span>
                               {!profile.telegram_chat_id ? (
-                                <span className="text-zinc-500 font-bold">Waiting for Step 1</span>
+                                <span className="text-white font-bold">Waiting for Step 1</span>
                               ) : profile.telegram_invite_claimed ? (
                                 <span className="text-[#00e676] font-bold">Private link generated (1/1 claimed)</span>
                               ) : (
-                                <span className="text-zinc-400 font-bold">Invite not claimed yet</span>
+                                <span className="text-white font-bold">Invite not claimed yet</span>
                               )}
                             </div>
 
@@ -2338,7 +2580,7 @@ export default function TerminalPage() {
                         {/* Invitation link display for paid users */}
                         {!isFreePlan && profile.telegram_invite_claimed && (
                           <div className="p-2.5 bg-zinc-950 border border-zinc-800 break-all text-[11px] text-zinc-300">
-                            <span className="block text-[9px] text-zinc-500 font-bold uppercase">Your 1-time Invite Link:</span>
+                            <span className="block text-[9px] text-white font-bold uppercase">Your 1-time Invite Link:</span>
                             <a href={profile.telegram_invite_link} target="_blank" rel="noopener noreferrer" className="text-[#3D5AFE] hover:underline">
                               {profile.telegram_invite_link}
                             </a>
@@ -2374,7 +2616,7 @@ export default function TerminalPage() {
 
                     {/* Email Notifications List */}
                     <div className="space-y-2 font-mono text-xs">
-                      <span className="block text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Email Notifications</span>
+                      <span className="block text-[10px] text-white font-bold uppercase tracking-widest">Email Notifications</span>
                       
                       {[
                         { label: 'Signal closed (TP/SL hit)', val: settingsEmailSignalClosed, set: setSettingsEmailSignalClosed },
@@ -2387,19 +2629,19 @@ export default function TerminalPage() {
                             className={`py-1 px-3 text-[10px] font-bold uppercase rounded-none cursor-pointer border ${
                               emailOpt.val
                                 ? 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/20'
-                                : 'bg-zinc-900 text-zinc-500 border-zinc-850'
+                                : 'bg-zinc-900 text-white border-zinc-850'
                             }`}>
                             {emailOpt.val ? 'ON' : 'OFF'}
                           </button>
                         </div>
                       ))}
-                      <span className="block text-[9px] text-zinc-500 font-mono italic">Emails go to: {profile.email}</span>
+                      <span className="block text-[9px] text-white font-mono italic">Emails go to: {profile.email}</span>
                     </div>
                   </div>
 
                   {/* DISPLAY */}
                   <div className="space-y-4">
-                    <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
+                    <h3 className="text-xs font-mono font-bold text-white uppercase tracking-widest border-b border-zinc-850 pb-1.5 flex items-center gap-1.5 select-none">
                       <svg className="w-3.5 h-3.5 text-[#3D5AFE]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
@@ -2408,7 +2650,7 @@ export default function TerminalPage() {
 
                     <div className="space-y-3 font-mono">
                       <div className="space-y-1">
-                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Timezone</label>
+                        <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Timezone</label>
                         <select value={settingsTimezone} onChange={e => setSettingsTimezone(e.target.value)}
                           className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
                           <option value="UTC">UTC</option>
@@ -2421,7 +2663,7 @@ export default function TerminalPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Price format</label>
+                        <label className="block text-[11px] font-bold text-white uppercase tracking-wider">Price format</label>
                         <select value={settingsPriceFormat} onChange={e => setSettingsPriceFormat(e.target.value)}
                           className="w-full bg-[#111827] border border-zinc-800 px-4 py-2.5 text-[13px] text-white focus:outline-none focus:border-brand-orange rounded-none">
                           <option value="usd">USD ($62,410.00)</option>
@@ -2463,7 +2705,7 @@ export default function TerminalPage() {
           return (
             <button key={item.id} onClick={() => setActiveTab(item.id)}
               className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full py-1 text-[11px] font-bold uppercase tracking-widest cursor-pointer border-0 bg-transparent ${
-                activeTab === item.id ? 'text-brand-orange bg-zinc-950' : 'text-zinc-400 hover:text-white'
+                activeTab === item.id ? 'text-brand-orange bg-zinc-950' : 'text-white hover:text-white'
               }`}>
               <Icon />
               <span>{item.label}</span>
@@ -2478,17 +2720,17 @@ export default function TerminalPage() {
           <div onClick={() => setUpgradeModal(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="relative w-full max-w-md bg-[#0d1426] border border-zinc-800 p-7 shadow-2xl space-y-5 z-10 text-left">
             <button onClick={() => setUpgradeModal(false)}
-              className="absolute top-4 right-4 text-zinc-500 hover:text-white text-[20px] font-bold font-mono bg-transparent border-0 cursor-pointer">
+              className="absolute top-4 right-4 text-white hover:text-white text-[20px] font-bold font-mono bg-transparent border-0 cursor-pointer">
               &times;
             </button>
             <div className="space-y-1.5">
               <span className="text-[11px] font-mono font-bold text-brand-orange uppercase tracking-wider">Console Upgrade</span>
               <h3 className="text-[20px] font-extrabold uppercase tracking-tight text-white">{upgradeTriggerText.title}</h3>
-              <p className="text-[13px] text-zinc-400 leading-relaxed normal-case">{upgradeTriggerText.desc}</p>
+              <p className="text-[13px] text-white leading-relaxed normal-case">{upgradeTriggerText.desc}</p>
             </div>
             <div className="p-4 bg-zinc-950 border border-zinc-900 space-y-2">
               <span className="block text-[13px] font-bold text-white uppercase tracking-wider">Pro Plan Benefits</span>
-              <ul className="space-y-1 text-[12px] text-zinc-400 list-disc list-inside normal-case">
+              <ul className="space-y-1 text-[12px] text-white list-disc list-inside normal-case">
                 <li>10+ major crypto coins tracked</li>
                 <li>30-minute timeframe (swing high/low detection)</li>
                 <li>Entry targets, Stop Loss, and Take Profit</li>
@@ -2501,7 +2743,7 @@ export default function TerminalPage() {
                 Upgrade to Pro ($29/mo)
               </button>
               <button onClick={() => setUpgradeModal(false)}
-                className="px-4 py-3 border border-zinc-800 bg-transparent hover:bg-[#111827] hover:text-white text-[13px] font-bold text-zinc-400 uppercase tracking-widest transition-colors cursor-pointer">
+                className="px-4 py-3 border border-zinc-800 bg-transparent hover:bg-[#111827] hover:text-white text-[13px] font-bold text-white uppercase tracking-widest transition-colors cursor-pointer">
                 Cancel
               </button>
             </div>
@@ -2521,21 +2763,21 @@ export default function TerminalPage() {
               setShowFreeSuccessModal(false);
               router.replace('/terminal');
             }}
-              className="absolute top-4 right-4 text-zinc-500 hover:text-white text-[20px] font-bold font-mono bg-transparent border-0 cursor-pointer">
+              className="absolute top-4 right-4 text-white hover:text-white text-[20px] font-bold font-mono bg-transparent border-0 cursor-pointer">
               &times;
             </button>
             <div className="space-y-1.5 text-center">
               <span className="text-4xl block mb-2">Success!</span>
               <span className="text-[11px] font-mono font-bold text-brand-orange uppercase tracking-wider">Welcome to Sanddock</span>
               <h3 className="text-[20px] font-extrabold uppercase tracking-tight text-white">Account Created Successfully!</h3>
-              <p className="text-[13px] text-zinc-400 leading-relaxed normal-case">
+              <p className="text-[13px] text-white leading-relaxed normal-case">
                 You now have unlimited access to live BTC/USDT signals, AI explanations, and chart setups.
               </p>
             </div>
             
             <div className="p-4 bg-zinc-950 border border-zinc-900 space-y-3">
               <span className="block text-[12px] font-bold text-white uppercase tracking-wider">Join Public Alerts Group</span>
-              <p className="text-[12px] text-zinc-400 normal-case leading-relaxed">
+              <p className="text-[12px] text-white normal-case leading-relaxed">
                 Connect with our public channel to receive real-time BTC alert updates directly in Telegram.
               </p>
               <a

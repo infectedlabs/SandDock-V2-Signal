@@ -866,7 +866,7 @@ export default function SignalDetailPage() {
               {historyLoading ? (
                 <div className="h-64 flex flex-col items-center justify-center border border-slate-800 bg-[#070b19]/60 p-6 text-center">
                   <div className="w-5 h-5 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
-                  <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-wider mt-3">Loading stats & chart...</p>
+                  <p className="text-white font-mono text-[10px] uppercase tracking-wider mt-3">Loading stats & chart...</p>
                 </div>
               ) : (
                 <PerformanceChart signals={historySignals} />
@@ -890,7 +890,7 @@ export default function SignalDetailPage() {
                   <span className="text-[12px] font-mono text-slate-500 uppercase">Loading history...</span>
                 </div>
               ) : historySignals.length === 0 ? (
-                <div className="text-center py-8 border border-dashed border-slate-800 text-[12px] text-zinc-500">
+                <div className="text-center py-8 border border-dashed border-slate-800 text-[12px] text-white">
                   No historical closed signals found in this window.
                 </div>
               ) : (

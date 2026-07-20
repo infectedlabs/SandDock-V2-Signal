@@ -119,7 +119,7 @@ export default function PerformanceChart({ signals = [] }) {
     return (
       <div className="h-64 flex flex-col items-center justify-center border border-slate-800 bg-[#070b19]/60 p-6 text-center">
         <span className="text-xl">📈</span>
-        <p className="text-zinc-500 font-mono text-xs uppercase tracking-wider mt-2">No completed trades in this window.</p>
+        <p className="text-white font-mono text-xs uppercase tracking-wider mt-2">No completed trades in this window.</p>
       </div>
     );
   }

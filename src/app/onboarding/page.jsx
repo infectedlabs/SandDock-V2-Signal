@@ -288,7 +288,7 @@ export default function OnboardingPage() {
                 <h2 className="text-xl md:text-2xl font-extrabold uppercase tracking-tight text-white leading-none">
                   {headline}
                 </h2>
-                <p className="text-zinc-400 text-xs leading-relaxed normal-case">
+                <p className="text-white text-xs leading-relaxed normal-case">
                   We will adjust your signals feed, descriptions, and learning tooltips to match where you are.
                 </p>
               </div>
@@ -309,11 +309,11 @@ export default function OnboardingPage() {
                         {opt.icon}
                       </div>
                       <span className="block font-bold text-xs uppercase tracking-wider mb-1.5 text-white">{opt.label}</span>
-                      <span className="block text-[11px] text-zinc-400 normal-case leading-relaxed mb-3">{opt.desc}</span>
+                      <span className="block text-[11px] text-white normal-case leading-relaxed mb-3">{opt.desc}</span>
                     </div>
                     <div>
                       <div className="border-t border-zinc-800/80 my-2.5 w-full" />
-                      <span className="block text-[10px] text-zinc-500 normal-case leading-relaxed font-mono">{opt.preview}</span>
+                      <span className="block text-[10px] text-white normal-case leading-relaxed font-mono">{opt.preview}</span>
                     </div>
                   </div>
                 ))}
@@ -342,7 +342,7 @@ export default function OnboardingPage() {
                 <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
                   Which coins do you want to track?
                 </h2>
-                <p className="text-zinc-400 text-sm">
+                <p className="text-white text-sm">
                   Bitcoin is always included on your plan. Select other coins you would like to track on your console.
                 </p>
               </div>
@@ -358,7 +358,7 @@ export default function OnboardingPage() {
                       disabled={isBtc}
                       className={`p-4 border transition-colors flex items-center justify-between text-left cursor-pointer ${
                         isBtc 
-                          ? 'border-brand-orange/50 bg-[#111827] text-zinc-400 opacity-80 cursor-not-allowed'
+                          ? 'border-brand-orange/50 bg-[#111827] text-white opacity-80 cursor-not-allowed'
                           : isSelected
                             ? 'border-brand-orange bg-brand-orange/10 text-white'
                             : 'border-zinc-800 bg-[#111827] hover:border-zinc-700 text-zinc-300'
@@ -366,12 +366,12 @@ export default function OnboardingPage() {
                     >
                       <div className="space-y-1">
                         <span className="block font-bold text-xs uppercase tracking-wider">{coin.symbol}</span>
-                        <span className="block text-[10px] text-zinc-500 normal-case">{coin.name}</span>
+                        <span className="block text-[10px] text-white normal-case">{coin.name}</span>
                       </div>
                       {isBtc ? (
                         <span className="text-[9px] font-mono font-bold bg-brand-orange text-white px-1.5 py-0.2 uppercase">Selected</span>
                       ) : !coin.free && (
-                        <span className="text-[8px] font-mono font-bold bg-zinc-800 text-zinc-400 px-1.5 py-0.2 uppercase">PRO</span>
+                        <span className="text-[8px] font-mono font-bold bg-zinc-800 text-white px-1.5 py-0.2 uppercase">PRO</span>
                       )}
                     </button>
                   );
@@ -393,7 +393,7 @@ export default function OnboardingPage() {
                 <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
                   What is your default trading style?
                 </h2>
-                <p className="text-zinc-400 text-sm">
+                <p className="text-white text-sm">
                   This configures the default Stop Loss (SL) and Take Profit (TP) targets displayed on your trade alerts.
                 </p>
               </div>
@@ -425,9 +425,9 @@ export default function OnboardingPage() {
                     <div className="space-y-1 flex-1">
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-sm uppercase tracking-wide">{opt.label}</span>
-                        <span className="text-[10px] font-mono font-bold text-zinc-500">{opt.specs}</span>
+                        <span className="text-[10px] font-mono font-bold text-white">{opt.specs}</span>
                       </div>
-                      <span className="block text-xs text-zinc-400 normal-case leading-relaxed">{opt.desc}</span>
+                      <span className="block text-xs text-white normal-case leading-relaxed">{opt.desc}</span>
                     </div>
                   </label>
                 ))}
@@ -442,7 +442,7 @@ export default function OnboardingPage() {
                 <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
                   What is your main goal with Sanddock?
                 </h2>
-                <p className="text-zinc-400 text-sm">
+                <p className="text-white text-sm">
                   We will optimize your trading terminal panels around what matters most.
                 </p>
               </div>
@@ -473,7 +473,7 @@ export default function OnboardingPage() {
                     <span className="text-2xl">{opt.icon}</span>
                     <div className="space-y-1">
                       <span className="block font-bold text-sm uppercase tracking-wide">{opt.label}</span>
-                      <span className="block text-xs text-zinc-400 normal-case leading-relaxed">{opt.desc}</span>
+                      <span className="block text-xs text-white normal-case leading-relaxed">{opt.desc}</span>
                     </div>
                   </label>
                 ))}
@@ -489,7 +489,7 @@ export default function OnboardingPage() {
                 <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
                   Connect Your Telegram Bot
                 </h2>
-                <p className="text-zinc-400 text-sm">
+                <p className="text-white text-sm">
                   Paired in under 2 minutes. Get alerts directly to your phone.
                 </p>
               </div>
@@ -501,7 +501,7 @@ export default function OnboardingPage() {
                     <span className="bg-brand-orange text-white w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px]">1</span>
                     <span className="font-bold text-white uppercase tracking-wider">Search for the bot</span>
                   </div>
-                  <p className="text-zinc-400 normal-case pl-7 leading-relaxed">
+                  <p className="text-white normal-case pl-7 leading-relaxed">
                     Open Telegram on your device, search for <span className="text-white font-bold">@SanddockBot</span>, or click below:
                   </p>
                   <div className="pl-7">
@@ -524,7 +524,7 @@ export default function OnboardingPage() {
                     <span className="bg-brand-orange text-white w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px]">2</span>
                     <span className="font-bold text-white uppercase tracking-wider">Send start command</span>
                   </div>
-                  <p className="text-zinc-400 normal-case pl-7 leading-relaxed">
+                  <p className="text-white normal-case pl-7 leading-relaxed">
                     Send the command <span className="text-white font-bold">/start</span> to the bot conversation window.
                   </p>
                 </div>
@@ -537,7 +537,7 @@ export default function OnboardingPage() {
                     <span className="bg-brand-orange text-white w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px]">3</span>
                     <span className="font-bold text-white uppercase tracking-wider">Enter your pairing code</span>
                   </div>
-                  <p className="text-zinc-400 normal-case pl-7 leading-relaxed mb-2">
+                  <p className="text-white normal-case pl-7 leading-relaxed mb-2">
                     The bot will reply with a 6-digit verification code. Enter it here:
                   </p>
                   
@@ -616,7 +616,7 @@ export default function OnboardingPage() {
                 // On step 6 (Telegram Pairing)
                 <button
                   onClick={() => handleFinishOnboarding()}
-                  className="py-3 px-6 text-zinc-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer bg-transparent border-0"
+                  className="py-3 px-6 text-white hover:text-white text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer bg-transparent border-0"
                 >
                   Set Up Later &rarr;
                 </button>
@@ -628,7 +628,7 @@ export default function OnboardingPage() {
       </main>
 
       {/* Footer Branding info */}
-      <footer className="relative z-10 w-full max-w-4xl mx-auto border-t border-zinc-900 pt-4 text-center text-[10px] text-zinc-600 uppercase font-mono tracking-wider">
+      <footer className="relative z-10 w-full max-w-4xl mx-auto border-t border-zinc-900 pt-4 text-center text-[10px] text-white uppercase font-mono tracking-wider">
         © 2025 Sanddock Technical Systems. All data signals are for educational purposes.
       </footer>
 

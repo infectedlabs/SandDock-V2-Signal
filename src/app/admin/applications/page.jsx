@@ -78,7 +78,7 @@ export default function AdminApplicationsPage() {
       <div className="min-h-screen bg-white text-black flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-xl font-bold">Access Denied</p>
-          <p className="text-zinc-600">Only ghuruprasaath@gmail.com has access to this page.</p>
+          <p className="text-white">Only ghuruprasaath@gmail.com has access to this page.</p>
           <a href="/" className="inline-block px-6 py-2 bg-black text-white font-bold text-sm uppercase rounded-lg hover:bg-brand-orange transition-all">
             Go Home
           </a>
@@ -108,7 +108,7 @@ export default function AdminApplicationsPage() {
               className={`px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-lg transition-all ${
                 filterStatus === status
                   ? "bg-brand-orange text-white"
-                  : "bg-zinc-900 text-zinc-400 hover:text-white"
+                  : "bg-zinc-900 text-white hover:text-white"
               }`}
             >
               {status.charAt(0).toUpperCase() + status.slice(1)} ({applications.filter(a => a.status === status).length})
@@ -119,9 +119,9 @@ export default function AdminApplicationsPage() {
         {/* ── APPLICATIONS TABLE ───────────────────────────────────────────── */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-zinc-400">Loading...</div>
+            <div className="p-8 text-center text-white">Loading...</div>
           ) : filteredApps.length === 0 ? (
-            <div className="p-8 text-center text-zinc-400">No {filterStatus} applications.</div>
+            <div className="p-8 text-center text-white">No {filterStatus} applications.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -140,7 +140,7 @@ export default function AdminApplicationsPage() {
                   {filteredApps.map((app) => (
                     <tr key={app.id} className="border-b border-zinc-700 hover:bg-zinc-800/50 transition-colors">
                       <td className="px-6 py-3 text-sm text-white">{app.name}</td>
-                      <td className="px-6 py-3 text-sm text-zinc-400">{app.email}</td>
+                      <td className="px-6 py-3 text-sm text-white">{app.email}</td>
                       <td className="px-6 py-3 text-sm">
                         <span className={`text-xs font-bold uppercase ${
                           app.plan === 'pro' ? 'text-brand-orange' : 'text-purple-400'
@@ -148,9 +148,9 @@ export default function AdminApplicationsPage() {
                           {app.plan}
                         </span>
                       </td>
-                      <td className="px-6 py-3 text-sm text-zinc-400 text-xs">{app.experience}</td>
-                      <td className="px-6 py-3 text-sm text-zinc-400 text-xs">{app.capital}</td>
-                      <td className="px-6 py-3 text-sm text-zinc-500 text-xs">
+                      <td className="px-6 py-3 text-sm text-white text-xs">{app.experience}</td>
+                      <td className="px-6 py-3 text-sm text-white text-xs">{app.capital}</td>
+                      <td className="px-6 py-3 text-sm text-white text-xs">
                         {new Date(app.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-3 text-sm">
@@ -178,7 +178,7 @@ export default function AdminApplicationsPage() {
               <h2 className="font-bold uppercase tracking-wide">{selectedApp.name}</h2>
               <button
                 onClick={() => setSelectedApp(null)}
-                className="text-zinc-400 hover:text-white text-2xl"
+                className="text-white hover:text-white text-2xl"
               >
                 ×
               </button>
@@ -189,10 +189,10 @@ export default function AdminApplicationsPage() {
               <section>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-brand-orange mb-3">Personal Info</h3>
                 <div className="space-y-2 text-sm">
-                  <p><span className="text-zinc-400">Name:</span> <span className="text-white">{selectedApp.name}</span></p>
-                  <p><span className="text-zinc-400">Email:</span> <span className="text-white">{selectedApp.email}</span></p>
-                  {selectedApp.telegram && <p><span className="text-zinc-400">Telegram:</span> <span className="text-white">{selectedApp.telegram}</span></p>}
-                  <p><span className="text-zinc-400">Country:</span> <span className="text-white">{selectedApp.country}</span></p>
+                  <p><span className="text-white">Name:</span> <span className="text-white">{selectedApp.name}</span></p>
+                  <p><span className="text-white">Email:</span> <span className="text-white">{selectedApp.email}</span></p>
+                  {selectedApp.telegram && <p><span className="text-white">Telegram:</span> <span className="text-white">{selectedApp.telegram}</span></p>}
+                  <p><span className="text-white">Country:</span> <span className="text-white">{selectedApp.country}</span></p>
                 </div>
               </section>
 
@@ -200,10 +200,10 @@ export default function AdminApplicationsPage() {
               <section className="pt-4 border-t border-zinc-800">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-brand-orange mb-3">Trading Profile</h3>
                 <div className="space-y-2 text-sm">
-                  <p><span className="text-zinc-400">Experience:</span> <span className="text-white">{selectedApp.experience}</span></p>
-                  <p><span className="text-zinc-400">Capital:</span> <span className="text-white">{selectedApp.capital}</span></p>
-                  {selectedApp.exchanges && <p><span className="text-zinc-400">Exchanges:</span> <span className="text-white">{selectedApp.exchanges}</span></p>}
-                  {selectedApp.current_services && <p><span className="text-zinc-400">Current Services:</span> <span className="text-white">{selectedApp.current_services}</span></p>}
+                  <p><span className="text-white">Experience:</span> <span className="text-white">{selectedApp.experience}</span></p>
+                  <p><span className="text-white">Capital:</span> <span className="text-white">{selectedApp.capital}</span></p>
+                  {selectedApp.exchanges && <p><span className="text-white">Exchanges:</span> <span className="text-white">{selectedApp.exchanges}</span></p>}
+                  {selectedApp.current_services && <p><span className="text-white">Current Services:</span> <span className="text-white">{selectedApp.current_services}</span></p>}
                 </div>
               </section>
 
@@ -212,11 +212,11 @@ export default function AdminApplicationsPage() {
                 <h3 className="text-xs font-bold uppercase tracking-wider text-brand-orange mb-3">Application</h3>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-xs text-zinc-400 uppercase tracking-wider mb-1">Goal</p>
+                    <p className="text-xs text-white uppercase tracking-wider mb-1">Goal</p>
                     <p className="text-sm text-white">{selectedApp.goal}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-zinc-400 uppercase tracking-wider mb-1">Risk Management (THE KEY QUESTION)</p>
+                    <p className="text-xs text-white uppercase tracking-wider mb-1">Risk Management (THE KEY QUESTION)</p>
                     <p className="text-sm text-white">{selectedApp.risk_management}</p>
                   </div>
                 </div>

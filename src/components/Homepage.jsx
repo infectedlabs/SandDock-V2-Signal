@@ -552,7 +552,7 @@ export default function Homepage() {
                   </p>
                 </div>
               </div>
-              <p className="text-[11px] text-zinc-500">
+              <p className="text-[11px] text-white">
                 Last updated {isLoadingStats ? '...' : new Date(heroStats.last_updated).toLocaleTimeString()}
               </p>
             </div>
@@ -594,7 +594,7 @@ export default function Homepage() {
               {/* Header */}
               <div className="pb-4 border-b border-black mb-6">
                 <h3 className="text-2xl font-extrabold uppercase tracking-tighter text-black mb-1 mt-2">Verified & Transparent</h3>
-                <p className="text-sm text-zinc-600">Why traders trust Sanddock</p>
+                <p className="text-sm text-white">Why traders trust Sanddock</p>
               </div>
 
               {/* Trust Metrics */}
@@ -610,7 +610,7 @@ export default function Homepage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-black text-sm">Public Track Record</h4>
-                    <p className="text-xs text-zinc-600 mt-1">Every signal logged immutably. Zero cherry-picked wins.</p>
+                    <p className="text-xs text-white mt-1">Every signal logged immutably. Zero cherry-picked wins.</p>
                   </div>
                 </div>
 
@@ -625,7 +625,7 @@ export default function Homepage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-black text-sm">Real-Time Performance</h4>
-                    <p className="text-xs text-zinc-600 mt-1">Live PnL from {heroStats.total_signals.toLocaleString()} verified signals.</p>
+                    <p className="text-xs text-white mt-1">Live PnL from {heroStats.total_signals.toLocaleString()} verified signals.</p>
                   </div>
                 </div>
 
@@ -640,7 +640,7 @@ export default function Homepage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-black text-sm">No Hidden Fees</h4>
-                    <p className="text-xs text-zinc-600 mt-1">Transparent pricing. No markup on signals. No surprise charges.</p>
+                    <p className="text-xs text-white mt-1">Transparent pricing. No markup on signals. No surprise charges.</p>
                   </div>
                 </div>
 
@@ -655,14 +655,14 @@ export default function Homepage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-black text-sm">Win Rate Verified</h4>
-                    <p className="text-xs text-zinc-600 mt-1">{heroStats.win_rate.toFixed(1)}% on-chain verified. Auditable data.</p>
+                    <p className="text-xs text-white mt-1">{heroStats.win_rate.toFixed(1)}% on-chain verified. Auditable data.</p>
                   </div>
                 </div>
               </div>
 
               {/* Trust Badge */}
               <div className="mt-6 pt-6 border-t border-zinc-200 text-center">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Trusted By</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-white mb-2">Trusted By</p>
                 <p className="text-xs text-black font-semibold">Thousands of Professional Traders</p>
               </div>
             </div>
@@ -1253,8 +1253,8 @@ export default function Homepage() {
               </div>
 
               {/* Terminal Log Console */}
-              <div className="mt-6 pt-4 border-t border-white/10 font-mono text-[9px] text-zinc-400 space-y-1.5 text-left">
-                <div className="flex items-center justify-between text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-1">
+              <div className="mt-6 pt-4 border-t border-white/10 font-mono text-[9px] text-white space-y-1.5 text-left">
+                <div className="flex items-center justify-between text-[8px] font-bold text-white uppercase tracking-widest mb-1">
                   <span>System Console Logs</span>
                   <span className="text-[#00e676] animate-pulse">● Live Connection</span>
                 </div>
@@ -1267,7 +1267,7 @@ export default function Homepage() {
                   ) : (
                     <div className="text-signal-sell font-bold">&gt; [14:30:10] SIGNAL TRIGGERED: SELL {activeSignal.coin} @ {activeSignal.price} (Confidence: {activeSignal.confidence}%)</div>
                   )}
-                  <div className="text-zinc-500">&gt; [14:30:12] Generating AI Rationale description blocks... Done.</div>
+                  <div className="text-white">&gt; [14:30:12] Generating AI Rationale description blocks... Done.</div>
                 </div>
               </div>
 
@@ -1471,7 +1471,7 @@ export default function Homepage() {
         </div>
 
         {/* Stats Row - Real Data from Database */}
-        <div className="mb-4 text-xs text-zinc-500 flex items-center gap-2">
+        <div className="mb-4 text-xs text-white flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-signal-buy animate-pulse" />
           Real-time data from our immutable ledger
         </div>
@@ -1713,34 +1713,34 @@ export default function Homepage() {
                   Sanddock
                 </span>
               </div>
-              <p className="text-zinc-400 text-xs uppercase font-bold tracking-wider">
+              <p className="text-white text-xs uppercase font-bold tracking-wider">
                 Trading signals backed by data, not promises.
               </p>
               <div className="space-y-4 pt-4">
                 <div className="flex gap-4">
-                  <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Twitter/X">
+                  <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Twitter/X">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.637l-5.206-6.801-5.979 6.801h-3.31l7.734-8.835L2.25 2.25h6.82l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/>
                     </svg>
                   </a>
-                  <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Telegram">
+                  <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Telegram">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.82-1.084.51l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.782 13.5l-2.995-.937c-.652-.213-.66-.652.135-.973l11.717-4.518c.54-.213 1.012.122.84 1.15z"/>
                     </svg>
                   </a>
-                  <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="YouTube">
+                  <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="YouTube">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                     </svg>
                   </a>
-                  <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Instagram">
+                  <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Instagram">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.441 7.265c.504 0 .915.41.915.915 0 .504-.41.915-.915.915-.504 0-.915-.41-.915-.915 0-.504.41-.915.915-.915zm-3.441.915c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-1.5c-2.485 0-4.5 2.015-4.5 4.5s2.015 4.5 4.5 4.5 4.5-2.015 4.5-4.5-2.015-4.5-4.5-4.5zm6.5-2c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5z"/>
                     </svg>
                   </a>
                 </div>
                 <div className="pt-2">
-                  <a href="mailto:alex@sanddock.com" className="text-zinc-500 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">
+                  <a href="mailto:alex@sanddock.com" className="text-white hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">
                     alex@sanddock.com
                   </a>
                 </div>
@@ -1752,7 +1752,7 @@ export default function Homepage() {
               
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Product</h4>
-                <ul className="space-y-2 text-zinc-400 text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
                   <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
                   <li><a href="/terminal" className="hover:text-white transition-colors">Terminal</a></li>
                   <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
@@ -1763,7 +1763,7 @@ export default function Homepage() {
 
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Support</h4>
-                <ul className="space-y-2 text-zinc-400 text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
                   <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
                   <li><a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Telegram Community</a></li>
                   <li><a href="#docs" className="hover:text-white transition-colors">Help Center</a></li>
@@ -1774,7 +1774,7 @@ export default function Homepage() {
 
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Legal</h4>
-                <ul className="space-y-2 text-zinc-400 text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
                   <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
                   <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
                   <li><a href="#disclaimer" className="hover:text-white transition-colors">Disclaimer</a></li>
@@ -1786,7 +1786,7 @@ export default function Homepage() {
 
           </div>
 
-          <div className="border-t border-zinc-800 pt-8 text-center text-[10px] text-zinc-500 leading-relaxed font-bold uppercase tracking-wider">
+          <div className="border-t border-zinc-800 pt-8 text-center text-[10px] text-white leading-relaxed font-bold uppercase tracking-wider">
             &copy; {new Date().getFullYear()} Sanddock. Not financial advice. All signals are for educational purposes only. Past performance does not indicate future results.
           </div>
 

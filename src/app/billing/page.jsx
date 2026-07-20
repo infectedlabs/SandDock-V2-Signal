@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 const PLAN_COLORS = {
-  free:     'text-zinc-400',
+  free:     'text-white',
   trial:    'text-[#3D5AFE]',
   pro:      'text-brand-orange',
   master:   'text-purple-400',
@@ -14,7 +14,7 @@ const PLAN_COLORS = {
 };
 
 const STATUS_BADGES = {
-  free:      { label: 'Free Tier',       bg: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20' },
+  free:      { label: 'Free Tier',       bg: 'bg-zinc-500/10 text-white border-zinc-500/20' },
   trial:     { label: 'Trial Active',    bg: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
   active:    { label: 'Active Member',   bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
   cancelled: { label: 'Cancelled',       bg: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
@@ -130,7 +130,7 @@ export default function BillingPage() {
       <header className="border-b border-[#1e2d4a]/50 bg-[#0b1224]/80 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <a href="/terminal" className="text-zinc-400 hover:text-white transition-colors text-xs font-mono font-bold uppercase tracking-wider">← Terminal Console</a>
+            <a href="/terminal" className="text-white hover:text-white transition-colors text-xs font-mono font-bold uppercase tracking-wider">← Terminal Console</a>
             <span className="text-slate-800">|</span>
             <span className="text-xs font-black uppercase tracking-widest text-zinc-300">Billing & Plan</span>
           </div>
@@ -154,7 +154,7 @@ export default function BillingPage() {
               )}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-3">
-                  <span className="block text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500">Current Plan</span>
+                  <span className="block text-[10px] font-mono font-bold uppercase tracking-widest text-white">Current Plan</span>
                   <div className="flex flex-wrap items-center gap-3">
                     <h1 className={`text-2xl font-black uppercase tracking-tight ${PLAN_COLORS[plan] || 'text-white'}`}>
                       {plan === 'lifetime' ? 'GrandMaster Lifetime' : `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`}
@@ -166,7 +166,7 @@ export default function BillingPage() {
 
 
                   {isPaid && billing?.currentPeriodEnd && (
-                    <p className="text-[12px] text-zinc-400 font-mono font-bold">
+                    <p className="text-[12px] text-white font-mono font-bold">
                       {status === 'cancelled'
                         ? `Access until: ${formatDate(billing.currentPeriodEnd)}`
                         : `Renews: ${formatDate(billing.currentPeriodEnd)}`}
@@ -225,14 +225,14 @@ export default function BillingPage() {
               <h2 className="text-[13px] font-black uppercase tracking-wider text-white mb-5 border-b border-[#1e2d4a] pb-2">Payment History</h2>
               {payments.length === 0 ? (
                 <div className="text-center py-10 border border-dashed border-slate-800 bg-[#020617]/40 rounded-xl">
-                  <p className="text-[13px] font-mono font-bold text-zinc-500">No payments recorded yet.</p>
-                  {isFreePlan && <p className="text-[11px] font-mono text-zinc-600 mt-1 uppercase">Upgrade to Pro or Master to unlock premium signals.</p>}
+                  <p className="text-[13px] font-mono font-bold text-white">No payments recorded yet.</p>
+                  {isFreePlan && <p className="text-[11px] font-mono text-white mt-1 uppercase">Upgrade to Pro or Master to unlock premium signals.</p>}
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-xl border border-[#1e2d4a] shadow-inner bg-[#020617]/50">
                   <table className="w-full text-left border-collapse text-[12px]">
                     <thead>
-                      <tr className="bg-slate-950/50 border-b border-[#1e2d4a] text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-500">
+                      <tr className="bg-slate-950/50 border-b border-[#1e2d4a] text-[10px] font-mono font-bold uppercase tracking-widest text-white">
                         <th className="p-3">Date</th>
                         <th className="p-3">Plan</th>
                         <th className="p-3">Cycle</th>
@@ -243,9 +243,9 @@ export default function BillingPage() {
                     <tbody className="divide-y divide-[#1e2d4a]/30 font-mono text-zinc-300">
                       {payments.map((p) => (
                         <tr key={p.id} className="hover:bg-slate-900/20 transition-colors">
-                          <td className="p-3 text-zinc-500">{formatDate(p.created_at)}</td>
+                          <td className="p-3 text-white">{formatDate(p.created_at)}</td>
                           <td className="p-3 font-extrabold uppercase text-white">{p.plan}</td>
-                          <td className="p-3 capitalize text-zinc-400">{p.billing_cycle || '-'}</td>
+                          <td className="p-3 capitalize text-white">{p.billing_cycle || '-'}</td>
                           <td className="p-3 font-bold text-[#00e676]">{formatCurrency(p.amount, p.currency)}</td>
                           <td className="p-3">
                             <span className={`text-[10px] px-2 py-0.5 font-bold border rounded-full ${
@@ -284,7 +284,7 @@ export default function BillingPage() {
                   { label: 'Signal History', value: isPaid ? (plan === 'pro' ? '3 coins' : 'All coins') : 'BTC read-only' },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex items-center justify-between bg-slate-950/40 border border-[#1e2d4a]/50 p-3 rounded-xl">
-                    <span className="text-zinc-500 uppercase tracking-wider text-[9px] font-bold">{label}</span>
+                    <span className="text-white uppercase tracking-wider text-[9px] font-bold">{label}</span>
                     <span className="font-extrabold text-white text-[10px] uppercase">{value}</span>
                   </div>
                 ))}
@@ -295,7 +295,7 @@ export default function BillingPage() {
             {isPaid && status !== 'lifetime' && (
               <section className="bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-6 sm:p-8 rounded-2xl text-left shadow-2xl">
                 <h2 className="text-[13px] font-black uppercase tracking-wider text-white mb-2 border-b border-[#1e2d4a] pb-2">Manage Subscription</h2>
-                <p className="text-[12px] text-zinc-400 mb-5 font-medium leading-relaxed">
+                <p className="text-[12px] text-white mb-5 font-medium leading-relaxed">
                   To cancel or update your payment method, contact us at{' '}
                   <a href="mailto:alex@sanddock.com" className="text-[#3D5AFE] hover:underline font-bold">alex@sanddock.com</a>
                   . You'll keep access until the end of your billing period.
@@ -331,7 +331,7 @@ export default function BillingPage() {
                 setShowSuccessModal(false);
                 router.replace('/billing');
               }}
-              className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors border-0 bg-transparent cursor-pointer text-lg font-mono"
+              className="absolute top-4 right-4 text-white hover:text-white transition-colors border-0 bg-transparent cursor-pointer text-lg font-mono"
             >
               &times;
             </button>
@@ -341,7 +341,7 @@ export default function BillingPage() {
               <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">
                 Upgrade Successful!
               </h2>
-              <p className="text-[13px] text-zinc-400 font-mono">
+              <p className="text-[13px] text-white font-mono">
                 You are now a premium Sanddock {successPlan.toUpperCase()} member.
               </p>
             </div>
@@ -355,11 +355,11 @@ export default function BillingPage() {
               <div className="p-4 bg-[#090e1a] border border-zinc-850 space-y-3">
                 <div className="flex justify-between items-center gap-2">
                   <div>
-                    <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 1: Link account</span>
+                    <span className="block text-[10px] text-white uppercase font-bold">Step 1: Link account</span>
                     {profile?.telegram_chat_id ? (
                       <span className="text-[#00e676] font-bold">Connected</span>
                     ) : (
-                      <span className="text-zinc-400">Not linked</span>
+                      <span className="text-white">Not linked</span>
                     )}
                   </div>
                   {!profile?.telegram_chat_id && tgPairingStep === 1 && (
@@ -372,7 +372,7 @@ export default function BillingPage() {
 
                 {!profile?.telegram_chat_id && tgPairingStep === 2 && (
                   <div className="p-3 bg-zinc-900/60 border border-zinc-800 space-y-2.5">
-                    <span className="block text-[10px] text-zinc-400 font-bold">Enter pairing code from @SanddockBot:</span>
+                    <span className="block text-[10px] text-white font-bold">Enter pairing code from @SanddockBot:</span>
                     <div className="flex gap-1.5 items-center justify-between flex-wrap">
                       <div className="flex gap-1">
                         {tgPairingCode.map((char, index) => (
@@ -418,13 +418,13 @@ export default function BillingPage() {
               <div className="p-4 bg-[#090e1a] border border-zinc-850 space-y-3">
                 <div className="flex justify-between items-center gap-2">
                   <div>
-                    <span className="block text-[10px] text-zinc-500 uppercase font-bold">Step 2: Join {successPlan === 'lifetime' ? 'GrandMaster' : successPlan.charAt(0).toUpperCase() + successPlan.slice(1)} Channel</span>
+                    <span className="block text-[10px] text-white uppercase font-bold">Step 2: Join {successPlan === 'lifetime' ? 'GrandMaster' : successPlan.charAt(0).toUpperCase() + successPlan.slice(1)} Channel</span>
                     {!profile?.telegram_chat_id ? (
-                      <span className="text-zinc-500 font-bold">Waiting for Step 1</span>
+                      <span className="text-white font-bold">Waiting for Step 1</span>
                     ) : profile?.telegram_invite_claimed ? (
                       <span className="text-[#00e676] font-bold">Private link generated (1/1 claimed)</span>
                     ) : (
-                      <span className="text-zinc-400 font-bold">Invite not claimed yet</span>
+                      <span className="text-white font-bold">Invite not claimed yet</span>
                     )}
                   </div>
                   {profile?.telegram_chat_id && (
@@ -452,7 +452,7 @@ export default function BillingPage() {
                 </div>
                 {profile?.telegram_invite_claimed && (
                   <div className="mt-2 p-2.5 bg-zinc-950 border border-zinc-800 break-all text-[11px] text-zinc-300">
-                    <span className="block text-[9px] text-zinc-500 font-bold uppercase">Your 1-time Invite Link:</span>
+                    <span className="block text-[9px] text-white font-bold uppercase">Your 1-time Invite Link:</span>
                     <a href={profile.telegram_invite_link} target="_blank" rel="noopener noreferrer" className="text-[#3D5AFE] hover:underline">
                       {profile.telegram_invite_link}
                     </a>
@@ -485,31 +485,31 @@ export default function BillingPage() {
                 <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-6 h-6 object-contain" />
                 <span className="text-base font-bold uppercase tracking-wider font-sans text-white">Sanddock</span>
               </div>
-              <p className="text-zinc-400 text-xs uppercase font-bold tracking-wider">Trading signals backed by data, not promises.</p>
+              <p className="text-white text-xs uppercase font-bold tracking-wider">Trading signals backed by data, not promises.</p>
               <div className="space-y-4 pt-4">
                 <div className="flex gap-4">
-                  <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Twitter/X">
+                  <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Twitter/X">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.637l-5.206-6.801-5.979 6.801h-3.31l7.734-8.835L2.25 2.25h6.82l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg>
                   </a>
-                  <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Telegram">
+                  <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Telegram">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.82-1.084.51l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.782 13.5l-2.995-.937c-.652-.213-.66-.652.135-.973l11.717-4.518c.54-.213 1.012.122.84 1.15z"/></svg>
                   </a>
-                  <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="YouTube">
+                  <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="YouTube">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                   </a>
-                  <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Instagram">
+                  <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Instagram">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.441 7.265c.504 0 .915.41.915.915 0 .504-.41.915-.915.915-.504 0-.915-.41-.915-.915 0-.504.41-.915.915-.915zm-3.441.915c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-1.5c-2.485 0-4.5 2.015-4.5 4.5s2.015 4.5 4.5 4.5 4.5-2.015 4.5-4.5-2.015-4.5-4.5-4.5zm6.5-2c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5z"/></svg>
                   </a>
                 </div>
                 <div className="pt-2">
-                  <a href="mailto:alex@sanddock.com" className="text-zinc-500 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">alex@sanddock.com</a>
+                  <a href="mailto:alex@sanddock.com" className="text-white hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">alex@sanddock.com</a>
                 </div>
               </div>
             </div>
             <div className="md:col-span-7 grid grid-cols-3 gap-8 text-left">
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Product</h4>
-                <ul className="space-y-2 text-zinc-400 text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
                   <li><a href="/#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
                   <li><a href="/terminal" className="hover:text-white transition-colors">Terminal</a></li>
                   <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
@@ -519,7 +519,7 @@ export default function BillingPage() {
               </div>
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Support</h4>
-                <ul className="space-y-2 text-zinc-400 text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
                   <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
                   <li><a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Telegram Community</a></li>
                   <li><a href="#docs" className="hover:text-white transition-colors">Help Center</a></li>
@@ -529,7 +529,7 @@ export default function BillingPage() {
               </div>
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Legal</h4>
-                <ul className="space-y-2 text-zinc-400 text-[11px] font-medium uppercase tracking-wider font-sans">
+                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
                   <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
                   <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
                   <li><a href="#disclaimer" className="hover:text-white transition-colors">Disclaimer</a></li>
@@ -538,7 +538,7 @@ export default function BillingPage() {
               </div>
             </div>
           </div>
-          <div className="border-t border-zinc-800 pt-8 text-center text-[10px] text-zinc-500 leading-relaxed font-bold uppercase tracking-wider">
+          <div className="border-t border-zinc-800 pt-8 text-center text-[10px] text-white leading-relaxed font-bold uppercase tracking-wider">
             &copy; {new Date().getFullYear()} Sanddock. Not financial advice. All signals are for educational purposes only. Past performance does not indicate future results.
           </div>
         </div>

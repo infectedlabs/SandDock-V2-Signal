@@ -1153,7 +1153,7 @@ export default function HAChart({
                           {isBuy ? 'BUY' : 'SELL'}
                         </span>
                         {isClosed ? (
-                          <span className="text-[7.5px] font-extrabold px-1 py-0.5 rounded bg-zinc-800 text-zinc-400 select-none uppercase tracking-wide leading-none">
+                          <span className="text-[7.5px] font-extrabold px-1 py-0.5 rounded bg-zinc-800 text-white select-none uppercase tracking-wide leading-none">
                             closed
                           </span>
                         ) : (
@@ -1217,17 +1217,17 @@ export default function HAChart({
             <>
 
               <div className="absolute right-24 top-6 z-30 bg-[#0b1224]/90 border border-slate-800/80 rounded px-3 py-2 font-mono text-[10px] shadow-2xl text-left select-none pointer-events-none select-none">
-                <div className="text-zinc-500 font-extrabold uppercase tracking-wider">Risk : Reward</div>
+                <div className="text-white font-extrabold uppercase tracking-wider">Risk : Reward</div>
                 <div className="text-[#00e676] font-black text-[13px] mt-0.5">
                   1 : {(Math.abs(parseFloat(activeSignal.tp_price) - parseFloat(activeSignal.entry_price)) / Math.abs(parseFloat(activeSignal.entry_price) - parseFloat(activeSignal.sl_price)) || 1.0).toFixed(1)}
                 </div>
-                <div className="text-zinc-400 mt-0.5 font-bold">
+                <div className="text-white mt-0.5 font-bold">
                   {signalStats ? `${signalStats.tpPctVal >= 0 ? '+' : ''}${signalStats.tpPct}% / ${signalStats.slPctVal >= 0 ? '+' : ''}${signalStats.slPct}%` : ''}
                 </div>
               </div>
               {livePriceRef.current && (
                 <div className="absolute left-6 top-6 z-30 bg-[#0b1224]/90 border border-slate-800/80 rounded px-3 py-2 font-mono text-[10px] shadow-2xl text-left select-none pointer-events-none select-none">
-                  <div className="text-zinc-500 font-extrabold uppercase tracking-wider">Live Position Gain</div>
+                  <div className="text-white font-extrabold uppercase tracking-wider">Live Position Gain</div>
                   {(() => {
                     const isBuy = activeSignal.signal_type === 'buy';
                     const diff = livePriceRef.current - parseFloat(activeSignal.entry_price);
@@ -1239,7 +1239,7 @@ export default function HAChart({
                         <div className={`font-black text-[13px] mt-0.5 ${isProfit ? 'text-[#00e676]' : 'text-[#ff1744]'}`}>
                           {isProfit ? '+' : ''}{pnlPct.toFixed(2)}%
                         </div>
-                        <div className="text-zinc-400 mt-0.5 font-bold">
+                        <div className="text-white mt-0.5 font-bold">
                           {isProfit ? 'Profit' : 'Loss'}: {isProfit ? '' : '-'}${absVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                         </div>
                       </>

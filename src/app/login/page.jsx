@@ -25,7 +25,7 @@ export default function LoginPage() {
       <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
           <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-12 h-12 animate-pulse object-contain" />
-          <span className="text-xs font-bold uppercase tracking-widest font-mono text-zinc-500 animate-pulse">
+          <span className="text-xs font-bold uppercase tracking-widest font-mono text-white animate-pulse">
             Loading...
           </span>
         </div>
@@ -86,7 +86,7 @@ export default function LoginPage() {
             <h2 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-white leading-none">
               Real-time<br />swing detection.
             </h2>
-            <p className="text-zinc-400 text-xs uppercase tracking-wider font-semibold">
+            <p className="text-white text-xs uppercase tracking-wider font-semibold">
               Live trade setups calculated by AI models.
             </p>
           </div>
@@ -98,20 +98,20 @@ export default function LoginPage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Live Setup Open
               </span>
-              <span className="text-[9px] font-mono text-zinc-500 uppercase">BTC/USDT (15m HA)</span>
+              <span className="text-[9px] font-mono text-white uppercase">BTC/USDT (15m HA)</span>
             </div>
 
             <div className="grid grid-cols-3 gap-3 border-y border-zinc-900 py-2.5 text-left">
               <div>
-                <span className="block text-[7px] text-zinc-500 font-bold uppercase tracking-widest">Entry Target</span>
+                <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Entry Target</span>
                 <span className="font-mono text-xs font-bold text-white">$67,420.00</span>
               </div>
               <div>
-                <span className="block text-[7px] text-zinc-500 font-bold uppercase tracking-widest">Stop Loss</span>
-                <span className="font-mono text-xs font-bold text-zinc-400">$66,850.00</span>
+                <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Stop Loss</span>
+                <span className="font-mono text-xs font-bold text-white">$66,850.00</span>
               </div>
               <div>
-                <span className="block text-[7px] text-zinc-500 font-bold uppercase tracking-widest">Take Profit</span>
+                <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Take Profit</span>
                 <span className="font-mono text-xs font-bold text-[#00e676]">$69,200.00</span>
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function LoginPage() {
                 <span className="text-[8px] font-bold bg-brand-orange text-white px-1.5 py-0.5 uppercase tracking-widest font-mono">AI Rating</span>
                 <span className="font-mono text-xs font-bold text-white">87% Confidence</span>
               </div>
-              <p className="text-[11px] text-zinc-400 font-mono leading-relaxed normal-case">
+              <p className="text-[11px] text-white font-mono leading-relaxed normal-case">
                 &ldquo;BTC swing bottom confirmed on Heikin Ashi candles. Spot volume shows strong absorption at local support levels. Proceeding with alternating swing structure.&rdquo;
               </p>
             </div>
@@ -129,7 +129,7 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom: Legal Disclaimer */}
-        <div className="relative z-10 pt-4 border-t border-zinc-900 text-[9px] text-zinc-500 uppercase font-bold tracking-wider leading-relaxed">
+        <div className="relative z-10 pt-4 border-t border-zinc-900 text-[9px] text-white uppercase font-bold tracking-wider leading-relaxed">
           Signals are for educational purposes only - not financial advice. Past signals do not guarantee future results.
         </div>
       </div>
@@ -240,7 +240,7 @@ export default function LoginPage() {
         </div>
 
         {/* Mobile Disclaimer */}
-        <div className="lg:hidden mt-8 text-[9px] text-zinc-500 uppercase font-bold tracking-wider leading-relaxed text-center">
+        <div className="lg:hidden mt-8 text-[9px] text-white uppercase font-bold tracking-wider leading-relaxed text-center">
           Signals are for educational purposes only - not financial advice. Past signals do not guarantee future results.
         </div>
       </div>

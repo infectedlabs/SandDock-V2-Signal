@@ -229,10 +229,10 @@ function ApplyPageContent() {
         <div className="max-w-2xl mx-auto px-6 py-24 text-center">
           <div className="text-6xl font-black mb-6">✓</div>
           <h1 className="text-4xl font-extrabold uppercase tracking-tighter text-black mb-4">Application Received</h1>
-          <p className="text-zinc-600 text-lg leading-relaxed mb-8">
+          <p className="text-white text-lg leading-relaxed mb-8">
             Thanks for applying! We'll review your application within 24 hours and send you an email with our decision. Please check your spam folder to make sure you don't miss it.
           </p>
-          <p className="text-[11px] text-zinc-500">Redirecting to home in 3 seconds...</p>
+          <p className="text-[11px] text-white">Redirecting to home in 3 seconds...</p>
         </div>
       </div>
     );
@@ -262,12 +262,12 @@ function ApplyPageContent() {
             <h1 className="text-2xl font-extrabold uppercase tracking-tighter text-black">
               {currentStepData.title}
             </h1>
-            <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+            <span className="text-xs font-bold uppercase tracking-widest text-white">
               Step {currentStep + 1} of {totalSteps}
             </span>
           </div>
           {currentStepData.subtitle && (
-            <p className="text-sm text-zinc-600 mb-4">{currentStepData.subtitle}</p>
+            <p className="text-sm text-white mb-4">{currentStepData.subtitle}</p>
           )}
           <div className="w-full bg-zinc-200 h-1 rounded-none overflow-hidden">
             <div
@@ -313,7 +313,7 @@ function ApplyPageContent() {
                 onChange={handleChange}
                 className="w-full border border-zinc-300 px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-brand-orange rounded-none cursor-pointer"
               >
-                <option value="" className="text-zinc-400">Select an option</option>
+                <option value="" className="text-white">Select an option</option>
                 {currentStepData.options.map((opt) => (
                   <option key={opt.value} value={opt.value} className="text-black">
                     {opt.label}
@@ -353,14 +353,14 @@ function ApplyPageContent() {
             )}
           </div>
 
-          <p className="text-[11px] text-zinc-500 text-center">
+          <p className="text-[11px] text-white text-center">
             Reviewed within 24 hours. Email notification sent.
           </p>
         </form>
       </div>
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer className="py-8 text-center text-zinc-500 text-xs border-t border-black mt-12">
+      <footer className="py-8 text-center text-white text-xs border-t border-black mt-12">
         <p>© 2024 Sanddock. Not financial advice. Educational purposes only.</p>
       </footer>
     </div>

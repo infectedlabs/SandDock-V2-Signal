@@ -26,7 +26,7 @@ export default function SignupPage() {
       <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
           <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-12 h-12 animate-pulse object-contain" />
-          <span className="text-xs font-bold uppercase tracking-widest font-mono text-zinc-500 animate-pulse">
+          <span className="text-xs font-bold uppercase tracking-widest font-mono text-white animate-pulse">
             Loading...
           </span>
         </div>
@@ -110,7 +110,7 @@ export default function SignupPage() {
 
           {/* Testimonial Quote */}
           <div className="pt-6 border-t border-zinc-800">
-            <p className="text-xs text-zinc-400 italic font-sans normal-case font-normal leading-relaxed">
+            <p className="text-xs text-white italic font-sans normal-case font-normal leading-relaxed">
               &ldquo;The AI rationale changes everything. I don&apos;t just blindly follow calls anymore - I understand the market structure behind each swing.&rdquo;
             </p>
             <span className="block text-[9px] font-bold text-brand-orange uppercase tracking-wider mt-2 font-mono">
@@ -120,7 +120,7 @@ export default function SignupPage() {
         </div>
 
         {/* Bottom: Legal Disclaimer */}
-        <div className="relative z-10 pt-4 border-t border-zinc-900 text-[9px] text-zinc-500 uppercase font-bold tracking-wider leading-relaxed">
+        <div className="relative z-10 pt-4 border-t border-zinc-900 text-[9px] text-white uppercase font-bold tracking-wider leading-relaxed">
           Signals are for educational purposes only - not financial advice. Past signals do not guarantee future results.
         </div>
       </div>
@@ -245,7 +245,7 @@ export default function SignupPage() {
         </div>
 
         {/* Mobile Disclaimer */}
-        <div className="lg:hidden mt-8 text-[9px] text-zinc-500 uppercase font-bold tracking-wider leading-relaxed text-center">
+        <div className="lg:hidden mt-8 text-[9px] text-white uppercase font-bold tracking-wider leading-relaxed text-center">
           Signals are for educational purposes only - not financial advice. Past signals do not guarantee future results.
         </div>
       </div>
