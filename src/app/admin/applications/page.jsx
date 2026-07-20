@@ -78,7 +78,7 @@ export default function AdminApplicationsPage() {
       <div className="min-h-screen bg-white text-black flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-xl font-bold">Access Denied</p>
-          <p className="text-white">Only ghuruprasaath@gmail.com has access to this page.</p>
+          <p className="text-black">Only ghuruprasaath@gmail.com has access to this page.</p>
           <a href="/" className="inline-block px-6 py-2 bg-black text-white font-bold text-sm uppercase rounded-lg hover:bg-brand-orange transition-all">
             Go Home
           </a>

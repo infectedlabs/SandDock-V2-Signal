@@ -26,7 +26,7 @@ export default function SignupPage() {
       <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
           <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-12 h-12 animate-pulse object-contain" />
-          <span className="text-xs font-bold uppercase tracking-widest font-mono text-white animate-pulse">
+          <span className="text-xs font-bold uppercase tracking-widest font-mono text-black animate-pulse">
             Loading...
           </span>
         </div>
@@ -81,7 +81,7 @@ export default function SignupPage() {
         <div className="relative z-10">
           <a href="/" className="flex items-center gap-2.5">
             <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-extrabold tracking-tighter uppercase font-mono text-white">
+            <span className="text-xl font-extrabold tracking-tighter uppercase font-mono text-black">
               Sanddock
             </span>
           </a>
@@ -89,7 +89,7 @@ export default function SignupPage() {
 
         {/* Center: Hero Branding & Feature list */}
         <div className="space-y-8 max-w-lg relative z-10 text-left my-auto">
-          <h2 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-white leading-none">
+          <h2 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-black leading-none">
             Your next trade<br />deserves <span className="text-brand-orange">a reason.</span>
           </h2>
           
@@ -110,7 +110,7 @@ export default function SignupPage() {
 
           {/* Testimonial Quote */}
           <div className="pt-6 border-t border-zinc-800">
-            <p className="text-xs text-white italic font-sans normal-case font-normal leading-relaxed">
+            <p className="text-xs text-black italic font-sans normal-case font-normal leading-relaxed">
               &ldquo;The AI rationale changes everything. I don&apos;t just blindly follow calls anymore - I understand the market structure behind each swing.&rdquo;
             </p>
             <span className="block text-[9px] font-bold text-brand-orange uppercase tracking-wider mt-2 font-mono">

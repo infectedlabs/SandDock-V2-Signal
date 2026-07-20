@@ -1934,17 +1934,29 @@ export default function TerminalPage() {
             {/* ══ CHART TAB ════════════════════════════════════════════════════ */}
             {activeTab === 'chart' && (
               <div className="space-y-5">
-                <HAChart
-                  symbol={selectedSymbol}
-                  interval={selectedInterval}
-                  isFreePlan={isFreePlan}
-                  onSymbolChange={setSelectedSymbol}
-                  onIntervalChange={setSelectedInterval}
-                  onPriceTick={setLiveBtcPrice}
-                  plan={profile?.plan || 'free'}
-                  onUpgradeGate={triggerUpgradeGate}
-                />
-                <SignalPanel signals={logSignals || []} />
+                {/* Helpful Note */}
+                <div className="bg-[#0d1426]/50 border border-[#1e2d4a]/50 rounded-lg p-3">
+                  <p className="text-[11px] text-white/80 font-mono">💡 Click the arrow or drag near the signal to view entry, stop loss & take profit details</p>
+                </div>
+
+                {/* Chart Component - Full Width */}
+                <div className="w-full h-[500px] rounded-lg border border-slate-800/50 bg-[#0f172a]/30 overflow-hidden">
+                  <HAChart
+                    symbol={selectedSymbol}
+                    interval={selectedInterval}
+                    isFreePlan={isFreePlan}
+                    onSymbolChange={setSelectedSymbol}
+                    onIntervalChange={setSelectedInterval}
+                    onPriceTick={setLiveBtcPrice}
+                    plan={profile?.plan || 'free'}
+                    onUpgradeGate={triggerUpgradeGate}
+                  />
+                </div>
+
+                {/* Signals Table Card - Separate Section */}
+                <div className="w-full rounded-lg border border-slate-800/50 bg-[#0f172a]/30 overflow-hidden">
+                  <SignalPanel signals={logSignals || []} />
+                </div>
               </div>
             )}
 

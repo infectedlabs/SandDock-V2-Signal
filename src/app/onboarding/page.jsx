@@ -285,10 +285,10 @@ export default function OnboardingPage() {
           {step === 1 && (
             <div className="space-y-5 text-left">
               <div className="space-y-1.5">
-                <h2 className="text-xl md:text-2xl font-extrabold uppercase tracking-tight text-white leading-none">
+                <h2 className="text-xl md:text-2xl font-extrabold uppercase tracking-tight text-black leading-none">
                   {headline}
                 </h2>
-                <p className="text-white text-xs leading-relaxed normal-case">
+                <p className="text-black text-xs leading-relaxed normal-case">
                   We will adjust your signals feed, descriptions, and learning tooltips to match where you are.
                 </p>
               </div>
@@ -308,12 +308,12 @@ export default function OnboardingPage() {
                       <div className="mb-3 flex text-brand-orange">
                         {opt.icon}
                       </div>
-                      <span className="block font-bold text-xs uppercase tracking-wider mb-1.5 text-white">{opt.label}</span>
-                      <span className="block text-[11px] text-white normal-case leading-relaxed mb-3">{opt.desc}</span>
+                      <span className="block font-bold text-xs uppercase tracking-wider mb-1.5 text-black">{opt.label}</span>
+                      <span className="block text-[11px] text-black normal-case leading-relaxed mb-3">{opt.desc}</span>
                     </div>
                     <div>
                       <div className="border-t border-zinc-800/80 my-2.5 w-full" />
-                      <span className="block text-[10px] text-white normal-case leading-relaxed font-mono">{opt.preview}</span>
+                      <span className="block text-[10px] text-black normal-case leading-relaxed font-mono">{opt.preview}</span>
                     </div>
                   </div>
                 ))}

@@ -106,6 +106,7 @@ function ApplyPageContent() {
       options: [
         { value: "pro", label: "Pro (BTC, ETH, BNB)" },
         { value: "master", label: "Master (All 15 coins)" },
+        { value: "grandmaster", label: "Grandmaster (Lifetime)" },
       ],
     },
     {
@@ -201,9 +202,6 @@ function ApplyPageContent() {
       }
 
       setSubmitSuccess(true);
-      setTimeout(() => {
-        router.push("/");
-      }, 3000);
     } catch (error) {
       setSubmitError(error.message);
     } finally {
@@ -220,19 +218,48 @@ function ApplyPageContent() {
               <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
               <span className="text-lg font-bold tracking-tighter uppercase font-sans text-black">Sanddock</span>
             </a>
-            <a href="/pricing" className="text-[11px] font-bold uppercase tracking-wider hover:text-brand-orange transition-colors">
-              Back to Pricing →
-            </a>
           </div>
         </header>
 
-        <div className="max-w-2xl mx-auto px-6 py-24 text-center">
-          <div className="text-6xl font-black mb-6">✓</div>
-          <h1 className="text-4xl font-extrabold uppercase tracking-tighter text-black mb-4">Application Received</h1>
-          <p className="text-white text-lg leading-relaxed mb-8">
-            Thanks for applying! We'll review your application within 24 hours and send you an email with our decision. Please check your spam folder to make sure you don't miss it.
-          </p>
-          <p className="text-[11px] text-white">Redirecting to home in 3 seconds...</p>
+        <div className="max-w-2xl mx-auto px-6 py-16">
+          <div className="space-y-8">
+            <div className="text-center space-y-4">
+              <div className="text-6xl font-black">✓</div>
+              <h1 className="text-4xl font-extrabold uppercase tracking-tighter text-black">Application Received</h1>
+            </div>
+
+            <div className="border border-black p-8 space-y-6">
+              <div className="space-y-3">
+                <h2 className="text-lg font-bold uppercase tracking-tight text-black">What happens next?</h2>
+                <p className="text-sm text-black leading-relaxed">
+                  Thanks for applying! We'll review your application within 24 hours and send you an email with our decision.
+                  Please check your spam folder to make sure you don't miss it.
+                </p>
+              </div>
+
+              <div className="border-t border-black pt-6 space-y-4 bg-amber-50 border border-amber-200 p-4">
+                <h3 className="font-bold text-black">Want to know more about pricing and application status?</h3>
+                <p className="text-sm text-black leading-relaxed">
+                  Contact us on Telegram for details about pricing, payment options, and to follow up on your application.
+                </p>
+                <a
+                  href="https://t.me/alexsanddockcom"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-sm font-bold text-amber-700 hover:text-amber-900 underline"
+                >
+                  Contact @alexsanddockcom →
+                </a>
+              </div>
+            </div>
+
+            <button
+              onClick={() => router.push('/terminal')}
+              className="w-full py-3 bg-black hover:bg-brand-orange text-white font-bold text-sm uppercase tracking-widest transition-all border border-black"
+            >
+              Go Back to Terminal →
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -262,12 +289,12 @@ function ApplyPageContent() {
             <h1 className="text-2xl font-extrabold uppercase tracking-tighter text-black">
               {currentStepData.title}
             </h1>
-            <span className="text-xs font-bold uppercase tracking-widest text-white">
+            <span className="text-xs font-bold uppercase tracking-widest text-black">
               Step {currentStep + 1} of {totalSteps}
             </span>
           </div>
           {currentStepData.subtitle && (
-            <p className="text-sm text-white mb-4">{currentStepData.subtitle}</p>
+            <p className="text-sm text-black mb-4">{currentStepData.subtitle}</p>
           )}
           <div className="w-full bg-zinc-200 h-1 rounded-none overflow-hidden">
             <div
@@ -313,7 +340,7 @@ function ApplyPageContent() {
                 onChange={handleChange}
                 className="w-full border border-zinc-300 px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-brand-orange rounded-none cursor-pointer"
               >
-                <option value="" className="text-white">Select an option</option>
+                <option value="" className="text-black">Select an option</option>
                 {currentStepData.options.map((opt) => (
                   <option key={opt.value} value={opt.value} className="text-black">
                     {opt.label}
@@ -353,14 +380,14 @@ function ApplyPageContent() {
             )}
           </div>
 
-          <p className="text-[11px] text-white text-center">
+          <p className="text-[11px] text-black text-center">
             Reviewed within 24 hours. Email notification sent.
           </p>
         </form>
       </div>
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer className="py-8 text-center text-white text-xs border-t border-black mt-12">
+      <footer className="py-8 text-center text-black text-xs border-t border-black mt-12">
         <p>© 2024 Sanddock. Not financial advice. Educational purposes only.</p>
       </footer>
     </div>

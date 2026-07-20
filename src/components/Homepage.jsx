@@ -552,7 +552,7 @@ export default function Homepage() {
                   </p>
                 </div>
               </div>
-              <p className="text-[11px] text-white">
+              <p className="text-[11px] text-black">
                 Last updated {isLoadingStats ? '...' : new Date(heroStats.last_updated).toLocaleTimeString()}
               </p>
             </div>
@@ -594,7 +594,7 @@ export default function Homepage() {
               {/* Header */}
               <div className="pb-4 border-b border-black mb-6">
                 <h3 className="text-2xl font-extrabold uppercase tracking-tighter text-black mb-1 mt-2">Verified & Transparent</h3>
-                <p className="text-sm text-white">Why traders trust Sanddock</p>
+                <p className="text-sm text-black">Why traders trust Sanddock</p>
               </div>
 
               {/* Trust Metrics */}
@@ -610,7 +610,7 @@ export default function Homepage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-black text-sm">Public Track Record</h4>
-                    <p className="text-xs text-white mt-1">Every signal logged immutably. Zero cherry-picked wins.</p>
+                    <p className="text-xs text-black mt-1">Every signal logged immutably. Zero cherry-picked wins.</p>
                   </div>
                 </div>
 
@@ -625,7 +625,7 @@ export default function Homepage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-black text-sm">Real-Time Performance</h4>
-                    <p className="text-xs text-white mt-1">Live PnL from {heroStats.total_signals.toLocaleString()} verified signals.</p>
+                    <p className="text-xs text-black mt-1">Live PnL from {heroStats.total_signals.toLocaleString()} verified signals.</p>
                   </div>
                 </div>
 

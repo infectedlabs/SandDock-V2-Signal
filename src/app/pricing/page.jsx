@@ -10,7 +10,7 @@ const PLANS_DATA = {
     label: "Free Plan",
     sublabel: "Always open to BTC signals",
     monthlyPrice: 0,
-    color: "text-white",
+    color: "text-black",
     badge: null,
     highlight: false,
     features: [
@@ -115,24 +115,24 @@ function PricingCard({ planKey, data, user }) {
             {isFree ? (
               <>
                 <span className="text-4xl font-extrabold font-mono text-black">$0</span>
-                <span className="block text-[11px] text-white font-bold mt-0.5">No credit card · Permanent access</span>
+                <span className="block text-[11px] text-black font-bold mt-0.5">No credit card · Permanent access</span>
               </>
             ) : (
               <>
                 <span className="text-2xl font-extrabold font-mono text-brand-orange">Application Only</span>
-                <span className="block text-[11px] text-white font-bold mt-1">Pricing revealed after approval</span>
+                <span className="block text-[11px] text-black font-bold mt-1">Pricing revealed after approval</span>
               </>
             )}
           </div>
         </div>
 
-        <p className="text-[13px] text-white leading-relaxed">{data.sublabel}</p>
+        <p className="text-[13px] text-black leading-relaxed">{data.sublabel}</p>
 
         <ul className="space-y-2.5 pt-2 border-t border-black/10">
           {data.features.map((f, i) => (
             <li key={i} className="flex items-start gap-2.5">
               <CheckIcon available={f.available} />
-              <span className={`text-[12px] font-semibold leading-snug ${f.available ? "text-zinc-800" : "text-white line-through"}`}>
+              <span className={`text-[12px] font-semibold leading-snug ${f.available ? "text-zinc-800" : "text-black line-through"}`}>
                 {f.text}
               </span>
             </li>
@@ -228,7 +228,7 @@ export default function PricingPage() {
         <h1 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-black font-sans leading-none mb-4">
           We're selective about who we let in.
         </h1>
-        <p className="text-white text-sm max-w-xl leading-relaxed">
+        <p className="text-black text-sm max-w-xl leading-relaxed">
           Every trader is reviewed for risk management. Start free on Bitcoin, then apply for Pro or Master. We review applications within 24 hours and notify you via email.
         </p>
       </section>
@@ -254,24 +254,24 @@ export default function PricingPage() {
         </span>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="border border-black p-6 bg-white">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white mb-2">Pro Plan</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-black mb-2">Pro Plan</p>
             <p className="text-3xl font-extrabold text-black mb-1">Open</p>
-            <p className="text-[11px] text-white">{DEMO_STATS.proAccepted} accepted this month</p>
+            <p className="text-[11px] text-black">{DEMO_STATS.proAccepted} accepted this month</p>
           </div>
           <div className="border border-black p-6 bg-zinc-50">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white mb-2">Master Waitlist</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-black mb-2">Master Waitlist</p>
             <p className="text-3xl font-extrabold text-brand-orange mb-1">{DEMO_STATS.masterWaitlist}</p>
-            <p className="text-[11px] text-white">traders waiting for access</p>
+            <p className="text-[11px] text-black">traders waiting for access</p>
           </div>
           <div className="border border-black p-6 bg-white">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white mb-2">This Week</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-black mb-2">This Week</p>
             <p className="text-3xl font-extrabold text-black mb-1">{DEMO_STATS.thisWeek}</p>
-            <p className="text-[11px] text-white">{DEMO_STATS.acceptedThisWeek} approved applications</p>
+            <p className="text-[11px] text-black">{DEMO_STATS.acceptedThisWeek} approved applications</p>
           </div>
           <div className="border border-black p-6 bg-zinc-50">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-white mb-2">Response Time</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-black mb-2">Response Time</p>
             <p className="text-3xl font-extrabold text-brand-orange mb-1">&lt; 24h</p>
-            <p className="text-[11px] text-white">email notification sent</p>
+            <p className="text-[11px] text-black">email notification sent</p>
           </div>
         </div>
       </section>
@@ -290,17 +290,17 @@ export default function PricingPage() {
             <div className="border border-black p-6 bg-zinc-50">
               <div className="text-2xl font-bold mb-2">📋</div>
               <p className="font-bold text-black mb-1 text-[13px]">Applications reviewed</p>
-              <p className="text-[12px] text-white">Within 24 hours of submission</p>
+              <p className="text-[12px] text-black">Within 24 hours of submission</p>
             </div>
             <div className="border border-black p-6 bg-white">
               <div className="text-2xl font-bold mb-2">✉️</div>
               <p className="font-bold text-black mb-1 text-[13px]">Notification</p>
-              <p className="text-[12px] text-white">Decision sent via email. Check spam folder to be safe.</p>
+              <p className="text-[12px] text-black">Decision sent via email. Check spam folder to be safe.</p>
             </div>
             <div className="border border-black p-6 bg-zinc-50">
               <div className="text-2xl font-bold mb-2">💳</div>
               <p className="font-bold text-black mb-1 text-[13px]">Payment method</p>
-              <p className="text-[12px] text-white">USDT TRC-20 only. Direct on-chain, no middleman.</p>
+              <p className="text-[12px] text-black">USDT TRC-20 only. Direct on-chain, no middleman.</p>
             </div>
           </div>
         </div>
@@ -313,8 +313,8 @@ export default function PricingPage() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-black">
-                <th className="text-left py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-white">Feature</th>
-                <th className="text-center py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-white">Free</th>
+                <th className="text-left py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-black">Feature</th>
+                <th className="text-center py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-black">Free</th>
                 <th className="text-center py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-brand-orange">Pro</th>
                 <th className="text-center py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-purple-600">Master</th>
               </tr>
@@ -322,49 +322,49 @@ export default function PricingPage() {
             <tbody>
               <tr className="border-b border-black/10">
                 <td className="py-3 px-4 text-sm font-semibold">Coins Available</td>
-                <td className="text-center py-3 px-4 text-sm text-white">BTC only</td>
+                <td className="text-center py-3 px-4 text-sm text-black">BTC only</td>
                 <td className="text-center py-3 px-4 text-sm text-black">BTC, ETH, BNB</td>
                 <td className="text-center py-3 px-4 text-sm text-black">All 15 pairs</td>
               </tr>
               <tr className="border-b border-black/10">
                 <td className="py-3 px-4 text-sm font-semibold">Timeframes</td>
-                <td className="text-center py-3 px-4 text-sm text-white">15m, 1h, 4h</td>
+                <td className="text-center py-3 px-4 text-sm text-black">15m, 1h, 4h</td>
                 <td className="text-center py-3 px-4 text-sm text-black">15m, 1h, 4h</td>
                 <td className="text-center py-3 px-4 text-sm text-black">15m, 1h, 4h</td>
               </tr>
               <tr className="border-b border-black/10">
                 <td className="py-3 px-4 text-sm font-semibold">SL & TP Levels</td>
-                <td className="text-center py-3 px-4 text-sm text-white">Locked</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Locked</td>
                 <td className="text-center py-3 px-4 text-sm text-black">Visible</td>
                 <td className="text-center py-3 px-4 text-sm text-black">Visible</td>
               </tr>
               <tr className="border-b border-black/10">
                 <td className="py-3 px-4 text-sm font-semibold">P&L Calculator</td>
-                <td className="text-center py-3 px-4 text-sm text-white">No</td>
+                <td className="text-center py-3 px-4 text-sm text-black">No</td>
                 <td className="text-center py-3 px-4 text-sm text-black">Full history</td>
                 <td className="text-center py-3 px-4 text-sm text-black">Full history</td>
               </tr>
               <tr className="border-b border-black/10">
                 <td className="py-3 px-4 text-sm font-semibold">CSV Export</td>
-                <td className="text-center py-3 px-4 text-sm text-white">No</td>
+                <td className="text-center py-3 px-4 text-sm text-black">No</td>
                 <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
                 <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
               </tr>
               <tr className="border-b border-black/10">
                 <td className="py-3 px-4 text-sm font-semibold">Telegram Alerts</td>
-                <td className="text-center py-3 px-4 text-sm text-white">Free BTC Group</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Free BTC Group</td>
                 <td className="text-center py-3 px-4 text-sm text-black">Private Channel</td>
                 <td className="text-center py-3 px-4 text-sm text-black">Unlimited Channels</td>
               </tr>
               <tr className="border-b border-black/10">
                 <td className="py-3 px-4 text-sm font-semibold">AI Explanations</td>
-                <td className="text-center py-3 px-4 text-sm text-white">Yes</td>
+                <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
                 <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
                 <td className="text-center py-3 px-4 text-sm text-black">Yes + Confluence</td>
               </tr>
               <tr>
                 <td className="py-3 px-4 text-sm font-semibold">Email Support</td>
-                <td className="text-center py-3 px-4 text-sm text-white">48h response</td>
+                <td className="text-center py-3 px-4 text-sm text-black">48h response</td>
                 <td className="text-center py-3 px-4 text-sm text-black">24h response</td>
                 <td className="text-center py-3 px-4 text-sm text-black">12h priority</td>
               </tr>
@@ -399,13 +399,31 @@ export default function PricingPage() {
       {/* ── CTA ─────────────────────────────────────────────────────────────── */}
       <section className="py-14 max-w-4xl mx-auto px-6 text-center border-b border-black">
         <h2 className="text-2xl font-bold uppercase tracking-tighter mb-4">Ready to apply?</h2>
-        <p className="text-white text-sm mb-8 max-w-2xl mx-auto">The application takes 3 minutes. We review within 24 hours and notify you via email with specific feedback on your risk management. Please check spam folder.</p>
+        <p className="text-black text-sm mb-8 max-w-2xl mx-auto">The application takes 3 minutes. We review within 24 hours and notify you via email with specific feedback on your risk management. Please check spam folder.</p>
         <a
           href="/apply"
           className="inline-block px-8 py-3 bg-brand-orange hover:bg-black text-white font-bold text-[12px] uppercase tracking-widest transition-all rounded-none border border-brand-orange hover:border-black"
         >
           Start Application →
         </a>
+      </section>
+
+      {/* ── QUICK SUPPORT ────────────────────────────────────────────────────── */}
+      <section className="py-14 max-w-4xl mx-auto px-6 border-b border-black">
+        <div className="border border-black p-8 space-y-6 bg-zinc-50">
+          <div>
+            <h2 className="text-2xl font-bold uppercase tracking-tighter text-black mb-2">Quick Support</h2>
+            <p className="text-sm text-black">Have questions about pricing, applications, or the payment process?</p>
+          </div>
+          <a
+            href="https://t.me/alexsanddockcom"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block px-6 py-3 bg-black hover:bg-brand-orange text-white font-bold text-xs uppercase tracking-widest transition-all border border-black"
+          >
+            Contact @alexsanddockcom on Telegram →
+          </a>
+        </div>
       </section>
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}

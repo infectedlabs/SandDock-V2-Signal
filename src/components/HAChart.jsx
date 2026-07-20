@@ -642,32 +642,7 @@ export default function HAChart({
                 axisLabelVisible: true,
                 title: 'Entry (Live)',
               });
-
-              if (Number.isFinite(tpVal)) {
-                const rawTpPct = ((tpVal - entryVal) / entryVal) * 100;
-                const tpPctVal = isBuySignal ? rawTpPct : -rawTpPct;
-                candleSeries.createPriceLine({
-                  price: tpVal,
-                  color: '#10b981',
-                  lineWidth: 1,
-                  lineStyle: lwc.LineStyle.Dashed,
-                  axisLabelVisible: true,
-                  title: `TP (${tpPctVal.toFixed(1)}%)`,
-                });
-              }
-
-              if (Number.isFinite(slVal)) {
-                const rawSlPct = ((slVal - entryVal) / entryVal) * 100;
-                const slPctVal = isBuySignal ? rawSlPct : -rawSlPct;
-                candleSeries.createPriceLine({
-                  price: slVal,
-                  color: '#ef4444',
-                  lineWidth: 1,
-                  lineStyle: lwc.LineStyle.Dashed,
-                  axisLabelVisible: true,
-                  title: `SL (${slPctVal.toFixed(1)}%)`,
-                });
-              }
+              // TP and SL lines removed - only show entry point and signal arrow
             }
           }
         } catch (liveSigErr) {

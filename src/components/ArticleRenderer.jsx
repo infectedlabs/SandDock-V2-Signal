@@ -153,29 +153,29 @@ export default function ArticleRenderer({ article, category }) {
             <span>/</span>
             <a href={`/${category}`} className="hover:underline">{category}</a>
             <span>/</span>
-            <span className="text-white font-medium truncate max-w-[200px] md:max-w-none">{frontmatter.title}</span>
+            <span className="text-black font-medium truncate max-w-[200px] md:max-w-none">{frontmatter.title}</span>
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold font-sans tracking-tight text-black leading-tight max-w-5xl">
             {frontmatter.title}
           </h1>
 
-          <p className="mt-6 text-lg md:text-xl text-white max-w-3xl font-medium leading-relaxed">
+          <p className="mt-6 text-lg md:text-xl text-black max-w-3xl font-medium leading-relaxed">
             {frontmatter.meta_description}
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-y-4 gap-x-8 text-xs font-mono text-white border-t border-zinc-200 pt-6">
+          <div className="mt-8 flex flex-wrap items-center gap-y-4 gap-x-8 text-xs font-mono text-black border-t border-zinc-200 pt-6">
             <div>
-              <span className="uppercase text-white">Written by:</span>
+              <span className="uppercase text-black">Written by:</span>
               <span className="ml-2 font-bold text-black">{frontmatter.author || 'Sanddock Research Team'}</span>
             </div>
             <div>
-              <span className="uppercase text-white">Last updated:</span>
+              <span className="uppercase text-black">Last updated:</span>
               <span className="ml-2 font-bold text-black">{formatDate(frontmatter.last_updated)}</span>
             </div>
             {frontmatter.target_keyword && (
               <div>
-                <span className="uppercase text-white">Topic Focus:</span>
+                <span className="uppercase text-black">Topic Focus:</span>
                 <span className="ml-2 bg-zinc-200 text-zinc-800 px-2 py-0.5 rounded uppercase text-[10px] font-bold tracking-wider">{frontmatter.target_keyword}</span>
               </div>
             )}
@@ -212,7 +212,7 @@ export default function ArticleRenderer({ article, category }) {
                   ))}
                 </ul>
               ) : (
-                <p className="text-white text-xs italic">No sections found in this article.</p>
+                <p <className="text-black text-xs italic">No sections found in this article.</p>
               )}
             </div>
           </aside>
@@ -225,7 +225,7 @@ export default function ArticleRenderer({ article, category }) {
             />
 
             {/* Disclaimer block (E-E-A-T trust signal) */}
-            <div className="mt-16 p-6 border border-zinc-200 rounded-lg bg-zinc-50 text-xs text-white space-y-2 leading-relaxed">
+            <div className="mt-16 p-6 border border-zinc-200 rounded-lg bg-zinc-50 text-xs text-black space-y-2 leading-relaxed">
               <p className="font-mono font-bold uppercase tracking-wider text-zinc-700">⚠️ Risk Warning & Disclaimer</p>
               <p>
                 Trading cryptocurrencies involves substantial risk and can result in the loss of your capital. The information provided in this article, including technical indicators, charts, formulas, and signals, is for educational and informational purposes only. It does not constitute investment advice, financial advice, trading advice, or any other sort of advice.
@@ -248,10 +248,10 @@ export default function ArticleRenderer({ article, category }) {
                 <h4 className="font-sans font-bold text-lg text-black uppercase tracking-tight mb-2">
                   Are You Trading Blind?
                 </h4>
-                <p className="text-white text-sm leading-relaxed mb-6">
+                <p className="text-black text-sm leading-relaxed mb-6">
                   Get real-time, Heikin Ashi-smooth swing signals for Bitcoin with full plain-English AI explanations.
                 </p>
-                <div className="space-y-3 font-mono text-[11px] text-white mb-6 bg-zinc-50 p-3 rounded border border-zinc-200">
+                <div className="space-y-3 font-mono text-[11px] text-black mb-6 bg-zinc-50 p-3 rounded border border-zinc-200">
                   <div className="flex justify-between">
                     <span>Active pair:</span>
                     <span className="font-bold text-black">BTC/USDT</span>
@@ -273,13 +273,13 @@ export default function ArticleRenderer({ article, category }) {
                 >
                   Start Free Signals &rarr;
                 </a>
-                <p className="text-[10px] text-white text-center mt-3 font-medium">
+                <p className="text-[10px] text-black text-center mt-3 font-medium">
                   Free plan includes BTC. No card required.
                 </p>
               </div>
 
               {/* Differentiator trust badge */}
-              <div className="border border-zinc-200 p-5 rounded-lg bg-zinc-50/50 text-xs text-white space-y-3">
+              <div className="border border-zinc-200 p-5 rounded-lg bg-zinc-50/50 text-xs text-black space-y-3">
                 <div className="flex items-start gap-2.5">
                   <span className="text-emerald-500 font-bold">✓</span>
                   <div>
@@ -311,7 +311,7 @@ export default function ArticleRenderer({ article, category }) {
               Sanddock &copy; 2026
             </span>
           </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-bold uppercase tracking-wider text-white">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-bold uppercase tracking-wider text-black">
             <a href="/" className="hover:text-black">Home</a>
             <a href="/pricing" className="hover:text-black">Pricing</a>
             <a href="/learn" className="hover:text-black">Learn</a>

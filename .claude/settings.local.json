@@ -198,7 +198,20 @@
       "PowerShell(\\(Get-Content \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\\\\src\\\\app\\\\apply\\\\page.jsx\"\\).Length)",
       "Bash(curl -s \"http://localhost:3000/api/chart/signals?symbol=BTCUSDT&interval=30m&plan=master\")",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('total:', len\\(d\\)\\); live=[s for s in d if s['closed_at'] is None]; print\\('live signals:', live\\)\")",
-      "Bash(git commit -m 'Update: add official social links to footer and replace all emails with alex@sanddock.com *)"
+      "Bash(git commit -m 'Update: add official social links to footer and replace all emails with alex@sanddock.com *)",
+      "Bash(sed -i 's/className=\"text-\\\\[11px\\\\] text-white\"/className=\"text-[11px] text-black\"/g' src/components/Homepage.jsx)",
+      "Bash(sed -i 's/className=\"text-sm text-white\">Why traders trust Sanddock/className=\"text-sm text-black\">Why traders trust Sanddock/g' src/components/Homepage.jsx)",
+      "Bash(sed -i 's/className=\"text-xs text-white mt-1\">Every signal logged/className=\"text-xs text-black mt-1\">Every signal logged/g' src/components/Homepage.jsx)",
+      "Bash(sed -i 's/className=\"text-xs text-white mt-1\">Live PnL from/className=\"text-xs text-black mt-1\">Live PnL from/g' src/components/Homepage.jsx)",
+      "Bash(sed -i 's/className=\"text-white text-sm max-w-xl leading-relaxed\"/className=\"text-black text-sm max-w-xl leading-relaxed\"/g' src/app/pricing/page.jsx)",
+      "Bash(sed -i 's/className=\"text-\\\\[11px\\\\] font-bold uppercase tracking-widest text-white mb-2\"/className=\"text-[11px] font-bold uppercase tracking-widest text-black mb-2\"/g' src/app/pricing/page.jsx)",
+      "Bash(sed -i 's/className=\"text-\\\\[11px\\\\] text-white\">{DEMO_STATS/className=\"text-[11px] text-black\">{DEMO_STATS/g' src/app/pricing/page.jsx)",
+      "Bash(sed -i 's/className=\"text-\\\\[11px\\\\] text-white\">traders waiting/className=\"text-[11px] text-black\">traders waiting/g' src/app/pricing/page.jsx)",
+      "Bash(sed -i 's/className=\"text-\\\\[11px\\\\] text-white\">email notification/className=\"text-[11px] text-black\">email notification/g' src/app/pricing/page.jsx)",
+      "Bash(sed -i 's/className=\"text-center py-3 px-4 text-sm text-white\">Free BTC Group<\\\\/td>/className=\"text-center py-3 px-4 text-sm text-black\">Free BTC Group<\\\\/td>/g' src/app/pricing/page.jsx)",
+      "Bash(sed -i 's/className=\"text-center py-3 px-4 text-sm text-white\">Yes<\\\\/td>/className=\"text-center py-3 px-4 text-sm text-black\">Yes<\\\\/td>/g' src/app/pricing/page.jsx)",
+      "Bash(sed -i 's/className=\"text-center py-3 px-4 text-sm text-white\">48h response<\\\\/td>/className=\"text-center py-3 px-4 text-sm text-black\">48h response<\\\\/td>/g' src/app/pricing/page.jsx)",
+      "Bash(sed -i 's/className=\"text-white text-sm mb-8 max-w-2xl mx-auto\">The application/className=\"text-black text-sm mb-8 max-w-2xl mx-auto\">The application/g' src/app/pricing/page.jsx)"
     ]
   }
 }

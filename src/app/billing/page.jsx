@@ -4,545 +4,312 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
-const PLAN_COLORS = {
-  free:     'text-white',
-  trial:    'text-[#3D5AFE]',
-  pro:      'text-brand-orange',
-  master:   'text-purple-400',
-  lifetime: 'text-amber-400',
-  expired:  'text-red-400',
-};
-
-const STATUS_BADGES = {
-  free:      { label: 'Free Tier',       bg: 'bg-zinc-500/10 text-white border-zinc-500/20' },
-  trial:     { label: 'Trial Active',    bg: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  active:    { label: 'Active Member',   bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  cancelled: { label: 'Cancelled',       bg: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  on_hold:   { label: 'On Hold',         bg: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
-  expired:   { label: 'Expired',         bg: 'bg-red-500/10 text-red-400 border-red-500/20' },
-  lifetime:  { label: 'Lifetime Member', bg: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-};
-
-function formatDate(isoString) {
-  if (!isoString) return '-';
-  return new Date(isoString).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric',
-  });
-}
-
-function formatCurrency(amount, currency = 'USD') {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency', currency, minimumFractionDigits: 2,
-  }).format(amount ?? 0);
-}
-
 export default function BillingPage() {
-  const { user, profile, loading, updateProfile } = useAuth();
+  const { user, profile, loading } = useAuth();
   const router = useRouter();
 
-  const [billing, setBilling] = useState(null);
-  const [billingLoading, setBillingLoading] = useState(true);
-  const [checkoutLoading, setCheckoutLoading] = useState(null);
-
-  // States for payment success modal
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successPlan, setSuccessPlan] = useState('');
-  const [tgPairingStep, setTgPairingStep] = useState(1);
-  const [tgPairingCode, setTgPairingCode] = useState(['', '', '', '', '', '']);
-  const [tgStatus, setTgStatus] = useState('');
-  const [isTelegramChannelJoined, setIsTelegramChannelJoined] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState(null);
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) router.push('/login');
+    if (!loading && !user) {
+      router.push('/login');
+    }
   }, [loading, user, router]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('success') === 'true') {
-        setShowSuccessModal(true);
-        setSuccessPlan(params.get('plan') || 'pro');
-      }
-      setIsTelegramChannelJoined(localStorage.getItem('sanddock_tg_channel_joined') === 'true');
-    }
-  }, []);
-
-  useEffect(() => {
     if (!user) return;
-    const load = async () => {
+
+    const fetchData = async () => {
       try {
-        const res = await fetch(`/api/billing/status?userId=${user.id}`);
-        if (res.ok) setBilling(await res.json());
+        // Fetch application status
+        const appRes = await fetch(`/api/applications?userId=${user.id}`);
+        if (appRes.ok) {
+          const appData = await appRes.json();
+          if (appData && appData.length > 0) {
+            setApplicationStatus(appData[0]);
+          }
+        }
+
+        // Fetch payment history
+        const payRes = await fetch(`/api/billing/status?userId=${user.id}`);
+        if (payRes.ok) {
+          const payData = await payRes.json();
+          setPaymentHistory(payData.payments || []);
+        }
       } catch (e) {
-        console.error('Failed to load billing:', e);
+        console.error('Failed to load billing data:', e);
       } finally {
-        setBillingLoading(false);
+        setLoadingData(false);
       }
     };
-    load();
+
+    fetchData();
   }, [user]);
 
-  const handleUpgrade = async (plan, billingCycle = 'monthly') => {
-    if (!user) return;
-    setCheckoutLoading(`${plan}_${billingCycle}`);
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan, billingCycle, userId: user.id }),
-      });
-      const data = await res.json();
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      } else {
-        alert(`Error: ${data.error || 'Could not create checkout session.'}`);
-      }
-    } catch (e) {
-      alert('An error occurred. Please try again.');
-    } finally {
-      setCheckoutLoading(null);
-    }
-  };
-
-  if (loading || billingLoading) {
+  if (loading || loadingData) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-slate-800 border-t-[#3D5AFE] rounded-full animate-spin" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-black border-t-brand-orange rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!user) return null;
 
-  const plan = billing?.plan || profile?.plan || 'free';
-  const status = plan === 'free' ? 'free' : (billing?.subscriptionStatus || 'active');
-  const trialDays = null;
-  const isTrialExpired = false;
-  const statusBadge = STATUS_BADGES[status] || STATUS_BADGES.active;
-  const payments = billing?.payments || [];
-
-  const isFreePlan = plan === 'free';
-  const isPaid = ['pro', 'master', 'lifetime'].includes(plan);
+  const currentPlan = profile?.plan || 'free';
+  const isApproved = applicationStatus?.status === 'approved';
+  const isWaitingList = applicationStatus?.status === 'waiting_list';
+  const isRejected = applicationStatus?.status === 'rejected';
+  const appliedFor = applicationStatus?.plan_applied_for;
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-[#1e2d4a]/50 bg-[#0b1224]/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <a href="/terminal" className="text-white hover:text-white transition-colors text-xs font-mono font-bold uppercase tracking-wider">← Terminal Console</a>
-            <span className="text-slate-800">|</span>
-            <span className="text-xs font-black uppercase tracking-widest text-zinc-300">Billing & Plan</span>
-          </div>
-          <a href="/pricing" className="text-xs font-extrabold text-[#3D5AFE] uppercase tracking-wider hover:text-white transition-colors">View Plans & Pricing</a>
+      <header className="border-b border-black bg-white sticky top-0 z-30">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <a href="/terminal" className="text-black text-xs font-bold uppercase tracking-widest hover:text-brand-orange transition-colors">
+            ← Terminal
+          </a>
+          <span className="text-xs font-bold uppercase tracking-widest text-black">Billing & Plan</span>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-        {/* Two-column layout grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          
-          {/* Left Column - Main Details (2/3 width) */}
-          <div className="lg:col-span-2 space-y-8">
-            
-            {/* Current Plan Card */}
-            <section className="bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-6 sm:p-8 rounded-2xl text-left shadow-2xl relative">
-              {plan !== 'free' && (
-                <span className="absolute top-0 right-6 -translate-y-1/2 bg-[#3D5AFE]/15 border border-[#3D5AFE]/30 text-[#3D5AFE] text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-full">
-                  {status === 'trial' ? 'Trial Member' : 'Active Member'}
-                </span>
-              )}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="space-y-3">
-                  <span className="block text-[10px] font-mono font-bold uppercase tracking-widest text-white">Current Plan</span>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h1 className={`text-2xl font-black uppercase tracking-tight ${PLAN_COLORS[plan] || 'text-white'}`}>
-                      {plan === 'lifetime' ? 'GrandMaster Lifetime' : `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`}
-                    </h1>
-                    <span className={`text-[10px] font-mono font-bold px-2.5 py-0.5 border uppercase tracking-widest rounded-full ${statusBadge.bg}`}>
-                      {statusBadge.label}
-                    </span>
-                  </div>
+      {/* Main Content */}
+      <main className="max-w-5xl mx-auto px-6 py-16">
+        <div className="space-y-12">
+          {/* Current Plan Section */}
+          <section>
+            <h1 className="text-5xl md:text-6xl font-extrabold uppercase tracking-tighter text-black mb-8">
+              Your Plan
+            </h1>
 
-
-                  {isPaid && billing?.currentPeriodEnd && (
-                    <p className="text-[12px] text-white font-mono font-bold">
-                      {status === 'cancelled'
-                        ? `Access until: ${formatDate(billing.currentPeriodEnd)}`
-                        : `Renews: ${formatDate(billing.currentPeriodEnd)}`}
-                    </p>
-                  )}
-
-                  {plan === 'lifetime' && (
-                    <p className="text-[12px] text-amber-400 font-mono font-extrabold">♾ Permanent access - no renewal needed</p>
-                  )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Plan Status Card */}
+              <div className="border border-black p-8 space-y-6">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-widest text-black">Current Plan</span>
+                  <h2 className="text-3xl font-extrabold uppercase tracking-tight text-black mt-2">
+                    {currentPlan === 'free' ? 'Free' : currentPlan === 'pro' ? 'Pro' : currentPlan === 'master' ? 'Master' : 'Lifetime'}
+                  </h2>
+                  <p className="text-sm text-black mt-2">
+                    {currentPlan === 'free' ? 'BTC signals only' : currentPlan === 'pro' ? 'BTC + ETH + BNB' : currentPlan === 'master' ? 'All 15 pairs' : 'Lifetime access'}
+                  </p>
                 </div>
 
-                {/* CTA buttons */}
-                <div className="flex flex-col gap-2 min-w-[200px] w-full md:w-auto">
-                  {isFreePlan && (
-                    <>
-                      <button
-                        onClick={() => handleUpgrade('pro', 'monthly')}
-                        disabled={!!checkoutLoading}
-                        className="w-full py-2.5 rounded-xl bg-[#3D5AFE] hover:bg-[#2e4be6] border-0 text-white font-bold text-[11px] uppercase tracking-widest transition-colors cursor-pointer disabled:opacity-50"
-                      >
-                        {checkoutLoading === 'pro_monthly' ? 'Loading…' : 'Upgrade to Pro'}
-                      </button>
-                      <button
-                        onClick={() => handleUpgrade('master', 'monthly')}
-                        disabled={!!checkoutLoading}
-                        className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 border-0 text-white font-bold text-[11px] uppercase tracking-widest transition-colors cursor-pointer disabled:opacity-50"
-                      >
-                        {checkoutLoading === 'master_monthly' ? 'Loading…' : 'Upgrade to Master'}
-                      </button>
-                    </>
-                  )}
-                  {plan === 'pro' && (
-                    <button
-                      onClick={() => handleUpgrade('master', 'monthly')}
-                      disabled={!!checkoutLoading}
-                      className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 border-0 text-white font-bold text-[11px] uppercase tracking-widest transition-colors cursor-pointer disabled:opacity-50"
-                    >
-                      {checkoutLoading === 'master_monthly' ? 'Loading…' : 'Upgrade to Master'}
-                    </button>
-                  )}
-                  {plan !== 'lifetime' && (
-                    <button
-                      onClick={() => handleUpgrade('lifetime', 'lifetime')}
-                      disabled={!!checkoutLoading}
-                      className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 border-0 text-slate-950 font-black text-[11px] uppercase tracking-widest shadow-[0_0_15px_rgba(245,158,11,0.25)] transition-all cursor-pointer disabled:opacity-50"
-                    >
-                      {checkoutLoading === 'lifetime_lifetime' ? 'Loading…' : 'Get Lifetime - $799'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            {/* Payment History Card */}
-            <section className="bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-6 sm:p-8 rounded-2xl text-left shadow-2xl">
-              <h2 className="text-[13px] font-black uppercase tracking-wider text-white mb-5 border-b border-[#1e2d4a] pb-2">Payment History</h2>
-              {payments.length === 0 ? (
-                <div className="text-center py-10 border border-dashed border-slate-800 bg-[#020617]/40 rounded-xl">
-                  <p className="text-[13px] font-mono font-bold text-white">No payments recorded yet.</p>
-                  {isFreePlan && <p className="text-[11px] font-mono text-white mt-1 uppercase">Upgrade to Pro or Master to unlock premium signals.</p>}
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-xl border border-[#1e2d4a] shadow-inner bg-[#020617]/50">
-                  <table className="w-full text-left border-collapse text-[12px]">
-                    <thead>
-                      <tr className="bg-slate-950/50 border-b border-[#1e2d4a] text-[10px] font-mono font-bold uppercase tracking-widest text-white">
-                        <th className="p-3">Date</th>
-                        <th className="p-3">Plan</th>
-                        <th className="p-3">Cycle</th>
-                        <th className="p-3">Amount</th>
-                        <th className="p-3">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#1e2d4a]/30 font-mono text-zinc-300">
-                      {payments.map((p) => (
-                        <tr key={p.id} className="hover:bg-slate-900/20 transition-colors">
-                          <td className="p-3 text-white">{formatDate(p.created_at)}</td>
-                          <td className="p-3 font-extrabold uppercase text-white">{p.plan}</td>
-                          <td className="p-3 capitalize text-white">{p.billing_cycle || '-'}</td>
-                          <td className="p-3 font-bold text-[#00e676]">{formatCurrency(p.amount, p.currency)}</td>
-                          <td className="p-3">
-                            <span className={`text-[10px] px-2 py-0.5 font-bold border rounded-full ${
-                              p.status === 'succeeded'
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                : 'bg-red-500/10 text-red-400 border-red-500/20'
-                            }`}>
-                              {p.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </section>
-
-          </div>
-
-          {/* Right Column - Secondary Actions (1/3 width) */}
-          <div className="space-y-8">
-            
-            {/* Plan Feature Summary Card */}
-            <section className="bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-6 sm:p-8 rounded-2xl text-left shadow-2xl">
-              <h2 className="text-[13px] font-black uppercase tracking-wider text-white mb-5 border-b border-[#1e2d4a] pb-2">Your Plan Includes</h2>
-              <div className="flex flex-col gap-3 text-[12px] font-mono">
-                {[
-                  { label: 'Signals Access', value: plan === 'free' ? 'BTC/USDT only' : plan === 'pro' ? 'BTC, ETH, BNB' : 'All 15 pairs' },
-                  { label: 'Timeframes', value: 'All (15m, 1h, 4h)' },
-                  { label: 'SL/TP Levels', value: plan === 'free' ? 'Locked' : 'Visible' },
-                  { label: 'Telegram Alerts', value: plan === 'free' ? 'Free BTC Group' : plan === 'pro' ? 'Pro Channel (1 Invite)' : plan === 'master' ? 'Master Channel (1 Invite)' : 'GrandMaster Channel (1 Invite)' },
-                  { label: 'AI Explanation', value: 'Full text' },
-                  { label: 'CSV Export', value: isPaid ? 'Enabled' : 'Locked' },
-                  { label: 'Live Active Signals', value: 'Active' },
-                  { label: 'Signal History', value: isPaid ? (plan === 'pro' ? '3 coins' : 'All coins') : 'BTC read-only' },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex items-center justify-between bg-slate-950/40 border border-[#1e2d4a]/50 p-3 rounded-xl">
-                    <span className="text-white uppercase tracking-wider text-[9px] font-bold">{label}</span>
-                    <span className="font-extrabold text-white text-[10px] uppercase">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Manage Subscription Card */}
-            {isPaid && status !== 'lifetime' && (
-              <section className="bg-gradient-to-b from-[#0b1224] to-[#070d19] border border-[#1e2d4a] p-6 sm:p-8 rounded-2xl text-left shadow-2xl">
-                <h2 className="text-[13px] font-black uppercase tracking-wider text-white mb-2 border-b border-[#1e2d4a] pb-2">Manage Subscription</h2>
-                <p className="text-[12px] text-white mb-5 font-medium leading-relaxed">
-                  To cancel or update your payment method, contact us at{' '}
-                  <a href="mailto:alex@sanddock.com" className="text-[#3D5AFE] hover:underline font-bold">alex@sanddock.com</a>
-                  . You'll keep access until the end of your billing period.
-                </p>
-                <div className="flex flex-col gap-3 font-mono">
-                  <a
-                    href="mailto:alex@sanddock.com?subject=Cancel Subscription"
-                    className="py-2 px-4 rounded-xl text-center text-[10px] font-bold uppercase tracking-widest bg-transparent hover:bg-red-500/10 text-red-400 border border-red-500/30 transition-colors"
-                  >
-                    Request Cancellation
-                  </a>
-                  <a
-                    href="mailto:alex@sanddock.com?subject=Update Payment Method"
-                    className="py-2 px-4 rounded-xl text-center text-[10px] font-bold uppercase tracking-widest bg-slate-950/50 hover:bg-slate-900/50 text-zinc-300 border border-[#1e2d4a] transition-colors"
-                  >
-                    Update Payment Method
-                  </a>
-                </div>
-              </section>
-            )}
-
-          </div>
-          
-        </div>
-      </main>
-
-      {/* UPGRADE SUCCESS MODAL */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div className="w-full max-w-lg bg-[#070b16] border border-[#3D5AFE]/40 rounded-2xl p-6 sm:p-8 space-y-6 text-left shadow-2xl relative">
-            <button
-              onClick={() => {
-                setShowSuccessModal(false);
-                router.replace('/billing');
-              }}
-              className="absolute top-4 right-4 text-white hover:text-white transition-colors border-0 bg-transparent cursor-pointer text-lg font-mono"
-            >
-              &times;
-            </button>
-
-            <div className="text-center space-y-2">
-              <span className="text-4xl">Success!</span>
-              <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">
-                Upgrade Successful!
-              </h2>
-              <p className="text-[13px] text-white font-mono">
-                You are now a premium Sanddock {successPlan.toUpperCase()} member.
-              </p>
-            </div>
-
-            <div className="space-y-4 font-mono text-xs">
-              <h3 className="text-xs font-bold text-[#3D5AFE] uppercase tracking-wider border-b border-zinc-800/60 pb-2 flex items-center gap-1.5 select-none">
-                Telegram Alert Delivery Setup
-              </h3>
-
-              {/* Step 1: Link Account */}
-              <div className="p-4 bg-[#090e1a] border border-zinc-850 space-y-3">
-                <div className="flex justify-between items-center gap-2">
-                  <div>
-                    <span className="block text-[10px] text-white uppercase font-bold">Step 1: Link account</span>
-                    {profile?.telegram_chat_id ? (
-                      <span className="text-[#00e676] font-bold">Connected</span>
-                    ) : (
-                      <span className="text-white">Not linked</span>
-                    )}
-                  </div>
-                  {!profile?.telegram_chat_id && tgPairingStep === 1 && (
-                    <button type="button" onClick={() => setTgPairingStep(2)}
-                      className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0">
-                      Link Telegram
-                    </button>
-                  )}
-                </div>
-
-                {!profile?.telegram_chat_id && tgPairingStep === 2 && (
-                  <div className="p-3 bg-zinc-900/60 border border-zinc-800 space-y-2.5">
-                    <span className="block text-[10px] text-white font-bold">Enter pairing code from @SanddockBot:</span>
-                    <div className="flex gap-1.5 items-center justify-between flex-wrap">
-                      <div className="flex gap-1">
-                        {tgPairingCode.map((char, index) => (
-                          <input key={index} id={`tg-modal-code-${index}`} type="text" maxLength="1" value={char}
-                            onChange={e => {
-                              const newCode = [...tgPairingCode];
-                              newCode[index] = e.target.value.slice(-1);
-                              setTgPairingCode(newCode);
-                              if (e.target.value && index < 5) {
-                                document.getElementById(`tg-modal-code-${index + 1}`)?.focus();
-                              }
-                            }}
-                            onKeyDown={e => {
-                              if (e.key === 'Backspace' && !tgPairingCode[index] && index > 0) {
-                                document.getElementById(`tg-modal-code-${index - 1}`)?.focus();
-                              }
-                            }}
-                            className="w-8 h-9 bg-slate-950 border border-zinc-800 text-center text-sm font-bold text-white focus:outline-none focus:border-brand-orange" />
-                        ))}
+                {/* Application Status */}
+                {applicationStatus && (
+                  <div className="border-t border-black pt-6 space-y-4">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-widest text-black">Application Status</span>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className={`text-sm font-bold uppercase ${
+                          isApproved ? 'text-emerald-600' : isWaitingList ? 'text-amber-600' : 'text-red-600'
+                        }`}>
+                          {isApproved ? '✓ Approved' : isWaitingList ? '⏳ Waiting List' : '✗ Rejected'}
+                        </span>
+                        <span className="text-xs text-black">for {appliedFor?.toUpperCase()}</span>
                       </div>
-                      <button type="button"
-                        onClick={() => {
-                          setTgStatus('loading');
-                          setTimeout(() => {
-                            setTgStatus('success');
-                            setTimeout(async () => {
-                              await updateProfile({ telegram_chat_id: 'mock-tg-chat-9988' });
-                              setTgPairingStep(1);
-                              setTgStatus('');
-                            }, 1000);
-                          }, 1000);
-                        }}
-                        disabled={tgPairingCode.some(c => !c) || tgStatus === 'loading'}
-                        className="py-1.5 px-3 bg-[#00e676] hover:bg-emerald-600 text-black font-bold text-[10px] uppercase tracking-widest cursor-pointer disabled:opacity-40">
-                        {tgStatus === 'loading' ? 'Verifying...' : 'Verify'}
-                      </button>
                     </div>
+
+                    {isApproved && currentPlan === 'free' && (
+                      <div className="bg-emerald-50 border border-emerald-200 p-4 space-y-3">
+                        <p className="text-sm font-semibold text-emerald-900">
+                          Your application is approved! 🎉
+                        </p>
+                        <p className="text-xs text-emerald-800 leading-relaxed">
+                          Finish payment to upgrade to {appliedFor?.toUpperCase()} and unlock all premium features.
+                        </p>
+                        <a
+                          href="https://t.me/alexsanddockcom"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-xs font-bold text-emerald-700 hover:text-emerald-900 underline"
+                        >
+                          Contact @alexsanddockcom for payment →
+                        </a>
+                      </div>
+                    )}
+
+                    {isWaitingList && (
+                      <div className="bg-amber-50 border border-amber-200 p-4">
+                        <p className="text-xs text-amber-800">
+                          Your application for {appliedFor?.toUpperCase()} is under review. We'll notify you as soon as it's approved.
+                        </p>
+                      </div>
+                    )}
+
+                    {isRejected && (
+                      <div className="bg-red-50 border border-red-200 p-4 space-y-2">
+                        <p className="text-xs text-red-800">
+                          Your {appliedFor?.toUpperCase()} application was not approved this time.
+                        </p>
+                        <a
+                          href="https://t.me/alexsanddockcom"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-xs font-bold text-red-700 hover:text-red-900 underline"
+                        >
+                          Contact us to discuss →
+                        </a>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
 
-              {/* Step 2: Join Channel */}
-              <div className="p-4 bg-[#090e1a] border border-zinc-850 space-y-3">
-                <div className="flex justify-between items-center gap-2">
-                  <div>
-                    <span className="block text-[10px] text-white uppercase font-bold">Step 2: Join {successPlan === 'lifetime' ? 'GrandMaster' : successPlan.charAt(0).toUpperCase() + successPlan.slice(1)} Channel</span>
-                    {!profile?.telegram_chat_id ? (
-                      <span className="text-white font-bold">Waiting for Step 1</span>
-                    ) : profile?.telegram_invite_claimed ? (
-                      <span className="text-[#00e676] font-bold">Private link generated (1/1 claimed)</span>
-                    ) : (
-                      <span className="text-white font-bold">Invite not claimed yet</span>
-                    )}
-                  </div>
-                  {profile?.telegram_chat_id && (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        let link = profile?.telegram_invite_link;
-                        if (!profile?.telegram_invite_claimed) {
-                          const randSuffix = Math.random().toString(36).substring(2, 9);
-                          link = `https://t.me/joinchat/sanddock_${successPlan}_private_invite_${randSuffix}`;
-                          await updateProfile({
-                            telegram_invite_claimed: true,
-                            telegram_invite_link: link
-                          });
-                        }
-                        setIsTelegramChannelJoined(true);
-                        localStorage.setItem('sanddock_tg_channel_joined', 'true');
-                        window.open(link, '_blank');
-                      }}
-                      className="py-1.5 px-3 bg-[#3D5AFE] hover:bg-[#2943d0] text-white font-bold text-[10px] uppercase tracking-wider transition-colors cursor-pointer border-0"
+                {!applicationStatus && currentPlan === 'free' && (
+                  <div className="border-t border-black pt-6">
+                    <p className="text-xs text-black mb-4">
+                      Want access to more coins? Apply for Pro or Master.
+                    </p>
+                    <a
+                      href="/pricing"
+                      className="inline-block w-full text-center py-3 bg-black hover:bg-brand-orange text-white font-bold text-xs uppercase tracking-widest transition-all border border-black"
                     >
-                      {profile?.telegram_invite_claimed ? 'Open Channel' : 'Claim invite & Join'}
-                    </button>
-                  )}
-                </div>
-                {profile?.telegram_invite_claimed && (
-                  <div className="mt-2 p-2.5 bg-zinc-950 border border-zinc-800 break-all text-[11px] text-zinc-300">
-                    <span className="block text-[9px] text-white font-bold uppercase">Your 1-time Invite Link:</span>
-                    <a href={profile.telegram_invite_link} target="_blank" rel="noopener noreferrer" className="text-[#3D5AFE] hover:underline">
-                      {profile.telegram_invite_link}
+                      View Plans & Apply →
                     </a>
                   </div>
                 )}
               </div>
-            </div>
 
-            <div className="flex justify-end pt-2">
-              <button
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  router.replace('/terminal');
-                }}
-                className="py-2.5 px-6 bg-white hover:bg-zinc-200 text-black font-extrabold text-[11px] uppercase tracking-widest border-0 cursor-pointer rounded-none"
-              >
-                Go to Terminal Console &rarr;
-              </button>
+              {/* Plan Features */}
+              <div className="border border-black p-8">
+                <span className="text-xs font-bold uppercase tracking-widest text-black">What's Included</span>
+                <ul className="space-y-3 mt-6 text-sm">
+                  {currentPlan === 'free' && (
+                    <>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">BTC/USDT signals</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">15m, 1h, 4h timeframes</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">Free BTC Telegram group</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-zinc-400">✗</span>
+                        <span className="text-black line-through">ETH & BNB signals</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-zinc-400">✗</span>
+                        <span className="text-black line-through">SL/TP levels visible</span>
+                      </li>
+                    </>
+                  )}
+                  {currentPlan === 'pro' && (
+                    <>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">BTC + ETH + BNB signals</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">Visible SL/TP levels</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">Private Pro Telegram channel</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">CSV export</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-zinc-400">✗</span>
+                        <span className="text-black line-through">All 15 coins</span>
+                      </li>
+                    </>
+                  )}
+                  {(currentPlan === 'master' || currentPlan === 'lifetime') && (
+                    <>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">All 15 pairs</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">Visible SL/TP levels</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">Unlimited Telegram channels</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">Full CSV export</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-emerald-600">✓</span>
+                        <span className="text-black">Priority support</span>
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </section>
 
-      {/* FOOTER */}
-      <footer className="bg-black text-white pt-16 pb-8 text-xs border-t border-zinc-800">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-16">
-            <div className="md:col-span-5 space-y-4 text-left">
-              <div className="flex items-center gap-2">
-                <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-6 h-6 object-contain" />
-                <span className="text-base font-bold uppercase tracking-wider font-sans text-white">Sanddock</span>
+          {/* Payment History */}
+          {paymentHistory.length > 0 && (
+            <section>
+              <h2 className="text-3xl font-extrabold uppercase tracking-tight text-black mb-6">
+                Payment History
+              </h2>
+              <div className="border border-black overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="border-b border-black bg-white">
+                    <tr>
+                      <th className="text-left p-4 font-bold uppercase tracking-widest text-xs text-black">Date</th>
+                      <th className="text-left p-4 font-bold uppercase tracking-widest text-xs text-black">Plan</th>
+                      <th className="text-left p-4 font-bold uppercase tracking-widest text-xs text-black">Amount</th>
+                      <th className="text-left p-4 font-bold uppercase tracking-widest text-xs text-black">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paymentHistory.map((payment, idx) => (
+                      <tr key={idx} className="border-t border-black">
+                        <td className="p-4 text-black">{new Date(payment.created_at).toLocaleDateString()}</td>
+                        <td className="p-4 font-bold text-black">{payment.plan?.toUpperCase()}</td>
+                        <td className="p-4 text-black">${(payment.amount / 100).toFixed(2)}</td>
+                        <td className="p-4">
+                          <span className={payment.status === 'succeeded' ? 'text-emerald-600 font-bold' : 'text-red-600 font-bold'}>
+                            {payment.status === 'succeeded' ? 'Paid' : 'Failed'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <p className="text-white text-xs uppercase font-bold tracking-wider">Trading signals backed by data, not promises.</p>
-              <div className="space-y-4 pt-4">
-                <div className="flex gap-4">
-                  <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Twitter/X">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.637l-5.206-6.801-5.979 6.801h-3.31l7.734-8.835L2.25 2.25h6.82l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg>
-                  </a>
-                  <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Telegram">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.82-1.084.51l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.782 13.5l-2.995-.937c-.652-.213-.66-.652.135-.973l11.717-4.518c.54-.213 1.012.122.84 1.15z"/></svg>
-                  </a>
-                  <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="YouTube">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                  </a>
-                  <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Instagram">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.441 7.265c.504 0 .915.41.915.915 0 .504-.41.915-.915.915-.504 0-.915-.41-.915-.915 0-.504.41-.915.915-.915zm-3.441.915c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-1.5c-2.485 0-4.5 2.015-4.5 4.5s2.015 4.5 4.5 4.5 4.5-2.015 4.5-4.5-2.015-4.5-4.5-4.5zm6.5-2c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5z"/></svg>
-                  </a>
-                </div>
-                <div className="pt-2">
-                  <a href="mailto:alex@sanddock.com" className="text-white hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">alex@sanddock.com</a>
-                </div>
-              </div>
+            </section>
+          )}
+
+          {/* Support Section */}
+          <section className="border border-black p-8 space-y-6">
+            <div>
+              <h2 className="text-2xl font-extrabold uppercase tracking-tight text-black">
+                Need Help?
+              </h2>
+              <p className="text-sm text-black mt-2">
+                For payment issues, plan upgrades, or technical support, contact us on Telegram.
+              </p>
             </div>
-            <div className="md:col-span-7 grid grid-cols-3 gap-8 text-left">
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Product</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
-                  <li><a href="/#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
-                  <li><a href="/terminal" className="hover:text-white transition-colors">Terminal</a></li>
-                  <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                  <li><a href="/#track-record" className="hover:text-white transition-colors">Track Record</a></li>
-                  <li><a href="/#faq" className="hover:text-white transition-colors">FAQ</a></li>
-                </ul>
-              </div>
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Support</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
-                  <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
-                  <li><a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Telegram Community</a></li>
-                  <li><a href="#docs" className="hover:text-white transition-colors">Help Center</a></li>
-                  <li><a href="#status" className="hover:text-white transition-colors">System Status</a></li>
-                  <li><a href="#affiliates" className="hover:text-white transition-colors">Affiliate Program</a></li>
-                </ul>
-              </div>
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Legal</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-sans">
-                  <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                  <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
-                  <li><a href="#disclaimer" className="hover:text-white transition-colors">Disclaimer</a></li>
-                  <li><a href="#cookies" className="hover:text-white transition-colors">Cookie Policy</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-zinc-800 pt-8 text-center text-[10px] text-white leading-relaxed font-bold uppercase tracking-wider">
-            &copy; {new Date().getFullYear()} Sanddock. Not financial advice. All signals are for educational purposes only. Past performance does not indicate future results.
-          </div>
+            <a
+              href="https://t.me/alexsanddockcom"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-6 py-3 bg-black hover:bg-brand-orange text-white font-bold text-xs uppercase tracking-widest transition-all border border-black"
+            >
+              Contact @alexsanddockcom on Telegram →
+            </a>
+          </section>
         </div>
-      </footer>
+      </main>
     </div>
   );
 }
