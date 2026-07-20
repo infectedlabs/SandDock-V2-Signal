@@ -6,6 +6,59 @@ const supabase = createClient(
   { auth: { persistSession: false } }
 );
 
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
+    const userId = searchParams.get('user_id');
+
+    if (!userId && !email) {
+      return Response.json({ error: 'Either user_id or email parameter is required' }, { status: 400 });
+    }
+
+    // Try user_id first
+    if (userId) {
+      const { data, error } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Supabase fetch error:', error);
+        return Response.json({ error: 'Failed to fetch application' }, { status: 500 });
+      }
+
+      if (data && data.length > 0) {
+        return Response.json(data, { status: 200 });
+      }
+    }
+
+    // Fallback to email if user_id didn't find anything
+    if (email) {
+      const { data, error } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('email', email)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Supabase fetch error:', error);
+        return Response.json({ error: 'Failed to fetch application' }, { status: 500 });
+      }
+
+      return Response.json(data || [], { status: 200 });
+    }
+
+    return Response.json([], { status: 200 });
+  } catch (error) {
+    console.error('GET error:', error);
+    return Response.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -35,6 +88,7 @@ export async function POST(request) {
       .insert({
         name: body.name,
         email: body.email,
+        user_id: body.user_id || null,
         telegram: body.telegram || null,
         country: body.country,
         experience: body.experience,

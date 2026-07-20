@@ -23,13 +23,19 @@ export default function BillingPage() {
 
     const fetchData = async () => {
       try {
-        // Fetch application status
-        const appRes = await fetch(`/api/applications?userId=${user.id}`);
+        // Fetch application status by user_id (primary) or email (fallback)
+        const appRes = await fetch(`/api/applications?user_id=${encodeURIComponent(user.id)}&email=${encodeURIComponent(user.email)}`);
         if (appRes.ok) {
           const appData = await appRes.json();
+          console.log('[Billing] Application API response:', appData);
           if (appData && appData.length > 0) {
+            console.log('[Billing] Setting applicationStatus:', appData[0]);
             setApplicationStatus(appData[0]);
+          } else {
+            console.log('[Billing] No application data found for user', user.id);
           }
+        } else {
+          console.log('[Billing] Application fetch failed:', appRes.status);
         }
 
         // Fetch payment history
@@ -60,9 +66,10 @@ export default function BillingPage() {
 
   const currentPlan = profile?.plan || 'free';
   const isApproved = applicationStatus?.status === 'approved';
-  const isWaitingList = applicationStatus?.status === 'waiting_list';
+  const isPending = applicationStatus?.status === 'pending';
+  const isWaitingList = applicationStatus?.status === 'waitlisted';
   const isRejected = applicationStatus?.status === 'rejected';
-  const appliedFor = applicationStatus?.plan_applied_for;
+  const appliedFor = applicationStatus?.plan;
 
   return (
     <div className="min-h-screen bg-white font-satoshi">
@@ -105,9 +112,9 @@ export default function BillingPage() {
                       <span className="text-xs font-bold uppercase tracking-widest text-black">Application Status</span>
                       <div className="mt-2 flex items-center gap-2">
                         <span className={`text-sm font-bold uppercase ${
-                          isApproved ? 'text-emerald-600' : isWaitingList ? 'text-amber-600' : 'text-red-600'
+                          isApproved ? 'text-emerald-600' : isPending ? 'text-blue-600' : isWaitingList ? 'text-amber-600' : 'text-red-600'
                         }`}>
-                          {isApproved ? '✓ Approved' : isWaitingList ? '⏳ Waiting List' : '✗ Rejected'}
+                          {isApproved ? '✓ Approved' : isPending ? '⏳ Under Review' : isWaitingList ? '⏳ Waiting List' : '✗ Rejected'}
                         </span>
                         <span className="text-xs text-black">for {appliedFor?.toUpperCase()}</span>
                       </div>
@@ -132,11 +139,35 @@ export default function BillingPage() {
                       </div>
                     )}
 
+                    {isPending && (
+                      <div className="bg-blue-50 border border-blue-200 p-4 space-y-3">
+                        <p className="text-xs text-blue-800">
+                          Your application for <b>{appliedFor?.toUpperCase()}</b> is under review. We'll notify you within 24 hours.
+                        </p>
+                        <a
+                          href="https://t.me/alexsanddockcom"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-xs font-bold text-blue-700 hover:text-blue-900 underline"
+                        >
+                          Contact @alexsanddockcom for status update →
+                        </a>
+                      </div>
+                    )}
+
                     {isWaitingList && (
-                      <div className="bg-amber-50 border border-amber-200 p-4">
+                      <div className="bg-amber-50 border border-amber-200 p-4 space-y-3">
                         <p className="text-xs text-amber-800">
                           Your application for {appliedFor?.toUpperCase()} is under review. We'll notify you as soon as it's approved.
                         </p>
+                        <a
+                          href="https://t.me/alexsanddockcom"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-xs font-bold text-amber-700 hover:text-amber-900 underline"
+                        >
+                          Contact @alexsanddockcom for status update →
+                        </a>
                       </div>
                     )}
 

@@ -14,7 +14,9 @@ export default function SignalPanel({ signals = [] }) {
   const [activeTab, setActiveTab] = useState('live');
 
   const liveSignals = signals.filter(s => !s.closed_at);
-  const closedSignals = [...signals.filter(s => s.closed_at)].reverse();
+  const closedSignals = [...signals.filter(s => s.closed_at)].sort((a, b) =>
+    new Date(b.closed_at).getTime() - new Date(a.closed_at).getTime()
+  );
 
   const tabSignals = activeTab === 'live' ? liveSignals : closedSignals;
 

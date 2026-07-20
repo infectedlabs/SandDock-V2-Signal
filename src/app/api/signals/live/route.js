@@ -104,6 +104,7 @@ export async function GET(request) {
             .select('*')
             .eq('symbol', sym.toUpperCase())
             .eq('interval', tf)
+            .is('closed_at', null)
             .order('bar_time', { ascending: false })
             .limit(limit),
           1200

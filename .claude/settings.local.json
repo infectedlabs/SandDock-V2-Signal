@@ -219,7 +219,24 @@
       "Bash(awk '/activeTab === .settings. && \\\\\\(/{start=NR} start && /^            \\\\\\)}$/{print NR; exit}' src/app/terminal/page.jsx)",
       "Bash(awk '/activeTab === .settings. && \\\\\\(/{start=NR} start && /^            \\\\\\)}$/{print start\"-\"NR; exit}' src/app/terminal/page.jsx)",
       "Bash(awk '/SETTINGS TAB/{start=NR} start && /^            \\\\{\\\\/\\\\* ══/{if\\(NR>start+5\\) {print start\"-\"NR; exit}}' src/app/terminal/page.jsx)",
-      "Bash(grep -n \"^\\\\s*</main>\\\\|^\\\\s*{/\\\\* ══\")"
+      "Bash(grep -n \"^\\\\s*</main>\\\\|^\\\\s*{/\\\\* ══\")",
+      "Bash(grep -E \"\\\\.\\(js|ts|py\\)$\")",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "Bash(node scripts/fix-open-btc-signal.js)",
+      "Bash(node scripts/fix-buy-sell-pair.js)",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(\"Done\")",
+      "Bash(node scripts/diag-open-signals.js)",
+      "Bash(node scripts/diag-profile.js)",
+      "Bash(node scripts/fix-eth-duplicate.js)",
+      "Bash(node scripts/fix-eth-bnb-signals.js)",
+      "Bash(node scripts/check-eth-bnb.js)",
+      "Bash(node scripts/proper-close-eth-bnb.js)",
+      "Bash(node scripts/check-app.js)",
+      "Bash(node scripts/check-all-apps.js)",
+      "Bash(node scripts/check-infected.js)",
+      "Bash(node scripts/link-apps-to-users.js)"
     ]
   }
 }

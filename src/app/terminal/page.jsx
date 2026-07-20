@@ -638,6 +638,7 @@ export default function TerminalPage() {
   const [isTelegramChannelJoined, setIsTelegramChannelJoined] = useState(false);
 
   const [showFreeSuccessModal, setShowFreeSuccessModal] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -648,6 +649,27 @@ export default function TerminalPage() {
       }
     }
   }, []);
+
+  // Fetch application status
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchApplicationStatus = async () => {
+      try {
+        const appRes = await fetch(`/api/applications?user_id=${encodeURIComponent(user.id)}`);
+        if (appRes.ok) {
+          const appData = await appRes.json();
+          if (appData && appData.length > 0) {
+            setApplicationStatus(appData[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch application status:', error);
+      }
+    };
+
+    fetchApplicationStatus();
+  }, [user]);
 
   // Fetch weekly PnL data from past 7 days
   useEffect(() => {
@@ -732,9 +754,9 @@ export default function TerminalPage() {
   }, [logSignals, profile?.min_confidence]);
   
   const openSignalsCount = useMemo(() => {
-    if (!cleanLogSignals || cleanLogSignals.length === 0) return 0;
-    return cleanLogSignals.filter(s => s.is_live).length;
-  }, [cleanLogSignals]);
+    if (!liveSignals || liveSignals.length === 0) return 0;
+    return liveSignals.filter(s => !s.closed_at).length;
+  }, [liveSignals]);
 
   const [headerAllTimePnl, setHeaderAllTimePnl] = useState('0.00');
 
@@ -996,9 +1018,14 @@ export default function TerminalPage() {
   const cleanLiveSignals = useMemo(() => {
     let filtered = liveSignals;
 
-    // Apply confidence filter
+    // Apply confidence filter — but never hide a currently open position.
+    // min_confidence is meant to gate which NEW signal alerts get surfaced;
+    // an already-open trade is real market exposure and must stay visible
+    // regardless of the confidence score it happened to fire at, otherwise
+    // a user can have an open position that silently disappears from every
+    // "active" count and list on the page.
     if (profile?.min_confidence != null) {
-      filtered = filtered.filter(s => (s.confidence || 75) >= profile.min_confidence);
+      filtered = filtered.filter(s => s.is_live || (s.confidence || 75) >= profile.min_confidence);
     }
 
     // Apply signal type filter (buy/sell)
@@ -1387,6 +1414,50 @@ export default function TerminalPage() {
           </div>
 
           <div className="space-y-3 pt-4 border-t border-zinc-900">
+            {/* Application Status Alert */}
+            {applicationStatus && (
+              <div className={`bg-[#000000] border p-3 space-y-2 text-left ${
+                applicationStatus.status === 'approved' ? 'border-emerald-500/20' :
+                applicationStatus.status === 'pending' ? 'border-blue-500/20' :
+                applicationStatus.status === 'waitlisted' ? 'border-amber-500/20' :
+                'border-red-500/20'
+              }`}>
+                <div className="flex items-center gap-1.5">
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    applicationStatus.status === 'approved' ? 'bg-emerald-500' :
+                    applicationStatus.status === 'pending' ? 'bg-blue-500' :
+                    applicationStatus.status === 'waitlisted' ? 'bg-amber-500' :
+                    'bg-red-500'
+                  } ${applicationStatus.status === 'pending' ? 'animate-pulse' : ''}`} />
+                  <span className={`text-[10px] font-bold uppercase tracking-widest font-satoshi ${
+                    applicationStatus.status === 'approved' ? 'text-emerald-500' :
+                    applicationStatus.status === 'pending' ? 'text-blue-500' :
+                    applicationStatus.status === 'waitlisted' ? 'text-amber-500' :
+                    'text-red-500'
+                  }`}>
+                    {applicationStatus.status === 'approved' ? '✓ Approved' :
+                     applicationStatus.status === 'pending' ? '⏳ Under Review' :
+                     applicationStatus.status === 'waitlisted' ? '⏳ Waiting List' :
+                     '✗ Rejected'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-white normal-case leading-relaxed">
+                  Your application for <span className="font-bold">{applicationStatus.plan?.toUpperCase()}</span>
+                  {applicationStatus.status === 'pending' && ' is under review. We\'ll notify you within 24 hours.'}
+                  {applicationStatus.status === 'waitlisted' && ' is under review. We\'ll notify you as soon as it\'s approved.'}
+                  {applicationStatus.status === 'approved' && ' is approved! Contact us to complete payment.'}
+                  {applicationStatus.status === 'rejected' && ' was not approved. Contact us to discuss.'}
+                </p>
+                <a
+                  href="https://t.me/alexsanddockcom"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] font-bold uppercase tracking-wider text-blue-400 hover:text-white transition-colors block underline">
+                  Contact @alexsanddockcom →
+                </a>
+              </div>
+            )}
+
             {/* Telegram status */}
             {profile.telegram_chat_id ? (
               <div className="bg-[#000000] border border-emerald-500/20 p-3 space-y-1.5 text-left">
@@ -1893,7 +1964,7 @@ export default function TerminalPage() {
                 </div>
 
                 {/* Chart Component - Full Width */}
-                <div className="w-full h-[500px] rounded-lg border border-slate-800/50 bg-[#0f172a]/30 overflow-hidden">
+                <div className="w-full">
                   <HAChart
                     symbol={selectedSymbol}
                     interval={selectedInterval}

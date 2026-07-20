@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -177,6 +177,27 @@ function PricingCard({ planKey, data, user }) {
 // ── Main Page ───────────────────────────────────────────────────────────────
 export default function PricingPage() {
   const { user } = useAuth();
+  const [applicationStatus, setApplicationStatus] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchApplicationStatus = async () => {
+      try {
+        const appRes = await fetch(`/api/applications?user_id=${encodeURIComponent(user.id)}`);
+        if (appRes.ok) {
+          const appData = await appRes.json();
+          if (appData && appData.length > 0) {
+            setApplicationStatus(appData[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch application status:', error);
+      }
+    };
+
+    fetchApplicationStatus();
+  }, [user]);
 
   return (
     <div className="relative min-h-screen bg-white text-black overflow-hidden font-satoshi">
@@ -232,6 +253,51 @@ export default function PricingPage() {
           Every trader is reviewed for risk management. Start free on Bitcoin, then apply for Pro or Master. We review applications within 24 hours and notify you via email.
         </p>
       </section>
+
+      {/* ── APPLICATION STATUS ALERT ──────────────────────────────────────── */}
+      {user && applicationStatus && (
+        <section className="py-12 max-w-7xl mx-auto px-6 border-b border-black">
+          <div className={`border-l-4 p-6 space-y-4 ${
+            applicationStatus.status === 'approved' ? 'border-l-emerald-500 bg-emerald-50' :
+            applicationStatus.status === 'pending' ? 'border-l-blue-500 bg-blue-50' :
+            applicationStatus.status === 'waitlisted' ? 'border-l-amber-500 bg-amber-50' :
+            'border-l-red-500 bg-red-50'
+          }`}>
+            <div>
+              <p className={`text-xs font-bold uppercase tracking-widest mb-2 ${
+                applicationStatus.status === 'approved' ? 'text-emerald-600' :
+                applicationStatus.status === 'pending' ? 'text-blue-600' :
+                applicationStatus.status === 'waitlisted' ? 'text-amber-600' :
+                'text-red-600'
+              }`}>
+                {applicationStatus.status === 'approved' ? '✓ Approved' :
+                 applicationStatus.status === 'pending' ? '⏳ Under Review' :
+                 applicationStatus.status === 'waitlisted' ? '⏳ Waiting List' :
+                 '✗ Rejected'}
+              </p>
+              <p className="text-sm text-black leading-relaxed mb-3">
+                Your application for <span className="font-bold uppercase">{applicationStatus.plan}</span> is{' '}
+                {applicationStatus.status === 'pending' && 'under review. We\'ll notify you within 24 hours.'}
+                {applicationStatus.status === 'waitlisted' && 'under review. We\'ll notify you as soon as it\'s approved.'}
+                {applicationStatus.status === 'approved' && 'approved! Contact us to complete payment and activate your plan.'}
+                {applicationStatus.status === 'rejected' && 'not approved at this time. Contact us to discuss further opportunities.'}
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <a
+                href="https://t.me/alexsanddockcom"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-black hover:bg-brand-orange text-white text-xs font-bold uppercase tracking-wider transition-colors">
+                Contact @alexsanddockcom →
+              </a>
+              <a href="/billing" className="px-4 py-2 border border-black hover:bg-black hover:text-white text-black text-xs font-bold uppercase tracking-wider transition-colors">
+                View Billing →
+              </a>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── PLAN CARDS ─────────────────────────────────────────────────────── */}
       <section className="py-14 max-w-7xl mx-auto px-6 border-b border-black">

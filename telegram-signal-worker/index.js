@@ -38,7 +38,13 @@ const BINANCE_WS_BASE = 'wss://fstream.binance.com/market/stream?streams=';
 
 const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
 const INTERVAL = '30m';
-const LOOKBACK = 5;   // must match the rest of the app's swing detection (backside only)
+// Widened from 5 — a 5-candle (2.5h) window let small countertrend bounces
+// register as a "new swing high/low" purely because the recent window had
+// been trending the other way, not because the move was actually significant
+// (e.g. a modest bounce candle became a false "swing high" right at the
+// bottom of a decline). Backside-only — still fires the instant a candle
+// closes, no forward-looking delay.
+const LOOKBACK = 8;
 const SL_PCT = 0.5;
 const TP_PCT = 1.5;
 const CANDLES_FETCH = 1000; // ~20.8 days of 30m candles — plenty of prior-swing context
@@ -261,37 +267,157 @@ function coinLabel(symbol) {
   return symbol.replace('USDT', '') + '/USDT';
 }
 
-function newSignalMessage(sig) {
+// Fetch today's performance metrics
+async function getTodayPerformance(symbol = null) {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayISO = today.toISOString();
+
+    let query = supabase
+      .from('signals')
+      .select('*')
+      .eq('interval', INTERVAL)
+      .not('closed_at', 'is', null)
+      .gte('closed_at', todayISO);
+
+    if (symbol) {
+      query = query.eq('symbol', symbol);
+    }
+
+    const { data: signals, error } = await query;
+
+    if (error) {
+      log(`[Performance] Failed to fetch: ${error.message}`);
+      return null;
+    }
+
+    if (!signals || signals.length === 0) {
+      return {
+        totalSignals: 0,
+        closedSignals: 0,
+        wins: 0,
+        losses: 0,
+        winRate: 0,
+        totalPnL: 0,
+        avgPnL: 0,
+      };
+    }
+
+    const closed = signals.filter(s => s.closed_at && s.pnl_pct != null);
+    const wins = closed.filter(s => s.pnl_pct > 0).length;
+    const losses = closed.filter(s => s.pnl_pct <= 0).length;
+    const totalPnL = closed.reduce((sum, s) => sum + (s.pnl_pct || 0), 0);
+    const avgPnL = closed.length > 0 ? totalPnL / closed.length : 0;
+    const winRate = closed.length > 0 ? (wins / closed.length * 100) : 0;
+
+    return {
+      totalSignals: signals.length,
+      closedSignals: closed.length,
+      wins,
+      losses,
+      winRate: winRate.toFixed(0),
+      totalPnL: totalPnL.toFixed(2),
+      avgPnL: avgPnL.toFixed(2),
+    };
+  } catch (err) {
+    log(`[Performance] Error: ${err.message}`);
+    return null;
+  }
+}
+
+function newSignalMessage(sig, perfData = null) {
   const isBuy = sig.signal_type === 'buy';
-  const icon = isBuy ? '🟢' : '🔴';
   const dir = isBuy ? 'BUY' : 'SELL';
-  const localTime = toLocalTimeString(new Date(sig.bar_time));
+  const rrRatio = (sig.tp_price - sig.entry_price) / Math.abs(sig.entry_price - sig.sl_price);
+  const rrRatioStr = rrRatio.toFixed(1);
+
+  let perfSection = `<code>────────────────────</code>\n<b>TODAY'S PERFORMANCE</b>\n`;
+
+  if (perfData) {
+    const coinPerf = perfData.coinSpecific || {};
+    const allPerf = perfData.allCoins || {};
+
+    perfSection += `${coinLabel(sig.symbol)} PnL today: <b>${coinPerf.totalPnL >= 0 ? '+' : ''}${coinPerf.totalPnL || 0}%</b>\n`;
+    perfSection += `All coins PnL today: <b>${allPerf.totalPnL >= 0 ? '+' : ''}${allPerf.totalPnL || 0}%</b>\n`;
+    perfSection += `Signals fired today: ${allPerf.totalSignals || 0}\n`;
+  } else {
+    perfSection += `${coinLabel(sig.symbol)} PnL today: pending\n`;
+    perfSection += `All coins PnL today: pending\n`;
+    perfSection += `Signals fired today: pending\n`;
+  }
 
   return (
-    `${icon} <b>${dir} ${coinLabel(sig.symbol)} (30m)</b>\n\n` +
-    `📊 <b>Entry:</b> <code>$${sig.entry_price.toFixed(2)}</code>\n` +
-    `🎯 <b>Target:</b> <code>$${sig.tp_price.toFixed(2)}</code>\n` +
-    `🛑 <b>Stop:</b> <code>$${sig.sl_price.toFixed(2)}</code>\n\n` +
-    `💪 <b>Confidence:</b> ${sig.confidence}%\n` +
-    `⏰ <b>Time:</b> ${localTime}`
+    `<b>SANDDOCK SIGNAL — ${coinLabel(sig.symbol)}</b>\n` +
+    `Type: <b>${dir}</b> · Timeframe: 30m\n\n` +
+    `<b>ENTRY</b>       $${sig.entry_price.toFixed(2)}\n` +
+    `<b>STOP LOSS</b>   $${sig.sl_price.toFixed(2)}\n` +
+    `<b>TAKE PROFIT</b> $${sig.tp_price.toFixed(2)}\n` +
+    `<b>R:R RATIO</b>   1:${rrRatioStr}\n` +
+    `<b>CONFIDENCE</b>  ${sig.confidence}%\n\n` +
+    `Signal fired — position is now open.\n\n` +
+    `${perfSection}` +
+    `<code>────────────────────</code>\n\n` +
+    `sanddock.com/terminal`
   );
 }
 
-function closedSignalMessage(sig) {
+function closedSignalMessage(sig, perfData = null) {
   const isBuy = sig.signal_type === 'buy';
-  const win = sig.is_win;
-  const icon = win ? '✅' : '❌';
   const dir = isBuy ? 'BUY' : 'SELL';
   const pnlStr = `${sig.pnl_pct >= 0 ? '+' : ''}${sig.pnl_pct.toFixed(2)}%`;
-  const pnlColor = sig.pnl_pct >= 0 ? '🟢' : '🔴';
+  const reasonText = sig.close_reason === 'swing_opposite' ? 'Opposite swing' : 'Take-profit hit';
+
+  let perfSection = `<code>────────────────────</code>\n<b>TODAY'S PERFORMANCE</b>\n`;
+
+  if (perfData) {
+    const coinPerf = perfData.coinSpecific || {};
+    const allPerf = perfData.allCoins || {};
+
+    perfSection += `${coinLabel(sig.symbol)} PnL today: <b>${coinPerf.totalPnL >= 0 ? '+' : ''}${coinPerf.totalPnL || 0}%</b>\n`;
+    perfSection += `All coins PnL today: <b>${allPerf.totalPnL >= 0 ? '+' : ''}${allPerf.totalPnL || 0}%</b>\n`;
+    perfSection += `Signals fired today: ${allPerf.totalSignals || 0} · Closed: ${allPerf.closedSignals || 0} · Win rate: ${allPerf.winRate || 0}%\n`;
+  } else {
+    perfSection += `${coinLabel(sig.symbol)} PnL today: pending\n`;
+    perfSection += `All coins PnL today: pending\n`;
+    perfSection += `Signals fired today: pending · Closed: pending · Win rate: pending\n`;
+  }
 
   return (
-    `${icon} <b>${coinLabel(sig.symbol)} ${dir} CLOSED</b>\n\n` +
-    `📥 <b>Entry:</b> <code>$${parseFloat(sig.entry_price).toFixed(2)}</code>\n` +
-    `📤 <b>Exit:</b> <code>$${sig.close_price.toFixed(2)}</code>\n\n` +
-    `${pnlColor} <b>PnL:</b> <code>${pnlStr}</code>\n` +
-    `📋 <b>Reason:</b> ${sig.close_reason === 'swing_opposite' ? 'Opposite swing' : 'Target hit'}`
+    `<b>SANDDOCK SIGNAL — ${coinLabel(sig.symbol)} [CLOSED]</b>\n` +
+    `Type: <b>${dir}</b> · Timeframe: 30m\n\n` +
+    `<b>ENTRY</b>       $${parseFloat(sig.entry_price).toFixed(2)}\n` +
+    `<b>EXIT</b>        $${parseFloat(sig.close_price).toFixed(2)}\n` +
+    `<b>PNL</b>         <b>${pnlStr}</b>\n` +
+    `<b>REASON</b>      ${reasonText}\n\n` +
+    `${perfSection}` +
+    `<code>────────────────────</code>\n\n` +
+    `sanddock.com/terminal`
   );
+}
+
+// Celebration gifs for high PnL wins
+const celebrationGifs = [
+  'CgACAgIAAxkBAAIBamZqN7oBOb2u8c8R5LqJ-mEGiEzvAALYEQACc0FJSLEPquZPRCp2NQQ',  // Clapping
+  'CgACAgIAAxkBAAIBammZqN7oDlz8sK4cMKJkJhGEPk4kAALYEQACc0FJSLEPquZPRCp2NQQ',  // Money rain
+  'CgACAgIAAxkBAAIBamqZqN7oDrV8sN4eNKJkKiHGPm5lAALYEQACc0FJSLEPquZPRCp2NQQ',  // Celebration
+  'CgACAgIAAxkBAAIBamyZqN7oEsW8tO4fOLKlLjIHPn6mAALYEQACc0FJSLEPquZPRCp2NQQ',  // Happy dance
+];
+
+async function sendCelebrationGif() {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
+  try {
+    const gifId = celebrationGifs[Math.floor(Math.random() * celebrationGifs.length)];
+    const payload = {
+      chat_id: TELEGRAM_CHAT_ID,
+      animation: gifId,
+      disable_web_page_preview: true,
+    };
+
+    await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendAnimation`, payload, { timeout: 10000 });
+  } catch (err) {
+    log(`[Telegram] Celebration gif send failed: ${err.message}`);
+  }
 }
 
 // ─── Per-symbol cycle ─────────────────────────────────────────────────────
@@ -311,7 +437,7 @@ async function processSymbol(symbol) {
   lastSeenCandle[symbol] = latestCandleTime;
   log(`[${symbol}] New candle @ ${latestCandleTime}, checking for swings...`);
 
-  const detected = detectSwings(candles);
+  let detected = detectSwings(candles);
   if (detected.length === 0) {
     log(`[${symbol}] No swings detected in current window.`);
     return true;
@@ -331,20 +457,33 @@ async function processSymbol(symbol) {
     .order('bar_time', { ascending: false })
     .limit(1);
 
-  let foundOpenSignal = false;
-  if (openRows && openRows.length > 0) {
-    const openSignal = openRows[0];
+  const openSignal = (openRows && openRows.length > 0) ? openRows[0] : null;
 
+  // A single candle can only ever open one new position. If both isLow and
+  // isHigh matched on the same candle (rare, but possible with a tie inside
+  // the lookback window), keep just one — preferring whichever direction is
+  // opposite the currently open position so we still flip correctly — and
+  // drop the other. Inserting both used to leave an orphaned duplicate open
+  // row that no future cycle could ever find (the open-signal query above
+  // only ever returns the single latest row by bar_time), so it could never
+  // be closed again.
+  if (detected.length > 1) {
+    const opposite = openSignal
+      ? detected.find(sig => sig.signal_type !== openSignal.action.toLowerCase())
+      : null;
+    const chosen = opposite || detected[0];
+    log(`[${symbol}] Both swing-low and swing-high matched on the same candle — keeping only the ${chosen.signal_type.toUpperCase()} signal.`);
+    detected = [chosen];
+  }
+
+  let foundOpenSignal = false;
+  if (openSignal) {
     // Check if detected signal is opposite direction (will close the open one)
-    const isOppositeDetected = detected.some(sig =>
-      sig.signal_type !== openSignal.action.toLowerCase()
-    );
+    const isOppositeDetected = detected[0].signal_type !== openSignal.action.toLowerCase();
 
     if (isOppositeDetected) {
       // Found opposite swing — close the open signal
-      const oppositeSignal = detected.find(sig =>
-        sig.signal_type !== openSignal.action.toLowerCase()
-      );
+      const oppositeSignal = detected[0];
 
       const closeInfo = {
         close_price: oppositeSignal.entry_price,
@@ -362,7 +501,23 @@ async function processSymbol(symbol) {
       if (!error) {
         log(`[${symbol}] ✓ Closed ${openSignal.action} @ ${openSignal.bar_time} with ${oppositeSignal.signal_type.toUpperCase()} — pnl ${closeInfo.pnl_pct}%`);
         const replyToId = signalMessageIds[openSignal.id] || null;
-        await sendTelegram(closedSignalMessage({ ...openSignal, ...closeInfo }), replyToId);
+
+        // Fetch performance data for message
+        const coinPerf = await getTodayPerformance(symbol);
+        const allPerf = await getTodayPerformance();
+        const perfData = {
+          coinSpecific: coinPerf,
+          allCoins: allPerf,
+        };
+
+        await sendTelegram(closedSignalMessage({ ...openSignal, ...closeInfo }, perfData), replyToId);
+
+        // Send celebration gif if PnL > 1%
+        if (closeInfo.pnl_pct > 1) {
+          await new Promise(resolve => setTimeout(resolve, 500)); // Small delay before gif
+          await sendCelebrationGif();
+        }
+
         foundOpenSignal = true;
       } else {
         log(`[${symbol}] Failed to close signal: ${error.message}`);
@@ -372,7 +527,7 @@ async function processSymbol(symbol) {
 
   // Only insert NEW signals if we either closed an existing one or there's no open signal
   // This ensures: close first, then open new
-  if (openRows && openRows.length > 0 && !foundOpenSignal) {
+  if (openSignal && !foundOpenSignal) {
     log(`[${symbol}] Open signal exists and no opposite detected, waiting for opposite.`);
     return true;
   }
@@ -399,9 +554,18 @@ async function processSymbol(symbol) {
   }
 
   log(`[${symbol}] ➕ Inserted ${toInsert.length} new signal(s).`);
+
+  // Fetch performance data for message
+  const coinPerf = await getTodayPerformance(symbol);
+  const allPerf = await getTodayPerformance();
+  const perfData = {
+    coinSpecific: coinPerf,
+    allCoins: allPerf,
+  };
+
   for (const sig of (insertedSignals || toInsert)) {
     if (sig.closed_at === null) {
-      const messageId = await sendTelegram(newSignalMessage(sig));
+      const messageId = await sendTelegram(newSignalMessage(sig, perfData));
       if (messageId && sig.id) {
         signalMessageIds[sig.id] = messageId;
       }

@@ -2,10 +2,12 @@
 
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 function ApplyPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const initialPlan = searchParams.get("plan") || "";
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -190,10 +192,16 @@ function ApplyPageContent() {
 
     setIsSubmitting(true);
     try {
+      // Include user_id if user is logged in
+      const dataToSubmit = {
+        ...formData,
+        ...(user && { user_id: user.id }),
+      };
+
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSubmit),
       });
 
       if (!res.ok) {
@@ -208,6 +216,65 @@ function ApplyPageContent() {
       setIsSubmitting(false);
     }
   };
+
+  // Require login to submit application
+  if (!user) {
+    return (
+      <div className="relative min-h-screen bg-white text-black overflow-hidden font-satoshi">
+        <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
+          <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
+            <a href="/" className="flex items-center gap-2.5">
+              <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
+              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">Sanddock</span>
+            </a>
+            <a href="/pricing" className="text-[11px] font-bold uppercase tracking-wider hover:text-brand-orange transition-colors">
+              Back to Pricing →
+            </a>
+          </div>
+        </header>
+
+        <div className="max-w-2xl mx-auto px-6 py-24">
+          <div className="space-y-8">
+            <div className="text-center space-y-4">
+              <div className="text-6xl font-black">🔐</div>
+              <h1 className="text-4xl font-extrabold uppercase tracking-tighter text-black">Login Required</h1>
+            </div>
+
+            <div className="border border-black p-8 space-y-6 text-center">
+              <p className="text-sm text-black leading-relaxed">
+                To prevent spam and maintain application quality, you must be logged in to submit an application.
+              </p>
+              <p className="text-xs text-zinc-600">
+                This ensures we can properly review and contact you about your application.
+              </p>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={() => router.push('/login')}
+                  className="flex-1 py-3 bg-black hover:bg-brand-orange text-white font-bold text-sm uppercase tracking-widest transition-all border border-black"
+                >
+                  Sign In →
+                </button>
+                <button
+                  onClick={() => router.push('/signup')}
+                  className="flex-1 py-3 bg-white hover:bg-zinc-100 text-black font-bold text-sm uppercase tracking-widest transition-all border border-black"
+                >
+                  Create Account →
+                </button>
+              </div>
+
+              <button
+                onClick={() => router.push('/pricing')}
+                className="w-full py-3 bg-white hover:bg-zinc-50 text-black font-bold text-sm uppercase tracking-widest transition-all border border-black"
+              >
+                Back to Pricing
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (submitSuccess) {
     return (
