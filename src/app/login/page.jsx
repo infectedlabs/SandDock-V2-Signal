@@ -154,7 +154,7 @@ export default function LoginPage() {
                 <span className="font-satoshi text-xs font-bold text-emerald-400">Profit Target Hit</span>
               </div>
               <p className="text-[11px] text-white font-satoshi leading-relaxed normal-case">
-                &ldquo;BTC swing bottom confirmed. Strong volume absorption at support. Trade executed and closed at take profit level. Clean 5.2% gain.&rdquo;
+                &ldquo;{trade.pair} signal executed with clean entry and exit. Trade closed at profit target level with {trade.result} verified gain.&rdquo;
               </p>
             </div>
           </div>
