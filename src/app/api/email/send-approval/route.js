@@ -143,7 +143,7 @@ export async function POST(request) {
     `;
 
     const response = await resend.emails.send({
-      from: 'Sanddock <onboarding@resend.dev>',
+      from: 'Sanddock <alex@sanddock.com>',
       to: email,
       subject: `🎉 Your ${planDetails.name} Application is Approved!`,
       html: emailHtml
