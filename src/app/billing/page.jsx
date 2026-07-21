@@ -365,7 +365,9 @@ export default function BillingPage() {
                     </div>
                     <div>
                       <p className="text-xs text-zinc-600">Member Since</p>
-                      <p className="text-sm font-semibold text-black">Nov 15, 2026</p>
+                      <p className="text-sm font-semibold text-black">
+                        {user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs text-zinc-600">Support Tier</p>
