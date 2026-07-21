@@ -90,28 +90,28 @@ export default function SignupPage() {
         {/* Center: Hero Branding & Feature list */}
         <div className="space-y-8 max-w-lg relative z-10 text-left my-auto">
           <h2 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-white leading-none">
-            Your next trade<br />deserves <span className="text-brand-orange">a reason.</span>
+            Signals backed by<br /><span className="text-brand-orange">verified results.</span>
           </h2>
-          
+
           <ul className="space-y-4 text-xs font-semibold uppercase tracking-wider text-zinc-300">
             <li className="flex items-start gap-3">
               <span className="text-[#00e676] text-base">&#x2713;</span>
-              <span>Every signal comes with a plain-English AI reason</span>
+              <span>80% verified win rate across 6,500+ signals</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-[#00e676] text-base">&#x2713;</span>
-              <span>Entry, Stop Loss, and Take Profit calculated automatically</span>
+              <span>Automated entry, stop loss, and take profit levels</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-[#00e676] text-base">&#x2713;</span>
-              <span>Alerts go straight to Telegram</span>
+              <span>Real-time Telegram alerts. Trade within seconds</span>
             </li>
           </ul>
 
           {/* Testimonial Quote */}
           <div className="pt-6 border-t border-zinc-800">
             <p className="text-xs text-white italic font-satoshi normal-case font-normal leading-relaxed">
-              &ldquo;The AI rationale changes everything. I don&apos;t just blindly follow calls anymore - I understand the market structure behind each swing.&rdquo;
+              &ldquo;Three trades this week. All three hit profit targets. This is the first signal tool that actually delivers results.&rdquo;
             </p>
             <span className="block text-[9px] font-bold text-brand-orange uppercase tracking-wider mt-2 font-satoshi">
               - Verified Trader
