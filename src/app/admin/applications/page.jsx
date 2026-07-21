@@ -11,7 +11,7 @@ export default function AdminApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("pending");
   const [selectedApp, setSelectedApp] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null);
+  const [updatingAction, setUpdatingAction] = useState(null); // Format: "appId_status"
 
   // Check admin access - only ghuruprasaath@gmail.com
   const ADMIN_EMAIL = "ghuruprasaath@gmail.com";
@@ -46,7 +46,7 @@ export default function AdminApplicationsPage() {
   };
 
   const updateApplicationStatus = async (appId, newStatus, notes = "") => {
-    setUpdatingId(appId);
+    setUpdatingAction(`${appId}_${newStatus}`);
     try {
       const res = await fetch(`/api/admin/applications?id=${appId}`, {
         method: "PATCH",
@@ -67,7 +67,7 @@ export default function AdminApplicationsPage() {
       console.error("Error updating application:", error);
       alert(`Failed to update application: ${error.message}`);
     } finally {
-      setUpdatingId(null);
+      setUpdatingAction(null);
     }
   };
 
@@ -78,7 +78,7 @@ export default function AdminApplicationsPage() {
       <div className="min-h-screen bg-white text-black flex items-center justify-center font-satoshi">
         <div className="text-center space-y-4">
           <p className="text-xl font-bold">Access Denied</p>
-          <p className="text-black">Only ghuruprasaath@gmail.com has access to this page.</p>
+          <p className="text-black">Only admin has access to this page.</p>
           <a href="/" className="inline-block px-6 py-2 bg-black text-white font-bold text-sm uppercase rounded-lg hover:bg-brand-orange transition-all">
             Go Home
           </a>
@@ -236,24 +236,24 @@ export default function AdminApplicationsPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => updateApplicationStatus(selectedApp.id, "accepted", "Approved - good risk management")}
-                      disabled={updatingId === selectedApp.id}
+                      disabled={updatingAction === `${selectedApp.id}_accepted`}
                       className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-bold uppercase rounded-lg transition-all"
                     >
-                      {updatingId === selectedApp.id ? "Accepting..." : "Accept"}
+                      {updatingAction === `${selectedApp.id}_accepted` ? "Accepting..." : "Accept"}
                     </button>
                     <button
                       onClick={() => updateApplicationStatus(selectedApp.id, "waitlisted", "Waitlisted - check back later")}
-                      disabled={updatingId === selectedApp.id}
+                      disabled={updatingAction === `${selectedApp.id}_waitlisted`}
                       className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-60 text-white text-sm font-bold uppercase rounded-lg transition-all"
                     >
-                      {updatingId === selectedApp.id ? "Waitlisting..." : "Waitlist"}
+                      {updatingAction === `${selectedApp.id}_waitlisted` ? "Waitlisting..." : "Waitlist"}
                     </button>
                     <button
                       onClick={() => updateApplicationStatus(selectedApp.id, "rejected", "Rejected - does not meet risk management standards")}
-                      disabled={updatingId === selectedApp.id}
+                      disabled={updatingAction === `${selectedApp.id}_rejected`}
                       className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm font-bold uppercase rounded-lg transition-all col-span-2"
                     >
-                      {updatingId === selectedApp.id ? "Rejecting..." : "Reject"}
+                      {updatingAction === `${selectedApp.id}_rejected` ? "Rejecting..." : "Reject"}
                     </button>
                   </div>
                 </section>
