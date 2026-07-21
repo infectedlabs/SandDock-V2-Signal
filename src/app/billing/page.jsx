@@ -84,17 +84,17 @@ export default function BillingPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-12">
+      <main className="max-w-7xl mx-auto px-6 py-12">
         <div className="space-y-8">
           {/* Current Plan Section */}
           <section>
-            <h1 className="text-5xl md:text-6xl font-extrabold uppercase tracking-tighter text-black mb-10">
+            <h1 className="text-5xl md:text-6xl font-extrabold uppercase tracking-tighter text-black mb-8">
               Your Plan
             </h1>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Plan Status Card */}
-              <div className="lg:col-span-1 border border-black p-6 space-y-5">
+              <div className="lg:col-span-1 border border-black p-5 space-y-4">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-widest text-black">Current Plan</span>
                   <h2 className="text-4xl font-extrabold uppercase tracking-tight text-black mt-3">
@@ -107,34 +107,30 @@ export default function BillingPage() {
 
                 {/* Application Status */}
                 {applicationStatus && (
-                  <div className="border-t border-black pt-4 space-y-4">
+                  <div className="border-t border-black pt-3 space-y-3">
                     <div>
                       <span className="text-[11px] font-bold uppercase tracking-widest text-black">Application Status</span>
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className={`text-base font-bold uppercase ${
+                      <div className="mt-2 flex items-start gap-2">
+                        <span className={`text-sm font-bold uppercase ${
                           isApproved ? 'text-emerald-600' : isPending ? 'text-blue-600' : isWaitingList ? 'text-amber-600' : 'text-red-600'
                         }`}>
                           {isApproved ? '✓ Approved' : isPending ? '⏳ Under Review' : isWaitingList ? '⏳ Waiting List' : '✗ Rejected'}
                         </span>
-                        <span className="text-sm text-black font-semibold">for {appliedFor?.toUpperCase()}</span>
                       </div>
                     </div>
 
                     {isApproved && currentPlan === 'free' && (
-                      <div className="bg-emerald-50 border border-emerald-200 p-4 space-y-2">
-                        <p className="text-base font-bold text-emerald-900">
-                          Your application is approved! 🎉
-                        </p>
-                        <p className="text-sm text-emerald-800 leading-relaxed">
-                          Finish payment to upgrade to {appliedFor?.toUpperCase()} and unlock all premium features.
+                      <div className="bg-emerald-50 border border-emerald-200 p-3 space-y-1.5">
+                        <p className="text-sm font-bold text-emerald-900">
+                          Approved! 🎉 Complete payment →
                         </p>
                         <a
                           href="https://t.me/alexsanddockcom"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-block text-sm font-bold text-emerald-700 hover:text-emerald-900 underline"
+                          className="inline-block text-xs font-bold text-emerald-700 hover:text-emerald-900 underline"
                         >
-                          Contact @alexsanddockcom for payment →
+                          Contact for payment
                         </a>
                       </div>
                     )}
@@ -208,9 +204,9 @@ export default function BillingPage() {
               </div>
 
               {/* Plan Features */}
-              <div className="lg:col-span-2 border border-black p-6">
+              <div className="lg:col-span-2 border border-black p-5">
                 <span className="text-[11px] font-bold uppercase tracking-widest text-black">What's Included</span>
-                <ul className="space-y-3 mt-6 text-base">
+                <ul className="space-y-2 mt-4 text-sm">
                   {currentPlan === 'free' && (
                     <>
                       <li className="flex items-center gap-2">
@@ -284,6 +280,48 @@ export default function BillingPage() {
                     </>
                   )}
                 </ul>
+              </div>
+
+              {/* Billing & Expiry Card */}
+              <div className="border border-black p-5 space-y-4">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-black">Billing</span>
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <p className="text-xs text-zinc-600">Billing Cycle</p>
+                      <p className="text-base font-semibold text-black">{currentPlan === 'free' ? 'Free Forever' : 'Monthly'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-600">Next Renewal</p>
+                      <p className="text-base font-semibold text-black">{currentPlan === 'free' ? 'N/A' : 'Dec 21, 2026'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-600">Auto-Renewal</p>
+                      <p className="text-base font-semibold text-emerald-600">{currentPlan === 'free' ? 'N/A' : 'Active'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Usage & Account Card */}
+              <div className="border border-black p-5 space-y-4">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-black">Account</span>
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <p className="text-xs text-zinc-600">Account Status</p>
+                      <p className="text-base font-semibold text-emerald-600">Active</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-600">Member Since</p>
+                      <p className="text-base font-semibold text-black">Nov 15, 2026</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-600">Support Tier</p>
+                      <p className="text-base font-semibold text-black">{currentPlan === 'free' ? 'Community' : currentPlan === 'pro' ? '24h Email' : '12h Priority'}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
