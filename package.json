@@ -11,6 +11,8 @@
     "validate:prod": "node scripts/validate-production.js"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
     "@supabase/supabase-js": "^2.108.2",
     "axios": "^1.7.0",
     "dodopayments": "^2.41.0",
@@ -20,7 +22,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.17.2",
-    "standardwebhooks": "^1.0.0"
+    "standardwebhooks": "^1.0.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/context/AuthContext";
+
+// Three.js needs the browser (WebGL canvas) — never render on the server.
+const CryptoScene3D = dynamic(() => import("./CryptoScene3D"), { ssr: false });
 
 // Tickers mock data structure (will be updated with real prices)
 const getInitialTickerStrip1 = () => [
@@ -464,7 +468,7 @@ export default function Homepage() {
             <a href="#faq" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">FAQ</a>
             <a href="/articles" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Articles</a>
             {user && (
-              <a href="/terminal" className="px-6 h-full flex items-center border-r border-black text-brand-orange hover:bg-brand-orange hover:text-white transition-colors">Terminal</a>
+              <a href="/terminal" className="px-6 h-full flex items-center border-r border-black text-brand-orange hover:bg-[linear-gradient(135deg,#1B2A6B_0%,#2943D0_50%,#3D5AFE_100%)] hover:text-white transition-colors">Terminal</a>
             )}
           </nav>
 
@@ -526,9 +530,10 @@ export default function Homepage() {
       </div>
 
       {/* SECTION 1 - HERO SECTION */}
-      <section className="relative z-20 pt-10 pb-10 max-w-7xl mx-auto px-6 border-b border-black bg-white">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+      <section className="relative z-20 border-b border-black bg-[linear-gradient(165deg,#3550D6_0%,#5B7FE8_28%,#A9BDF5_58%,#FFFFFF_100%)] overflow-hidden">
+        <CryptoScene3D variant="coin" className="absolute top-0 right-0 w-[340px] h-[340px] z-0 opacity-70 hidden md:block" />
+        <div className="relative z-10 max-w-7xl mx-auto px-6 pt-10 pb-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
           {/* Left Column: Huge typography & description & CTAs */}
           <div className="lg:col-span-7 space-y-5 text-left">
             <div className="space-y-3">
@@ -574,14 +579,14 @@ export default function Homepage() {
               {user ? (
                 <a 
                   href="/terminal"
-                  className="bg-black hover:bg-brand-orange font-bold text-white text-xs uppercase tracking-widest px-8 py-4 transition-colors rounded-none inline-block text-center"
+                  className="bg-black hover:bg-[linear-gradient(135deg,#1B2A6B_0%,#2943D0_50%,#3D5AFE_100%)] font-bold text-white text-xs uppercase tracking-widest px-8 py-4 transition-colors rounded-none inline-block text-center"
                 >
                   Go to Terminal &rarr;
                 </a>
               ) : (
                 <a 
                   href="/signup"
-                  className="bg-black hover:bg-brand-orange font-bold text-white text-xs uppercase tracking-widest px-8 py-4 transition-colors rounded-none inline-block text-center"
+                  className="bg-black hover:bg-[linear-gradient(135deg,#1B2A6B_0%,#2943D0_50%,#3D5AFE_100%)] font-bold text-white text-xs uppercase tracking-widest px-8 py-4 transition-colors rounded-none inline-block text-center"
                 >
                   Get Free Signals &rarr;
                 </a>
@@ -759,7 +764,8 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 3 - WHY SANDDOCK (Outcome-First Comparison) */}
-      <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black bg-white reveal-on-scroll">
+      <section className="relative overflow-hidden py-24 max-w-7xl mx-auto px-6 border-b border-black bg-white reveal-on-scroll">
+        <CryptoScene3D variant="bars" className="absolute top-6 right-0 w-72 h-72 -z-10 opacity-80 hidden lg:block" />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16 items-start">
           <div className="lg:col-span-6 space-y-4 text-left">
             <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
@@ -905,7 +911,8 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 4 - HOW IT WORKS (Image 2 Card Grids Redesign) */}
-      <section id="how-it-works" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-left">
+      <section id="how-it-works" className="relative overflow-hidden py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-left">
+        <CryptoScene3D variant="network" className="absolute top-4 right-0 w-80 h-80 -z-10 opacity-70 hidden lg:block" />
         <div className="text-left mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             How It Works
@@ -973,7 +980,8 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 5 - AI EXPLAINABILITY SHOWCASE (Image 3 Accordion Layout Redesign) */}
-      <section id="explainability" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-on-scroll">
+      <section id="explainability" className="relative overflow-hidden py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-on-scroll">
+        <CryptoScene3D variant="particles" className="absolute top-0 left-0 w-64 h-64 -z-10 opacity-50 hidden lg:block" />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           
           {/* Left Side: Accordion Lists based on Image 3 */}
@@ -1285,7 +1293,8 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 6 - THE SANDDOCK LEDGER */}
-      <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-right">
+      <section className="relative overflow-hidden py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-right">
+        <CryptoScene3D variant="cube" className="absolute top-4 right-0 w-72 h-72 -z-10 opacity-70 hidden lg:block" />
         <div className="text-left mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             Coin Unlocks
@@ -1382,7 +1391,7 @@ export default function Homepage() {
 
             <a 
               href="/pricing"
-              className="w-full py-3.5 bg-black hover:bg-brand-orange text-white font-bold text-xs uppercase tracking-widest text-center transition-colors rounded-none"
+              className="w-full py-3.5 bg-black hover:bg-[linear-gradient(135deg,#1B2A6B_0%,#2943D0_50%,#3D5AFE_100%)] text-white font-bold text-xs uppercase tracking-widest text-center transition-colors rounded-none"
             >
               Upgrade to Pro &rarr;
             </a>
@@ -1394,7 +1403,8 @@ export default function Homepage() {
       {/* SECTION 9 - SOCIAL WALL / SUCCESS STORIES (Image 5 Testimonial Slider Redesign) */}
       {/* SECTION 7 - COIN COVERAGE */}
       <section className="py-24 max-w-7xl mx-auto px-6 border-b border-black overflow-hidden relative reveal-scale">
-        
+        <CryptoScene3D variant="particles" className="absolute bottom-0 left-0 w-72 h-72 -z-10 opacity-40 hidden lg:block" />
+
         {/* Header with fraction counter aligned right */}
         <div className="flex items-end justify-between mb-16">
           <div className="space-y-4 text-left">
@@ -1449,7 +1459,7 @@ export default function Homepage() {
           <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none md:-mr-4">
             <button 
               onClick={nextTestimonial}
-              className="w-14 h-14 rounded-full bg-black hover:bg-brand-orange text-white flex items-center justify-center pointer-events-auto border border-black transition-colors shadow-xl"
+              className="w-14 h-14 rounded-full bg-black hover:bg-[linear-gradient(135deg,#1B2A6B_0%,#2943D0_50%,#3D5AFE_100%)] text-white flex items-center justify-center pointer-events-auto border border-black transition-colors shadow-xl"
             >
               <svg className="w-6 h-6 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
@@ -1462,7 +1472,8 @@ export default function Homepage() {
 
       {/* SECTION 6 - PUBLIC TRACK RECORD (Editorial Swiss Layout) */}
       {/* SECTION 8 - TRACK RECORD */}
-      <section id="track-record" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-left">
+      <section id="track-record" className="relative overflow-hidden py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-left">
+        <CryptoScene3D variant="candles" className="absolute top-4 right-0 w-80 h-64 -z-10 opacity-80 hidden lg:block" />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16 items-end">
           <div className="lg:col-span-7 space-y-4 text-left">
             <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
@@ -1587,7 +1598,8 @@ export default function Homepage() {
 
       {/* SECTION 8 - LIFETIME ACCESS SHOWCASE (GrandMaster Deal) */}
       {/* SECTION 9 - PRICING SUMMARY */}
-      <section id="pricing" className="py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-on-scroll">
+      <section id="pricing" className="relative overflow-hidden py-24 max-w-7xl mx-auto px-6 border-b border-black reveal-on-scroll">
+        <CryptoScene3D variant="coin" className="absolute top-4 right-0 w-72 h-72 -z-10 opacity-70 hidden lg:block" ringColor="#2943D0" />
         <div className="text-left max-w-3xl mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             GrandMaster Offer
@@ -1624,7 +1636,7 @@ export default function Homepage() {
 
           <a 
             href="/pricing"
-            className="w-full lg:w-auto bg-black hover:bg-brand-orange text-white font-bold text-xs uppercase tracking-widest px-8 py-4 transition-colors rounded-none border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] flex-shrink-0 text-center inline-block"
+            className="w-full lg:w-auto bg-black hover:bg-[linear-gradient(135deg,#1B2A6B_0%,#2943D0_50%,#3D5AFE_100%)] text-white font-bold text-xs uppercase tracking-widest px-8 py-4 transition-colors rounded-none border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] flex-shrink-0 text-center inline-block"
           >
             Get Lifetime Access &rarr;
           </a>
@@ -1632,7 +1644,8 @@ export default function Homepage() {
       </section>
 
       {/* SECTION 10 - FAQ SECTION */}
-      <section id="faq" className="py-24 max-w-4xl mx-auto px-6 border-b border-black reveal-right">
+      <section id="faq" className="relative overflow-hidden py-24 max-w-4xl mx-auto px-6 border-b border-black reveal-right">
+        <CryptoScene3D variant="particles" className="absolute top-0 right-0 w-56 h-56 -z-10 opacity-35 hidden md:block" />
         <div className="text-left mb-16 space-y-4">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
             FAQ
@@ -1671,7 +1684,8 @@ export default function Homepage() {
       {/* SECTION 11 - FINAL CTA BANNER */}
       <section className="py-24 max-w-7xl mx-auto px-6 reveal-scale">
         <div className="relative rounded-none border border-black bg-[#f4f6fa] p-12 text-left overflow-hidden">
-          
+          <CryptoScene3D variant="network" className="absolute top-0 right-0 w-96 h-full -z-10 opacity-60 hidden lg:block" />
+
           <div className="max-w-2xl space-y-6 relative z-10">
             <h2 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none">
               Your next trade<br />deserves <span className="text-brand-orange">a reason.</span>
@@ -1683,14 +1697,14 @@ export default function Homepage() {
               {user ? (
                 <a 
                   href="/terminal"
-                  className="bg-black hover:bg-brand-orange font-bold text-white text-xs uppercase tracking-widest px-8 py-4 transition-colors rounded-none inline-block text-center"
+                  className="bg-black hover:bg-[linear-gradient(135deg,#1B2A6B_0%,#2943D0_50%,#3D5AFE_100%)] font-bold text-white text-xs uppercase tracking-widest px-8 py-4 transition-colors rounded-none inline-block text-center"
                 >
                   Go to Terminal &rarr;
                 </a>
               ) : (
                 <a 
                   href="/signup"
-                  className="bg-black hover:bg-brand-orange font-bold text-white text-xs uppercase tracking-widest px-8 py-4 transition-colors rounded-none inline-block text-center"
+                  className="bg-black hover:bg-[linear-gradient(135deg,#1B2A6B_0%,#2943D0_50%,#3D5AFE_100%)] font-bold text-white text-xs uppercase tracking-widest px-8 py-4 transition-colors rounded-none inline-block text-center"
                 >
                   Get Free Signals &rarr;
                 </a>
@@ -1835,7 +1849,7 @@ export default function Homepage() {
             <div className="flex gap-4 pt-2">
               <button 
                 onClick={() => setModalOpen(false)}
-                className="flex-1 py-3 bg-black hover:bg-brand-orange text-white font-bold text-xs uppercase tracking-widest transition-colors rounded-none"
+                className="flex-1 py-3 bg-black hover:bg-[linear-gradient(135deg,#1B2A6B_0%,#2943D0_50%,#3D5AFE_100%)] text-white font-bold text-xs uppercase tracking-widest transition-colors rounded-none"
               >
                 Proceed &rarr;
               </button>
