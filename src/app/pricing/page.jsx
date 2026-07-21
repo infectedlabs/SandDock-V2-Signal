@@ -264,19 +264,19 @@ export default function PricingPage() {
       {user && applicationStatus && (
         <section className="py-12 max-w-7xl mx-auto px-6 border-b border-black">
           <div className={`border-l-4 p-6 space-y-4 ${
-            applicationStatus.status === 'approved' ? 'border-l-emerald-500 bg-emerald-50' :
+            applicationStatus.status === 'accepted' ? 'border-l-emerald-500 bg-emerald-50' :
             applicationStatus.status === 'pending' ? 'border-l-blue-500 bg-blue-50' :
             applicationStatus.status === 'waitlisted' ? 'border-l-amber-500 bg-amber-50' :
             'border-l-red-500 bg-red-50'
           }`}>
             <div>
               <p className={`text-xs font-bold uppercase tracking-widest mb-2 ${
-                applicationStatus.status === 'approved' ? 'text-emerald-600' :
+                applicationStatus.status === 'accepted' ? 'text-emerald-600' :
                 applicationStatus.status === 'pending' ? 'text-blue-600' :
                 applicationStatus.status === 'waitlisted' ? 'text-amber-600' :
                 'text-red-600'
               }`}>
-                {applicationStatus.status === 'approved' ? '✓ Approved' :
+                {applicationStatus.status === 'accepted' ? '✓ Approved' :
                  applicationStatus.status === 'pending' ? '⏳ Under Review' :
                  applicationStatus.status === 'waitlisted' ? '⏳ Waiting List' :
                  '✗ Rejected'}
@@ -285,7 +285,7 @@ export default function PricingPage() {
                 Your application for <span className="font-bold uppercase">{applicationStatus.plan}</span> is{' '}
                 {applicationStatus.status === 'pending' && 'under review. We\'ll notify you within 24 hours.'}
                 {applicationStatus.status === 'waitlisted' && 'under review. We\'ll notify you as soon as it\'s approved.'}
-                {applicationStatus.status === 'approved' && 'approved! Contact us to complete payment and activate your plan.'}
+                {applicationStatus.status === 'accepted' && 'approved! Contact us to complete payment and activate your plan.'}
                 {applicationStatus.status === 'rejected' && 'not approved at this time. Contact us to discuss further opportunities.'}
               </p>
             </div>

@@ -65,7 +65,7 @@ export default function BillingPage() {
   if (!user) return null;
 
   const currentPlan = profile?.plan || 'free';
-  const isApproved = applicationStatus?.status === 'approved';
+  const isApproved = applicationStatus?.status === 'accepted';
   const isPending = applicationStatus?.status === 'pending';
   const isWaitingList = applicationStatus?.status === 'waitlisted';
   const isRejected = applicationStatus?.status === 'rejected';

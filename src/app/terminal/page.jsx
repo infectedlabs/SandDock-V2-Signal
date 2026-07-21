@@ -1418,25 +1418,25 @@ export default function TerminalPage() {
             {/* Application Status Alert */}
             {applicationStatus && (
               <div className={`bg-[#000000] border p-3 space-y-2 text-left ${
-                applicationStatus.status === 'approved' ? 'border-emerald-500/20' :
+                applicationStatus.status === 'accepted' ? 'border-emerald-500/20' :
                 applicationStatus.status === 'pending' ? 'border-blue-500/20' :
                 applicationStatus.status === 'waitlisted' ? 'border-amber-500/20' :
                 'border-red-500/20'
               }`}>
                 <div className="flex items-center gap-1.5">
                   <span className={`w-1.5 h-1.5 rounded-full ${
-                    applicationStatus.status === 'approved' ? 'bg-emerald-500' :
+                    applicationStatus.status === 'accepted' ? 'bg-emerald-500' :
                     applicationStatus.status === 'pending' ? 'bg-blue-500' :
                     applicationStatus.status === 'waitlisted' ? 'bg-amber-500' :
                     'bg-red-500'
                   } ${applicationStatus.status === 'pending' ? 'animate-pulse' : ''}`} />
                   <span className={`text-[10px] font-bold uppercase tracking-widest font-satoshi ${
-                    applicationStatus.status === 'approved' ? 'text-emerald-500' :
+                    applicationStatus.status === 'accepted' ? 'text-emerald-500' :
                     applicationStatus.status === 'pending' ? 'text-blue-500' :
                     applicationStatus.status === 'waitlisted' ? 'text-amber-500' :
                     'text-red-500'
                   }`}>
-                    {applicationStatus.status === 'approved' ? '✓ Approved' :
+                    {applicationStatus.status === 'accepted' ? '✓ Approved' :
                      applicationStatus.status === 'pending' ? '⏳ Under Review' :
                      applicationStatus.status === 'waitlisted' ? '⏳ Waiting List' :
                      '✗ Rejected'}
@@ -1446,7 +1446,7 @@ export default function TerminalPage() {
                   Your application for <span className="font-bold">{applicationStatus.plan?.toUpperCase()}</span>
                   {applicationStatus.status === 'pending' && ' is under review. We\'ll notify you within 24 hours.'}
                   {applicationStatus.status === 'waitlisted' && ' is under review. We\'ll notify you as soon as it\'s approved.'}
-                  {applicationStatus.status === 'approved' && ' is approved! Contact us to complete payment.'}
+                  {applicationStatus.status === 'accepted' && ' is approved! Contact us to complete payment.'}
                   {applicationStatus.status === 'rejected' && ' was not approved. Contact us to discuss.'}
                 </p>
                 <a
