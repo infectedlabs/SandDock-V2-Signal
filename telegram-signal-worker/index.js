@@ -38,13 +38,11 @@ const BINANCE_WS_BASE = 'wss://fstream.binance.com/market/stream?streams=';
 
 const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
 const INTERVAL = '30m';
-// Widened from 5 — a 5-candle (2.5h) window let small countertrend bounces
-// register as a "new swing high/low" purely because the recent window had
-// been trending the other way, not because the move was actually significant
-// (e.g. a modest bounce candle became a false "swing high" right at the
-// bottom of a decline). Backside-only — still fires the instant a candle
-// closes, no forward-looking delay.
-const LOOKBACK = 8;
+// Must match backfill.js and the validated TradingView Pine script exactly —
+// 8 was tried to filter countertrend bounces but instead let a modest bounce
+// get misread as a genuine swing high, firing a live SELL signal that went
+// straight to a loss. 5 is the confirmed-good value.
+const LOOKBACK = 5;
 const SL_PCT = 0.5;
 const TP_PCT = 1.5;
 const CANDLES_FETCH = 1000; // ~20.8 days of 30m candles — plenty of prior-swing context
