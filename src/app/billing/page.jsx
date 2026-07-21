@@ -92,9 +92,9 @@ export default function BillingPage() {
               Your Plan
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Plan Status Card */}
-              <div className="lg:col-span-1 border border-black p-4 space-y-3">
+              <div className="border border-black p-4 space-y-3">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-widest text-black">Current Plan</span>
                   <h2 className="text-3xl font-extrabold uppercase tracking-tight text-black mt-2">
