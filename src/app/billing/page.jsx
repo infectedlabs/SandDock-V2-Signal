@@ -469,11 +469,10 @@ export default function BillingPage() {
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Product</h4>
                 <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
-                  <li><a href="/#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
+                  <li><a href="/" className="hover:text-white transition-colors">Home</a></li>
                   <li><a href="/terminal" className="hover:text-white transition-colors">Terminal</a></li>
                   <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                  <li><a href="/#track-record" className="hover:text-white transition-colors">Track Record</a></li>
-                  <li><a href="/#faq" className="hover:text-white transition-colors">FAQ</a></li>
+                  <li><a href="/articles" className="hover:text-white transition-colors">Articles</a></li>
                 </ul>
               </div>
 
@@ -482,19 +481,14 @@ export default function BillingPage() {
                 <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
                   <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
                   <li><a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Telegram Community</a></li>
-                  <li><a href="#docs" className="hover:text-white transition-colors">Help Center</a></li>
-                  <li><a href="#status" className="hover:text-white transition-colors">System Status</a></li>
-                  <li><a href="#affiliates" className="hover:text-white transition-colors">Affiliate Program</a></li>
+                  <li><a href="/billing" className="hover:text-white transition-colors">Billing</a></li>
                 </ul>
               </div>
 
               <div className="space-y-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Legal</h4>
                 <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
-                  <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                  <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
-                  <li><a href="#disclaimer" className="hover:text-white transition-colors">Disclaimer</a></li>
-                  <li><a href="#cookies" className="hover:text-white transition-colors">Cookie Policy</a></li>
+                  <li><a href="https://t.me/alexsanddockcom" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Support Channel</a></li>
                 </ul>
               </div>
 
