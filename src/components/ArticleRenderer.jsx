@@ -212,7 +212,7 @@ export default function ArticleRenderer({ article, category }) {
                   ))}
                 </ul>
               ) : (
-                <p <className="text-black text-xs italic">No sections found in this article.</p>
+                <p className="text-black text-xs italic">No sections found in this article.</p>
               )}
             </div>
           </aside>

@@ -1105,46 +1105,6 @@ export default function TerminalPage() {
     });
   }, [perfSignals, activeSignals]);
 
-  const todayStats = useMemo(() => {
-    // Scope to the currently-selected coin — cleanLiveSignals spans every coin
-    // the plan can see (needed for the Live Signals tab), but this banner is
-    // shown alongside the selected coin's chart and was silently summing
-    // PnL across all coins, e.g. labeling BTC+ETH+BNB combined as "today".
-    const todaySignals = cleanLiveSignals.filter(s => s.symbol === selectedSymbol);
-
-    const mapped = todaySignals.map((sig) => {
-      let pnlVal = 0;
-      if (sig.is_live) {
-        const currentPrice = livePrices[sig.symbol];
-        if (currentPrice) {
-          const pnl = ((currentPrice - sig.entry_price) / sig.entry_price) * 100;
-          pnlVal = sig.signal_type === 'buy' ? pnl : -pnl;
-        } else {
-          pnlVal = 0;
-        }
-      } else {
-        pnlVal = parseFloat(sig.pnl_pct || 0);
-      }
-      return pnlVal;
-    });
-
-    const totalTrades = mapped.length;
-    const wins = mapped.filter(p => p > 0).length;
-    const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '-';
-    const sumPnl = mapped.reduce((sum, p) => sum + p, 0);
-
-    const confidences = todaySignals.map(s => s.confidence || 0).filter(c => c > 0);
-    const avgConfidence = confidences.length > 0
-      ? (confidences.reduce((a, b) => a + b, 0) / confidences.length).toFixed(0) + '%'
-      : '82%';
-
-    return {
-      totalTrades,
-      winRate,
-      sumPnl: sumPnl.toFixed(2),
-      avgConfidence
-    };
-  }, [cleanLiveSignals, livePrices, selectedSymbol]);
 
   // Get the most recent LIVE signal for the selected symbol to display on chart
   const selectedSymbolActiveSignal = useMemo(() => {
@@ -1226,6 +1186,47 @@ export default function TerminalPage() {
 
     return sorted;
   }, [cleanLiveSignals, recentBtcSignals, sortBy, signalTypeFilter]);
+
+  const todayStats = useMemo(() => {
+    // On Live Signals tab: show all recent signals (live + closed + history)
+    // On other tabs: show only the selected symbol's live signals
+    const todaySignals = activeTab === 'signals'
+      ? allRecentSignals
+      : cleanLiveSignals.filter(s => s.symbol === selectedSymbol);
+
+    const mapped = todaySignals.map((sig) => {
+      let pnlVal = 0;
+      if (sig.is_live) {
+        const currentPrice = livePrices[sig.symbol];
+        if (currentPrice) {
+          const pnl = ((currentPrice - sig.entry_price) / sig.entry_price) * 100;
+          pnlVal = sig.signal_type === 'buy' ? pnl : -pnl;
+        } else {
+          pnlVal = 0;
+        }
+      } else {
+        pnlVal = parseFloat(sig.pnl_pct || 0);
+      }
+      return pnlVal;
+    });
+
+    const totalTrades = mapped.length;
+    const wins = mapped.filter(p => p > 0).length;
+    const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '-';
+    const sumPnl = mapped.reduce((sum, p) => sum + p, 0);
+
+    const confidences = todaySignals.map(s => s.confidence || 0).filter(c => c > 0);
+    const avgConfidence = confidences.length > 0
+      ? (confidences.reduce((a, b) => a + b, 0) / confidences.length).toFixed(0) + '%'
+      : '82%';
+
+    return {
+      totalTrades,
+      winRate,
+      sumPnl: sumPnl.toFixed(2),
+      avgConfidence
+    };
+  }, [cleanLiveSignals, livePrices, selectedSymbol, activeTab, allRecentSignals]);
 
   const triggerUpgradeGate = (title, desc) => {
     setUpgradeTriggerText({ title, desc });
@@ -2339,9 +2340,9 @@ export default function TerminalPage() {
                             { label: 'Outcome Ratio', val: computedStats ? `${computedStats.wins}W - ${computedStats.losses}L` : '-', note: 'wins vs losses' },
                           ].map((s, i) => (
                             <div key={i} className="text-left py-2 px-4 border-r last:border-0 border-zinc-800/40 space-y-1">
-                              <span className="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-white leading-none">{s.label}</span>
-                              <span className="block text-2xl md:text-3xl font-black text-white tracking-tighter leading-none pt-1">{s.val}</span>
-                              <span className="block text-[10px] text-white leading-none pt-0.5">{s.note}</span>
+                              <span className="block text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-white leading-none">{s.label}</span>
+                              <span className="block text-xl md:text-2xl font-black text-white tracking-tighter leading-none pt-1">{s.val}</span>
+                              <span className="block text-[9px] text-white leading-none pt-0.5">{s.note}</span>
                             </div>
                           ))}
                         </div>
