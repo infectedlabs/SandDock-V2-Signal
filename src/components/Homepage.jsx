@@ -647,7 +647,7 @@ export default function Homepage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-black text-sm">No Hidden Fees</h4>
-                    <p className="text-xs text-white mt-1">Transparent pricing. No markup on signals. No surprise charges.</p>
+                    <p className="text-xs text-black mt-1">Transparent pricing. No markup on signals. No surprise charges.</p>
                   </div>
                 </div>
 
@@ -662,7 +662,7 @@ export default function Homepage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-black text-sm">Win Rate Verified</h4>
-                    <p className="text-xs text-white mt-1">{heroStats.win_rate.toFixed(1)}% on-chain verified. Auditable data.</p>
+                    <p className="text-xs text-black mt-1">{heroStats.win_rate.toFixed(1)}% on-chain verified. Auditable data.</p>
                   </div>
                 </div>
               </div>
