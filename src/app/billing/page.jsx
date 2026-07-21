@@ -84,55 +84,55 @@ export default function BillingPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-6 py-16">
-        <div className="space-y-12">
+      <main className="max-w-6xl mx-auto px-6 py-12">
+        <div className="space-y-8">
           {/* Current Plan Section */}
           <section>
-            <h1 className="text-5xl md:text-6xl font-extrabold uppercase tracking-tighter text-black mb-8">
+            <h1 className="text-5xl md:text-6xl font-extrabold uppercase tracking-tighter text-black mb-10">
               Your Plan
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Plan Status Card */}
-              <div className="border border-black p-8 space-y-6">
+              <div className="lg:col-span-1 border border-black p-6 space-y-5">
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-widest text-black">Current Plan</span>
-                  <h2 className="text-3xl font-extrabold uppercase tracking-tight text-black mt-2">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-black">Current Plan</span>
+                  <h2 className="text-4xl font-extrabold uppercase tracking-tight text-black mt-3">
                     {currentPlan === 'free' ? 'Free' : currentPlan === 'pro' ? 'Pro' : currentPlan === 'master' ? 'Master' : 'Lifetime'}
                   </h2>
-                  <p className="text-sm text-black mt-2">
+                  <p className="text-base text-black mt-2 font-semibold">
                     {currentPlan === 'free' ? 'BTC signals only' : currentPlan === 'pro' ? 'BTC + ETH + BNB' : currentPlan === 'master' ? 'All 15 pairs' : 'Lifetime access'}
                   </p>
                 </div>
 
                 {/* Application Status */}
                 {applicationStatus && (
-                  <div className="border-t border-black pt-6 space-y-4">
+                  <div className="border-t border-black pt-4 space-y-4">
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-widest text-black">Application Status</span>
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-black">Application Status</span>
                       <div className="mt-2 flex items-center gap-2">
-                        <span className={`text-sm font-bold uppercase ${
+                        <span className={`text-base font-bold uppercase ${
                           isApproved ? 'text-emerald-600' : isPending ? 'text-blue-600' : isWaitingList ? 'text-amber-600' : 'text-red-600'
                         }`}>
                           {isApproved ? '✓ Approved' : isPending ? '⏳ Under Review' : isWaitingList ? '⏳ Waiting List' : '✗ Rejected'}
                         </span>
-                        <span className="text-xs text-black">for {appliedFor?.toUpperCase()}</span>
+                        <span className="text-sm text-black font-semibold">for {appliedFor?.toUpperCase()}</span>
                       </div>
                     </div>
 
                     {isApproved && currentPlan === 'free' && (
-                      <div className="bg-emerald-50 border border-emerald-200 p-4 space-y-3">
-                        <p className="text-sm font-semibold text-emerald-900">
+                      <div className="bg-emerald-50 border border-emerald-200 p-4 space-y-2">
+                        <p className="text-base font-bold text-emerald-900">
                           Your application is approved! 🎉
                         </p>
-                        <p className="text-xs text-emerald-800 leading-relaxed">
+                        <p className="text-sm text-emerald-800 leading-relaxed">
                           Finish payment to upgrade to {appliedFor?.toUpperCase()} and unlock all premium features.
                         </p>
                         <a
                           href="https://t.me/alexsanddockcom"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-block text-xs font-bold text-emerald-700 hover:text-emerald-900 underline"
+                          className="inline-block text-sm font-bold text-emerald-700 hover:text-emerald-900 underline"
                         >
                           Contact @alexsanddockcom for payment →
                         </a>
@@ -140,49 +140,52 @@ export default function BillingPage() {
                     )}
 
                     {isPending && (
-                      <div className="bg-blue-50 border border-blue-200 p-4 space-y-3">
-                        <p className="text-xs text-blue-800">
-                          Your application for <b>{appliedFor?.toUpperCase()}</b> is under review. We'll notify you within 24 hours.
+                      <div className="bg-blue-50 border border-blue-200 p-4 space-y-2">
+                        <p className="text-sm font-semibold text-blue-900">Under Review</p>
+                        <p className="text-sm text-blue-800">
+                          Your {appliedFor?.toUpperCase()} application is under review. We'll notify you within 24 hours.
                         </p>
                         <a
                           href="https://t.me/alexsanddockcom"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-block text-xs font-bold text-blue-700 hover:text-blue-900 underline"
+                          className="inline-block text-sm font-bold text-blue-700 hover:text-blue-900 underline"
                         >
-                          Contact @alexsanddockcom for status update →
+                          Status update →
                         </a>
                       </div>
                     )}
 
                     {isWaitingList && (
-                      <div className="bg-amber-50 border border-amber-200 p-4 space-y-3">
-                        <p className="text-xs text-amber-800">
-                          Your application for {appliedFor?.toUpperCase()} is under review. We'll notify you as soon as it's approved.
+                      <div className="bg-amber-50 border border-amber-200 p-4 space-y-2">
+                        <p className="text-sm font-semibold text-amber-900">Waiting List</p>
+                        <p className="text-sm text-amber-800">
+                          Your {appliedFor?.toUpperCase()} application is on the waiting list. We'll notify you when approved.
                         </p>
                         <a
                           href="https://t.me/alexsanddockcom"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-block text-xs font-bold text-amber-700 hover:text-amber-900 underline"
+                          className="inline-block text-sm font-bold text-amber-700 hover:text-amber-900 underline"
                         >
-                          Contact @alexsanddockcom for status update →
+                          Check status →
                         </a>
                       </div>
                     )}
 
                     {isRejected && (
                       <div className="bg-red-50 border border-red-200 p-4 space-y-2">
-                        <p className="text-xs text-red-800">
-                          Your {appliedFor?.toUpperCase()} application was not approved this time.
+                        <p className="text-sm font-semibold text-red-900">Not Approved</p>
+                        <p className="text-sm text-red-800">
+                          Your {appliedFor?.toUpperCase()} application was not approved at this time.
                         </p>
                         <a
                           href="https://t.me/alexsanddockcom"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-block text-xs font-bold text-red-700 hover:text-red-900 underline"
+                          className="inline-block text-sm font-bold text-red-700 hover:text-red-900 underline"
                         >
-                          Contact us to discuss →
+                          Discuss options →
                         </a>
                       </div>
                     )}
@@ -190,13 +193,13 @@ export default function BillingPage() {
                 )}
 
                 {!applicationStatus && currentPlan === 'free' && (
-                  <div className="border-t border-black pt-6">
-                    <p className="text-xs text-black mb-4">
+                  <div className="border-t border-black pt-4">
+                    <p className="text-sm text-black mb-4 font-semibold">
                       Want access to more coins? Apply for Pro or Master.
                     </p>
                     <a
                       href="/pricing"
-                      className="inline-block w-full text-center py-3 bg-black hover:bg-brand-orange text-white font-bold text-xs uppercase tracking-widest transition-all border border-black"
+                      className="inline-block w-full text-center py-3 bg-black hover:bg-brand-orange text-white font-bold text-sm uppercase tracking-widest transition-all border border-black"
                     >
                       View Plans & Apply →
                     </a>
@@ -205,9 +208,9 @@ export default function BillingPage() {
               </div>
 
               {/* Plan Features */}
-              <div className="border border-black p-8">
-                <span className="text-xs font-bold uppercase tracking-widest text-black">What's Included</span>
-                <ul className="space-y-3 mt-6 text-sm">
+              <div className="lg:col-span-2 border border-black p-6">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-black">What's Included</span>
+                <ul className="space-y-3 mt-6 text-base">
                   {currentPlan === 'free' && (
                     <>
                       <li className="flex items-center gap-2">
