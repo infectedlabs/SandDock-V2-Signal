@@ -94,13 +94,13 @@ export default function BillingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Plan Status Card */}
-              <div className="lg:col-span-1 border border-black p-5 space-y-4">
+              <div className="lg:col-span-1 border border-black p-4 space-y-3">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-widest text-black">Current Plan</span>
-                  <h2 className="text-4xl font-extrabold uppercase tracking-tight text-black mt-3">
+                  <h2 className="text-3xl font-extrabold uppercase tracking-tight text-black mt-2">
                     {currentPlan === 'free' ? 'Free' : currentPlan === 'pro' ? 'Pro' : currentPlan === 'master' ? 'Master' : 'Lifetime'}
                   </h2>
-                  <p className="text-base text-black mt-2 font-semibold">
+                  <p className="text-sm text-black mt-1 font-semibold">
                     {currentPlan === 'free' ? 'BTC signals only' : currentPlan === 'pro' ? 'BTC + ETH + BNB' : currentPlan === 'master' ? 'All 15 pairs' : 'Lifetime access'}
                   </p>
                 </div>
@@ -120,9 +120,9 @@ export default function BillingPage() {
                     </div>
 
                     {isApproved && currentPlan === 'free' && (
-                      <div className="bg-emerald-50 border border-emerald-200 p-3 space-y-1.5">
-                        <p className="text-sm font-bold text-emerald-900">
-                          Approved! 🎉 Complete payment →
+                      <div className="bg-emerald-50 border border-emerald-200 p-2.5 space-y-1">
+                        <p className="text-xs font-bold text-emerald-900">
+                          Approved! 🎉
                         </p>
                         <a
                           href="https://t.me/alexsanddockcom"
@@ -130,7 +130,7 @@ export default function BillingPage() {
                           rel="noopener noreferrer"
                           className="inline-block text-xs font-bold text-emerald-700 hover:text-emerald-900 underline"
                         >
-                          Contact for payment
+                          Complete payment →
                         </a>
                       </div>
                     )}
@@ -204,9 +204,9 @@ export default function BillingPage() {
               </div>
 
               {/* Plan Features */}
-              <div className="lg:col-span-2 border border-black p-5">
+              <div className="lg:col-span-2 border border-black p-4">
                 <span className="text-[11px] font-bold uppercase tracking-widest text-black">What's Included</span>
-                <ul className="space-y-2 mt-4 text-sm">
+                <ul className="space-y-1.5 mt-3 text-sm">
                   {currentPlan === 'free' && (
                     <>
                       <li className="flex items-center gap-2">
@@ -283,12 +283,12 @@ export default function BillingPage() {
               </div>
 
               {/* Need Help Card - Black Background with Blue Button */}
-              <div className="border border-black bg-black p-5 space-y-4 flex flex-col justify-between">
+              <div className="border border-black bg-black p-5 space-y-3 flex flex-col justify-between">
                 <div>
-                  <h2 className="text-2xl font-extrabold uppercase tracking-tight text-white">
+                  <h2 className="text-lg font-extrabold uppercase tracking-tight text-white">
                     Need Help?
                   </h2>
-                  <p className="text-sm text-white mt-2">
+                  <p className="text-xs text-white mt-1.5">
                     For payment issues, plan upgrades, or technical support, contact us on Telegram.
                   </p>
                 </div>
@@ -296,49 +296,49 @@ export default function BillingPage() {
                   href="https://t.me/alexsanddockcom"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-widest transition-all border border-blue-600 w-full text-center"
+                  className="inline-block px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-widest transition-all border border-blue-600 w-full text-center"
                 >
                   Contact @alexsanddockcom →
                 </a>
               </div>
 
               {/* Billing & Expiry Card */}
-              <div className="border border-black p-5 space-y-4">
+              <div className="border border-black p-4 space-y-3">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-widest text-black">Billing</span>
-                  <div className="mt-3 space-y-3">
+                  <div className="mt-2 space-y-2">
                     <div>
                       <p className="text-xs text-zinc-600">Billing Cycle</p>
-                      <p className="text-base font-semibold text-black">{currentPlan === 'free' ? 'Free Forever' : 'Monthly'}</p>
+                      <p className="text-sm font-semibold text-black">{currentPlan === 'free' ? 'Free Forever' : 'Monthly'}</p>
                     </div>
                     <div>
                       <p className="text-xs text-zinc-600">Next Renewal</p>
-                      <p className="text-base font-semibold text-black">{currentPlan === 'free' ? 'N/A' : 'Dec 21, 2026'}</p>
+                      <p className="text-sm font-semibold text-black">{currentPlan === 'free' ? 'N/A' : 'Dec 21, 2026'}</p>
                     </div>
                     <div>
                       <p className="text-xs text-zinc-600">Auto-Renewal</p>
-                      <p className="text-base font-semibold text-emerald-600">{currentPlan === 'free' ? 'N/A' : 'Active'}</p>
+                      <p className="text-sm font-semibold text-emerald-600">{currentPlan === 'free' ? 'N/A' : 'Active'}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Usage & Account Card */}
-              <div className="border border-black p-5 space-y-4">
+              <div className="border border-black p-4 space-y-3">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-widest text-black">Account</span>
-                  <div className="mt-3 space-y-3">
+                  <div className="mt-2 space-y-2">
                     <div>
                       <p className="text-xs text-zinc-600">Account Status</p>
-                      <p className="text-base font-semibold text-emerald-600">Active</p>
+                      <p className="text-sm font-semibold text-emerald-600">Active</p>
                     </div>
                     <div>
                       <p className="text-xs text-zinc-600">Member Since</p>
-                      <p className="text-base font-semibold text-black">Nov 15, 2026</p>
+                      <p className="text-sm font-semibold text-black">Nov 15, 2026</p>
                     </div>
                     <div>
                       <p className="text-xs text-zinc-600">Support Tier</p>
-                      <p className="text-base font-semibold text-black">{currentPlan === 'free' ? 'Community' : currentPlan === 'pro' ? '24h Email' : '12h Priority'}</p>
+                      <p className="text-sm font-semibold text-black">{currentPlan === 'free' ? 'Community' : currentPlan === 'pro' ? '24h Email' : '12h Priority'}</p>
                     </div>
                   </div>
                 </div>
