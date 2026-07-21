@@ -55,16 +55,17 @@ export default function LearnIndexPage() {
             <a href="/#explainability" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Platform Features</a>
             <a href="/#track-record" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Track Record</a>
             <a href="/pricing" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Pricing</a>
-            <a href="/learn" className="px-6 h-full flex items-center border-r border-black bg-zinc-100 text-[#ff5722] hover:bg-black hover:text-white transition-colors">Learn</a>
-            <a href="/compare" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Compare</a>
+            <a href="/contact" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Contact</a>
+            <a href="/#faq" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">FAQ</a>
+            <a href="/articles" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Articles</a>
           </nav>
 
           {/* Start button */}
           <div className="flex items-center h-16 border-l border-black relative">
-            <a 
-              href="/signup"
-              className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center"
-            >
+            <a href="/login" className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center border-r border-black">
+              Login
+            </a>
+            <a href="/signup" className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center">
               Start Free &rarr;
             </a>
             <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-2 h-2 bg-black rotate-45 z-10" />

@@ -55,12 +55,16 @@ export default function CompareIndexPage() {
             <a href="/#explainability" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Platform Features</a>
             <a href="/#track-record" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Track Record</a>
             <a href="/pricing" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Pricing</a>
-            <a href="/learn" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Learn</a>
-            <a href="/compare" className="px-6 h-full flex items-center border-r border-black bg-zinc-100 text-[#ff5722] hover:bg-black hover:text-white transition-colors">Compare</a>
+            <a href="/contact" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Contact</a>
+            <a href="/#faq" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">FAQ</a>
+            <a href="/articles" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Articles</a>
           </nav>
 
           <div className="flex items-center h-16 border-l border-black relative">
-            <a 
+            <a href="/login" className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center border-r border-black">
+              Login
+            </a>
+            <a
               href="/signup"
               className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center"
             >
