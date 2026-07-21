@@ -3,6 +3,7 @@
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import Navbar from "@/components/Navbar";
 
 function ApplyPageContent() {
   const router = useRouter();
@@ -168,16 +169,7 @@ function ApplyPageContent() {
 
   const handleNext = () => {
     if (!validateStep()) return;
-
-    // Handle dependent fields
-    if (currentStepData.dependsOn && currentStepData.dependsOn.length > 0 && formData.currentServices) {
-      // Show the dependent question
-      setCurrentStep(currentStep + 1);
-    } else if (currentStepData.dependsOn && formData.currentServices) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      setCurrentStep(currentStep + 1);
-    }
+    setCurrentStep(currentStep + 1);
     setSubmitError("");
   };
 
@@ -220,54 +212,41 @@ function ApplyPageContent() {
   // Require login to submit application
   if (!user) {
     return (
-      <div className="relative min-h-screen bg-white text-black overflow-hidden font-satoshi">
-        <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
-          <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
-            <a href="/" className="flex items-center gap-2.5">
-              <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">Sanddock</span>
-            </a>
-            <a href="/pricing" className="text-[11px] font-bold uppercase tracking-wider hover:text-brand-orange transition-colors">
-              Back to Pricing →
-            </a>
-          </div>
-        </header>
+      <div className="relative min-h-screen bg-surface-0 text-ink overflow-hidden">
+        <Navbar />
 
-        <div className="max-w-2xl mx-auto px-6 py-24">
-          <div className="space-y-8">
-            <div className="text-center space-y-4">
-              <div className="text-6xl font-black">🔐</div>
-              <h1 className="text-4xl font-extrabold uppercase tracking-tighter text-black">Login Required</h1>
+        <div className="relative mesh-glow grain">
+          <div className="grid-lines" />
+          <div className="relative z-10 max-w-2xl mx-auto px-6 pt-36 pb-24 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/25 to-accent-2/15 border border-white/10 text-accent-soft flex items-center justify-center mx-auto mb-6">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
             </div>
+            <h1 className="text-[38px] font-semibold tracking-tight text-gradient leading-none">
+              Login required
+            </h1>
 
-            <div className="border border-black p-8 space-y-6 text-center">
-              <p className="text-sm text-black leading-relaxed">
-                To prevent spam and maintain application quality, you must be logged in to submit an application.
+            <div className="card p-8 mt-8 space-y-5 text-left">
+              <p className="text-[14.5px] text-ink-2 leading-relaxed">
+                To prevent spam and maintain application quality, you must be logged in to submit
+                an application.
               </p>
-              <p className="text-xs text-zinc-600">
+              <p className="text-[13px] text-ink-3 leading-relaxed">
                 This ensures we can properly review and contact you about your application.
               </p>
 
-              <div className="flex gap-4 pt-4">
-                <button
-                  onClick={() => router.push('/login')}
-                  className="flex-1 py-3 bg-black hover:bg-brand-orange text-white font-bold text-sm uppercase tracking-widest transition-all border border-black"
-                >
-                  Sign In →
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => router.push('/login')} className="btn-form flex-1">
+                  Sign in
                 </button>
-                <button
-                  onClick={() => router.push('/signup')}
-                  className="flex-1 py-3 bg-white hover:bg-zinc-100 text-black font-bold text-sm uppercase tracking-widest transition-all border border-black"
-                >
-                  Create Account →
+                <button onClick={() => router.push('/signup')} className="btn-form-outline flex-1">
+                  Create account
                 </button>
               </div>
 
-              <button
-                onClick={() => router.push('/pricing')}
-                className="w-full py-3 bg-white hover:bg-zinc-50 text-black font-bold text-sm uppercase tracking-widest transition-all border border-black"
-              >
-                Back to Pricing
+              <button onClick={() => router.push('/pricing')} className="btn-secondary w-full justify-center">
+                Back to pricing
               </button>
             </div>
           </div>
@@ -278,54 +257,58 @@ function ApplyPageContent() {
 
   if (submitSuccess) {
     return (
-      <div className="relative min-h-screen bg-white text-black overflow-hidden font-satoshi">
-        <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
-          <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
-            <a href="/" className="flex items-center gap-2.5">
-              <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">Sanddock</span>
-            </a>
-          </div>
-        </header>
+      <div className="relative min-h-screen bg-surface-0 text-ink overflow-hidden">
+        <Navbar />
 
-        <div className="max-w-2xl mx-auto px-6 py-16">
-          <div className="space-y-8">
-            <div className="text-center space-y-4">
-              <div className="text-6xl font-black">✓</div>
-              <h1 className="text-4xl font-extrabold uppercase tracking-tighter text-black">Application Received</h1>
+        <div className="relative mesh-glow grain">
+          <div className="grid-lines" />
+          <div className="relative z-10 max-w-2xl mx-auto px-6 pt-36 pb-24">
+            <div className="text-center mb-8">
+              <div className="w-14 h-14 rounded-2xl bg-up/12 border border-up/25 text-up flex items-center justify-center mx-auto mb-6">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <h1 className="text-[38px] font-semibold tracking-tight text-gradient leading-none">
+                Application received
+              </h1>
             </div>
 
-            <div className="border border-black p-8 space-y-6">
-              <div className="space-y-3">
-                <h2 className="text-lg font-bold uppercase tracking-tight text-black">What happens next?</h2>
-                <p className="text-sm text-black leading-relaxed">
-                  Thanks for applying! We'll review your application within 24 hours and send you an email with our decision.
-                  Please check your spam folder to make sure you don't miss it.
+            <div className="card p-8 space-y-6">
+              <div className="space-y-2.5">
+                <h2 className="text-[18px] font-semibold text-ink">What happens next?</h2>
+                <p className="text-[14px] text-ink-2 leading-relaxed">
+                  Thanks for applying! We&apos;ll review your application within 24 hours and send you
+                  an email with our decision. Please check your spam folder to make sure you don&apos;t
+                  miss it.
                 </p>
               </div>
 
-              <div className="border-t border-black pt-6 space-y-4 bg-amber-50 border border-amber-200 p-4">
-                <h3 className="font-bold text-black">Want to know more about pricing and application status?</h3>
-                <p className="text-sm text-black leading-relaxed">
-                  Contact us on Telegram for details about pricing, payment options, and to follow up on your application.
+              <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 p-4 space-y-3">
+                <h3 className="font-semibold text-[14px] text-amber-200">
+                  Want to know more about pricing and application status?
+                </h3>
+                <p className="text-[13px] text-ink-2 leading-relaxed">
+                  Contact us on Telegram for details about pricing, payment options, and to follow
+                  up on your application.
                 </p>
                 <a
                   href="https://t.me/alexsanddockcom"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block text-sm font-bold text-amber-700 hover:text-amber-900 underline"
+                  className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-amber-300 hover:text-amber-100 transition-colors"
                 >
-                  Contact @alexsanddockcom →
+                  Contact @alexsanddockcom
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12l-7.5 7.5" />
+                  </svg>
                 </a>
               </div>
-            </div>
 
-            <button
-              onClick={() => router.push('/terminal')}
-              className="w-full py-3 bg-black hover:bg-brand-orange text-white font-bold text-sm uppercase tracking-widest transition-all border border-black"
-            >
-              Go Back to Terminal →
-            </button>
+              <button onClick={() => router.push('/terminal')} className="btn-form">
+                Go back to terminal
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -333,137 +316,111 @@ function ApplyPageContent() {
   }
 
   return (
-    <div className="relative min-h-screen bg-white text-black overflow-hidden font-satoshi">
-      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6 relative">
-          <a href="/" className="flex items-center gap-2.5">
-            <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-            <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">Sanddock</span>
-          </a>
-          <a href="/pricing" className="text-[11px] font-bold uppercase tracking-wider hover:text-brand-orange transition-colors">
-            Back to Pricing →
-          </a>
-          <div className="absolute bottom-0 left-6 translate-y-1/2 -translate-x-1/2 w-2 h-2 bg-black rotate-45 z-10" />
-        </div>
-      </header>
+    <div className="relative min-h-screen bg-surface-0 text-ink overflow-hidden">
+      <Navbar />
 
-      {/* ── FORM CONTAINER ─────────────────────────────────────────────────── */}
-      <div className="max-w-3xl mx-auto px-6 py-12">
-        {/* Progress Bar */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-extrabold uppercase tracking-tighter text-black">
-              {currentStepData.title}
-            </h1>
-            <span className="text-xs font-bold uppercase tracking-widest text-black">
-              Step {currentStep + 1} of {totalSteps}
-            </span>
-          </div>
-          {currentStepData.subtitle && (
-            <p className="text-sm text-black mb-4">{currentStepData.subtitle}</p>
-          )}
-          <div className="w-full bg-zinc-200 h-1 rounded-none overflow-hidden">
-            <div
-              className="bg-brand-orange h-full transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Error Message */}
-          {submitError && (
-            <div className="border border-red-300 bg-red-50 text-red-700 p-4 text-sm rounded-none">
-              {submitError}
+      <div className="relative mesh-glow-soft">
+        <div className="relative z-10 max-w-3xl mx-auto px-6 pt-28 pb-20">
+          {/* Progress */}
+          <div className="mb-10">
+            <div className="flex items-center justify-between gap-6 mb-4">
+              <h1 className="text-[26px] md:text-[32px] font-semibold tracking-tight text-gradient leading-tight">
+                {currentStepData.title}
+              </h1>
+              <span className="flex-shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3">
+                Step {currentStep + 1} of {totalSteps}
+              </span>
             </div>
-          )}
-
-          {/* Current Step Fields */}
-          <div className="border border-black p-8 bg-zinc-50 space-y-4">
-            {currentStepData.type === "text" || currentStepData.type === "email" ? (
-              <input
-                type={currentStepData.type}
-                name={currentStepData.fields[0]}
-                value={formData[currentStepData.fields[0]]}
-                onChange={handleChange}
-                placeholder={currentStepData.placeholder}
-                className="w-full border border-zinc-300 px-4 py-3 text-lg bg-white text-black placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-orange rounded-none"
+            {currentStepData.subtitle && (
+              <p className="text-[14px] text-ink-2 mb-4">{currentStepData.subtitle}</p>
+            )}
+            <div className="w-full bg-white/8 h-1.5 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-accent to-accent-2 transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
               />
-            ) : currentStepData.type === "textarea" ? (
-              <textarea
-                name={currentStepData.fields[0]}
-                value={formData[currentStepData.fields[0]]}
-                onChange={handleChange}
-                placeholder={currentStepData.placeholder}
-                rows="6"
-                className="w-full border border-zinc-300 px-4 py-3 text-base bg-white text-black placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-orange rounded-none resize-none"
-              />
-            ) : currentStepData.type === "select" ? (
-              <select
-                name={currentStepData.fields[0]}
-                value={formData[currentStepData.fields[0]]}
-                onChange={handleChange}
-                className="w-full border border-zinc-300 px-4 py-3 text-base bg-white text-black focus:outline-none focus:ring-2 focus:ring-brand-orange rounded-none cursor-pointer"
-              >
-                <option value="" className="text-black">Select an option</option>
-                {currentStepData.options.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="text-black">
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            ) : null}
+            </div>
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex gap-4 justify-between">
-            <button
-              type="button"
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className="px-8 py-3 border border-black text-black font-bold text-[12px] uppercase tracking-widest hover:bg-black hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all rounded-none"
-            >
-              ← Previous
-            </button>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {submitError && (
+              <div className="p-4 rounded-xl bg-down/10 border border-down/25 text-down text-[13.5px] font-medium">
+                {submitError}
+              </div>
+            )}
 
-            {currentStep === totalSteps - 1 ? (
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-8 py-3 bg-brand-orange hover:bg-black text-white font-bold text-[12px] uppercase tracking-widest disabled:opacity-60 transition-all rounded-none border border-brand-orange hover:border-black"
-              >
-                {isSubmitting ? "Submitting..." : "Submit Application →"}
-              </button>
-            ) : (
+            <div className="card p-8">
+              {currentStepData.type === "text" || currentStepData.type === "email" ? (
+                <input
+                  type={currentStepData.type}
+                  name={currentStepData.fields[0]}
+                  value={formData[currentStepData.fields[0]]}
+                  onChange={handleChange}
+                  placeholder={currentStepData.placeholder}
+                  className="field !text-lg !py-3.5"
+                />
+              ) : currentStepData.type === "textarea" ? (
+                <textarea
+                  name={currentStepData.fields[0]}
+                  value={formData[currentStepData.fields[0]]}
+                  onChange={handleChange}
+                  placeholder={currentStepData.placeholder}
+                  rows="6"
+                  className="field !text-base resize-none"
+                />
+              ) : currentStepData.type === "select" ? (
+                <select
+                  name={currentStepData.fields[0]}
+                  value={formData[currentStepData.fields[0]]}
+                  onChange={handleChange}
+                  className="field !text-base cursor-pointer"
+                >
+                  <option value="" className="bg-surface-1">Select an option</option>
+                  {currentStepData.options.map((opt) => (
+                    <option key={opt.value} value={opt.value} className="bg-surface-1">
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex gap-4 justify-between">
               <button
                 type="button"
-                onClick={handleNext}
-                className="px-8 py-3 bg-black hover:bg-brand-orange text-white font-bold text-[12px] uppercase tracking-widest transition-all rounded-none border border-black hover:border-brand-orange"
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className="btn-form-outline w-auto px-8"
               >
-                Next →
+                Previous
               </button>
-            )}
-          </div>
 
-          <p className="text-[11px] text-black text-center">
-            Reviewed within 24 hours. Email notification sent.
-          </p>
-        </form>
+              {currentStep === totalSteps - 1 ? (
+                <button type="submit" disabled={isSubmitting} className="btn-form w-auto px-8">
+                  {isSubmitting ? "Submitting…" : "Submit application"}
+                </button>
+              ) : (
+                <button type="button" onClick={handleNext} className="btn-form w-auto px-8">
+                  Next
+                </button>
+              )}
+            </div>
+
+            <p className="text-[12px] text-ink-3 text-center">
+              Reviewed within 24 hours. Email notification sent.
+            </p>
+          </form>
+        </div>
       </div>
-
-      {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer className="py-8 text-center text-black text-xs border-t border-black mt-12">
-        <p>© 2024 Sanddock. Not financial advice. Educational purposes only.</p>
-      </footer>
     </div>
   );
 }
 
 export default function ApplyPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-satoshi">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-surface-0 flex items-center justify-center text-ink-2">Loading…</div>}>
       <ApplyPageContent />
     </Suspense>
   );

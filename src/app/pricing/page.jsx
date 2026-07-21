@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { CtaPrimary, CtaSecondary, SectionHeading } from "@/components/ui/Cta";
 
 // ── Plan Definitions ────────────────────────────────────────────────────────
 const PLANS_DATA = {
@@ -10,7 +13,7 @@ const PLANS_DATA = {
     label: "Free Plan",
     sublabel: "Always open to BTC signals",
     monthlyPrice: 0,
-    color: "text-black",
+    color: "text-ink",
     badge: null,
     highlight: false,
     features: [
@@ -27,7 +30,7 @@ const PLANS_DATA = {
   pro: {
     label: "Pro",
     sublabel: "Best for active traders",
-    color: "text-brand-orange",
+    color: "text-accent-soft",
     badge: "Most Popular",
     highlight: true,
     features: [
@@ -44,7 +47,7 @@ const PLANS_DATA = {
   master: {
     label: "Master",
     sublabel: "For power traders",
-    color: "text-purple-400",
+    color: "text-[#c4b5fd]",
     badge: "All Coins",
     highlight: false,
     features: [
@@ -73,19 +76,86 @@ const DEMO_STATS = {
   lastReviewDate: "Tuesday",
 };
 
+const COMPARISON_ROWS = [
+  ["Coins Available", "BTC only", "BTC, ETH, BNB", "All 15 pairs"],
+  ["Timeframes", "15m, 1h, 4h", "15m, 1h, 4h", "15m, 1h, 4h"],
+  ["SL & TP Levels", "Locked", "Visible", "Visible"],
+  ["P&L Calculator", "No", "Full history", "Full history"],
+  ["CSV Export", "No", "Yes", "Yes"],
+  ["Telegram Alerts", "Free BTC Group", "Private Channel", "Unlimited Channels"],
+  ["AI Explanations", "Yes", "Yes", "Yes + Confluence"],
+  ["Email Support", "48h response", "24h response", "12h priority"],
+];
+
+const PRICING_FAQ = [
+  {
+    q: "How long does the review process take?",
+    a: "Applications are reviewed within 24 hours of submission. You'll receive an email with your decision and feedback on your risk management. Please check your spam folder to ensure you don't miss it.",
+  },
+  {
+    q: "What if I'm rejected?",
+    a: "You'll receive specific feedback on your risk management approach. Most rejections are because traders aren't sizing positions properly or moving stops. You can reapply after addressing the feedback.",
+  },
+  {
+    q: "Can I cancel my subscription?",
+    a: "Yes. Email alex@sanddock.com anytime. Your account downgrades to Free on your renewal date.",
+  },
+  {
+    q: "Why USDT only?",
+    a: "USDT TRC-20 has near-zero fees, instant confirmation, and no price volatility. We avoid volatile assets to simplify accounting and prevent refund nightmares when BTC drops 20% after you pay.",
+  },
+];
+
+const PROCESS_STEPS = [
+  {
+    title: "Applications reviewed",
+    body: "Within 24 hours of submission",
+    icon: (
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+    ),
+  },
+  {
+    title: "Notification",
+    body: "Decision sent via email. Check spam folder to be safe.",
+    icon: (
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    ),
+  },
+  {
+    title: "Payment method",
+    body: "USDT TRC-20 only. Direct on-chain, no middleman.",
+    icon: (
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 10h18M7 15h4m-7 4h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    ),
+  },
+];
+
 function CheckIcon({ available }) {
   if (available) {
     return (
-      <svg className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 text-up shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
       </svg>
     );
   }
   return (
-    <svg className="w-4 h-4 text-zinc-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+    <svg className="w-4 h-4 text-ink-3/60 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
   );
+}
+
+// Status pill icons, replacing the previous emoji glyphs.
+function StatusIcon({ status }) {
+  const common = { className: "w-4 h-4", fill: "none", stroke: "currentColor", strokeWidth: 2.2, viewBox: "0 0 24 24" };
+  if (status === "accepted") {
+    return <svg {...common}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
+  }
+  if (status === "rejected") {
+    return <svg {...common}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
+  }
+  // pending / waitlisted
+  return <svg {...common}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 }
 
 // ── PricingCard ─────────────────────────────────────────────────────────
@@ -93,83 +163,103 @@ function PricingCard({ planKey, data, user }) {
   const router = useRouter();
   const isFree = planKey === "free";
 
+  const Shell = ({ children }) =>
+    data.highlight ? (
+      <div className="card-gradient-border p-px h-full shadow-[0_30px_80px_-35px_rgba(48,84,255,0.65)]">
+        <div className="relative flex flex-col justify-between h-full rounded-[17px] bg-surface-2/80 backdrop-blur-xl p-7 overflow-hidden">
+          <div className="pointer-events-none absolute -top-24 -right-16 w-56 h-56 rounded-full bg-accent/18 blur-3xl" />
+          <div className="relative flex flex-col justify-between h-full">{children}</div>
+        </div>
+      </div>
+    ) : (
+      <div className="card card-interactive flex flex-col justify-between h-full p-7">{children}</div>
+    );
+
   return (
-    <div
-      className={`relative flex flex-col justify-between rounded-none border p-7 ${
-        data.highlight
-          ? "border-brand-orange bg-white shadow-[6px_6px_0px_0px_rgba(255,69,0,0.3)]"
-          : "border-black bg-[#f8f9fa] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-      }`}
-      id={`plan-${planKey}`}
-    >
+    <div className="relative h-full" id={`plan-${planKey}`}>
       {data.badge && (
-        <span className="absolute top-0 right-6 -translate-y-1/2 bg-brand-orange text-white text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-none">
+        <span
+          className={`absolute top-0 right-6 -translate-y-1/2 z-20 text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-1 rounded-full ${
+            data.highlight
+              ? "bg-gradient-to-r from-accent to-accent-2 text-white shadow-[0_8px_24px_-10px_rgba(48,84,255,0.9)]"
+              : "bg-surface-3 text-ink-2 border border-white/10"
+          }`}
+        >
           {data.badge}
         </span>
       )}
 
-      <div className="space-y-5">
-        <div>
-          <span className={`text-[11px] font-extrabold uppercase tracking-wider ${data.color}`}>{data.label}</span>
-          <div className="mt-1.5">
-            {isFree ? (
-              <>
-                <span className="text-4xl font-extrabold font-satoshi text-black">$0</span>
-                <span className="block text-[11px] text-black font-bold mt-0.5">No credit card · Permanent access</span>
-              </>
-            ) : (
-              <>
-                <span className="text-2xl font-extrabold font-satoshi text-brand-orange">Application Only</span>
-                <span className="block text-[11px] text-black font-bold mt-1">Pricing revealed after approval</span>
-              </>
-            )}
+      <Shell>
+        <div className="space-y-5">
+          <div>
+            <span className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${data.color}`}>
+              {data.label}
+            </span>
+            <div className="mt-2">
+              {isFree ? (
+                <>
+                  <span className="text-4xl font-semibold tracking-tight text-ink">$0</span>
+                  <span className="block text-[12px] text-ink-3 mt-1">
+                    No credit card · Permanent access
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl font-semibold tracking-tight text-gradient">
+                    Application Only
+                  </span>
+                  <span className="block text-[12px] text-ink-3 mt-1">
+                    Pricing revealed after approval
+                  </span>
+                </>
+              )}
+            </div>
           </div>
+
+          <p className="text-[13px] text-ink-2 leading-relaxed">{data.sublabel}</p>
+
+          <ul className="space-y-2.5 pt-4 border-t border-white/8">
+            {data.features.map((f, i) => (
+              <li key={i} className="flex items-start gap-2.5">
+                <CheckIcon available={f.available} />
+                <span
+                  className={`text-[12.5px] leading-snug ${
+                    f.available ? "text-ink-2" : "text-ink-3/70 line-through"
+                  }`}
+                >
+                  {f.text}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <p className="text-[13px] text-black leading-relaxed">{data.sublabel}</p>
-
-        <ul className="space-y-2.5 pt-2 border-t border-black/10">
-          {data.features.map((f, i) => (
-            <li key={i} className="flex items-start gap-2.5">
-              <CheckIcon available={f.available} />
-              <span className={`text-[12px] font-semibold leading-snug ${f.available ? "text-zinc-800" : "text-black line-through"}`}>
-                {f.text}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="mt-7">
-        {isFree ? (
-          user ? (
-            <a
-              href="/terminal"
-              className="block w-full py-3 text-center bg-black hover:bg-brand-orange text-white font-bold text-[12px] uppercase tracking-widest transition-all rounded-none border border-black"
-            >
-              Go to Terminal →
-            </a>
+        <div className="mt-7">
+          {isFree ? (
+            user ? (
+              <CtaSecondary href="/terminal" className="w-full justify-center border border-white/12">
+                Go to Terminal
+              </CtaSecondary>
+            ) : (
+              <CtaSecondary href="/signup" className="w-full justify-center border border-white/12">
+                Get Started Free
+              </CtaSecondary>
+            )
           ) : (
-            <a
-              href="/signup"
-              className="block w-full py-3 text-center bg-white hover:bg-black text-black hover:text-white font-bold text-[12px] uppercase tracking-widest transition-all rounded-none border border-black"
+            <button
+              onClick={() => router.push(`/apply?plan=${planKey}`)}
+              className="btn-primary w-full justify-between cursor-pointer"
             >
-              Get Started Free →
-            </a>
-          )
-        ) : (
-          <button
-            onClick={() => router.push(`/apply?plan=${planKey}`)}
-            className={`w-full py-3 font-bold text-[12px] uppercase tracking-widest transition-all rounded-none border cursor-pointer ${
-              data.highlight
-                ? "bg-brand-orange hover:bg-black text-white border-brand-orange"
-                : "bg-black hover:bg-brand-orange text-white border-black"
-            }`}
-          >
-            Apply for {data.label} →
-          </button>
-        )}
-      </div>
+              <span>Apply for {data.label}</span>
+              <span className="btn-primary__arrow">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12l-7.5 7.5" />
+                </svg>
+              </span>
+            </button>
+          )}
+        </div>
+      </Shell>
     </div>
   );
 }
@@ -178,6 +268,7 @@ function PricingCard({ planKey, data, user }) {
 export default function PricingPage() {
   const { user } = useAuth();
   const [applicationStatus, setApplicationStatus] = useState(null);
+  const [openFAQ, setOpenFAQ] = useState({});
 
   useEffect(() => {
     if (!user) return;
@@ -199,372 +290,269 @@ export default function PricingPage() {
     fetchApplicationStatus();
   }, [user]);
 
+  const toggleFAQ = (idx) => setOpenFAQ((prev) => ({ ...prev, [idx]: !prev[idx] }));
+
+  const statusTone = {
+    accepted: "border-up/40 bg-up/10 text-up",
+    pending: "border-accent/40 bg-accent/10 text-accent-soft",
+    waitlisted: "border-amber-400/40 bg-amber-400/10 text-amber-300",
+    rejected: "border-down/40 bg-down/10 text-down",
+  };
+
   return (
-    <div className="relative min-h-screen bg-white text-black overflow-hidden font-satoshi">
-
-      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
-        <div className="max-w-7xl mx-auto flex items-center justify-between relative">
-          <div className="flex items-center px-6 h-16 border-r border-black relative">
-            <a href="/" className="flex items-center gap-2.5">
-              <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">Sanddock</span>
-            </a>
-            <div className="absolute bottom-0 right-0 translate-y-1/2 translate-x-1/2 w-2 h-2 bg-black rotate-45 z-10" />
-          </div>
-
-          <nav className="hidden md:flex items-center flex-1 h-16 text-xs font-bold uppercase tracking-wider text-black">
-            <a href="/#how-it-works" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">How It Works</a>
-            <a href="/#explainability" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Platform Features</a>
-            <a href="/#track-record" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Track Record</a>
-            <a href="/pricing" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Pricing</a>
-            <a href="/contact" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Contact</a>
-            <a href="/#faq" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">FAQ</a>
-            <a href="/articles" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Articles</a>
-            {user && (
-              <a href="/terminal" className="px-6 h-full flex items-center border-r border-black text-brand-orange hover:bg-brand-orange hover:text-white transition-colors">Terminal</a>
-            )}
-          </nav>
-
-          <div className="flex items-center h-16 border-l border-black relative">
-            {user ? (
-              <a href="/terminal" className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center">
-                Terminal &rarr;
-              </a>
-            ) : (
-              <>
-                <a href="/login" className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center border-r border-black">
-                  Login
-                </a>
-                <a href="/signup" className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center">
-                  Start Free &rarr;
-                </a>
-              </>
-            )}
-            <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-2 h-2 bg-black rotate-45 z-10" />
-          </div>
-        </div>
-      </header>
-
+    <div className="relative min-h-screen bg-surface-0 text-ink overflow-hidden antialiased">
+      <Navbar />
 
       {/* ── TITLE SECTION ──────────────────────────────────────────────────── */}
-      <section className="pt-16 pb-10 max-w-7xl mx-auto px-6 border-b border-black text-left">
-        <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange block mb-2">
-          Application-Based Access
-        </span>
-        <h1 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none mb-4">
-          We're selective about who we let in.
-        </h1>
-        <p className="text-black text-sm max-w-xl leading-relaxed">
-          Every trader is reviewed for risk management. Start free on Bitcoin, then apply for Pro or Master. We review applications within 24 hours and notify you via email.
-        </p>
+      <section className="relative mesh-glow grain border-b border-line overflow-hidden">
+        <div className="grid-lines" />
+        <div className="relative z-10 max-w-7xl mx-auto px-6 pt-36 pb-20 md:pt-44 md:pb-24 text-center">
+          <p className="font-instrument-serif text-[#b4c0ff] text-2xl sm:text-3xl leading-[1.1]">
+            Application-based access
+          </p>
+          <h1 className="mt-4 text-5xl sm:text-6xl lg:text-[86px] font-semibold tracking-tighter leading-[0.95] text-gradient max-w-4xl mx-auto">
+            We&apos;re selective about who we let in.
+          </h1>
+          <p className="mt-6 text-white/70 text-[17px] md:text-lg leading-[1.65] max-w-2xl mx-auto">
+            Every trader is reviewed for risk management. Start free on Bitcoin, then apply for Pro
+            or Master. We review applications within 24 hours and notify you via email.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
+            <CtaPrimary href="/apply">Start application</CtaPrimary>
+            <CtaSecondary href="#compare">Compare plans</CtaSecondary>
+          </div>
+        </div>
       </section>
 
       {/* ── APPLICATION STATUS ALERT ──────────────────────────────────────── */}
       {user && applicationStatus && (
-        <section className="py-12 max-w-7xl mx-auto px-6 border-b border-black">
-          <div className={`border-l-4 p-6 space-y-4 ${
-            applicationStatus.status === 'accepted' ? 'border-l-emerald-500 bg-emerald-50' :
-            applicationStatus.status === 'pending' ? 'border-l-blue-500 bg-blue-50' :
-            applicationStatus.status === 'waitlisted' ? 'border-l-amber-500 bg-amber-50' :
-            'border-l-red-500 bg-red-50'
-          }`}>
-            <div>
-              <p className={`text-xs font-bold uppercase tracking-widest mb-2 ${
-                applicationStatus.status === 'accepted' ? 'text-emerald-600' :
-                applicationStatus.status === 'pending' ? 'text-blue-600' :
-                applicationStatus.status === 'waitlisted' ? 'text-amber-600' :
-                'text-red-600'
-              }`}>
-                {applicationStatus.status === 'accepted' ? '✓ Approved' :
-                 applicationStatus.status === 'pending' ? '⏳ Under Review' :
-                 applicationStatus.status === 'waitlisted' ? '⏳ Waiting List' :
-                 '✗ Rejected'}
+        <section className="relative py-14 border-b border-line">
+          <div className="relative z-10 max-w-7xl mx-auto px-6">
+            <div
+              className={`card p-7 border-l-2 ${
+                statusTone[applicationStatus.status] || statusTone.pending
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <StatusIcon status={applicationStatus.status} />
+                <p className="text-[12px] font-semibold uppercase tracking-[0.16em]">
+                  {applicationStatus.status === "accepted"
+                    ? "Approved"
+                    : applicationStatus.status === "pending"
+                    ? "Under review"
+                    : applicationStatus.status === "waitlisted"
+                    ? "Waiting list"
+                    : "Rejected"}
+                </p>
+              </div>
+              <p className="text-[15px] text-ink-2 leading-relaxed mb-5">
+                Your application for{" "}
+                <span className="font-semibold text-ink uppercase">{applicationStatus.plan}</span> is{" "}
+                {applicationStatus.status === "pending" && "under review. We'll notify you within 24 hours."}
+                {applicationStatus.status === "waitlisted" && "under review. We'll notify you as soon as it's approved."}
+                {applicationStatus.status === "accepted" && "approved! Contact us to complete payment and activate your plan."}
+                {applicationStatus.status === "rejected" && "not approved at this time. Contact us to discuss further opportunities."}
               </p>
-              <p className="text-sm text-black leading-relaxed mb-3">
-                Your application for <span className="font-bold uppercase">{applicationStatus.plan}</span> is{' '}
-                {applicationStatus.status === 'pending' && 'under review. We\'ll notify you within 24 hours.'}
-                {applicationStatus.status === 'waitlisted' && 'under review. We\'ll notify you as soon as it\'s approved.'}
-                {applicationStatus.status === 'accepted' && 'approved! Contact us to complete payment and activate your plan.'}
-                {applicationStatus.status === 'rejected' && 'not approved at this time. Contact us to discuss further opportunities.'}
-              </p>
-            </div>
-            <div className="flex gap-3 pt-2">
-              <a
-                href="https://t.me/alexsanddockcom"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-black hover:bg-brand-orange text-white text-xs font-bold uppercase tracking-wider transition-colors">
-                Contact @alexsanddockcom →
-              </a>
-              <a href="/billing" className="px-4 py-2 border border-black hover:bg-black hover:text-white text-black text-xs font-bold uppercase tracking-wider transition-colors">
-                View Billing →
-              </a>
+              <div className="flex flex-wrap gap-3">
+                <CtaSecondary
+                  href="https://t.me/alexsanddockcom"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="border border-white/12"
+                >
+                  Contact @alexsanddockcom
+                </CtaSecondary>
+                <CtaSecondary href="/billing" className="border border-white/12">
+                  View billing
+                </CtaSecondary>
+              </div>
             </div>
           </div>
         </section>
       )}
 
       {/* ── PLAN CARDS ─────────────────────────────────────────────────────── */}
-      <section className="py-14 max-w-7xl mx-auto px-6 border-b border-black">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-          {Object.entries(PLANS_DATA).map(([key, data]) => (
-            <PricingCard
-              key={key}
-              planKey={key}
-              data={data}
-              user={user}
-            />
-          ))}
+      <section className="relative py-20 md:py-24 border-b border-line mesh-glow-soft">
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+            {Object.entries(PLANS_DATA).map(([key, data]) => (
+              <PricingCard key={key} planKey={key} data={data} user={user} />
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── ACCESS STATUS (FOMO) ───────────────────────────────────────────── */}
-      <section className="py-14 max-w-7xl mx-auto px-6 border-b border-black">
-        <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange block mb-6">
-          Current Access Status
-        </span>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="border border-black p-6 bg-white">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-black mb-2">Pro Plan</p>
-            <p className="text-3xl font-extrabold text-black mb-1">Open</p>
-            <p className="text-[11px] text-black">{DEMO_STATS.proAccepted} accepted this month</p>
-          </div>
-          <div className="border border-black p-6 bg-zinc-50">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-black mb-2">Master Waitlist</p>
-            <p className="text-3xl font-extrabold text-brand-orange mb-1">{DEMO_STATS.masterWaitlist}</p>
-            <p className="text-[11px] text-black">traders waiting for access</p>
-          </div>
-          <div className="border border-black p-6 bg-white">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-black mb-2">This Week</p>
-            <p className="text-3xl font-extrabold text-black mb-1">{DEMO_STATS.thisWeek}</p>
-            <p className="text-[11px] text-black">{DEMO_STATS.acceptedThisWeek} approved applications</p>
-          </div>
-          <div className="border border-black p-6 bg-zinc-50">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-black mb-2">Response Time</p>
-            <p className="text-3xl font-extrabold text-brand-orange mb-1">&lt; 24h</p>
-            <p className="text-[11px] text-black">email notification sent</p>
+      <section className="relative py-20 md:py-24 border-b border-line">
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <SectionHeading eyebrow="Current access status" title="Where the queue stands today" />
+          <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-line bg-line">
+            {[
+              { label: "Pro Plan", value: "Open", sub: `${DEMO_STATS.proAccepted} accepted this month`, tone: "text-up" },
+              { label: "Master Waitlist", value: DEMO_STATS.masterWaitlist, sub: "traders waiting for access", tone: "text-gradient-accent" },
+              { label: "This Week", value: DEMO_STATS.thisWeek, sub: `${DEMO_STATS.acceptedThisWeek} approved applications`, tone: "text-ink" },
+              { label: "Response Time", value: "< 24h", sub: "email notification sent", tone: "text-gradient-accent" },
+            ].map((s) => (
+              <div key={s.label} className="bg-surface-1/90 p-6">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-3 mb-2">
+                  {s.label}
+                </p>
+                <p className={`text-[30px] font-semibold tracking-tight mb-1 ${s.tone}`}>{s.value}</p>
+                <p className="text-[12.5px] text-ink-3">{s.sub}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── HOW THE PROCESS WORKS ──────────────────────────────────────────── */}
-      <section className="py-14 max-w-7xl mx-auto px-6 border-b border-black">
-        <span className="text-[11px] font-bold uppercase tracking-widest text-brand-orange block mb-6">
-          The Application Process
-        </span>
-        <h2 className="text-2xl font-bold uppercase tracking-tighter mb-8">Why we review every application</h2>
-        <div className="space-y-6 text-zinc-700 max-w-3xl">
-          <p className="leading-relaxed">
-            Signal quality means nothing if you don't understand risk management. We review each application and grant access based on your approach to position sizing and stop losses. This ensures everyone on the platform has realistic expectations and the discipline to follow their plan.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="border border-black p-6 bg-zinc-50">
-              <div className="text-2xl font-bold mb-2">📋</div>
-              <p className="font-bold text-black mb-1 text-[13px]">Applications reviewed</p>
-              <p className="text-[12px] text-black">Within 24 hours of submission</p>
-            </div>
-            <div className="border border-black p-6 bg-white">
-              <div className="text-2xl font-bold mb-2">✉️</div>
-              <p className="font-bold text-black mb-1 text-[13px]">Notification</p>
-              <p className="text-[12px] text-black">Decision sent via email. Check spam folder to be safe.</p>
-            </div>
-            <div className="border border-black p-6 bg-zinc-50">
-              <div className="text-2xl font-bold mb-2">💳</div>
-              <p className="font-bold text-black mb-1 text-[13px]">Payment method</p>
-              <p className="text-[12px] text-black">USDT TRC-20 only. Direct on-chain, no middleman.</p>
-            </div>
+      <section className="relative py-20 md:py-24 border-b border-line">
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <SectionHeading
+            eyebrow="The application process"
+            title="Why we review every application"
+            description="Signal quality means nothing if you don't understand risk management. We review each application and grant access based on your approach to position sizing and stop losses. This ensures everyone on the platform has realistic expectations and the discipline to follow their plan."
+          />
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {PROCESS_STEPS.map((step) => (
+              <div key={step.title} className="card card-interactive p-7">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent to-accent-2 text-white flex items-center justify-center shadow-[0_8px_24px_-10px_rgba(48,84,255,0.9)]">
+                  <svg className="w-[19px] h-[19px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {step.icon}
+                  </svg>
+                </div>
+                <p className="mt-5 font-semibold text-ink text-[15px]">{step.title}</p>
+                <p className="mt-1.5 text-[13.5px] text-ink-2 leading-relaxed">{step.body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── FEATURE COMPARISON TABLE ────────────────────────────────────────── */}
-      <section className="py-14 max-w-7xl mx-auto px-6 border-b border-black">
-        <h2 className="text-2xl font-bold uppercase tracking-tighter mb-8">Complete Feature Comparison</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-black">
-                <th className="text-left py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-black">Feature</th>
-                <th className="text-center py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-black">Free</th>
-                <th className="text-center py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-brand-orange">Pro</th>
-                <th className="text-center py-4 px-4 font-bold text-[11px] uppercase tracking-wider text-purple-600">Master</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-black/10">
-                <td className="py-3 px-4 text-sm font-semibold">Coins Available</td>
-                <td className="text-center py-3 px-4 text-sm text-black">BTC only</td>
-                <td className="text-center py-3 px-4 text-sm text-black">BTC, ETH, BNB</td>
-                <td className="text-center py-3 px-4 text-sm text-black">All 15 pairs</td>
-              </tr>
-              <tr className="border-b border-black/10">
-                <td className="py-3 px-4 text-sm font-semibold">Timeframes</td>
-                <td className="text-center py-3 px-4 text-sm text-black">15m, 1h, 4h</td>
-                <td className="text-center py-3 px-4 text-sm text-black">15m, 1h, 4h</td>
-                <td className="text-center py-3 px-4 text-sm text-black">15m, 1h, 4h</td>
-              </tr>
-              <tr className="border-b border-black/10">
-                <td className="py-3 px-4 text-sm font-semibold">SL & TP Levels</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Locked</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Visible</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Visible</td>
-              </tr>
-              <tr className="border-b border-black/10">
-                <td className="py-3 px-4 text-sm font-semibold">P&L Calculator</td>
-                <td className="text-center py-3 px-4 text-sm text-black">No</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Full history</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Full history</td>
-              </tr>
-              <tr className="border-b border-black/10">
-                <td className="py-3 px-4 text-sm font-semibold">CSV Export</td>
-                <td className="text-center py-3 px-4 text-sm text-black">No</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
-              </tr>
-              <tr className="border-b border-black/10">
-                <td className="py-3 px-4 text-sm font-semibold">Telegram Alerts</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Free BTC Group</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Private Channel</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Unlimited Channels</td>
-              </tr>
-              <tr className="border-b border-black/10">
-                <td className="py-3 px-4 text-sm font-semibold">AI Explanations</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Yes</td>
-                <td className="text-center py-3 px-4 text-sm text-black">Yes + Confluence</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 text-sm font-semibold">Email Support</td>
-                <td className="text-center py-3 px-4 text-sm text-black">48h response</td>
-                <td className="text-center py-3 px-4 text-sm text-black">24h response</td>
-                <td className="text-center py-3 px-4 text-sm text-black">12h priority</td>
-              </tr>
-            </tbody>
-          </table>
+      <section id="compare" className="relative py-20 md:py-24 border-b border-line mesh-glow-soft">
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <SectionHeading eyebrow="Side by side" title="Complete feature comparison" />
+          <div className="mt-12 card overflow-hidden !rounded-2xl">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse min-w-[640px]">
+                <thead>
+                  <tr className="border-b border-white/8">
+                    <th className="text-left py-4 px-5 font-semibold text-[10px] uppercase tracking-[0.16em] text-ink-3">Feature</th>
+                    <th className="text-center py-4 px-5 font-semibold text-[10px] uppercase tracking-[0.16em] text-ink-3">Free</th>
+                    <th className="text-center py-4 px-5 font-semibold text-[10px] uppercase tracking-[0.16em] text-accent-soft">Pro</th>
+                    <th className="text-center py-4 px-5 font-semibold text-[10px] uppercase tracking-[0.16em] text-[#c4b5fd]">Master</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/6">
+                  {COMPARISON_ROWS.map(([feature, free, pro, master]) => (
+                    <tr key={feature} className="hover:bg-white/[0.03] transition-colors">
+                      <td className="py-3.5 px-5 text-[13.5px] font-medium text-ink">{feature}</td>
+                      <td className="text-center py-3.5 px-5 text-[13.5px] text-ink-2">{free}</td>
+                      <td className="text-center py-3.5 px-5 text-[13.5px] text-ink-2">{pro}</td>
+                      <td className="text-center py-3.5 px-5 text-[13.5px] text-ink-2">{master}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ── FAQ ─────────────────────────────────────────────────────────────── */}
-      <section className="py-14 max-w-4xl mx-auto px-6 border-b border-black">
-        <h2 className="text-2xl font-bold uppercase tracking-tighter mb-8">Questions?</h2>
-        <div className="space-y-4">
-          <div className="border border-black p-6 bg-zinc-50">
-            <h3 className="font-bold text-black mb-2">How long does the review process take?</h3>
-            <p className="text-sm text-zinc-700">Applications are reviewed within 24 hours of submission. You'll receive an email with your decision and feedback on your risk management. Please check your spam folder to ensure you don't miss it.</p>
-          </div>
-          <div className="border border-black p-6 bg-white">
-            <h3 className="font-bold text-black mb-2">What if I'm rejected?</h3>
-            <p className="text-sm text-zinc-700">You'll receive specific feedback on your risk management approach. Most rejections are because traders aren't sizing positions properly or moving stops. You can reapply after addressing the feedback.</p>
-          </div>
-          <div className="border border-black p-6 bg-zinc-50">
-            <h3 className="font-bold text-black mb-2">Can I cancel my subscription?</h3>
-            <p className="text-sm text-zinc-700">Yes. Email alex@sanddock.com anytime. Your account downgrades to Free on your renewal date.</p>
-          </div>
-          <div className="border border-black p-6 bg-white">
-            <h3 className="font-bold text-black mb-2">Why USDT only?</h3>
-            <p className="text-sm text-zinc-700">USDT TRC-20 has near-zero fees, instant confirmation, and no price volatility. We avoid volatile assets to simplify accounting and prevent refund nightmares when BTC drops 20% after you pay.</p>
+      <section className="relative py-20 md:py-24 border-b border-line">
+        <div className="relative z-10 max-w-4xl mx-auto px-6">
+          <SectionHeading eyebrow="Questions?" title="Before you apply" />
+          <div className="mt-12 divide-y divide-white/8 border-y border-white/8">
+            {PRICING_FAQ.map((item, idx) => {
+              const isOpen = !!openFAQ[idx];
+              return (
+                <div key={idx}>
+                  <button
+                    onClick={() => toggleFAQ(idx)}
+                    aria-expanded={isOpen}
+                    className={`w-full text-left flex items-center justify-between gap-6 py-5 text-[16px] font-medium transition-colors ${
+                      isOpen ? "text-ink" : "text-ink-2 hover:text-ink"
+                    }`}
+                  >
+                    <span>{item.q}</span>
+                    <span
+                      className={`flex-shrink-0 w-7 h-7 rounded-full border flex items-center justify-center text-[14px] transition-all ${
+                        isOpen
+                          ? "border-accent/40 bg-accent/15 text-accent-soft"
+                          : "border-white/12 text-ink-3"
+                      }`}
+                    >
+                      {isOpen ? "−" : "+"}
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <p className="text-ink-2 text-[15px] leading-relaxed pb-6 pr-10">{item.a}</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ── CTA ─────────────────────────────────────────────────────────────── */}
-      <section className="py-14 max-w-4xl mx-auto px-6 text-center border-b border-black">
-        <h2 className="text-2xl font-bold uppercase tracking-tighter mb-4">Ready to apply?</h2>
-        <p className="text-black text-sm mb-8 max-w-2xl mx-auto">The application takes 3 minutes. We review within 24 hours and notify you via email with specific feedback on your risk management. Please check spam folder.</p>
-        <a
-          href="/apply"
-          className="inline-block px-8 py-3 bg-brand-orange hover:bg-black text-white font-bold text-[12px] uppercase tracking-widest transition-all rounded-none border border-brand-orange hover:border-black"
-        >
-          Start Application →
-        </a>
+      <section className="relative py-20 md:py-24 border-b border-line">
+        <div className="relative z-10 max-w-5xl mx-auto px-6">
+          <div className="card-gradient-border p-px shadow-[0_40px_100px_-40px_rgba(48,84,255,0.7)]">
+            <div className="relative rounded-[17px] bg-surface-1/85 backdrop-blur-xl px-8 py-14 md:px-14 md:py-16 text-center overflow-hidden grain">
+              <div className="pointer-events-none absolute -top-40 -right-20 w-[420px] h-[420px] rounded-full bg-accent-2/20 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-40 -left-24 w-[420px] h-[420px] rounded-full bg-accent/18 blur-3xl" />
+              <div className="relative z-10">
+                <h2 className="text-[32px] md:text-[46px] font-semibold tracking-tighter leading-[1.05] text-gradient">
+                  Ready to apply?
+                </h2>
+                <p className="mt-5 text-white/70 text-[16px] md:text-[17px] leading-[1.65] max-w-2xl mx-auto">
+                  The application takes 3 minutes. We review within 24 hours and notify you via
+                  email with specific feedback on your risk management. Please check your spam folder.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-9">
+                  <CtaPrimary href="/apply">Start application</CtaPrimary>
+                  <CtaSecondary
+                    href="https://t.me/alexsanddockcom"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Ask a question first
+                  </CtaSecondary>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ── QUICK SUPPORT ────────────────────────────────────────────────────── */}
-      <section className="py-14 max-w-4xl mx-auto px-6 border-b border-black">
-        <div className="border border-black p-8 space-y-6 bg-zinc-50">
-          <div>
-            <h2 className="text-2xl font-bold uppercase tracking-tighter text-black mb-2">Quick Support</h2>
-            <p className="text-sm text-black">Have questions about pricing, applications, or the payment process?</p>
+      <section className="relative py-20 md:py-24 border-b border-line">
+        <div className="relative z-10 max-w-4xl mx-auto px-6">
+          <div className="card p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h2 className="text-[22px] font-semibold tracking-tight text-ink mb-2">
+                Quick support
+              </h2>
+              <p className="text-[14.5px] text-ink-2">
+                Have questions about pricing, applications, or the payment process?
+              </p>
+            </div>
+            <CtaSecondary
+              href="https://t.me/alexsanddockcom"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-white/12 flex-shrink-0"
+            >
+              Contact on Telegram
+            </CtaSecondary>
           </div>
-          <a
-            href="https://t.me/alexsanddockcom"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block px-6 py-3 bg-black hover:bg-brand-orange text-white font-bold text-xs uppercase tracking-widest transition-all border border-black"
-          >
-            Contact @alexsanddockcom on Telegram →
-          </a>
         </div>
       </section>
 
-      {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer className="bg-black text-white pt-16 pb-8 text-xs border-t border-zinc-800">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-16">
-            <div className="md:col-span-5 space-y-4 text-left">
-              <div className="flex items-center gap-2">
-                <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-6 h-6 object-contain" />
-                <span className="text-base font-bold uppercase tracking-wider font-satoshi text-white">Sanddock</span>
-              </div>
-              <p className="text-white text-xs uppercase font-bold tracking-wider">Trading signals backed by data, not promises.</p>
-              <div className="space-y-4 pt-4">
-                <div className="flex gap-4">
-                  <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Twitter/X">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.637l-5.206-6.801-5.979 6.801h-3.31l7.734-8.835L2.25 2.25h6.82l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg>
-                  </a>
-                  <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Telegram">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.82-1.084.51l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.782 13.5l-2.995-.937c-.652-.213-.66-.652.135-.973l11.717-4.518c.54-.213 1.012.122.84 1.15z"/></svg>
-                  </a>
-                  <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="YouTube">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                  </a>
-                  <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Instagram">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.441 7.265c.504 0 .915.41.915.915 0 .504-.41.915-.915.915-.504 0-.915-.41-.915-.915 0-.504.41-.915.915-.915zm-3.441.915c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-1.5c-2.485 0-4.5 2.015-4.5 4.5s2.015 4.5 4.5 4.5 4.5-2.015 4.5-4.5-2.015-4.5-4.5-4.5zm6.5-2c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5z"/></svg>
-                  </a>
-                </div>
-                <div className="pt-2">
-                  <a href="mailto:alex@sanddock.com" className="text-white hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">alex@sanddock.com</a>
-                </div>
-              </div>
-            </div>
-            <div className="md:col-span-7 grid grid-cols-3 gap-8 text-left">
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Product</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
-                  <li><a href="/#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
-                  <li><a href="/terminal" className="hover:text-white transition-colors">Terminal</a></li>
-                  <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                  <li><a href="/#track-record" className="hover:text-white transition-colors">Track Record</a></li>
-                  <li><a href="/#faq" className="hover:text-white transition-colors">FAQ</a></li>
-                </ul>
-              </div>
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Support</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
-                  <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
-                  <li><a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Telegram Community</a></li>
-                  <li><a href="#docs" className="hover:text-white transition-colors">Help Center</a></li>
-                  <li><a href="#status" className="hover:text-white transition-colors">System Status</a></li>
-                  <li><a href="#affiliates" className="hover:text-white transition-colors">Affiliate Program</a></li>
-                </ul>
-              </div>
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Legal</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
-                  <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                  <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
-                  <li><a href="#disclaimer" className="hover:text-white transition-colors">Disclaimer</a></li>
-                  <li><a href="#cookies" className="hover:text-white transition-colors">Cookie Policy</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-zinc-800 pt-8 text-center text-[10px] text-white leading-relaxed font-bold uppercase tracking-wider">
-            &copy; {new Date().getFullYear()} Sanddock. Not financial advice. All signals are for educational purposes only. Past performance does not indicate future results.
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

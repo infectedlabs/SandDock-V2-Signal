@@ -251,7 +251,21 @@
       "Bash(cat /tmp/dev.log 2>&1 | tail -40)",
       "Bash(curl -s -o /tmp/home.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3001/)",
       "Bash(taskkill //PID 24816 //F)",
-      "Bash(jobs -l)"
+      "Bash(jobs -l)",
+      "Bash(npx --yes esbuild --loader=jsx --jsx=automatic src/components/Homepage.jsx --outfile=/dev/null)",
+      "Bash(npx --yes esbuild --jsx=automatic src/components/Homepage.jsx --outfile=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/hp.js\")",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(npm ls *)",
+      "Bash(npx --yes esbuild --jsx=automatic src/components/Homepage.jsx src/components/Hero.jsx src/components/Navbar.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk\")",
+      "Bash(npx --yes esbuild --jsx=automatic src/components/Homepage.jsx src/components/Footer.jsx src/components/ui/Cta.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk2\")",
+      "Bash(npx --yes esbuild --jsx=automatic src/app/login/page.jsx src/app/signup/page.jsx src/app/verify-email/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk3\")",
+      "Bash(npx --yes esbuild --jsx=automatic src/app/apply/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk4\")",
+      "Bash(npx --yes esbuild --jsx=automatic src/app/terminal/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk5\")",
+      "Bash(npx --yes esbuild --jsx=automatic \"src/app/terminal/signals/[id]/page.jsx\" --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk6\")",
+      "Bash(npx --yes esbuild --jsx=automatic src/components/Navbar.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk7\")",
+      "Bash(npx --yes esbuild --jsx=automatic src/app/onboarding/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk8\")",
+      "Bash(npx --yes esbuild --jsx=automatic src/app/onboarding/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk8b\")",
+      "Bash(npx --yes esbuild --jsx=automatic src/app/track-record/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk9\")"
     ]
   }
 }

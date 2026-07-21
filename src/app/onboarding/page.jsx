@@ -19,15 +19,64 @@ const coinList = [
   { symbol: 'LTC', name: 'Litecoin', free: false },
 ];
 
+// Icon set replaces the emoji glyphs the old wizard used per-option.
+const Icons = {
+  Shield: () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" />
+    </svg>
+  ),
+  Scale: () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18M5 8l-3 6a3 3 0 006 0l-3-6zm14 0l-3 6a3 3 0 006 0l-3-6zM5 8h14M8 21h8" />
+    </svg>
+  ),
+  Rocket: () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 16.5c-1.5 1.5-2 5-2 5s3.5-.5 5-2c.8-.8 1-2 1-2M15 9l3 3M12.5 20.5c2-2 5-6 5-11 0-2.5-2-5.5-5-5.5-5 0-9 3-11 5 0 0 4 1 6 3s3 6 3 6" />
+    </svg>
+  ),
+  Book: () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V4a2 2 0 00-2-2H6.5A2.5 2.5 0 004 4.5v15z" />
+    </svg>
+  ),
+  Growth: () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l6-6 4 4 8-8M21 7v6h-6" />
+    </svg>
+  ),
+  Bolt: () => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13 2L4.5 13.5H12L11 22l8.5-11.5H12L13 2z" />
+    </svg>
+  ),
+  Check: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+    </svg>
+  ),
+  Warning: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14.14A2 2 0 004.18 21h15.64a2 2 0 001.87-2.99L13.71 3.86a2 2 0 00-3.42 0z" />
+    </svg>
+  ),
+  Info: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+};
+
 export default function OnboardingPage() {
   const { user, profile, loading, updateProfile } = useAuth();
-  const firstName = profile?.name 
-    ? profile.name.trim().split(' ')[0] 
-    : (user?.user_metadata?.full_name 
-        ? user.user_metadata.full_name.trim().split(' ')[0] 
+  const firstName = profile?.name
+    ? profile.name.trim().split(' ')[0]
+    : (user?.user_metadata?.full_name
+        ? user.user_metadata.full_name.trim().split(' ')[0]
         : '');
-  const headline = firstName 
-    ? `${firstName}, how would you describe your trading experience?` 
+  const headline = firstName
+    ? `${firstName}, how would you describe your trading experience?`
     : 'How would you describe your trading experience?';
   const router = useRouter();
   const [step, setStep] = useState(1); // 1 to 4, and 5 for Telegram connect
@@ -58,10 +107,10 @@ export default function OnboardingPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-[#080d1a] text-white flex items-center justify-center font-satoshi">
+      <div className="min-h-screen bg-surface-0 text-ink flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
-          <span>Syncing layout session...</span>
+          <div className="w-8 h-8 border-2 border-white/15 border-t-accent rounded-full animate-spin" />
+          <span className="text-[13px] text-ink-2">Syncing layout session…</span>
         </div>
       </div>
     );
@@ -86,28 +135,6 @@ export default function OnboardingPage() {
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
-    }
-  };
-
-  // Skip onboarding
-  const handleSkip = async () => {
-    try {
-      setSubmitting(true);
-      setErrorMsg('');
-      await updateProfile({
-        experience_level: 'comfortable',
-        risk_style: 'balanced',
-        primary_goal: 'grow',
-        coins_selected: ['BTC'],
-        alert_delivery: { web: true, telegram: false },
-        onboarding_completed_at: new Date().toISOString(),
-      });
-      router.push('/terminal?signup_success=true');
-    } catch (err) {
-      console.error('Onboarding skip error:', err);
-      setErrorMsg(err.message || "Failed to save profile. If you're using Supabase, make sure you have run the database schema migration in your SQL Editor.");
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -196,18 +223,18 @@ export default function OnboardingPage() {
   const renderProgress = () => {
     if (step > 5) return null;
     return (
-      <div className="flex items-center gap-2 text-xs font-satoshi font-bold uppercase tracking-widest text-[#8892a4] mb-8">
+      <div className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3 mb-8">
         <div className="flex gap-1.5">
           {[1, 2, 3, 4, 5].map((i) => (
             <span
               key={i}
-              className={`w-2.5 h-2.5 rounded-full ${
-                i <= step ? 'bg-brand-orange shadow-[0_0_8px_rgba(46,59,244,0.4)]' : 'bg-zinc-800'
+              className={`w-2 h-2 rounded-full transition-colors ${
+                i <= step ? 'bg-gradient-to-r from-accent to-accent-2' : 'bg-white/10'
               }`}
             />
           ))}
         </div>
-        <span className="ml-2">Step {step} of 5</span>
+        <span>Step {step} of 5</span>
       </div>
     );
   };
@@ -217,78 +244,72 @@ export default function OnboardingPage() {
       id: 'beginner',
       label: 'Just starting out',
       desc: "I'm new to crypto trading. I want to learn as I go with clear explanations.",
-      preview: "What this means: Your dashboard will include beginner guides and plain-English explanations on every signal.",
-      icon: (
-        <svg className="w-8 h-8 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1 8a7 7 0 0 1-9 10Z" />
-          <path d="M9 22v-4" />
-        </svg>
-      )
+      preview: 'What this means: Your dashboard will include beginner guides and plain-English explanations on every signal.',
+      icon: <Icons.Shield />,
     },
     {
       id: 'comfortable',
       label: 'Getting comfortable',
       desc: "I've made some trades but still have plenty to learn. Don't over-explain.",
-      preview: "What this means: Standard terminal experience with selective jargon tooltips.",
-      icon: (
-        <svg className="w-8 h-8 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 3v18h18" />
-          <path d="m19 9-5 5-4-4-3 3" />
-        </svg>
-      )
+      preview: 'What this means: Standard terminal experience with selective jargon tooltips.',
+      icon: <Icons.Scale />,
     },
     {
       id: 'experienced',
       label: 'Experienced trader',
       desc: "I know what I'm doing. I just want clean signals and data - skip the hand-holding.",
-      preview: "What this means: Full data mode with direct signals feed and advanced metrics.",
-      icon: (
-        <svg className="w-8 h-8 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <circle cx="12" cy="12" r="6" />
-          <circle cx="12" cy="12" r="2" />
-        </svg>
-      )
-    }
+      preview: 'What this means: Full data mode with direct signals feed and advanced metrics.',
+      icon: <Icons.Rocket />,
+    },
+  ];
+
+  const riskOptions = [
+    { id: 'conservative', icon: <Icons.Shield />, label: 'Conservative', desc: 'Smaller risk margins, smaller profit targets. Prioritizes security.', specs: 'SL -1.5%  |  TP +3.0%  |  Ratio 1:2' },
+    { id: 'balanced', icon: <Icons.Scale />, label: 'Balanced', desc: 'Balanced risk parameters. Sensible middle strategy.', specs: 'SL -2.5%  |  TP +5.0%  |  Ratio 1:2' },
+    { id: 'aggressive', icon: <Icons.Rocket />, label: 'Aggressive', desc: 'Wider stop ranges, higher yield targets. High volatility tolerance.', specs: 'SL -4.0%  |  TP +10.0%  |  Ratio 1:2.5' },
+  ];
+
+  const goalOptions = [
+    { id: 'learn', icon: <Icons.Book />, label: 'Learn to trade smarter', desc: 'I want Heikin Ashi explanations, tooltips, and AI rationales to expand my analysis.' },
+    { id: 'grow', icon: <Icons.Growth />, label: 'Grow my portfolio', desc: 'Focus on overall win rates, positive streaks, and historical metrics.' },
+    { id: 'automate', icon: <Icons.Bolt />, label: 'Automate my alerts', desc: 'Prioritizes push notifications, Telegram connect widgets, and API settings.' },
   ];
 
   return (
-    <div className="min-h-screen bg-[#080d1a] text-white flex flex-col justify-between p-4 sm:p-6 md:p-8 relative overflow-hidden font-satoshi selection:bg-brand-orange selection:text-white">
-      
-      {/* Decorative Glow Grid */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-brand-orange/5 to-transparent pointer-events-none z-0" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-brand-orange/5 to-transparent pointer-events-none z-0" />
+    <div className="min-h-screen bg-surface-0 text-ink flex flex-col justify-between p-4 sm:p-6 md:p-8 relative overflow-hidden mesh-glow grain">
+      <div className="grid-lines" />
 
-      {/* Header Logo */}
-      <header className="relative z-10 w-full flex justify-between items-center max-w-4xl mx-auto border-b border-zinc-900 pb-3">
-        <div className="flex items-center gap-2.5">
-          <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-          <span className="text-xl font-extrabold tracking-tighter uppercase font-satoshi">
-            Sanddock
+      {/* Header */}
+      <header className="relative z-10 w-full flex items-center max-w-4xl mx-auto border-b border-white/8 pb-4">
+        <a href="/" className="flex items-center gap-2.5">
+          <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 border border-white/10">
+            <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-5 h-5 object-contain" />
           </span>
-        </div>
+          <span className="text-[19px] font-semibold tracking-tight text-ink">Sanddock</span>
+        </a>
       </header>
 
       {/* Center Container Card */}
-      <main className="flex-1 flex items-center justify-center relative z-10 py-6">
-        <div className="w-full max-w-4xl bg-[#0d1426] border border-zinc-800 p-6 md:p-8 shadow-2xl relative">
-          
+      <main className="flex-1 flex items-center justify-center relative z-10 py-8">
+        <div className="w-full max-w-4xl card p-6 md:p-9">
+
           {renderProgress()}
 
           {errorMsg && (
-            <div className="mb-5 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold uppercase tracking-wider font-satoshi">
-              ⚠️ {errorMsg}
+            <div className="mb-6 flex items-start gap-2 p-3.5 rounded-xl bg-down/10 border border-down/25 text-down text-[13px] font-medium">
+              <Icons.Warning />
+              {errorMsg}
             </div>
           )}
 
           {/* STEP 1: EXPERIENCE LEVEL */}
           {step === 1 && (
-            <div className="space-y-5 text-left">
-              <div className="space-y-1.5">
-                <h2 className="text-xl md:text-2xl font-extrabold uppercase tracking-tight text-black leading-none">
+            <div className="space-y-6 text-left">
+              <div className="space-y-2">
+                <h2 className="text-[26px] md:text-[32px] font-semibold tracking-tight text-gradient leading-tight">
                   {headline}
                 </h2>
-                <p className="text-black text-xs leading-relaxed normal-case">
+                <p className="text-ink-2 text-[14px] leading-relaxed">
                   We will adjust your signals feed, descriptions, and learning tooltips to match where you are.
                 </p>
               </div>
@@ -298,22 +319,22 @@ export default function OnboardingPage() {
                   <div
                     key={opt.id}
                     onClick={() => setExperience(opt.id)}
-                    className={`flex flex-col p-5 border transition-all cursor-pointer rounded-none text-left justify-between ${
+                    className={`card-interactive flex flex-col p-5 border rounded-xl cursor-pointer text-left justify-between ${
                       experience === opt.id
-                        ? 'border-brand-orange bg-brand-orange/5 shadow-[0_0_15px_rgba(46,59,244,0.15)]'
-                        : 'border-zinc-800 bg-[#111827] hover:border-zinc-700'
+                        ? 'border-accent/50 bg-accent/8 shadow-[0_0_0_1px_rgba(48,84,255,0.3)]'
+                        : 'border-white/8 bg-surface-2/50'
                     }`}
                   >
                     <div>
-                      <div className="mb-3 flex text-brand-orange">
+                      <div className="mb-3 w-11 h-11 rounded-xl bg-gradient-to-br from-accent/25 to-accent-2/15 border border-white/10 text-accent-soft flex items-center justify-center">
                         {opt.icon}
                       </div>
-                      <span className="block font-bold text-xs uppercase tracking-wider mb-1.5 text-black">{opt.label}</span>
-                      <span className="block text-[11px] text-black normal-case leading-relaxed mb-3">{opt.desc}</span>
+                      <span className="block font-semibold text-[14px] mb-1.5 text-ink">{opt.label}</span>
+                      <span className="block text-[12.5px] text-ink-2 leading-relaxed mb-3">{opt.desc}</span>
                     </div>
                     <div>
-                      <div className="border-t border-zinc-800/80 my-2.5 w-full" />
-                      <span className="block text-[10px] text-black normal-case leading-relaxed font-satoshi">{opt.preview}</span>
+                      <div className="border-t border-white/8 my-2.5 w-full" />
+                      <span className="block text-[11px] text-ink-3 leading-relaxed">{opt.preview}</span>
                     </div>
                   </div>
                 ))}
@@ -321,15 +342,12 @@ export default function OnboardingPage() {
 
               {/* Continue button container */}
               <div className={`transition-all duration-300 flex flex-col items-center gap-2.5 pt-4 ${
-                experience 
-                  ? 'opacity-100 transform translate-y-0' 
+                experience
+                  ? 'opacity-100 transform translate-y-0'
                   : 'opacity-0 transform translate-y-4 pointer-events-none'
               }`}>
-                <button
-                  onClick={handleNext}
-                  className="py-3 px-12 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer shadow-lg rounded-none border-0"
-                >
-                  Continue &rarr;
+                <button onClick={handleNext} className="btn-form w-auto px-12">
+                  Continue
                 </button>
               </div>
             </div>
@@ -339,10 +357,10 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div className="space-y-6 text-left">
               <div className="space-y-2">
-                <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
+                <h2 className="text-[26px] md:text-[32px] font-semibold tracking-tight text-gradient leading-tight">
                   Which coins do you want to track?
                 </h2>
-                <p className="text-white text-sm">
+                <p className="text-ink-2 text-[14px]">
                   Bitcoin is always included on your plan. Select other coins you would like to track on your console.
                 </p>
               </div>
@@ -356,22 +374,22 @@ export default function OnboardingPage() {
                       key={coin.symbol}
                       onClick={() => handleCoinToggle(coin.symbol)}
                       disabled={isBtc}
-                      className={`p-4 border transition-colors flex items-center justify-between text-left cursor-pointer ${
-                        isBtc 
-                          ? 'border-brand-orange/50 bg-[#111827] text-white opacity-80 cursor-not-allowed'
+                      className={`p-4 rounded-xl border transition-colors flex items-center justify-between text-left cursor-pointer ${
+                        isBtc
+                          ? 'border-accent/40 bg-accent/8 text-ink opacity-90 cursor-not-allowed'
                           : isSelected
-                            ? 'border-brand-orange bg-brand-orange/10 text-white'
-                            : 'border-zinc-800 bg-[#111827] hover:border-zinc-700 text-zinc-300'
+                            ? 'border-accent/50 bg-accent/10 text-ink'
+                            : 'border-white/8 bg-surface-2/50 hover:border-white/16 text-ink-2'
                       }`}
                     >
                       <div className="space-y-1">
-                        <span className="block font-bold text-xs uppercase tracking-wider">{coin.symbol}</span>
-                        <span className="block text-[10px] text-white normal-case">{coin.name}</span>
+                        <span className="block font-semibold text-[13px]">{coin.symbol}</span>
+                        <span className="block text-[10.5px] text-ink-3">{coin.name}</span>
                       </div>
                       {isBtc ? (
-                        <span className="text-[9px] font-satoshi font-bold bg-brand-orange text-white px-1.5 py-0.2 uppercase">Selected</span>
+                        <span className="text-[9px] font-bold bg-gradient-to-r from-accent to-accent-2 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">Selected</span>
                       ) : !coin.free && (
-                        <span className="text-[8px] font-satoshi font-bold bg-zinc-800 text-white px-1.5 py-0.2 uppercase">PRO</span>
+                        <span className="text-[9px] font-bold bg-white/10 text-ink-2 px-2 py-0.5 rounded-full uppercase tracking-wider">Pro</span>
                       )}
                     </button>
                   );
@@ -379,8 +397,9 @@ export default function OnboardingPage() {
               </div>
 
               {selectedCoins.some((c) => c !== 'BTC') && (
-                <div className="p-3 bg-brand-orange/10 border border-brand-orange/20 text-zinc-300 text-xs font-semibold uppercase tracking-wider font-satoshi mt-4">
-                  ℹ️ Pro and Master coins selected will appear as preview cards on your console.
+                <div className="flex items-start gap-2 p-3.5 rounded-xl bg-accent/10 border border-accent/25 text-accent-soft text-[13px] font-medium mt-4">
+                  <Icons.Info />
+                  Pro and Master coins selected will appear as preview cards on your console.
                 </div>
               )}
             </div>
@@ -390,27 +409,23 @@ export default function OnboardingPage() {
           {step === 3 && (
             <div className="space-y-6 text-left">
               <div className="space-y-2">
-                <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
+                <h2 className="text-[26px] md:text-[32px] font-semibold tracking-tight text-gradient leading-tight">
                   What is your default trading style?
                 </h2>
-                <p className="text-white text-sm">
+                <p className="text-ink-2 text-[14px]">
                   This configures the default Stop Loss (SL) and Take Profit (TP) targets displayed on your trade alerts.
                 </p>
               </div>
 
-              <div className="space-y-4 pt-4">
-                {[
-                  { id: 'conservative', icon: '🛡️', label: 'Conservative', desc: 'Smaller risk margins, smaller profit targets. Prioritizes security.', specs: 'SL -1.5%  |  TP +3.0%  |  Ratio 1:2' },
-                  { id: 'balanced', icon: '⚖️', label: 'Balanced', desc: 'Balanced risk parameters. Sensible middle strategy.', specs: 'SL -2.5%  |  TP +5.0%  |  Ratio 1:2' },
-                  { id: 'aggressive', icon: '🚀', label: 'Aggressive', desc: 'Wider stop ranges, higher yield targets. High volatility tolerance.', specs: 'SL -4.0%  |  TP +10.0%  |  Ratio 1:2.5' }
-                ].map((opt) => (
+              <div className="space-y-3 pt-4">
+                {riskOptions.map((opt) => (
                   <label
                     key={opt.id}
                     onClick={() => setRiskStyle(opt.id)}
-                    className={`flex items-start gap-4 p-5 border transition-all cursor-pointer ${
+                    className={`flex items-start gap-4 p-5 rounded-xl border transition-all cursor-pointer ${
                       riskStyle === opt.id
-                        ? 'border-brand-orange bg-brand-orange/5'
-                        : 'border-zinc-800 bg-[#111827] hover:border-zinc-700'
+                        ? 'border-accent/50 bg-accent/8'
+                        : 'border-white/8 bg-surface-2/50 hover:border-white/16'
                     }`}
                   >
                     <input
@@ -421,13 +436,15 @@ export default function OnboardingPage() {
                       onChange={() => {}}
                       className="hidden"
                     />
-                    <span className="text-2xl">{opt.icon}</span>
+                    <span className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-accent/25 to-accent-2/15 border border-white/10 text-accent-soft flex items-center justify-center">
+                      {opt.icon}
+                    </span>
                     <div className="space-y-1 flex-1">
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-sm uppercase tracking-wide">{opt.label}</span>
-                        <span className="text-[10px] font-satoshi font-bold text-white">{opt.specs}</span>
+                      <div className="flex flex-wrap justify-between items-center gap-2">
+                        <span className="font-semibold text-[14px] text-ink">{opt.label}</span>
+                        <span className="text-[11px] font-medium text-ink-3">{opt.specs}</span>
                       </div>
-                      <span className="block text-xs text-white normal-case leading-relaxed">{opt.desc}</span>
+                      <span className="block text-[13px] text-ink-2 leading-relaxed">{opt.desc}</span>
                     </div>
                   </label>
                 ))}
@@ -439,27 +456,23 @@ export default function OnboardingPage() {
           {step === 4 && (
             <div className="space-y-6 text-left">
               <div className="space-y-2">
-                <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
+                <h2 className="text-[26px] md:text-[32px] font-semibold tracking-tight text-gradient leading-tight">
                   What is your main goal with Sanddock?
                 </h2>
-                <p className="text-white text-sm">
+                <p className="text-ink-2 text-[14px]">
                   We will optimize your trading terminal panels around what matters most.
                 </p>
               </div>
 
-              <div className="space-y-4 pt-4">
-                {[
-                  { id: 'learn', icon: '📚', label: 'Learn to trade smarter', desc: 'I want Heikin Ashi explanations, tooltips, and AI rationales to expand my analysis.' },
-                  { id: 'grow', icon: '💰', label: 'Grow my portfolio', desc: 'Focus on overall win rates, positive streaks, and historical metrics.' },
-                  { id: 'automate', icon: '⚡', label: 'Automate my alerts', desc: 'Prioritizes push notifications, Telegram connect widgets, and API settings.' }
-                ].map((opt) => (
+              <div className="space-y-3 pt-4">
+                {goalOptions.map((opt) => (
                   <label
                     key={opt.id}
                     onClick={() => setGoal(opt.id)}
-                    className={`flex items-start gap-4 p-5 border transition-all cursor-pointer ${
+                    className={`flex items-start gap-4 p-5 rounded-xl border transition-all cursor-pointer ${
                       goal === opt.id
-                        ? 'border-brand-orange bg-brand-orange/5'
-                        : 'border-zinc-800 bg-[#111827] hover:border-zinc-700'
+                        ? 'border-accent/50 bg-accent/8'
+                        : 'border-white/8 bg-surface-2/50 hover:border-white/16'
                     }`}
                   >
                     <input
@@ -470,10 +483,12 @@ export default function OnboardingPage() {
                       onChange={() => {}}
                       className="hidden"
                     />
-                    <span className="text-2xl">{opt.icon}</span>
+                    <span className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-accent/25 to-accent-2/15 border border-white/10 text-accent-soft flex items-center justify-center">
+                      {opt.icon}
+                    </span>
                     <div className="space-y-1">
-                      <span className="block font-bold text-sm uppercase tracking-wide">{opt.label}</span>
-                      <span className="block text-xs text-white normal-case leading-relaxed">{opt.desc}</span>
+                      <span className="block font-semibold text-[14px] text-ink">{opt.label}</span>
+                      <span className="block text-[13px] text-ink-2 leading-relaxed">{opt.desc}</span>
                     </div>
                   </label>
                 ))}
@@ -484,64 +499,64 @@ export default function OnboardingPage() {
           {/* STEP 5: TELEGRAM PAIRING SCREEN */}
           {step === 5 && (
             <div className="space-y-6 text-left">
-              <div className="space-y-2 border-b border-zinc-800 pb-4">
-                <span className="text-[10px] font-satoshi text-brand-orange font-bold uppercase tracking-widest">Connect Telegram</span>
-                <h2 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tight text-white leading-none">
-                  Connect Your Telegram Bot
+              <div className="space-y-2 border-b border-white/8 pb-5">
+                <span className="eyebrow">Connect Telegram</span>
+                <h2 className="text-[26px] md:text-[32px] font-semibold tracking-tight text-gradient leading-tight">
+                  Connect your Telegram bot
                 </h2>
-                <p className="text-white text-sm">
+                <p className="text-ink-2 text-[14px]">
                   Paired in under 2 minutes. Get alerts directly to your phone.
                 </p>
               </div>
 
-              <div className="space-y-6 pt-2 font-satoshi text-xs">
+              <div className="space-y-6 pt-2 text-[13px]">
                 {/* Step 1 */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="bg-brand-orange text-white w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px]">1</span>
-                    <span className="font-bold text-white uppercase tracking-wider">Search for the bot</span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="bg-gradient-to-br from-accent to-accent-2 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-[11px] flex-shrink-0">1</span>
+                    <span className="font-semibold text-ink">Search for the bot</span>
                   </div>
-                  <p className="text-white normal-case pl-7 leading-relaxed">
-                    Open Telegram on your device, search for <span className="text-white font-bold">@SanddockBot</span>, or click below:
+                  <p className="text-ink-2 pl-[34px] leading-relaxed">
+                    Open Telegram on your device, search for <span className="text-ink font-semibold">@SanddockBot</span>, or click below:
                   </p>
-                  <div className="pl-7">
+                  <div className="pl-[34px]">
                     <a
                       href="https://t.me/SanddockBot"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block py-2.5 px-6 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-xs uppercase tracking-widest transition-colors font-satoshi"
+                      className="btn-form-outline w-auto px-6 inline-flex"
                     >
-                      Open @SanddockBot ↗
+                      Open @SanddockBot
                     </a>
                   </div>
                 </div>
 
-                <div className="border-t border-zinc-900" />
+                <div className="border-t border-white/8" />
 
                 {/* Step 2 */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="bg-brand-orange text-white w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px]">2</span>
-                    <span className="font-bold text-white uppercase tracking-wider">Send start command</span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="bg-gradient-to-br from-accent to-accent-2 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-[11px] flex-shrink-0">2</span>
+                    <span className="font-semibold text-ink">Send start command</span>
                   </div>
-                  <p className="text-white normal-case pl-7 leading-relaxed">
-                    Send the command <span className="text-white font-bold">/start</span> to the bot conversation window.
+                  <p className="text-ink-2 pl-[34px] leading-relaxed">
+                    Send the command <span className="text-ink font-semibold">/start</span> to the bot conversation window.
                   </p>
                 </div>
 
-                <div className="border-t border-zinc-900" />
+                <div className="border-t border-white/8" />
 
                 {/* Step 3 */}
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="bg-brand-orange text-white w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px]">3</span>
-                    <span className="font-bold text-white uppercase tracking-wider">Enter your pairing code</span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="bg-gradient-to-br from-accent to-accent-2 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-[11px] flex-shrink-0">3</span>
+                    <span className="font-semibold text-ink">Enter your pairing code</span>
                   </div>
-                  <p className="text-white normal-case pl-7 leading-relaxed mb-2">
+                  <p className="text-ink-2 pl-[34px] leading-relaxed mb-2">
                     The bot will reply with a 6-digit verification code. Enter it here:
                   </p>
-                  
-                  <div className="pl-7 flex flex-col sm:flex-row gap-4 items-center">
+
+                  <div className="pl-[34px] flex flex-col sm:flex-row gap-4 items-center">
                     <div className="flex gap-2">
                       {pairingCode.map((char, index) => (
                         <input
@@ -552,7 +567,7 @@ export default function OnboardingPage() {
                           value={char}
                           onChange={(e) => handlePairingCodeChange(e, index)}
                           onKeyDown={(e) => handlePairingCodeKeyDown(e, index)}
-                          className="w-10 h-12 bg-[#111827] border border-zinc-800 text-center text-lg font-bold text-white focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange"
+                          className="field !w-10 !h-12 !p-0 text-center text-lg font-bold"
                         />
                       ))}
                     </div>
@@ -560,21 +575,23 @@ export default function OnboardingPage() {
                     <button
                       onClick={handleVerifyTelegram}
                       disabled={pairingCode.some(c => !c) || telegramStatus === 'loading'}
-                      className="py-3 px-6 bg-[#00e676] hover:bg-emerald-600 text-black font-bold text-xs uppercase tracking-widest transition-colors font-satoshi flex-shrink-0 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-auto px-6 py-3.5 rounded-xl bg-up text-[#03150c] font-semibold text-sm flex-shrink-0 transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      {telegramStatus === 'loading' ? 'Verifying...' : 'Pair Account →'}
+                      {telegramStatus === 'loading' ? 'Verifying…' : 'Pair account'}
                     </button>
                   </div>
 
                   {telegramStatus === 'success' && (
-                    <div className="pl-7 text-emerald-400 font-bold uppercase tracking-wider mt-2 animate-pulse">
-                      ✅ Connection successful! Syncing workspace...
+                    <div className="flex items-center gap-2 pl-[34px] text-up font-semibold mt-2 animate-pulse">
+                      <Icons.Check />
+                      Connection successful! Syncing workspace…
                     </div>
                   )}
 
                   {telegramStatus === 'error' && (
-                    <div className="pl-7 text-red-500 font-bold uppercase tracking-wider mt-2">
-                      ⚠️ Invalid code. Please verify the code on your bot chat and retry.
+                    <div className="flex items-center gap-2 pl-[34px] text-down font-semibold mt-2">
+                      <Icons.Warning />
+                      Invalid code. Please verify the code on your bot chat and retry.
                     </div>
                   )}
                 </div>
@@ -584,41 +601,38 @@ export default function OnboardingPage() {
 
           {/* Wizard Footer Controls */}
           {step > 1 && (
-            <div className="mt-12 pt-6 border-t border-[#1e2a3a] flex items-center justify-between">
+            <div className="mt-12 pt-6 border-t border-white/8 flex items-center justify-between">
               {step > 1 && step < 6 ? (
                 <button
                   onClick={handleBack}
                   disabled={submitting}
-                  className="py-3 px-6 border border-zinc-800 hover:bg-[#111827] text-zinc-300 font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer bg-transparent"
+                  className="btn-form-outline w-auto px-6"
                 >
-                  &larr; Back
+                  Back
                 </button>
               ) : (
                 <div />
               )}
 
               {step < 5 ? (
-                <button
-                  onClick={handleNext}
-                  className="py-3 px-8 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer border-0"
-                >
-                  Next &rarr;
+                <button onClick={handleNext} className="btn-form w-auto px-8">
+                  Next
                 </button>
               ) : step === 5 ? (
                 <button
                   onClick={handleNext}
                   disabled={submitting}
-                  className="py-3 px-8 bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer border-0"
+                  className="btn-form w-auto px-8"
                 >
-                  {submitting ? 'Submitting...' : 'Finish Setup →'}
+                  {submitting ? 'Submitting…' : 'Finish setup'}
                 </button>
               ) : (
                 // On step 6 (Telegram Pairing)
                 <button
                   onClick={() => handleFinishOnboarding()}
-                  className="py-3 px-6 text-white hover:text-white text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer bg-transparent border-0"
+                  className="btn-secondary"
                 >
-                  Set Up Later &rarr;
+                  Set up later
                 </button>
               )}
             </div>
@@ -628,8 +642,8 @@ export default function OnboardingPage() {
       </main>
 
       {/* Footer Branding info */}
-      <footer className="relative z-10 w-full max-w-4xl mx-auto border-t border-zinc-900 pt-4 text-center text-[10px] text-white uppercase font-satoshi tracking-wider">
-        © 2025 Sanddock Technical Systems. All data signals are for educational purposes.
+      <footer className="relative z-10 w-full max-w-4xl mx-auto border-t border-white/8 pt-4 text-center text-[11px] text-ink-3">
+        &copy; {new Date().getFullYear()} Sanddock Technical Systems. All data signals are for educational purposes.
       </footer>
 
     </div>

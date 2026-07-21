@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { CtaPrimary, CtaSecondary, SectionHeading } from "@/components/ui/Cta";
 
 const faqItems = [
   {
@@ -22,16 +25,59 @@ const faqItems = [
   }
 ];
 
+const channels = [
+  {
+    kicker: "Direct email",
+    title: "Email Us",
+    body: "Get quick support and technical answers.",
+    handle: "alex@sanddock.com",
+    href: "mailto:alex@sanddock.com",
+    icon: (
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    ),
+  },
+  {
+    kicker: "Instant chat",
+    title: "Telegram",
+    body: "Chat with admins and our trading community.",
+    handle: "@sanddockcom",
+    href: "https://t.me/sanddockcom",
+    external: true,
+    icon: (
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21.5 4.5L2.5 11.2l5.9 2 2.2 6.3 3-3.6 4.6 3.4 3.3-14.8z" />
+    ),
+  },
+  {
+    kicker: "Updates & news",
+    title: "Twitter / X",
+    body: "Follow our signal announcements and reviews.",
+    handle: "@sanddockcom",
+    href: "https://x.com/sanddockcom",
+    external: true,
+    icon: (
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 4l16 16M20 4L4 20" />
+    ),
+  },
+  {
+    kicker: "Visual feed",
+    title: "Instagram",
+    body: "Check visual walkthroughs and trade examples.",
+    handle: "@sanddockcom",
+    href: "https://instagram.com/sanddockcom",
+    external: true,
+    icon: (
+      <>
+        <rect x="3" y="3" width="18" height="18" rx="5" strokeWidth={1.8} />
+        <circle cx="12" cy="12" r="4" strokeWidth={1.8} />
+        <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
+      </>
+    ),
+  },
+];
+
 export default function ContactPage() {
   const { user } = useAuth();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState({ title: "", body: "" });
   const [openFAQ, setOpenFAQ] = useState({});
-
-  const handleOpenModal = (title, body) => {
-    setModalContent({ title, body });
-    setModalOpen(true);
-  };
 
   const toggleFAQ = (index) => {
     setOpenFAQ(prev => ({
@@ -41,309 +87,126 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-white text-black selection:bg-brand-orange selection:text-white overflow-hidden font-satoshi">
+    <div className="relative min-h-screen bg-surface-0 text-ink overflow-hidden antialiased">
+      <Navbar />
 
-      {/* HEADER / NAVIGATION BAR (SWISS STYLE) */}
-      <header className="sticky top-0 z-40 w-full border-b border-black bg-white">
-        <div className="max-w-7xl mx-auto flex items-center justify-between relative">
-          
-          {/* Logo container block with right border */}
-          <div className="flex items-center px-6 h-16 border-r border-black relative">
-            <a href="/" className="flex items-center gap-2.5">
-              <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-              <span className="text-lg font-bold tracking-tighter uppercase font-satoshi text-black">
-                Sanddock
-              </span>
-            </a>
-            {/* Diamond point marker */}
-            <div className="absolute bottom-0 right-0 translate-y-1/2 translate-x-1/2 w-2 h-2 bg-black rotate-45 z-10" />
+      {/* CONTACT HERO */}
+      <section className="relative mesh-glow grain border-b border-line overflow-hidden">
+        <div className="grid-lines" />
+        <div className="relative z-10 max-w-7xl mx-auto px-6 pt-36 pb-20 md:pt-44 md:pb-24 text-center">
+          <p className="font-instrument-serif text-[#b4c0ff] text-2xl sm:text-3xl leading-[1.1]">
+            Get in touch
+          </p>
+          <h1 className="mt-4 text-5xl sm:text-6xl lg:text-[86px] font-semibold tracking-tighter leading-[0.95] text-gradient">
+            Connect With Us
+          </h1>
+          <p className="mt-6 text-white/70 text-[17px] md:text-lg leading-[1.65] max-w-2xl mx-auto">
+            Have questions about Sanddock confluences, API webhook configuration, or GrandMaster
+            spots? Our support team and engineering channels are available 24/7.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
+            <CtaPrimary href="mailto:alex@sanddock.com">Email support</CtaPrimary>
+            <CtaSecondary href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer">
+              Join Telegram
+            </CtaSecondary>
           </div>
+        </div>
+      </section>
 
-          {/* Links grid with right borders */}
-          <nav className="hidden md:flex items-center flex-1 h-16 text-xs font-bold uppercase tracking-wider text-black">
-            <a href="/#how-it-works" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">How It Works</a>
-            <a href="/#explainability" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Platform Features</a>
-            <a href="/#track-record" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Track Record</a>
-            <a href="/pricing" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Pricing</a>
-            <a href="/contact" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Contact</a>
-            <a href="/#faq" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">FAQ</a>
-            <a href="/articles" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Articles</a>
-            {user && (
-              <a href="/terminal" className="px-6 h-full flex items-center border-r border-black text-brand-orange hover:bg-brand-orange hover:text-white transition-colors">Terminal</a>
-            )}
-          </nav>
-
-          {/* Action button container on right with left border */}
-          <div className="flex items-center h-16 border-l border-black relative">
-            {user ? (
+      {/* CONTACT CHANNELS */}
+      <section className="relative py-20 md:py-24 border-b border-line mesh-glow-soft">
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <SectionHeading eyebrow="Every way to reach us" title="Pick a channel" />
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {channels.map((c) => (
               <a
-                href="/terminal"
-                className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center"
+                key={c.title}
+                href={c.href}
+                {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="card card-interactive p-7 flex flex-col justify-between gap-10 group"
               >
-                Terminal &rarr;
-              </a>
-            ) : (
-              <>
-                <a
-                  href="/login"
-                  className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center border-r border-black"
-                >
-                  Login
-                </a>
-                <a
-                  href="/signup"
-                  className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center"
-                >
-                  Start Free &rarr;
-                </a>
-              </>
-            )}
-            {/* Diamond point marker */}
-            <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-2 h-2 bg-black rotate-45 z-10" />
-          </div>
-
-        </div>
-      </header>
-
-      {/* CONTACT HERO TITLE SECTION */}
-      <section className="pt-20 pb-12 max-w-7xl mx-auto px-6 border-b border-black text-left">
-        <span className="text-xs font-bold uppercase tracking-widest text-brand-orange block mb-3">
-          Get in Touch
-        </span>
-        <h1 className="text-5xl md:text-7xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none mb-6">
-          Connect With Us
-        </h1>
-        <p className="text-text-secondary text-base md:text-lg max-w-2xl leading-relaxed">
-          Have questions about Sanddock confluences, API webhook configuration, or GrandMaster spots? Our support team and engineering channels are available 24/7.
-        </p>
-      </section>
-
-      {/* CONTACT CARDS GRID */}
-      <section className="py-16 max-w-7xl mx-auto px-6 border-b border-black">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          
-          {/* Card 1: Email */}
-          <a href="mailto:alex@sanddock.com" className="bg-[#f4f6fa] border border-black p-8 rounded-none flex flex-col justify-between h-56 hover:bg-black hover:text-white transition-colors group">
-            <div>
-              <span className="text-[10px] font-satoshi font-bold tracking-wider block text-brand-orange uppercase mb-4">Direct Email</span>
-              <h3 className="text-2xl font-bold uppercase tracking-tight text-black group-hover:text-white">Email Us</h3>
-              <p className="text-text-secondary text-sm group-hover:text-zinc-300 mt-2">Get quick support and technical answers.</p>
-            </div>
-            <div className="font-satoshi text-xs font-bold uppercase tracking-wider mt-4">
-              alex@sanddock.com &rarr;
-            </div>
-          </a>
-
-          {/* Card 2: Telegram */}
-          <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="bg-[#f4f6fa] border border-black p-8 rounded-none flex flex-col justify-between h-56 hover:bg-black hover:text-white transition-colors group">
-            <div>
-              <span className="text-[10px] font-satoshi font-bold tracking-wider block text-brand-orange uppercase mb-4">Instant Chat</span>
-              <h3 className="text-2xl font-bold uppercase tracking-tight text-black group-hover:text-white">Telegram</h3>
-              <p className="text-text-secondary text-sm group-hover:text-zinc-300 mt-2">Chat with admins and our trading community.</p>
-            </div>
-            <div className="font-satoshi text-xs font-bold uppercase tracking-wider mt-4">
-              @sanddockcom &rarr;
-            </div>
-          </a>
-
-          {/* Card 3: Twitter/X */}
-          <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="bg-[#f4f6fa] border border-black p-8 rounded-none flex flex-col justify-between h-56 hover:bg-black hover:text-white transition-colors group">
-            <div>
-              <span className="text-[10px] font-satoshi font-bold tracking-wider block text-brand-orange uppercase mb-4">Updates & News</span>
-              <h3 className="text-2xl font-bold uppercase tracking-tight text-black group-hover:text-white">Twitter / X</h3>
-              <p className="text-text-secondary text-sm group-hover:text-zinc-300 mt-2">Follow our signal announcements and reviews.</p>
-            </div>
-            <div className="font-satoshi text-xs font-bold uppercase tracking-wider mt-4">
-              @sanddockcom &rarr;
-            </div>
-          </a>
-
-          {/* Card 4: Instagram */}
-          <a href="https://instagram.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="bg-[#f4f6fa] border border-black p-8 rounded-none flex flex-col justify-between h-56 hover:bg-black hover:text-white transition-colors group">
-            <div>
-              <span className="text-[10px] font-satoshi font-bold tracking-wider block text-brand-orange uppercase mb-4">Visual Feed</span>
-              <h3 className="text-2xl font-bold uppercase tracking-tight text-black group-hover:text-white">Instagram</h3>
-              <p className="text-text-secondary text-sm group-hover:text-zinc-300 mt-2">Check visual walkthroughs and trade examples.</p>
-            </div>
-            <div className="font-satoshi text-xs font-bold uppercase tracking-wider mt-4">
-              @sanddockcom &rarr;
-            </div>
-          </a>
-
-        </div>
-      </section>
-
-      {/* SUPPORT FAQ SECTION */}
-      <section className="py-20 max-w-4xl mx-auto px-6 border-b border-black text-left">
-        <div className="mb-12">
-          <span className="text-xs font-bold uppercase tracking-widest text-brand-orange block mb-2">
-            Support FAQs
-          </span>
-          <h2 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter text-black font-satoshi leading-none">
-            Basic Support Queries
-          </h2>
-        </div>
-
-        <div className="border-t border-black divide-y divide-black">
-          {faqItems.map((item, idx) => {
-            const isOpen = !!openFAQ[idx];
-            return (
-              <div key={idx} className="py-5">
-                <button 
-                  onClick={() => toggleFAQ(idx)}
-                  className="w-full text-left flex items-center justify-between gap-4 font-bold uppercase text-base text-black hover:text-brand-orange transition-colors"
-                >
-                  <span className="font-satoshi">{item.q}</span>
-                  <span className="text-xl font-bold font-satoshi">
-                    {isOpen ? "\u2212" : "+"}
-                  </span>
-                </button>
-                {isOpen && (
-                  <div className="text-text-secondary text-base leading-relaxed pt-3 pr-8 transition-all normal-case font-satoshi">
-                    {item.a}
+                <div>
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent to-accent-2 text-white flex items-center justify-center shadow-[0_8px_24px_-10px_rgba(48,84,255,0.9)]">
+                    <svg className="w-[19px] h-[19px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {c.icon}
+                    </svg>
                   </div>
-                )}
-              </div>
-            );
-          })}
+                  <span className="mt-5 block text-[10px] font-semibold tracking-[0.16em] text-accent-soft uppercase">
+                    {c.kicker}
+                  </span>
+                  <h3 className="mt-2 text-[20px] font-semibold tracking-tight text-ink">{c.title}</h3>
+                  <p className="mt-2 text-[13.5px] text-ink-2 leading-relaxed">{c.body}</p>
+                </div>
+                <div className="flex items-center gap-2 text-[13px] font-medium text-ink-2 group-hover:text-accent-soft transition-colors">
+                  {c.handle}
+                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12l-7.5 7.5" />
+                  </svg>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-black text-white pt-16 pb-8 text-xs border-t border-zinc-800">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-16">
-            
-            <div className="md:col-span-5 space-y-4 text-left">
-              <div className="flex items-center gap-2">
-                <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-6 h-6 object-contain" />
-                <span className="text-base font-bold uppercase tracking-wider font-satoshi text-white">
-                  Sanddock
-                </span>
-              </div>
-              <p className="text-white text-xs uppercase font-bold tracking-wider">
-                AI signals. Honest track record.
+      {/* SUPPORT FAQ */}
+      <section className="relative py-20 md:py-24 border-b border-line">
+        <div className="relative z-10 max-w-4xl mx-auto px-6">
+          <SectionHeading eyebrow="Support FAQs" title="Basic support queries" />
+          <div className="mt-12 divide-y divide-white/8 border-y border-white/8">
+            {faqItems.map((item, idx) => {
+              const isOpen = !!openFAQ[idx];
+              return (
+                <div key={idx}>
+                  <button
+                    onClick={() => toggleFAQ(idx)}
+                    aria-expanded={isOpen}
+                    className={`w-full text-left flex items-center justify-between gap-6 py-5 text-[16px] font-medium transition-colors ${
+                      isOpen ? "text-ink" : "text-ink-2 hover:text-ink"
+                    }`}
+                  >
+                    <span>{item.q}</span>
+                    <span
+                      className={`flex-shrink-0 w-7 h-7 rounded-full border flex items-center justify-center text-[14px] transition-all ${
+                        isOpen
+                          ? "border-accent/40 bg-accent/15 text-accent-soft"
+                          : "border-white/12 text-ink-3"
+                      }`}
+                    >
+                      {isOpen ? "−" : "+"}
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <p className="text-ink-2 text-[15px] leading-relaxed pb-6 pr-10">{item.a}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Closing CTA */}
+          <div className="mt-14 card p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h3 className="text-[20px] font-semibold tracking-tight text-ink">
+                Still stuck?
+              </h3>
+              <p className="mt-1.5 text-[14.5px] text-ink-2">
+                Message a support admin directly and we&apos;ll pick it up within the hour.
               </p>
-              <div className="space-y-4 pt-4">
-                <div className="flex gap-4">
-                  <a href="https://x.com/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Twitter/X">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.637l-5.206-6.801-5.979 6.801h-3.31l7.734-8.835L2.25 2.25h6.82l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/>
-                    </svg>
-                  </a>
-                  <a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Telegram">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.82-1.084.51l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L6.782 13.5l-2.995-.937c-.652-.213-.66-.652.135-.973l11.717-4.518c.54-.213 1.012.122.84 1.15z"/>
-                    </svg>
-                  </a>
-                  <a href="https://www.youtube.com/@SandDock" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="YouTube">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                    </svg>
-                  </a>
-                  <a href="https://www.instagram.com/sanddockcom/" target="_blank" rel="noopener noreferrer" className="text-white hover:text-white transition-colors" title="Instagram">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.441 7.265c.504 0 .915.41.915.915 0 .504-.41.915-.915.915-.504 0-.915-.41-.915-.915 0-.504.41-.915.915-.915zm-3.441.915c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0-1.5c-2.485 0-4.5 2.015-4.5 4.5s2.015 4.5 4.5 4.5 4.5-2.015 4.5-4.5-2.015-4.5-4.5-4.5zm6.5-2c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5z"/>
-                    </svg>
-                  </a>
-                </div>
-                <div className="pt-2">
-                  <a href="mailto:alex@sanddock.com" className="text-white hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider">
-                    alex@sanddock.com
-                  </a>
-                </div>
-              </div>
             </div>
-
-            <div className="md:col-span-7 grid grid-cols-3 gap-8 text-left">
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Product</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
-                  <li><a href="/#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
-                  <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                  <li><a href="/#track-record" className="hover:text-white transition-colors">Track Record</a></li>
-                  <li><a href="#blog" className="hover:text-white transition-colors">Blog</a></li>
-                  <li><a href="#changelog" className="hover:text-white transition-colors">Changelog</a></li>
-                </ul>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Support</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
-                  <li><a href="/#faq" className="hover:text-white transition-colors">FAQ</a></li>
-                  <li><a href="#docs" className="hover:text-white transition-colors">Documentation</a></li>
-                  <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
-                  <li><a href="https://t.me/sanddockcom" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Telegram Community</a></li>
-                  <li><a href="#affiliates" className="hover:text-white transition-colors">Affiliate Program</a></li>
-                </ul>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-white">Legal</h4>
-                <ul className="space-y-2 text-white text-[11px] font-medium uppercase tracking-wider font-satoshi">
-                  <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                  <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
-                  <li><a href="#disclaimer" className="hover:text-white transition-colors">Disclaimer</a></li>
-                  <li><a href="#cookies" className="hover:text-white transition-colors">Cookie Policy</a></li>
-                </ul>
-              </div>
-            </div>
-
-          </div>
-
-          <div className="border-t border-zinc-800 pt-8 text-center text-[10px] text-white leading-relaxed font-bold uppercase tracking-wider">
-            &copy; {new Date().getFullYear()} Sanddock. Not financial advice. All signals are for educational purposes only. Past performance does not indicate future results.
-          </div>
-        </div>
-      </footer>
-
-      {/* POPUP MODAL GATE */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            onClick={() => setModalOpen(false)}
-            className="absolute inset-0 bg-black/40 backdrop-blur-xs"
-          />
-          <div className="relative w-full max-w-md bg-white border border-black rounded-none p-8 shadow-2xl space-y-6 z-10 text-left">
-            <button 
-              onClick={() => setModalOpen(false)}
-              className="absolute top-4 right-4 text-black hover:text-brand-orange text-xl font-bold font-satoshi"
+            <CtaSecondary
+              href="https://t.me/alexsanddockcom"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-white/12 flex-shrink-0"
             >
-              &times;
-            </button>
-            <div className="space-y-2">
-              <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider font-satoshi">SANDDOCK GATEWAY</span>
-              <h3 className="text-2xl font-extrabold uppercase tracking-tight text-black font-satoshi">{modalContent.title}</h3>
-              <p className="text-text-secondary text-base leading-relaxed normal-case font-satoshi">
-                {modalContent.body}
-              </p>
-            </div>
-            <div className="space-y-3">
-              <label className="block text-[10px] font-bold text-black uppercase tracking-wider">Email Address</label>
-              <input 
-                type="email" 
-                placeholder="you@example.com" 
-                className="w-full bg-[#f4f6fa] border border-black rounded-none px-4 py-3 text-sm text-black focus:outline-none focus:border-brand-orange font-satoshi"
-              />
-            </div>
-            <div className="flex gap-4 pt-2">
-              <button 
-                onClick={() => setModalOpen(false)}
-                className="flex-1 py-3 bg-black hover:bg-brand-orange text-white font-bold text-xs uppercase tracking-widest transition-colors rounded-none"
-              >
-                Proceed &rarr;
-              </button>
-              <button 
-                onClick={() => setModalOpen(false)}
-                className="px-4 py-3 border border-black bg-white hover:bg-[#f4f6fa] text-xs font-bold text-black uppercase tracking-widest transition-colors rounded-none"
-              >
-                Cancel
-              </button>
-            </div>
+              Contact @alexsanddockcom
+            </CtaSecondary>
           </div>
         </div>
-      )}
+      </section>
 
+      <Footer />
     </div>
   );
 }

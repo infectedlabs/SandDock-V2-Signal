@@ -2,7 +2,7 @@
 
 :root {
   --background: #000000;
-  --foreground: #f8fafc;
+  --foreground: #f4f6fb;
 }
 
 @theme {
@@ -11,13 +11,16 @@
   --color-bg-secondary: #090909;
   --color-bg-tertiary: #111111;
 
-  --color-brand-orange: #3D5AFE;
-  --color-brand-orange-hover: #2943d0;
+  /* Legacy accent name, still referenced across terminal/onboarding/apply.
+     Pinned to the hero's exact accent so every un-migrated page inherits
+     the same blue without needing a line-by-line rewrite. */
+  --color-brand-orange: #3054ff;
+  --color-brand-orange-hover: #2040e0;
 
   --color-signal-buy: #10b981;
   --color-signal-sell: #ef4444;
 
-  --color-confidence-high: #3D5AFE;
+  --color-confidence-high: #4f6bff;
   --color-confidence-mid: #f59e0b;
   --color-confidence-low: #f97316;
 
@@ -27,13 +30,59 @@
 
   --color-border-default: #1e293b;
   --color-border-hover: #334155;
+
+  /* ---------------------------------------------------------------
+     Dark product surface system
+     Layered near-black surfaces, cool-shifted so the accent reads warm
+     against them. surface-0 is the page, 3 is the most elevated card.
+     --------------------------------------------------------------- */
+  --color-surface-0: #000000;
+  --color-surface-1: #07080d;
+  --color-surface-2: #0d0f18;
+  --color-surface-3: #141826;
+  --color-surface-4: #1c2133;
+
+  /* Hairlines. `line` is the default divider, `line-2` for emphasis. */
+  --color-line: #191d2a;
+  --color-line-2: #272d3e;
+
+  /* Text ramp */
+  --color-ink: #f4f6fb;
+  --color-ink-2: #a6aec2;
+  /* ink-3 is tuned to clear WCAG AA (4.5:1) on surface-1/2, not lower. */
+  --color-ink-3: #7d8598;
+
+  /* Accent ramp, anchored on the hero's #3054ff CTA blue. */
+  --color-accent: #3054ff;
+  --color-accent-hover: #2040e0;
+  --color-accent-soft: #8fa2ff;
+  --color-accent-2: #7c5cf6;
+  --color-accent-3: #22d3ee;
+  /* Tail colour of the hero headline gradient. */
+  --color-headline-fade: #b4c0ff;
+
+  /* Market colors, brightened for dark backgrounds */
+  --color-up: #22d07e;
+  --color-down: #ff4d5e;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-satoshi);
+  /* Instrument Sans is the product voice; Satoshi stays available via
+     .font-satoshi for anything that still opts into it. */
+  font-family: var(--font-instrument-sans), var(--font-satoshi), system-ui, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: rgba(48, 84, 255, 0.35);
+  color: #ffffff;
 }
 
 /* Custom Font Classes */
@@ -41,7 +90,346 @@ body {
   font-family: var(--font-satoshi), system-ui, -apple-system, sans-serif;
 }
 
-/* Animations & Transitions System */
+/* Hero typography (loaded via next/font in layout.js). */
+.font-instrument-sans {
+  font-family: var(--font-instrument-sans), system-ui, -apple-system, sans-serif;
+}
+
+.font-instrument-serif {
+  font-family: var(--font-instrument-serif), ui-serif, Georgia, serif;
+}
+
+/* ------------------------------------------------------------------
+   Backgrounds & texture
+   Layered atmosphere is what separates this from a flat page: a mesh
+   of accent glows, a faint blueprint grid, and film grain on top.
+   ------------------------------------------------------------------ */
+
+/* Accent glow mesh. Sits behind content, never intercepts clicks. */
+.mesh-glow {
+  position: relative;
+}
+.mesh-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(58% 46% at 12% -4%, rgba(48, 84, 255, 0.26), transparent 68%),
+    radial-gradient(48% 42% at 88% 6%, rgba(79, 70, 229, 0.20), transparent 68%),
+    radial-gradient(46% 40% at 52% 104%, rgba(34, 211, 238, 0.09), transparent 70%);
+}
+
+/* Softer variant for mid-page sections. */
+.mesh-glow-soft::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(46% 60% at 100% 0%, rgba(79, 70, 229, 0.12), transparent 66%),
+    radial-gradient(40% 55% at 0% 40%, rgba(48, 84, 255, 0.10), transparent 66%);
+}
+
+/* Blueprint grid, faded out toward the edges with a mask. */
+.grid-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 30%, #000 20%, transparent 78%);
+  mask-image: radial-gradient(ellipse 80% 65% at 50% 30%, #000 20%, transparent 78%);
+}
+
+/* Film grain. Keeps large dark areas from banding. */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------------
+   Surfaces
+   ------------------------------------------------------------------ */
+
+/* Standard elevated card: subtle top-lit gradient + hairline.
+   Blur is applied with Tailwind's `backdrop-blur-*` utility where needed —
+   Lightning CSS strips the unprefixed `backdrop-filter` from hand-written
+   rules here, leaving only a -webkit- alias Chrome no longer honours. */
+.card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012));
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 16px;
+}
+
+/* Interactive card: lifts and warms toward the accent on hover. */
+.card-interactive {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+}
+.card-interactive:hover {
+  transform: translateY(-3px);
+  border-color: rgba(143, 162, 255, 0.34);
+  box-shadow: 0 18px 46px -18px rgba(48, 84, 255, 0.45);
+}
+
+/* Gradient-border card: accent ring drawn with a masked pseudo-element
+   so the fill underneath stays independent. */
+.card-gradient-border {
+  position: relative;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+}
+.card-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg, rgba(180, 192, 255, 0.7), rgba(48, 84, 255, 0.35) 45%, rgba(255, 255, 255, 0.06) 75%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Glass panel for the sticky header. Pair with `backdrop-blur-xl` in markup. */
+.glass-nav {
+  background: rgba(0, 0, 0, 0.72);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Legacy glass class, kept for other pages. */
+.glass {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ------------------------------------------------------------------
+   Type & accents
+   ------------------------------------------------------------------ */
+
+/* Headline gradient. Matches the hero's from-white via-white to-[#b4c0ff]
+   so every section heading reads as the same family as "Not Promises". */
+.text-gradient {
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 52%, #b4c0ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Accent gradient for emphasised words, in the hero's blue range. */
+.text-gradient-accent {
+  background: linear-gradient(100deg, #8fa2ff 0%, #b4c0ff 60%, #dbe1ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Section eyebrow. Instrument Serif in sentence case, echoing the hero's
+   serif pre-headline rather than the old uppercase Swiss label. */
+.eyebrow {
+  display: block;
+  font-family: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #b4c0ff;
+}
+
+/* Pill chip used for badges and tags. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.3rem 0.7rem;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a6aec2;
+}
+.chip-accent {
+  border-color: rgba(143, 162, 255, 0.32);
+  background: rgba(48, 84, 255, 0.14);
+  color: #b4c0ff;
+}
+
+/* ------------------------------------------------------------------
+   Buttons
+   ------------------------------------------------------------------ */
+
+/* Primary CTA: the hero's white pill. Text sits left, a blue circle holds the
+   arrow on the right — see the CtaPrimary component for the markup. */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+  color: #0a0400;
+  font-weight: 500;
+  font-size: 1.125rem;
+  line-height: 1.4;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+/* The circular arrow well. */
+.btn-primary__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #3054ff;
+  color: #ffffff;
+  flex-shrink: 0;
+  transition: background 0.25s ease;
+}
+.btn-primary:hover .btn-primary__arrow {
+  background: #2040e0;
+}
+
+/* Secondary CTA: quiet text link with a nudging arrow. */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.25s ease, background 0.25s ease;
+}
+.btn-secondary:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Full-width form submit: the accent gradient rectangle used by
+   login/signup/apply/onboarding — .btn-primary's white pill is for
+   navigational CTAs, not form actions. */
+.btn-form {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  border-radius: 0.75rem;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(120deg, #3054ff 0%, #7c5cf6 100%);
+  box-shadow: 0 10px 30px -12px rgba(48, 84, 255, 0.55);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, opacity 0.25s ease;
+}
+.btn-form:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 36px -12px rgba(48, 84, 255, 0.7);
+}
+.btn-form:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Full-width form secondary: outlined, for OAuth / back buttons. */
+.btn-form-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  border-radius: 0.75rem;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f4f6fb;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+.btn-form-outline:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.btn-form-outline:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------
+   Form fields
+   ------------------------------------------------------------------ */
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a6aec2;
+  margin-bottom: 0.375rem;
+}
+
+.field {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #f4f6fb;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.field::placeholder {
+  color: #565f75;
+}
+.field:focus {
+  outline: none;
+  border-color: rgba(48, 84, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(48, 84, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ------------------------------------------------------------------
+   Marquee / ticker
+   ------------------------------------------------------------------ */
+
+/* Fades the ticker into the background at both edges. */
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+}
+
+/* ------------------------------------------------------------------
+   Animations & Transitions System
+   ------------------------------------------------------------------ */
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -61,10 +449,10 @@ body {
 
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 15px rgba(61, 90, 254, 0.1);
+    box-shadow: 0 0 15px rgba(48, 84, 255, 0.1);
   }
   50% {
-    box-shadow: 0 0 25px rgba(61, 90, 254, 0.4);
+    box-shadow: 0 0 25px rgba(48, 84, 255, 0.4);
   }
 }
 
@@ -75,6 +463,12 @@ body {
   50% {
     transform: translateY(-8px);
   }
+}
+
+/* Slow drift for the hero glow orbs. */
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -24px, 0) scale(1.06); }
 }
 
 .animate-fade-in {
@@ -91,6 +485,10 @@ body {
 
 .animate-float {
   animation: float 5s infinite ease-in-out;
+}
+
+.animate-drift {
+  animation: drift 14s infinite ease-in-out;
 }
 
 /* Custom scrolling animations for tickers */
@@ -125,20 +523,25 @@ body {
   scrollbar-width: none;
 }
 
+/* Thin dark scrollbar for inset panels. */
+.scrollbar-dark::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.scrollbar-dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-dark::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+
 /* Smooth zoom on hover */
 .hover-scale {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .hover-scale:hover {
   transform: scale(1.03);
-}
-
-/* Glassmorphism classes */
-.glass {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Scroll reveal & Parallax utility classes */
@@ -186,3 +589,21 @@ body {
   transform: scale(1);
 }
 
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal-on-scroll,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    opacity: 1;
+    transform: none;
+  }
+}
