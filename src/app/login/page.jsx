@@ -69,12 +69,12 @@ export default function LoginPage() {
       <div className="hidden lg:flex flex-col justify-between bg-black text-white p-10 border-r border-black relative overflow-hidden h-full">
         {/* Glow effect */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-brand-orange/10 to-transparent pointer-events-none" />
-        
+
         {/* Top: Logo */}
         <div className="relative z-10">
           <a href="/" className="flex items-center gap-2.5">
             <img src="/sanddock-logo.png" alt="Sanddock Logo" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-extrabold tracking-tighter uppercase font-satoshi text-black">
+            <span className="text-xl font-extrabold tracking-tighter uppercase font-satoshi text-white">
               Sanddock
             </span>
           </a>
@@ -83,10 +83,10 @@ export default function LoginPage() {
         {/* Center: Open Signal Card Mockup */}
         <div className="space-y-6 max-w-lg relative z-10 text-left my-auto w-full">
           <div className="space-y-2">
-            <h2 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-black leading-none">
+            <h2 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-white leading-none">
               Real-time<br />swing detection.
             </h2>
-            <p className="text-black text-xs uppercase tracking-wider font-semibold">
+            <p className="text-white text-xs uppercase tracking-wider font-semibold">
               Live trade setups calculated by AI models.
             </p>
           </div>
