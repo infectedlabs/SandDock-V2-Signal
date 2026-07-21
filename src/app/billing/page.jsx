@@ -282,6 +282,26 @@ export default function BillingPage() {
                 </ul>
               </div>
 
+              {/* Need Help Card - Black Background with Blue Button */}
+              <div className="border border-black bg-black p-5 space-y-4 flex flex-col justify-between">
+                <div>
+                  <h2 className="text-2xl font-extrabold uppercase tracking-tight text-white">
+                    Need Help?
+                  </h2>
+                  <p className="text-sm text-white mt-2">
+                    For payment issues, plan upgrades, or technical support, contact us on Telegram.
+                  </p>
+                </div>
+                <a
+                  href="https://t.me/alexsanddockcom"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-widest transition-all border border-blue-600 w-full text-center"
+                >
+                  Contact @alexsanddockcom →
+                </a>
+              </div>
+
               {/* Billing & Expiry Card */}
               <div className="border border-black p-5 space-y-4">
                 <div>
@@ -361,25 +381,6 @@ export default function BillingPage() {
             </section>
           )}
 
-          {/* Support Section */}
-          <section className="border border-black p-8 space-y-6">
-            <div>
-              <h2 className="text-2xl font-extrabold uppercase tracking-tight text-black">
-                Need Help?
-              </h2>
-              <p className="text-sm text-black mt-2">
-                For payment issues, plan upgrades, or technical support, contact us on Telegram.
-              </p>
-            </div>
-            <a
-              href="https://t.me/alexsanddockcom"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block px-6 py-3 bg-black hover:bg-brand-orange text-white font-bold text-xs uppercase tracking-widest transition-all border border-black"
-            >
-              Contact @alexsanddockcom on Telegram →
-            </a>
-          </section>
         </div>
       </main>
     </div>
