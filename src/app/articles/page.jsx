@@ -30,9 +30,23 @@ async function getArticles() {
           const titleMatch = content.match(/^#\s+(.+)$/m);
           const title = titleMatch ? titleMatch[1] : slug.replace(/-/g, ' ');
 
-          // Extract first paragraph as summary
-          const summaryMatch = content.match(/^(?!#)(.+?)(?:\n\n|$)/m);
-          const summary = summaryMatch ? summaryMatch[1].slice(0, 150) + '...' : '';
+          // Extract first paragraph as summary, skip frontmatter and headings
+          let summary = '';
+          const lines = content.split('\n');
+          let inFrontmatter = false;
+          for (const line of lines) {
+            if (line.trim() === '---') {
+              inFrontmatter = !inFrontmatter;
+              continue;
+            }
+            if (inFrontmatter) continue;
+            if (line.trim().startsWith('#')) continue;
+            if (line.trim().length > 0 && !line.trim().startsWith('>') && !line.trim().startsWith('-') && !line.trim().startsWith('*')) {
+              summary = line.trim().slice(0, 150);
+              if (summary.length === 150) summary += '...';
+              break;
+            }
+          }
 
           articles[category].push({ slug, title, summary });
         }
@@ -55,8 +69,8 @@ export default async function ArticlesPage() {
   return (
     <div className="min-h-screen bg-white text-black font-satoshi">
       {/* Header */}
-      <div className="sticky top-16 z-30 border-b border-black bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="border-b border-black bg-white">
+        <div className="max-w-7xl mx-auto px-6 py-12">
           <h1 className="text-4xl md:text-5xl font-extrabold uppercase tracking-tighter text-black font-satoshi mb-3">
             Articles & Guides
           </h1>
