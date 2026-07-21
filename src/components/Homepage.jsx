@@ -462,29 +462,36 @@ export default function Homepage() {
             <a href="/pricing" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Pricing</a>
             <a href="/contact" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Contact</a>
             <a href="#faq" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">FAQ</a>
-            {user ? (
+            <a href="/articles" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Articles</a>
+            {user && (
               <a href="/terminal" className="px-6 h-full flex items-center border-r border-black text-brand-orange hover:bg-brand-orange hover:text-white transition-colors">Terminal</a>
-            ) : (
-              <a href="/login" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Login</a>
             )}
           </nav>
 
           {/* Action button container on right with left border */}
           <div className="flex items-center h-16 border-l border-black relative">
             {user ? (
-              <a 
+              <a
                 href="/terminal"
                 className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center"
               >
                 Terminal &rarr;
               </a>
             ) : (
-              <a 
-                href="/signup"
-                className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center"
-              >
-                Start Free &rarr;
-              </a>
+              <>
+                <a
+                  href="/login"
+                  className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center border-r border-black"
+                >
+                  Login
+                </a>
+                <a
+                  href="/signup"
+                  className="px-6 h-full font-bold text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors flex items-center"
+                >
+                  Start Free &rarr;
+                </a>
+              </>
             )}
             {/* Diamond point marker */}
             <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-2 h-2 bg-black rotate-45 z-10" />
