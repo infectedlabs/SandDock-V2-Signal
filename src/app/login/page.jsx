@@ -91,38 +91,38 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Open Signal Mockup Card */}
+          {/* Recent High PnL Trade Card */}
           <div className="bg-[#111] border border-zinc-800 p-5 space-y-3 rounded-none relative">
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-satoshi">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Live Setup Open
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                Closed Trade +5.2%
               </span>
               <span className="text-[9px] font-satoshi text-white uppercase">BTC/USDT (15m HA)</span>
             </div>
 
             <div className="grid grid-cols-3 gap-3 border-y border-zinc-900 py-2.5 text-left">
               <div>
-                <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Entry Target</span>
-                <span className="font-satoshi text-xs font-bold text-white">$67,420.00</span>
-              </div>
-              <div>
-                <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Stop Loss</span>
+                <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Entry</span>
                 <span className="font-satoshi text-xs font-bold text-white">$66,850.00</span>
               </div>
               <div>
-                <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Take Profit</span>
-                <span className="font-satoshi text-xs font-bold text-[#00e676]">$69,200.00</span>
+                <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Exit</span>
+                <span className="font-satoshi text-xs font-bold text-white">$70,320.00</span>
+              </div>
+              <div>
+                <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Return</span>
+                <span className="font-satoshi text-xs font-bold text-[#00e676]">+5.2% PnL</span>
               </div>
             </div>
 
             <div className="space-y-1.5 text-left">
               <div className="flex items-center gap-2">
-                <span className="text-[8px] font-bold bg-brand-orange text-white px-1.5 py-0.5 uppercase tracking-widest font-satoshi">AI Rating</span>
-                <span className="font-satoshi text-xs font-bold text-white">87% Confidence</span>
+                <span className="text-[8px] font-bold bg-emerald-600/40 text-emerald-400 px-1.5 py-0.5 uppercase tracking-widest font-satoshi">Result</span>
+                <span className="font-satoshi text-xs font-bold text-emerald-400">Profit Target Hit</span>
               </div>
               <p className="text-[11px] text-white font-satoshi leading-relaxed normal-case">
-                &ldquo;BTC swing bottom confirmed on Heikin Ashi candles. Spot volume shows strong absorption at local support levels. Proceeding with alternating swing structure.&rdquo;
+                &ldquo;BTC swing bottom confirmed. Strong volume absorption at support. Trade executed and closed at take profit level. Clean 5.2% gain.&rdquo;
               </p>
             </div>
           </div>
