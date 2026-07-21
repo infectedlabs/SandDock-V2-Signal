@@ -245,7 +245,8 @@
       "Bash(node pine_backtest.js)",
       "Bash(node pine_backtest_filtered.js)",
       "Bash(node pine_backtest_extreme_rr.js)",
-      "Bash(curl -s \"https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=30m&limit=150\" -o /tmp/btc30m.json)"
+      "Bash(curl -s \"https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=30m&limit=150\" -o /tmp/btc30m.json)",
+      "Bash(node -e \"require\\('./src/app/api/email/send-approval/route.js'\\)\")"
     ]
   }
 }
