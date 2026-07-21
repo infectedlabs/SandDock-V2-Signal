@@ -11,7 +11,39 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [trade, setTrade] = useState({
+    result: '+5.2%',
+    entry: '$66,850.00',
+    exit: '$70,320.00',
+    pair: 'BTC/USDT'
+  });
   const router = useRouter();
+
+  // Fetch recent high PnL trade
+  useEffect(() => {
+    const fetchRecentTrade = async () => {
+      try {
+        const response = await fetch('/api/closed-signals?limit=1');
+        const data = await response.json();
+        if (data.signals && data.signals.length > 0) {
+          const topTrade = data.signals[0];
+          setTrade({
+            result: topTrade.result,
+            entry: topTrade.entry,
+            exit: topTrade.exit,
+            pair: topTrade.pair
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch recent trade:', err);
+      }
+    };
+
+    fetchRecentTrade();
+    // Refresh every 24 hours (86400000 ms)
+    const interval = setInterval(fetchRecentTrade, 86400000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Redirect to terminal if already authenticated
   useEffect(() => {
@@ -96,23 +128,23 @@ export default function LoginPage() {
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-satoshi">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                Closed Trade +5.2%
+                Closed Trade {trade.result}
               </span>
-              <span className="text-[9px] font-satoshi text-white uppercase">BTC/USDT (15m HA)</span>
+              <span className="text-[9px] font-satoshi text-white uppercase">{trade.pair} (30m HA)</span>
             </div>
 
             <div className="grid grid-cols-3 gap-3 border-y border-zinc-900 py-2.5 text-left">
               <div>
                 <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Entry</span>
-                <span className="font-satoshi text-xs font-bold text-white">$66,850.00</span>
+                <span className="font-satoshi text-xs font-bold text-white">{trade.entry}</span>
               </div>
               <div>
                 <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Exit</span>
-                <span className="font-satoshi text-xs font-bold text-white">$70,320.00</span>
+                <span className="font-satoshi text-xs font-bold text-white">{trade.exit}</span>
               </div>
               <div>
                 <span className="block text-[7px] text-white font-bold uppercase tracking-widest">Return</span>
-                <span className="font-satoshi text-xs font-bold text-[#00e676]">+5.2% PnL</span>
+                <span className="font-satoshi text-xs font-bold text-[#00e676]">{trade.result} PnL</span>
               </div>
             </div>
 

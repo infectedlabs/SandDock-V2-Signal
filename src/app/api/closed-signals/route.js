@@ -14,54 +14,26 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '5');
 
-    // First, try to fetch closed signals from today only
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const todayStart = today.toISOString();
+    // Fetch closed signals from the past 7 days with highest PnL
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgoISO = sevenDaysAgo.toISOString();
 
-    const tomorrow = new Date(today);
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    const todayEnd = tomorrow.toISOString();
-
-    const { data: todaySignals, error: todayError } = await supabaseAdmin
+    const { data: signals, error: signalsError } = await supabaseAdmin
       .from('signals')
       .select('bar_time, symbol, signal_type, entry_price, pnl_pct, is_win')
       .not('pnl_pct', 'is', null)
       .gt('pnl_pct', 0)  // Only positive PnL
-      .gte('bar_time', todayStart)  // Today only (start)
-      .lt('bar_time', todayEnd)  // Today only (end)
+      .gte('bar_time', sevenDaysAgoISO)  // Past 7 days
       .order('pnl_pct', { ascending: false })  // Highest PnL first
       .limit(limit * 2);
 
-    if (todayError) {
-      console.error('Error fetching today signals:', todayError);
+    if (signalsError) {
+      console.error('Error fetching signals from past 7 days:', signalsError);
       return NextResponse.json(
-        { error: todayError.message },
+        { error: signalsError.message },
         { status: 500, headers: { 'Cache-Control': 'no-store' } }
       );
-    }
-
-    let signals = todaySignals;
-
-    // If no signals from today, fetch the last 5 signals from any day
-    if (!signals || signals.length === 0) {
-      const { data: allTimeSignals, error: allTimeError } = await supabaseAdmin
-        .from('signals')
-        .select('bar_time, symbol, signal_type, entry_price, pnl_pct, is_win')
-        .not('pnl_pct', 'is', null)
-        .gt('pnl_pct', 0)  // Only positive PnL
-        .order('bar_time', { ascending: false })  // Most recent first
-        .limit(limit * 2);
-
-      if (allTimeError) {
-        console.error('Error fetching all-time signals:', allTimeError);
-        return NextResponse.json(
-          { error: allTimeError.message },
-          { status: 500, headers: { 'Cache-Control': 'no-store' } }
-        );
-      }
-
-      signals = allTimeSignals;
     }
 
     if (!signals || signals.length === 0) {
