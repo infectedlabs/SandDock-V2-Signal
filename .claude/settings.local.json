@@ -236,7 +236,16 @@
       "Bash(node scripts/check-app.js)",
       "Bash(node scripts/check-all-apps.js)",
       "Bash(node scripts/check-infected.js)",
-      "Bash(node scripts/link-apps-to-users.js)"
+      "Bash(node scripts/link-apps-to-users.js)",
+      "Bash(powershell -c \"type 'C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\\\\telegram-signal-worker\\\\package.json'\")",
+      "Bash(node \"C:\\\\Users\\\\GHURUP~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-GHURU-PRASAATH-Desktop-sanddock\\\\0f8ee24b-092a-4604-ab3f-5def27f35d00\\\\scratchpad\\\\backtest_exit.js\")",
+      "Bash(cp \"C:\\\\Users\\\\GHURUP~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-GHURU-PRASAATH-Desktop-sanddock\\\\0f8ee24b-092a-4604-ab3f-5def27f35d00\\\\scratchpad\\\\backtest_exit.js\" \"C:\\\\Users\\\\GHURU PRASAATH\\\\Desktop\\\\sanddock\\\\telegram-signal-worker\\\\backtest_exit_tmp.js\")",
+      "Bash(node backtest_exit_tmp.js)",
+      "Bash(node scripts/fix-live-signals.js)",
+      "Bash(node pine_backtest.js)",
+      "Bash(node pine_backtest_filtered.js)",
+      "Bash(node pine_backtest_extreme_rr.js)",
+      "Bash(curl -s \"https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=30m&limit=150\" -o /tmp/btc30m.json)"
     ]
   }
 }
