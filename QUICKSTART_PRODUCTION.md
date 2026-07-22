@@ -37,7 +37,7 @@ For the complete guide, see `DEPLOYMENT.md`. This is the TL;DR version.
 ```bash
 1. Open your Netlify site
 2. Open DevTools (F12) → Console
-3. Should see: [HAChart] WebSocket open — subscribing to BTCUSDT 30m
+3. Should see: [HAChart] WebSocket open - subscribing to BTCUSDT 30m
 4. If error, check NEXT_PUBLIC_WS_URL in Netlify dashboard
 ```
 

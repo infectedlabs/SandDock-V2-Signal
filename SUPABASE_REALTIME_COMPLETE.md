@@ -104,7 +104,7 @@ npm run dev
 ```
 1. Open your site: https://yourapp.com
 2. F12 Console → Check for:
-   "[HAChart] WebSocket open — subscribing to BTCUSDT 30m"
+   "[HAChart] WebSocket open - subscribing to BTCUSDT 30m"
 3. Charts should update live with Binance data
 ```
 

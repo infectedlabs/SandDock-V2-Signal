@@ -2,11 +2,11 @@
 // Always-on Railway service: listens to Binance's live kline WebSocket for
 // BTC/ETH/BNB 30m candles, closes signals on genuine opposite swings,
 // creates new live signals, writes both to Supabase, and posts Telegram
-// alerts to a dedicated channel — the instant each candle closes.
+// alerts to a dedicated channel - the instant each candle closes.
 //
 // Why WebSocket and not REST polling: a signal is only useful in the
 // Telegram channel if it lands the moment it's confirmed, not minutes (or
-// even 15s) later — polling always trades some delay for request volume.
+// even 15s) later - polling always trades some delay for request volume.
 // Binance pushes a kline-closed event the moment it happens, so there is no
 // polling delay to trade away. It also scales to any number of symbols on a
 // single connection with zero REST rate-limit cost, unlike REST polling
@@ -14,7 +14,7 @@
 // klines endpoint). REST is only used here for two things: fetching the
 // LOOKBACK candle context needed to run swing detection once a close event
 // fires, and a slow safety-net sweep in case a WebSocket message is ever
-// dropped — both are cheap and don't grow with polling frequency.
+// dropped - both are cheap and don't grow with polling frequency.
 
 require('dotenv').config();
 
@@ -25,27 +25,27 @@ const { createClient } = require('@supabase/supabase-js');
 
 // ─── Config ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-// Backstop only — the WebSocket is the real-time trigger. This just catches
+// Backstop only - the WebSocket is the real-time trigger. This just catches
 // the rare case of a dropped WS message. Runs the same cheap change-detection
 // guard as everything else, so it costs nothing when there's no new candle.
 const SAFETY_NET_INTERVAL_SECONDS = parseInt(process.env.SAFETY_NET_INTERVAL_SECONDS || '180', 10);
 
 // Matches the exact path already proven working in production by
-// backend/stream_subscriber.py — Binance's documented `/stream?streams=` and
+// backend/stream_subscriber.py - Binance's documented `/stream?streams=` and
 // `/ws/` paths both connected but delivered zero messages when tested
 // directly against this account/region; this one delivers within ~1s.
 const BINANCE_WS_BASE = 'wss://fstream.binance.com/market/stream?streams=';
 
 const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'];
 const INTERVAL = '30m';
-// Must match backfill.js and the validated TradingView Pine script exactly —
+// Must match backfill.js and the validated TradingView Pine script exactly -
 // 8 was tried to filter countertrend bounces but instead let a modest bounce
 // get misread as a genuine swing high, firing a live SELL signal that went
 // straight to a loss. 5 is the confirmed-good value.
 const LOOKBACK = 5;
 const SL_PCT = 0.5;
 const TP_PCT = 1.5;
-const CANDLES_FETCH = 1000; // ~20.8 days of 30m candles — plenty of prior-swing context
+const CANDLES_FETCH = 1000; // ~20.8 days of 30m candles - plenty of prior-swing context
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -70,7 +70,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   process.exit(1);
 }
 if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-  console.warn('[WARN] TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set — Telegram alerts are disabled.');
+  console.warn('[WARN] TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set - Telegram alerts are disabled.');
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
@@ -81,10 +81,10 @@ function log(msg) {
 }
 
 // ─── Binance REST candle fetch ───────────────────────────────────────────
-// Futures (fapi), not spot — matches the chart's live websocket
+// Futures (fapi), not spot - matches the chart's live websocket
 // (stream_subscriber.py connects to fstream.binance.com) and the app's own
 // live-price fallback (src/lib/binanceFallback.js uses fapi.binance.com).
-// The original backfill script used spot and is left untouched — this is a
+// The original backfill script used spot and is left untouched - this is a
 // deliberate divergence for the worker only, so its entries/closes line up
 // with what's actually shown on the live chart going forward.
 async function fetchCandles(symbol, limit = CANDLES_FETCH) {
@@ -97,7 +97,7 @@ async function fetchCandles(symbol, limit = CANDLES_FETCH) {
   } catch (err) {
     if (err.response?.status === 451) {
       throw new Error(
-        `Binance returned 451 (Unavailable For Legal Reasons) — this host's IP is in a region ` +
+        `Binance returned 451 (Unavailable For Legal Reasons) - this host's IP is in a region ` +
         `Binance blocks (binance.com/fapi is not available to US-based traffic; Binance.US has no ` +
         `futures data). Fix: change this service's deploy region to a non-US region in Railway's ` +
         `Settings -> Deploy -> Region.`
@@ -114,7 +114,7 @@ async function fetchCandles(symbol, limit = CANDLES_FETCH) {
   // because the live partial candle's high/low shifted, with no real price
   // action on the confirmed bar itself. That's how a signal already stored
   // as open in the DB can stop matching anything in a later run's
-  // withCloses and sit there forever unclosed. Drop it — only fully closed
+  // withCloses and sit there forever unclosed. Drop it - only fully closed
   // candles are deterministic, matching what a historical backfill (which
   // only ever sees closed candles) actually computes.
   const closeTimeMs = k => k[6];
@@ -346,14 +346,14 @@ function newSignalMessage(sig, perfData = null) {
   }
 
   return (
-    `<b>SANDDOCK SIGNAL — ${coinLabel(sig.symbol)}</b>\n` +
+    `<b>SANDDOCK SIGNAL - ${coinLabel(sig.symbol)}</b>\n` +
     `Type: <b>${dir}</b> · Timeframe: 30m\n\n` +
     `<b>ENTRY</b>       $${sig.entry_price.toFixed(2)}\n` +
     `<b>STOP LOSS</b>   $${sig.sl_price.toFixed(2)}\n` +
     `<b>TAKE PROFIT</b> $${sig.tp_price.toFixed(2)}\n` +
     `<b>R:R RATIO</b>   1:${rrRatioStr}\n` +
     `<b>CONFIDENCE</b>  ${sig.confidence}%\n\n` +
-    `Signal fired — position is now open.\n\n` +
+    `Signal fired - position is now open.\n\n` +
     `${perfSection}` +
     `<code>────────────────────</code>\n\n` +
     `sanddock.com/terminal`
@@ -382,7 +382,7 @@ function closedSignalMessage(sig, perfData = null) {
   }
 
   return (
-    `<b>SANDDOCK SIGNAL — ${coinLabel(sig.symbol)} [CLOSED]</b>\n` +
+    `<b>SANDDOCK SIGNAL - ${coinLabel(sig.symbol)} [CLOSED]</b>\n` +
     `Type: <b>${dir}</b> · Timeframe: 30m\n\n` +
     `<b>ENTRY</b>       $${parseFloat(sig.entry_price).toFixed(2)}\n` +
     `<b>EXIT</b>        $${parseFloat(sig.close_price).toFixed(2)}\n` +
@@ -459,8 +459,8 @@ async function processSymbol(symbol) {
 
   // A single candle can only ever open one new position. If both isLow and
   // isHigh matched on the same candle (rare, but possible with a tie inside
-  // the lookback window), keep just one — preferring whichever direction is
-  // opposite the currently open position so we still flip correctly — and
+  // the lookback window), keep just one - preferring whichever direction is
+  // opposite the currently open position so we still flip correctly - and
   // drop the other. Inserting both used to leave an orphaned duplicate open
   // row that no future cycle could ever find (the open-signal query above
   // only ever returns the single latest row by bar_time), so it could never
@@ -470,7 +470,7 @@ async function processSymbol(symbol) {
       ? detected.find(sig => sig.signal_type !== openSignal.action.toLowerCase())
       : null;
     const chosen = opposite || detected[0];
-    log(`[${symbol}] Both swing-low and swing-high matched on the same candle — keeping only the ${chosen.signal_type.toUpperCase()} signal.`);
+    log(`[${symbol}] Both swing-low and swing-high matched on the same candle - keeping only the ${chosen.signal_type.toUpperCase()} signal.`);
     detected = [chosen];
   }
 
@@ -480,7 +480,7 @@ async function processSymbol(symbol) {
     const isOppositeDetected = detected[0].signal_type !== openSignal.action.toLowerCase();
 
     if (isOppositeDetected) {
-      // Found opposite swing — close the open signal
+      // Found opposite swing - close the open signal
       const oppositeSignal = detected[0];
 
       const closeInfo = {
@@ -497,7 +497,7 @@ async function processSymbol(symbol) {
         .eq('id', openSignal.id);
 
       if (!error) {
-        log(`[${symbol}] ✓ Closed ${openSignal.action} @ ${openSignal.bar_time} with ${oppositeSignal.signal_type.toUpperCase()} — pnl ${closeInfo.pnl_pct}%`);
+        log(`[${symbol}] ✓ Closed ${openSignal.action} @ ${openSignal.bar_time} with ${oppositeSignal.signal_type.toUpperCase()} - pnl ${closeInfo.pnl_pct}%`);
         const replyToId = signalMessageIds[openSignal.id] || null;
 
         // Fetch performance data for message
@@ -581,7 +581,7 @@ let wsConnected = false;
 let wsConnectCount = 0;
 let lastMessageAt = null; // any WS message, not just candle-close events
 
-// A symbol is processed independently of the others — one busy/slow symbol
+// A symbol is processed independently of the others - one busy/slow symbol
 // must never block another symbol's candle-close event from being handled
 // immediately, so concurrency is guarded per-symbol, not globally.
 async function trigger(symbol, source) {
@@ -624,7 +624,7 @@ function connectWebSocket() {
       const msg = JSON.parse(raw);
       const k = msg?.data?.k;
       if (!k) return;
-      // k.x === true means this candle has closed — that's the exact moment
+      // k.x === true means this candle has closed - that's the exact moment
       // a signal for this bar becomes possible to confirm. Fire immediately;
       // don't await here, so one symbol's processing can't delay another's
       // message from being read off the socket.
@@ -650,7 +650,7 @@ function connectWebSocket() {
   // under any real market activity a message should arrive within seconds.
   // A connection that "opens" but never delivers anything is the exact
   // symptom of a geo-blocked host (handshake succeeds, Binance silently
-  // sends nothing) — the same root cause as the REST 451 error, just
+  // sends nothing) - the same root cause as the REST 451 error, just
   // without an explicit status code to log. Warn once so it's diagnosable
   // from logs alone instead of looking like a silently-idle connection.
   const watchdog = setInterval(() => {
@@ -658,7 +658,7 @@ function connectWebSocket() {
     if (!watchdogWarned && Date.now() - connectedAt > 90000 && (!lastMessageAt || lastMessageAt < connectedAt)) {
       watchdogWarned = true;
       log('[WARN] WebSocket has been open for 90s with zero messages received. This usually means ' +
-          "the connection handshake succeeded but Binance is silently not delivering data — the " +
+          "the connection handshake succeeded but Binance is silently not delivering data - the " +
           'same geo-restriction that causes the REST 451 error. If REST is also failing, change ' +
           "this service's deploy region to a non-US region in Railway's Settings -> Deploy -> Region.");
     }

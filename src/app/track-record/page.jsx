@@ -19,19 +19,19 @@ function formatPct(n, withSign = true) {
 }
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 function formatTime(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function TrackRecordPage() {
   const { user } = useAuth();
 
-  // Overall stats — same aggregate feed the homepage hero uses.
+  // Overall stats - same aggregate feed the homepage hero uses.
   const [heroStats, setHeroStats] = useState({ total_pnl: 0, win_rate: 0, total_signals: 0, last_updated: null });
   const [isLoadingHero, setIsLoadingHero] = useState(true);
 
@@ -104,7 +104,7 @@ export default function TrackRecordPage() {
     const fetchLedger = async () => {
       try {
         setIsLoadingLedger(true);
-        // plan=master requests the zero-delay feed — this page is a public
+        // plan=master requests the zero-delay feed - this page is a public
         // record of closed history, not a live entry signal, so there is no
         // reason to apply the free-tier 5 minute delay here.
         const res = await fetch(
@@ -157,32 +157,32 @@ export default function TrackRecordPage() {
           </h1>
           <p className="mt-6 text-white/70 text-[17px] md:text-lg leading-[1.65] max-w-2xl mx-auto">
             No login required. No cherry-picked screenshots. This page pulls directly from the
-            same database Sanddock trades against — wins, losses, and everything in between.
+            same database Sanddock trades against - wins, losses, and everything in between.
           </p>
 
-          {/* Live stats strip — identical data source to the homepage hero */}
+          {/* Live stats strip - identical data source to the homepage hero */}
           <div className="mt-12 max-w-2xl mx-auto grid grid-cols-3 gap-px rounded-2xl overflow-hidden border border-line bg-line">
             <div className="bg-surface-1/90 px-4 py-5 md:px-6">
               <p className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.16em] text-ink-3">Win Rate</p>
               <p className="mt-1.5 text-2xl md:text-[32px] font-extrabold text-ink tracking-tight">
-                {isLoadingHero ? "—" : `${heroStats.win_rate.toFixed(1)}%`}
+                {isLoadingHero ? "-" : `${heroStats.win_rate.toFixed(1)}%`}
               </p>
             </div>
             <div className="bg-surface-1/90 px-4 py-5 md:px-6">
               <p className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.16em] text-ink-3">Total PnL</p>
               <p className={`mt-1.5 text-2xl md:text-[32px] font-extrabold tracking-tight ${heroStats.total_pnl >= 0 ? "text-up" : "text-down"}`}>
-                {isLoadingHero ? "—" : formatPct(heroStats.total_pnl)}
+                {isLoadingHero ? "-" : formatPct(heroStats.total_pnl)}
               </p>
             </div>
             <div className="bg-surface-1/90 px-4 py-5 md:px-6">
               <p className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.16em] text-ink-3">Signals</p>
               <p className="mt-1.5 text-2xl md:text-[32px] font-extrabold text-ink tracking-tight">
-                {isLoadingHero ? "—" : heroStats.total_signals.toLocaleString()}
+                {isLoadingHero ? "-" : heroStats.total_signals.toLocaleString()}
               </p>
             </div>
           </div>
           <p className="mt-3 text-[12px] text-ink-3">
-            Last updated {isLoadingHero ? "—" : new Date(heroStats.last_updated).toLocaleString()}
+            Last updated {isLoadingHero ? "-" : new Date(heroStats.last_updated).toLocaleString()}
           </p>
         </div>
       </section>
@@ -211,14 +211,14 @@ export default function TrackRecordPage() {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-line bg-line">
             {[
-              { label: "Win rate", value: isLoadingSummary || !coinSummary ? "—" : `${coinSummary.win_rate_pct}%`, tone: "text-up" },
-              { label: "Completed trades", value: isLoadingSummary || !coinSummary ? "—" : coinSummary.completed_trades, tone: "text-ink" },
-              { label: "Profit factor", value: isLoadingSummary || !coinSummary ? "—" : coinSummary.profit_factor, tone: "text-gradient-accent" },
-              { label: "Avg PnL / trade", value: isLoadingSummary || !coinSummary ? "—" : formatPct(coinSummary.avg_pnl), tone: parseFloat(coinSummary?.avg_pnl) >= 0 ? "text-up" : "text-down" },
-              { label: "Wins", value: isLoadingSummary || !coinSummary ? "—" : coinSummary.wins, tone: "text-up" },
-              { label: "Losses", value: isLoadingSummary || !coinSummary ? "—" : coinSummary.losses, tone: "text-down" },
-              { label: "Best trade", value: isLoadingSummary || !coinSummary ? "—" : formatPct(coinSummary.best_trade), tone: "text-up" },
-              { label: "Worst trade", value: isLoadingSummary || !coinSummary ? "—" : formatPct(coinSummary.worst_trade), tone: "text-down" },
+              { label: "Win rate", value: isLoadingSummary || !coinSummary ? "-" : `${coinSummary.win_rate_pct}%`, tone: "text-up" },
+              { label: "Completed trades", value: isLoadingSummary || !coinSummary ? "-" : coinSummary.completed_trades, tone: "text-ink" },
+              { label: "Profit factor", value: isLoadingSummary || !coinSummary ? "-" : coinSummary.profit_factor, tone: "text-gradient-accent" },
+              { label: "Avg PnL / trade", value: isLoadingSummary || !coinSummary ? "-" : formatPct(coinSummary.avg_pnl), tone: parseFloat(coinSummary?.avg_pnl) >= 0 ? "text-up" : "text-down" },
+              { label: "Wins", value: isLoadingSummary || !coinSummary ? "-" : coinSummary.wins, tone: "text-up" },
+              { label: "Losses", value: isLoadingSummary || !coinSummary ? "-" : coinSummary.losses, tone: "text-down" },
+              { label: "Best trade", value: isLoadingSummary || !coinSummary ? "-" : formatPct(coinSummary.best_trade), tone: "text-up" },
+              { label: "Worst trade", value: isLoadingSummary || !coinSummary ? "-" : formatPct(coinSummary.worst_trade), tone: "text-down" },
             ].map((s) => (
               <div key={s.label} className="bg-surface-1/90 p-6">
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink-3 mb-2">{s.label}</p>
@@ -230,10 +230,10 @@ export default function TrackRecordPage() {
           {/* This week by coin */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-4 gap-4">
             {[
-              { label: "BTC — 7d", value: weeklyPnl.BTC },
-              { label: "ETH — 7d", value: weeklyPnl.ETH },
-              { label: "BNB — 7d", value: weeklyPnl.BNB },
-              { label: "Combined — 7d", value: weeklyPnl.total },
+              { label: "BTC - 7d", value: weeklyPnl.BTC },
+              { label: "ETH - 7d", value: weeklyPnl.ETH },
+              { label: "BNB - 7d", value: weeklyPnl.BNB },
+              { label: "Combined - 7d", value: weeklyPnl.total },
             ].map((w) => (
               <div key={w.label} className="card p-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3 mb-1.5">{w.label}</p>
@@ -252,7 +252,7 @@ export default function TrackRecordPage() {
           <SectionHeading
             eyebrow="Estimator"
             title="What this track record means for your capital"
-            description="Applies the verified all-time return to a starting balance. Illustrative only — past performance does not guarantee future results."
+            description="Applies the verified all-time return to a starting balance. Illustrative only - past performance does not guarantee future results."
           />
 
           <div className="card-gradient-border p-px mt-10">
@@ -266,7 +266,7 @@ export default function TrackRecordPage() {
                       ${startingCapital.toLocaleString()}
                     </span>
                     <span className="text-[12px] text-ink-3">
-                      at {isLoadingHero ? "—" : formatPct(heroStats.total_pnl)} all-time
+                      at {isLoadingHero ? "-" : formatPct(heroStats.total_pnl)} all-time
                     </span>
                   </div>
                   <input
@@ -375,7 +375,7 @@ export default function TrackRecordPage() {
                             </span>
                           </td>
                           <td className="px-5 py-4 text-ink-2 tabular-nums">
-                            {sig.entry_price ? `$${Number(sig.entry_price).toLocaleString("en-US", { maximumFractionDigits: 2 })}` : "—"}
+                            {sig.entry_price ? `$${Number(sig.entry_price).toLocaleString("en-US", { maximumFractionDigits: 2 })}` : "-"}
                           </td>
                           <td className={`px-5 py-4 font-bold tabular-nums ${isWin ? "text-up" : "text-down"}`}>
                             <span className="inline-flex items-center gap-1.5">

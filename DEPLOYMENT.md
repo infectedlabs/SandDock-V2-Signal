@@ -182,7 +182,7 @@ Set in your hosting platform's dashboard:
 ### Test Frontend:
 1. Open `https://yourapp.com`
 2. Open DevTools (F12) → Console
-3. Should see: `[HAChart] WebSocket open — subscribing to BTCUSDT 30m`
+3. Should see: `[HAChart] WebSocket open - subscribing to BTCUSDT 30m`
 
 ### Test Backend Health:
 ```bash

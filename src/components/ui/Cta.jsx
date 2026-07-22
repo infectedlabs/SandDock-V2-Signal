@@ -4,7 +4,7 @@ import React from "react";
 import { ArrowRight } from "lucide-react";
 
 /**
- * Primary call to action — the hero's white pill with a blue arrow well.
+ * Primary call to action - the hero's white pill with a blue arrow well.
  * Renders an <a> so it works for both navigation and anchor links.
  */
 export function CtaPrimary({ href, children, className = "", ...rest }) {
@@ -19,7 +19,7 @@ export function CtaPrimary({ href, children, className = "", ...rest }) {
 }
 
 /**
- * Secondary call to action — quiet text link whose arrow nudges on hover.
+ * Secondary call to action - quiet text link whose arrow nudges on hover.
  */
 export function CtaSecondary({ href, children, className = "", ...rest }) {
   return (

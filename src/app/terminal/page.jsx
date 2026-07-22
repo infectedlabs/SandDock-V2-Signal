@@ -732,7 +732,7 @@ export default function TerminalPage() {
   }, []);
 
   // Signal generation (create/close) is handled entirely by the standalone
-  // Railway worker (telegram-signal-worker/) — this app is read-only with
+  // Railway worker (telegram-signal-worker/) - this app is read-only with
   // respect to the `signals` table. No sync trigger needed here.
 
   const signalFilters = useMemo(() => ({
@@ -874,7 +874,7 @@ export default function TerminalPage() {
     const negativeSum = Math.abs(pnlValues.filter(p => p < 0).reduce((sum, p) => sum + p, 0));
     const profitFactor = negativeSum > 0 ? (positiveSum / negativeSum).toFixed(2) : positiveSum > 0 ? 'Infinite' : '-';
 
-    // Plain arithmetic sum of the % moves shown in the signal log — distinct
+    // Plain arithmetic sum of the % moves shown in the signal log - distinct
     // from cumulative_r (R-multiple sum, i.e. account return assuming fixed
     // 1% risk per signal). Kept separate on purpose: they answer different
     // questions and shouldn't be conflated into one number.
@@ -1018,7 +1018,7 @@ export default function TerminalPage() {
   const cleanLiveSignals = useMemo(() => {
     let filtered = liveSignals;
 
-    // Apply confidence filter — but never hide a currently open position.
+    // Apply confidence filter - but never hide a currently open position.
     // min_confidence is meant to gate which NEW signal alerts get surfaced;
     // an already-open trade is real market exposure and must stay visible
     // regardless of the confidence score it happened to fire at, otherwise

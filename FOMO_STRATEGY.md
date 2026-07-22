@@ -147,7 +147,7 @@ Keep a simple Google Sheet for every payment received:
 |------|-------|------|------------|-----------|--------|---------------|-----------|----------|
 | Alex | alex@... | Pro | 29 | $29 | 0x1234... | 2024-07-20 | 2024-07-20 | 2024-08-20 |
 
-**Key**: The TxHash is your receipt — it's on-chain and permanently verifiable.
+**Key**: The TxHash is your receipt - it's on-chain and permanently verifiable.
 
 ### Tax Reporting
 - USDT is pegged to $1, so 1 USDT = $1 for tax purposes
@@ -161,9 +161,9 @@ On `/pricing`, show live counts:
 ```
 CURRENT ACCESS STATUS
 
-Pro plan:     OPEN — reviewing applications
-Master plan:  WAITLIST — 47 on waitlist
-Grandmaster:  CLOSED — next opening unannounced
+Pro plan:     OPEN - reviewing applications
+Master plan:  WAITLIST - 47 on waitlist
+Grandmaster:  CLOSED - next opening unannounced
 
 Applications reviewed:  Every Tuesday
 Last batch:             12 accepted, 3 waitlisted

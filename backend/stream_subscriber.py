@@ -222,7 +222,7 @@ async def handle_kline(data, db_conn):
             "symbol":    symbol,
             "interval":  interval,
             "time":      k["t"] // 1000,
-            # HA values — what the chart renders (matches TradingView HA mode)
+            # HA values - what the chart renders (matches TradingView HA mode)
             "open":      ha["ha_open"],
             "high":      ha["ha_high"],
             "low":       ha["ha_low"],
@@ -393,7 +393,7 @@ async def run():
     # Run historical data bootstrap
     bootstrap_history(db_conn)
     
-    # ── Seed ha:prev from FRESH Binance data — not stale DB rows ────────────────
+    # ── Seed ha:prev from FRESH Binance data - not stale DB rows ────────────────
     #
     # ROOT CAUSE OF SPIKE (fixed here):
     # After a long outage the DB contains HA values that are many hours old.
@@ -420,7 +420,7 @@ async def run():
                 seeded += 1
                 log.debug(f"  Seeded {symbol} {interval}: ha_open={last['ha_open']}, ha_close={last['ha_close']}")
             else:
-                log.warning(f"  No HA candles computed for {symbol} {interval} — first live candle will use raw seed")
+                log.warning(f"  No HA candles computed for {symbol} {interval} - first live candle will use raw seed")
                 failed += 1
         except Exception as seed_err:
             log.error(f"  Failed to seed ha:prev for {symbol} {interval}: {seed_err}")
@@ -454,7 +454,7 @@ async def run():
                         if event_type == "kline":
                             await handle_kline(data, db_conn)
                         elif event_type == "24hrMiniTicker":
-                            # Last trade price — matches TradingView BTCUSDT.P
+                            # Last trade price - matches TradingView BTCUSDT.P
                             await handle_mini_ticker(data, db_conn)
 
                     except Exception as e:

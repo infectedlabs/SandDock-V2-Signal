@@ -73,7 +73,7 @@ python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
 #### Step 4: Verify the connection
 - Frontend should be running: `http://localhost:3000`
 - Backend should be running: `http://localhost:8000`
-- In the browser console, you should see: `[HAChart] WebSocket open — subscribing to BTCUSDT 30m`
+- In the browser console, you should see: `[HAChart] WebSocket open - subscribing to BTCUSDT 30m`
 
 ---
 

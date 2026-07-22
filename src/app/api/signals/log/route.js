@@ -71,7 +71,7 @@ export async function GET(request) {
       } catch (e) {
         console.warn(`[/api/signals/log] Failed to fetch price for ${sym}:`, e.message);
       }
-      // Fallback to last cached candle close if Binance timed out/failed — without
+      // Fallback to last cached candle close if Binance timed out/failed - without
       // this, a live signal's pnl_pct silently stays null and renders as a
       // misleading 0% instead of its actual unrealized PnL.
       if (priceCache[sym] === undefined) {

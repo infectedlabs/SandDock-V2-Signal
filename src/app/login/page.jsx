@@ -162,7 +162,7 @@ export default function LoginPage() {
 
         {/* Bottom: Legal disclaimer */}
         <div className="relative z-10 pt-4 border-t border-white/8 text-[11px] text-ink-3 leading-relaxed">
-          Signals are for educational purposes only — not financial advice. Past signals do not
+          Signals are for educational purposes only - not financial advice. Past signals do not
           guarantee future results.
         </div>
       </div>
@@ -256,7 +256,7 @@ export default function LoginPage() {
 
         {/* Mobile disclaimer */}
         <div className="lg:hidden mt-8 text-[11px] text-ink-3 leading-relaxed text-center">
-          Signals are for educational purposes only — not financial advice. Past signals do not
+          Signals are for educational purposes only - not financial advice. Past signals do not
           guarantee future results.
         </div>
       </div>

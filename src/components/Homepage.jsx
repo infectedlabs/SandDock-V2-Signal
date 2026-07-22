@@ -108,11 +108,11 @@ const faqItems = [
   },
   {
     q: "What makes Sanddock signals different from other signal groups?",
-    a: "Most signal groups hide their losses and show cherry-picked wins. Sanddock logs every signal publicly—wins and losses. You can audit our track record yourself. 80% win rate. 6,500+ signals. Real data, no promises.",
+    a: "Most signal groups hide their losses and show cherry-picked wins. Sanddock logs every signal publicly-wins and losses. You can audit our track record yourself. 80% win rate. 6,500+ signals. Real data, no promises.",
   },
   {
     q: "How accurate are the signals?",
-    a: "Our current verified win rate is 80% across 6,500+ signals. You can check our complete track record anytime in the Terminal section. Every signal—wins and losses—is timestamped and publicly logged. We don't cherry-pick. No deleted signals. No screenshots. Just data.",
+    a: "Our current verified win rate is 80% across 6,500+ signals. You can check our complete track record anytime in the Terminal section. Every signal-wins and losses-is timestamped and publicly logged. We don't cherry-pick. No deleted signals. No screenshots. Just data.",
   },
   {
     q: "Can I trust these signals enough to trade real money?",
@@ -457,7 +457,7 @@ export default function Homepage() {
     },
     {
       title: "Telegram & Mobile Alerts",
-      desc: "Get signals pushed to your phone the instant they fire. Telegram alerts or dashboard—choose your preference. Trade when you're ready, not when you happen to check.",
+      desc: "Get signals pushed to your phone the instant they fire. Telegram alerts or dashboard-choose your preference. Trade when you're ready, not when you happen to check.",
       signal: {
         type: "BUY",
         price: "$67,432.00",
@@ -610,7 +610,7 @@ export default function Homepage() {
             </div>
             <div className="lg:col-span-6 text-[16px] md:text-[17px] text-ink-2 leading-relaxed">
               Sanddock doesn&apos;t make promises. Every signal is backtested, verified, and logged
-              publicly. You see exactly what happened — wins and losses — with no cherry-picked
+              publicly. You see exactly what happened - wins and losses - with no cherry-picked
               screenshots or hidden track records. Pure data.
             </div>
           </div>
@@ -1114,12 +1114,12 @@ export default function Homepage() {
           {/* Card 1: Free */}
           <div className="card card-interactive p-8 flex flex-col gap-8">
             <div>
-              <span className="chip mb-5">Free — no card needed</span>
+              <span className="chip mb-5">Free - no card needed</span>
               <h3 className="text-[26px] font-bold tracking-tight text-ink max-w-sm leading-tight">
                 Start swing trading with Bitcoin
               </h3>
               <p className="mt-3 text-ink-2 text-[15px] leading-relaxed">
-                Your free plan gives you real, live AI signals on the world&apos;s most traded cryptocurrency — forever. No credit card. No expiry. Just signals.
+                Your free plan gives you real, live AI signals on the world&apos;s most traded cryptocurrency - forever. No credit card. No expiry. Just signals.
               </p>
             </div>
 
@@ -1163,7 +1163,7 @@ export default function Homepage() {
                   Unlock 50+ altcoins on the market
                 </h3>
                 <p className="mt-3 text-ink-2 text-[15px] leading-relaxed">
-                  Upgrade to unlock real-time AI signals across the top 50 cryptocurrencies by market cap — ETH, SOL, BNB, XRP, ADA, DOGE, AVAX, and dozens more. New coins added monthly.
+                  Upgrade to unlock real-time AI signals across the top 50 cryptocurrencies by market cap - ETH, SOL, BNB, XRP, ADA, DOGE, AVAX, and dozens more. New coins added monthly.
                 </p>
               </div>
 
@@ -1278,7 +1278,7 @@ export default function Homepage() {
             </h2>
           </div>
           <div className="lg:col-span-5 text-[16px] md:text-[17px] text-ink-2 leading-relaxed">
-            Most crypto signal services show you screenshots of their best calls. We show you everything — wins, losses, breakevens, and open signals — in a public, timestamped ledger. No cherry-picking. No deleted signals. Just data.
+            Most crypto signal services show you screenshots of their best calls. We show you everything - wins, losses, breakevens, and open signals - in a public, timestamped ledger. No cherry-picking. No deleted signals. Just data.
           </div>
         </div>
 
@@ -1296,25 +1296,25 @@ export default function Homepage() {
           <div className="bg-surface-1/90 p-6 text-left">
             <span className="block text-[10px] font-bold text-ink-3 uppercase tracking-[0.16em] mb-2">Total signals</span>
             <span className="text-[30px] font-semibold text-ink tracking-tight">
-              {isLoadingStats ? '—' : heroStats.total_signals.toLocaleString()}
+              {isLoadingStats ? '-' : heroStats.total_signals.toLocaleString()}
             </span>
           </div>
           <div className="bg-surface-1/90 p-6 text-left">
             <span className="block text-[10px] font-bold text-ink-3 uppercase tracking-[0.16em] mb-2">Verified win rate</span>
             <span className="text-[30px] font-semibold text-up tracking-tight">
-              {isLoadingStats ? '—' : heroStats.win_rate.toFixed(1)}%
+              {isLoadingStats ? '-' : heroStats.win_rate.toFixed(1)}%
             </span>
           </div>
           <div className="bg-surface-1/90 p-6 text-left">
             <span className="block text-[10px] font-bold text-ink-3 uppercase tracking-[0.16em] mb-2">Total PnL</span>
             <span className={`text-[30px] font-semibold tracking-tight ${heroStats.total_pnl >= 0 ? 'text-up' : 'text-down'}`}>
-              {isLoadingStats ? '—' : (heroStats.total_pnl >= 0 ? '+' : '') + heroStats.total_pnl.toFixed(2)}%
+              {isLoadingStats ? '-' : (heroStats.total_pnl >= 0 ? '+' : '') + heroStats.total_pnl.toFixed(2)}%
             </span>
           </div>
           <div className="bg-surface-1/90 p-6 text-left">
             <span className="block text-[10px] font-bold text-ink-3 uppercase tracking-[0.16em] mb-2">Updated</span>
             <span className="text-[15px] font-semibold text-ink-2">
-              {isLoadingStats ? '—' : new Date(heroStats.last_updated).toLocaleDateString()}
+              {isLoadingStats ? '-' : new Date(heroStats.last_updated).toLocaleDateString()}
             </span>
           </div>
         </div>
@@ -1533,7 +1533,7 @@ export default function Homepage() {
                 <CtaPrimary href={user ? "/terminal" : "/signup"}>
                   {user ? "Go to Terminal" : "Get free signals"}
                 </CtaPrimary>
-                <CtaSecondary href="#track-record">View track record</CtaSecondary>
+                <CtaSecondary href="/track-record">View track record</CtaSecondary>
               </div>
             </div>
           </div>

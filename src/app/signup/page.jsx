@@ -114,14 +114,14 @@ export default function SignupPage() {
               tool that actually delivers results.&rdquo;
             </p>
             <span className="block text-[11px] font-semibold text-accent-soft mt-2">
-              — Verified trader
+              - Verified trader
             </span>
           </div>
         </div>
 
         {/* Bottom: Legal disclaimer */}
         <div className="relative z-10 pt-4 border-t border-white/8 text-[11px] text-ink-3 leading-relaxed">
-          Signals are for educational purposes only — not financial advice. Past signals do not
+          Signals are for educational purposes only - not financial advice. Past signals do not
           guarantee future results.
         </div>
       </div>
@@ -227,7 +227,7 @@ export default function SignupPage() {
 
         {/* Mobile disclaimer */}
         <div className="lg:hidden mt-8 text-[11px] text-ink-3 leading-relaxed text-center">
-          Signals are for educational purposes only — not financial advice. Past signals do not
+          Signals are for educational purposes only - not financial advice. Past signals do not
           guarantee future results.
         </div>
       </div>

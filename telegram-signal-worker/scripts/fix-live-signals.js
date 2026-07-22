@@ -20,7 +20,7 @@ const INTERVAL = '30m';
 const LOOKBACK = 5;
 const SL_PCT = 0.5;
 const TP_PCT = 1.5;
-const CANDLES_FETCH = 1000; // matches index.js — ~20.8 days of 30m candles
+const CANDLES_FETCH = 1000; // matches index.js - ~20.8 days of 30m candles
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -121,7 +121,7 @@ async function fixSymbol(symbol) {
 
   const liveSignal = recentRows.find(r => !r.closed_at);
   if (!liveSignal) {
-    log(`[${symbol}] No live signal found — nothing to fix.`);
+    log(`[${symbol}] No live signal found - nothing to fix.`);
     return;
   }
 
@@ -137,7 +137,7 @@ async function fixSymbol(symbol) {
   }
 
   if (!previousSignal) {
-    log(`[${symbol}] No previous signal to resume from — nothing further to backfill.`);
+    log(`[${symbol}] No previous signal to resume from - nothing further to backfill.`);
     return;
   }
 
@@ -156,7 +156,7 @@ async function fixSymbol(symbol) {
     }
     currentOpenRow = reopened[0];
   } else {
-    log(`[${symbol}] Previous signal was already live (unexpected) — leaving as-is.`);
+    log(`[${symbol}] Previous signal was already live (unexpected) - leaving as-is.`);
   }
 
   const candles = await fetchCandles(symbol);
@@ -166,7 +166,7 @@ async function fixSymbol(symbol) {
   const startIdx = candles.findIndex(c => new Date(c.close_time).getTime() > cutoffMs);
 
   if (startIdx === -1 || startIdx < LOOKBACK) {
-    log(`[${symbol}] No new candles after previous signal's bar_time yet — previous signal stays live under lookback=5.`);
+    log(`[${symbol}] No new candles after previous signal's bar_time yet - previous signal stays live under lookback=5.`);
     return;
   }
 
@@ -189,7 +189,7 @@ async function fixSymbol(symbol) {
     }
 
     const opposite = candidates.find(cd => cd.type !== openType);
-    if (!opposite) continue; // same-direction swing — worker waits for the real opposite
+    if (!opposite) continue; // same-direction swing - worker waits for the real opposite
 
     const closeTimeIso = new Date(opposite.time).toISOString();
     const pnlPct = calculatePnL(currentOpenRow, opposite.price);

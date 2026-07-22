@@ -163,7 +163,7 @@ html {
    ------------------------------------------------------------------ */
 
 /* Standard elevated card: subtle top-lit gradient + hairline.
-   Blur is applied with Tailwind's `backdrop-blur-*` utility where needed —
+   Blur is applied with Tailwind's `backdrop-blur-*` utility where needed -
    Lightning CSS strips the unprefixed `backdrop-filter` from hand-written
    rules here, leaving only a -webkit- alias Chrome no longer honours. */
 .card {
@@ -278,7 +278,7 @@ html {
    ------------------------------------------------------------------ */
 
 /* Primary CTA: the hero's white pill. Text sits left, a blue circle holds the
-   arrow on the right — see the CtaPrimary component for the markup. */
+   arrow on the right - see the CtaPrimary component for the markup. */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -331,7 +331,7 @@ html {
 }
 
 /* Full-width form submit: the accent gradient rectangle used by
-   login/signup/apply/onboarding — .btn-primary's white pill is for
+   login/signup/apply/onboarding - .btn-primary's white pill is for
    navigational CTAs, not form actions. */
 .btn-form {
   display: inline-flex;

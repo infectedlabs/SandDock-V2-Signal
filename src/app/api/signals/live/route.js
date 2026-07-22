@@ -70,7 +70,7 @@ export async function GET(request) {
       } catch (e) {
         console.warn(`[/api/signals/live] Failed to fetch price for ${sym}:`, e.message);
       }
-      // Fallback to last cached candle close if Binance timed out/failed — without
+      // Fallback to last cached candle close if Binance timed out/failed - without
       // this, a live signal's pnl_pct silently stays null and renders as a
       // misleading 0% instead of its actual unrealized PnL.
       if (priceCache[sym] === undefined) {
@@ -179,7 +179,7 @@ export async function GET(request) {
 
     const filteredByDay = filtered.filter(sig => {
       // Open signals (closed_at=null) are "live" regardless of when they were
-      // opened — a signal opened yesterday and still open must keep showing as
+      // opened - a signal opened yesterday and still open must keep showing as
       // live here, otherwise it silently vanishes from this endpoint while the
       // chart (which has no day filter) keeps rendering it as live, and the
       // coin looks "closed" here when it isn't.

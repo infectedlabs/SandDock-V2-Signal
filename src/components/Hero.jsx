@@ -126,7 +126,7 @@ export default function Hero({ heroStats, isLoadingStats }) {
           </a>
 
           <a
-            href="#track-record"
+            href="/track-record"
             className="group flex items-center gap-2 px-4 py-2 rounded-lg text-white/70 hover:text-white backdrop-blur-sm hover:bg-white/5 transition-all font-instrument-sans"
           >
             See Track Record
@@ -134,7 +134,7 @@ export default function Hero({ heroStats, isLoadingStats }) {
           </a>
         </motion.div>
 
-        {/* Live stats strip — real data from /api/hero-stats */}
+        {/* Live stats strip - real data from /api/hero-stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -146,7 +146,7 @@ export default function Hero({ heroStats, isLoadingStats }) {
               Win Rate
             </p>
             <p className="mt-1.5 font-instrument-sans text-2xl md:text-[32px] font-semibold tracking-tight text-white">
-              {isLoadingStats ? "—" : `${heroStats.win_rate.toFixed(1)}%`}
+              {isLoadingStats ? "-" : `${heroStats.win_rate.toFixed(1)}%`}
             </p>
           </div>
           <div className="bg-black/65 px-4 py-5">
@@ -159,7 +159,7 @@ export default function Hero({ heroStats, isLoadingStats }) {
               }`}
             >
               {isLoadingStats
-                ? "—"
+                ? "-"
                 : `${heroStats.total_pnl >= 0 ? "+" : ""}${heroStats.total_pnl.toFixed(2)}%`}
             </p>
           </div>
@@ -168,7 +168,7 @@ export default function Hero({ heroStats, isLoadingStats }) {
               Signals
             </p>
             <p className="mt-1.5 font-instrument-sans text-2xl md:text-[32px] font-semibold tracking-tight text-white">
-              {isLoadingStats ? "—" : heroStats.total_signals.toLocaleString()}
+              {isLoadingStats ? "-" : heroStats.total_signals.toLocaleString()}
             </p>
           </div>
         </motion.div>

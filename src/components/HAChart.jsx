@@ -274,7 +274,7 @@ export default function HAChart({
       });
       realPriceLineRef.current = realPriceLine;
 
-      // ── Start WebSocket IMMEDIATELY — before any await — so the TCP
+      // ── Start WebSocket IMMEDIATELY - before any await - so the TCP
       // handshake runs in parallel with candle/signal data fetching.
       // By the time the chart renders, the socket is already live.
       // ───────────────────────────────────────────────────────────────
@@ -307,7 +307,7 @@ export default function HAChart({
           ws = new WebSocket(wsUrl);
 
           ws.onopen = () => {
-            console.log('[HAChart] WebSocket open — subscribing to', selectedSymbol, selectedInterval);
+            console.log('[HAChart] WebSocket open - subscribing to', selectedSymbol, selectedInterval);
             wsRetryCount = 0;
             if (ws && ws.readyState === WebSocket.OPEN) {
               ws.send(JSON.stringify({ action: 'subscribe', symbol: selectedSymbol, interval: selectedInterval }));
@@ -375,7 +375,7 @@ export default function HAChart({
         offsetSecondsRef.current = offsetSeconds;
         const candleData = candles.map((c) => ({
           time:  Math.floor(new Date(c.open_time).getTime() / 1000) + offsetSeconds,
-          // Heikin Ashi values — same as TradingView when using HA chart mode
+          // Heikin Ashi values - same as TradingView when using HA chart mode
           open:  parseFloat(c.ha_open),
           high:  parseFloat(c.ha_high),
           low:   parseFloat(c.ha_low),
@@ -820,7 +820,7 @@ export default function HAChart({
         setTimeout(() => updateCardPositions(), 500);
         
         // ── Attach onmessage AFTER data loads so the handler closes over
-        // candleSeries, lastCandle — variables that only exist once historical
+        // candleSeries, lastCandle - variables that only exist once historical
         // candles have been processed. The WebSocket itself was already opened
         // and subscribed in the early-init block.
         if (ws) {

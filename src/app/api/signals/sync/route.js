@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 // owned exclusively by the standalone Railway worker in
 // telegram-signal-worker/. This endpoint used to run that logic itself on
 // every terminal page load, which meant the app and the worker could both
-// be writing to the `signals` table at the same time — a second writer
+// be writing to the `signals` table at the same time - a second writer
 // applying slightly different bookkeeping (e.g. how trailing/still-open
 // signals get resolved) is exactly how the BNBUSDT stale-duplicate-open-row
 // bug happened. Keeping this endpoint but making it a true no-op means any

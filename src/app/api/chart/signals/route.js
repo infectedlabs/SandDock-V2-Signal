@@ -49,7 +49,7 @@ export async function GET(request) {
     }
 
     // The chart renders a recent time window, so we need the most recent
-    // signals (not the oldest 500 of a year's worth) — re-sort ascending
+    // signals (not the oldest 500 of a year's worth) - re-sort ascending
     // after taking the newest slice.
     const dbSignals = (recentDesc || []).slice().sort((a, b) => new Date(a.bar_time) - new Date(b.bar_time));
 

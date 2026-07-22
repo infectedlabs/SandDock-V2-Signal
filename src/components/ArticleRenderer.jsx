@@ -123,7 +123,7 @@ export default function ArticleRenderer({ article, category }) {
           <nav className="hidden md:flex items-center flex-1 h-16 text-xs font-bold uppercase tracking-wider text-black">
             <a href="/#how-it-works" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">How It Works</a>
             <a href="/#explainability" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Platform Features</a>
-            <a href="/#track-record" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Track Record</a>
+            <a href="/track-record" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Track Record</a>
             <a href="/pricing" className="px-6 h-full flex items-center border-r border-black text-black hover:bg-black hover:text-white transition-colors">Pricing</a>
             <a href="/learn" className={`px-6 h-full flex items-center border-r border-black hover:bg-black hover:text-white transition-colors ${category === 'learn' ? 'bg-zinc-100 text-[#ff5722]' : 'text-black'}`}>Learn</a>
             <a href="/compare" className={`px-6 h-full flex items-center border-r border-black hover:bg-black hover:text-white transition-colors ${category === 'compare' || category === 'alternatives' ? 'bg-zinc-100 text-[#ff5722]' : 'text-black'}`}>Compare</a>
