@@ -278,7 +278,8 @@
       "Bash(npx eslint *)",
       "Bash(git restore *)",
       "Bash(grep -n \"Fired\\\\|router.push\\(\\\\`/terminal/signals\" src/app/terminal/page.jsx)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(node \"C:\\\\Users\\\\GHURUP~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-GHURU-PRASAATH-Desktop-sanddock\\\\b671981a-1bdb-4f42-807a-0cd4c04b958a\\\\scratchpad\\\\render_messages.js\")"
     ]
   }
 }
