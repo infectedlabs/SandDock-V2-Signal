@@ -1149,12 +1149,12 @@ Two sub-tabs:
 
 | Trigger | Modal Headline | Body |
 |---|---|---|
-| Clicks non-BTC signal | "Unlock ETH signals on Pro" | "Get real-time Buy/Sell signals for ETH, SOL, BNB, and 7 more coins - from $29/mo." |
-| Goes to Telegram settings on Free | "Telegram alerts are on Pro" | "Get signals pushed to your phone within seconds of firing. Set up in 2 minutes." |
+| Clicks non-BTC signal | "Unlock ETH + BNB on Pro" | "Add ETH and BNB to your watchlist with automated Stop Loss & Take Profit. Get Telegram alerts on the Pro channel. From $29/mo." |
+| Goes to Telegram settings on Free | "Telegram alerts are on Pro" | "Get signals pushed to your phone within seconds of firing. Added to the Pro shared channel for BTC/ETH/BNB." |
 | Clicks CSV export | "Export your signal history" | "Download your full signal history as CSV on Pro and Master." |
-| Clicks 1H/4H timeframe tab | "Multi-timeframe signals on Pro" | "Unlock 1-hour and 4-hour Heikin Ashi signals for stronger confluence." |
-| Hovers SL/TP on Free | "See Stop Loss & Take Profit levels" | "Know your risk before every trade. SL/TP included on Pro and Master." |
-| 7 days as free user (banner) | "You've been with us a week 👋" | "Ready for more than BTC? Unlock 10 coins, Telegram alerts, and SL/TP - from $19/mo on the annual plan." |
+| Clicks custom coin selector | "Choose Your 5 Coins on Master" | "Build your personal watchlist. Get signals on coins you care about, sent directly to you. From $49/mo annually." |
+| Hovers SL/TP on Free | "See Stop Loss & Take Profit levels" | "Know your risk before every trade. SL/TP visible and automated on Pro and Master." |
+| 7 days as free user (banner) | "You've been with us a week 👋" | "Ready to expand? Pro adds ETH + BNB. Master adds 5 custom coins with direct alerts. From $19/mo on annual plan." |
 
 All upgrade modals include:
 - Plan name + price

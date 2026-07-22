@@ -1121,20 +1121,20 @@ export default function Homepage() {
               <div className="relative">
                 <span className="chip chip-accent mb-5">Pro &amp; Master plans</span>
                 <h3 className="text-[26px] font-bold tracking-tight text-ink max-w-sm leading-tight">
-                  Unlock 50+ altcoins on the market
+                  Expand beyond the top 3
                 </h3>
                 <p className="mt-3 text-ink-2 text-[15px] leading-relaxed">
-                  Upgrade to unlock real-time AI signals across the top 50 cryptocurrencies by market cap - ETH, SOL, BNB, XRP, ADA, DOGE, AVAX, and dozens more. New coins added monthly.
+                  Pro unlocks ETH and BNB alongside BTC. Master lets you choose 5 additional coins you care about most - crypto doesn't sleep, and neither should your watchlist. Signals sent directly to you.
                 </p>
               </div>
 
               {/* Visual: Unlocked coin grid */}
               <div className="relative pt-6 border-t border-white/8 mt-auto">
                 <div className="grid grid-cols-4 gap-2">
-                  {["ETH", "SOL", "BNB", "ADA", "AVAX", "XRP", "DOT", "LINK"].map((coin) => (
+                  {["ETH", "BNB", "SOL", "AVAX", "XRP", "ADA", "DOGE", "OP"].map((coin) => (
                     <div key={coin} className="rounded-lg bg-surface-3/60 border border-white/10 p-2.5 text-center transition-colors hover:border-accent/40">
                       <span className="text-[12px] font-semibold text-ink block">{coin}</span>
-                      <span className="text-[8px] text-up uppercase tracking-[0.14em] font-bold block mt-0.5">Live</span>
+                      <span className="text-[8px] text-up uppercase tracking-[0.14em] font-bold block mt-0.5">Custom</span>
                     </div>
                   ))}
                 </div>

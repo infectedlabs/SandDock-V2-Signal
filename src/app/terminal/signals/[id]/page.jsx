@@ -557,7 +557,7 @@ export default function SignalDetailPage() {
 
             {isFreePlan && (
               <div 
-                onClick={() => handleOpenModal("Unlock Parameters", "Upgrade to the Pro Plan to immediately reveal exact Stop Loss and Take Profit levels, pair live Telegram notifications, and trade altcoins.")}
+                onClick={() => handleOpenModal("Unlock Parameters", "Upgrade to Pro to see Stop Loss & Take Profit levels, unlock ETH + BNB signals, and get Telegram alerts on the Pro channel.")}
                 className="mt-2 border border-dashed border-[#3054ff]/30 bg-[#3054ff]/5 p-2.5 text-center text-[11px] text-[#3054ff] font-bold uppercase cursor-pointer hover:bg-[#3054ff]/10 transition-colors"
               >
                 <Icons.Lock /> Unlock stop loss & take profit levels - Upgrade to Pro &rarr;
@@ -691,7 +691,7 @@ export default function SignalDetailPage() {
 
               {isFreePlan ? (
                 <div 
-                  onClick={() => handleOpenModal("Unlock Parameters", "Upgrade to the Pro Plan to immediately reveal exact Stop Loss and Take Profit levels, pair live Telegram notifications, and trade altcoins.")}
+                  onClick={() => handleOpenModal("Unlock Parameters", "Upgrade to Pro to see Stop Loss & Take Profit levels, unlock ETH + BNB signals, and get Telegram alerts on the Pro channel.")}
                   className="pt-2 border-t border-slate-800/60 text-[11px] text-slate-500 cursor-pointer hover:underline"
                 >
                   <Icons.Lock /> Unlock stop loss to dynamically calculate position sizing. Upgrade to Pro &rarr;

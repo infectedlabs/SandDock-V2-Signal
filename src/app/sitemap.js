@@ -4,7 +4,7 @@ import path from "path";
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://sanddock.com").replace(/\/$/, "");
 
 // Static, publicly-indexable marketing routes. Authenticated app routes
-// (terminal, billing, onboarding, admin, etc.) are deliberately excluded —
+// (terminal, billing, onboarding, admin, etc.) are deliberately excluded -
 // see robots.js, which disallows crawling them.
 const STATIC_ROUTES = [
   { path: "", changeFrequency: "daily", priority: 1 },

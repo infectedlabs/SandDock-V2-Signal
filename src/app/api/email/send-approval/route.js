@@ -9,7 +9,7 @@ const PRICING_DETAILS = {
       'Automated Stop Loss & Take Profit',
       'P&L dashboard & performance metrics',
       'CSV export of signal history',
-      '24h priority email support'
+      '12h priority email support'
     ]
   },
   master: {
@@ -20,7 +20,7 @@ const PRICING_DETAILS = {
       'Multi-timeframe trend confluence analysis',
       'Full P&L history & CSV export',
       'Automated Stop Loss & Take Profit',
-      '12h priority email support',
+      '6h priority email support',
       'Webhook integration for automation'
     ]
   }

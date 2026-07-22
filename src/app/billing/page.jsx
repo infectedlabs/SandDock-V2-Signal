@@ -316,7 +316,7 @@ export default function BillingPage() {
                 />
                 <Field
                   label="Support tier"
-                  value={currentPlan === 'free' ? 'Community' : currentPlan === 'pro' ? '24h email' : '12h priority'}
+                  value={currentPlan === 'free' ? 'Community' : currentPlan === 'pro' ? '24h email' : '6h priority'}
                 />
               </div>
             </div>

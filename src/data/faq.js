@@ -23,7 +23,7 @@ export const faqItems = [
   },
   {
     q: "How do I get signals on Telegram?",
-    a: "After signing up, go to Settings → Telegram and connect using our pairing wizard. You'll get live alerts instantly. Free plan gets Bitcoin alerts. Pro plan adds 50+ coins and advanced features. Master plan includes webhook integration for automation.",
+    a: "After signing up, go to Settings → Telegram and connect using our pairing wizard. You'll get live alerts instantly. Free plan gets Bitcoin alerts. Pro plan adds ETH and BNB to a shared channel. Master plan adds up to 5 custom coins with direct bot alerts, plus API access for custom automation.",
   },
   {
     q: "Can I cancel anytime?",
