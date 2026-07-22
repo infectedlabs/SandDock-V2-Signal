@@ -55,8 +55,8 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID; // Pro channel - per-signal alerts
 const TELEGRAM_GROUP_CHAT_ID = process.env.TELEGRAM_GROUP_CHAT_ID; // Public group - once-a-day digest only
-// Hour of day (UTC) the public digest fires: 21:00 UTC (9 PM)
-const TELEGRAM_DIGEST_HOUR_UTC = 21;
+// Hour of day (UTC) the public digest fires: 18:00 UTC (11:30 PM UTC+5:30)
+const TELEGRAM_DIGEST_HOUR_UTC = 18;
 
 // Helper: Convert UTC date to local timezone string (e.g., "2026-07-18T18:35:00" IST)
 function toLocalTimeString(utcDate) {
