@@ -279,6 +279,16 @@ export default function SignalDetailPage() {
         }
 
         if (foundSignal) {
+          // This live-tracking page (chart, position calculator, real-time
+          // progress bar) only makes sense for a still-open trade. Once a
+          // signal has closed, its outcome already lives in the Signal
+          // History Ledger table - send the user there instead of rendering
+          // a "live" page for a trade that's over. Guards direct/bookmarked
+          // URLs too, not just in-app clicks.
+          if (foundSignal.closed_at) {
+            router.replace('/terminal');
+            return;
+          }
           setSignal(foundSignal);
         } else {
           setError('Signal reference was not found in Sanddock ledger log indexes.');

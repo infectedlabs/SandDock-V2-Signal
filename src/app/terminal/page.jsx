@@ -200,8 +200,11 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
 
   return (
     <div
-      onClick={() => onViewDetails(sig)}
-      className="group px-5 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left cursor-pointer hover:bg-slate-900/30 transition-all select-none"
+      onClick={isLive ? () => onViewDetails(sig) : undefined}
+      title={isLive ? undefined : 'Closed signals do not have a live detail page - see Signal History Ledger below.'}
+      className={`group px-5 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-left transition-all select-none ${
+        isLive ? 'cursor-pointer hover:bg-slate-900/30' : 'cursor-default'
+      }`}
     >
       {/* 1. Logo & Token Info */}
       <div className="flex items-center gap-3 w-full md:w-[20%] shrink-0">
@@ -286,11 +289,13 @@ function SignalCard({ sig, isFreePlan, isLastSignalBadge = false, isExpanded, on
             Closed
           </span>
         )}
-        <span className="text-white group-hover:text-white transition-colors pl-1">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </span>
+        {isLive && (
+          <span className="text-white group-hover:text-white transition-colors pl-1">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </span>
+        )}
       </div>
     </div>
   );
@@ -1113,39 +1118,41 @@ export default function TerminalPage() {
   }, [cleanLiveSignals, selectedSymbol]);
 
   // Load fallback signals when live feed is empty (to prevent conversion drop)
-  // Retrieve the most recent signal from the general history ledger
-  const { signals: allBtcHistoryLog } = useSignalLog({ plan: 'free', symbol: 'BTCUSDT', pageSize: 6 });
-  
-  const lastBtcSignal = useMemo(() => {
-    if (allBtcHistoryLog && allBtcHistoryLog.length > 0) {
-      return allBtcHistoryLog[0];
+  // Retrieve the most recent signal from the general history ledger, across
+  // every symbol the user's plan is entitled to (not just BTC) - omitting
+  // `symbol` makes /api/signals/log return the full allowed-symbol set.
+  const { signals: allRecentHistoryLog } = useSignalLog({ plan: profile?.plan || 'free', user_id: profile?.id, pageSize: 15 });
+
+  const lastHistorySignal = useMemo(() => {
+    if (allRecentHistoryLog && allRecentHistoryLog.length > 0) {
+      return allRecentHistoryLog[0];
     }
     return null;
-  }, [allBtcHistoryLog]);
+  }, [allRecentHistoryLog]);
 
-  const recentBtcSignals = useMemo(() => {
-    if (allBtcHistoryLog && allBtcHistoryLog.length > 1) {
+  const recentHistorySignals = useMemo(() => {
+    if (allRecentHistoryLog && allRecentHistoryLog.length > 1) {
       // Exclude signals already shown in today's Active/Closed sections above.
       const shownIds = new Set(cleanLiveSignals.map(s => s.id));
-      return allBtcHistoryLog.slice(1, 6).filter(s => !shownIds.has(s.id));
+      return allRecentHistoryLog.slice(1, 11).filter(s => !shownIds.has(s.id));
     }
     return [];
-  }, [allBtcHistoryLog, cleanLiveSignals]);
+  }, [allRecentHistoryLog, cleanLiveSignals]);
 
-  // Single unified feed: today's signals (active + closed) plus recent BTC history, deduped, newest first.
+  // Single unified feed: today's signals (active + closed) plus recent history across all allowed coins, deduped, newest first.
   const allRecentSignals = useMemo(() => {
     const seen = new Set();
     const merged = [];
 
-    // Apply signal type filter to both cleanLiveSignals and recentBtcSignals
-    const filteredRecentBtc = recentBtcSignals.filter(s => {
+    // Apply signal type filter to both cleanLiveSignals and recentHistorySignals
+    const filteredRecentHistory = recentHistorySignals.filter(s => {
       if (signalTypeFilter !== 'all') {
         return s.signal_type?.toLowerCase() === signalTypeFilter.toLowerCase();
       }
       return true;
     });
 
-    [...cleanLiveSignals, ...filteredRecentBtc].forEach(s => {
+    [...cleanLiveSignals, ...filteredRecentHistory].forEach(s => {
       if (!seen.has(s.id)) {
         seen.add(s.id);
         merged.push(s);
@@ -1185,7 +1192,7 @@ export default function TerminalPage() {
     }
 
     return sorted;
-  }, [cleanLiveSignals, recentBtcSignals, sortBy, signalTypeFilter]);
+  }, [cleanLiveSignals, recentHistorySignals, sortBy, signalTypeFilter]);
 
   const todayStats = useMemo(() => {
     // On Live Signals tab: show all recent signals (live + closed + history)
@@ -1676,7 +1683,7 @@ export default function TerminalPage() {
                   <CustomCoinsList userId={profile?.id} plan={profile?.plan} />
                 )}
 
-                {/* Empty State / Monitoring Layout with fallbacks (BTC Signals) */}
+                {/* Empty State / Monitoring Layout with history fallback (all allowed coins) */}
                 {!isTrialExpired && !sigLoading && cleanLiveSignals.length === 0 && (
                   <div className="space-y-6">
                     {/* Scanning & Monitoring Animation Banner */}
@@ -1689,7 +1696,7 @@ export default function TerminalPage() {
                         <div>
                           <h3 className="font-bold text-[13px] uppercase tracking-wider text-white">Scanning market parameters...</h3>
                           <p className="text-[12px] text-white normal-case leading-relaxed">
-                            Watch the engine detect the next BTC signal - usually within a few hours.
+                            Watch the engine detect the next signal - usually within a few hours.
                           </p>
                         </div>
                       </div>
@@ -1701,41 +1708,41 @@ export default function TerminalPage() {
                       )}
                     </div>
 
-                    {/* 1. Show the last BTC signal with a LAST SIGNAL badge */}
-                    {lastBtcSignal && (
+                    {/* 1. Show the last signal with a LAST SIGNAL badge */}
+                    {lastHistorySignal && (
                       <div className="space-y-2">
                         <span className="block text-[11px] text-white uppercase tracking-widest text-left">
                           Previous Active Setup
                         </span>
                         <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl">
                           <SignalCard
-                            sig={lastBtcSignal}
+                            sig={lastHistorySignal}
                             isFreePlan={isFreePlan}
                             isLastSignalBadge={true}
                             isExpanded={false}
                             onToggle={() => {}}
                             onUpgrade={triggerUpgradeGate}
                             onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
-                            livePrice={selectedSymbol === 'BTCUSDT' ? liveBtcPrice : null}
-                            isLive={lastBtcSignal.is_live}
+                            livePrice={livePrices[lastHistorySignal.symbol] || null}
+                            isLive={lastHistorySignal.is_live}
                           />
                         </div>
                       </div>
                     )}
 
                     {/* 2. Show Recent Signals below it */}
-                    {recentBtcSignals.length > 0 && (
+                    {recentHistorySignals.length > 0 && (
                       <div className="space-y-3">
                         <div className="text-left">
                           <span className="block text-[11px] text-white uppercase tracking-widest">
-                            Recent BTC Signals
+                            Recent Signals
                           </span>
                           <p className="text-[11px] text-white normal-case leading-relaxed">
                             These signals fired in the past 7 days. New signals appear here as they fire.
                           </p>
                         </div>
                         <div className="bg-[#070b16]/60 border border-slate-800/80 rounded-2xl overflow-hidden divide-y divide-slate-800/40 shadow-2xl">
-                          {recentBtcSignals.map(sig => (
+                          {recentHistorySignals.map(sig => (
                             <SignalCard
                               key={sig.id}
                               sig={sig}
@@ -1745,6 +1752,7 @@ export default function TerminalPage() {
                               onToggle={() => {}}
                               onUpgrade={triggerUpgradeGate}
                               onViewDetails={(s) => window.open(`/terminal/signals/${s.id}`, '_blank')}
+                              livePrice={livePrices[sig.symbol] || null}
                               isLive={false}
                             />
                           ))}
@@ -1757,7 +1765,7 @@ export default function TerminalPage() {
                 {/* Active signals view layout */}
                 {!isTrialExpired && cleanLiveSignals.length > 0 && (
                   <div className="space-y-6">
-                    {/* Unified Recent Signals feed: today's active + closed, plus recent BTC history */}
+                    {/* Unified Recent Signals feed: today's active + closed, plus recent history across all allowed coins */}
                     {allRecentSignals.length > 0 && (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between border-b border-slate-800/40 pb-2 text-left">
