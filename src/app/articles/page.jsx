@@ -5,6 +5,9 @@ import Link from 'next/link';
 export const metadata = {
   title: 'Articles - Sanddock',
   description: 'Learn about crypto trading signals, strategies, and tools.',
+  alternates: {
+    canonical: '/articles',
+  },
 };
 
 async function getArticles() {

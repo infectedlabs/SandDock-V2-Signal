@@ -5,6 +5,9 @@ import { parseMarkdownFile } from '@/lib/markdown';
 export const metadata = {
   title: 'Learn Crypto Swing Trading & Indicators | Sanddock Academy',
   description: 'Deep-dive educational guides on Heikin Ashi charting, stop loss calculation, risk management, and trading psychology. No jargon, just verifiable logic.',
+  alternates: {
+    canonical: '/learn',
+  },
 };
 
 function getArticles() {

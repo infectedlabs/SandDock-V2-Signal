@@ -5,6 +5,9 @@ import { parseMarkdownFile } from '@/lib/markdown';
 export const metadata = {
   title: 'Top Competitor Alternatives & Reviews | Sanddock Crypto',
   description: 'Detailed, honest reviews of alternative crypto bots and signal platforms. Contrast pricing plans, usage caps, and cancellation rules.',
+  alternates: {
+    canonical: '/alternatives',
+  },
 };
 
 function getArticles() {

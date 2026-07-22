@@ -5,6 +5,9 @@ import { parseMarkdownFile } from '@/lib/markdown';
 export const metadata = {
   title: 'Compare Crypto Signals & Trading Bots | Sanddock Reviews',
   description: 'Factual, complaint-focused comparisons of crypto trading tools. See how Sanddock compares to 3Commas, Cryptohopper, Cornix, and more.',
+  alternates: {
+    canonical: '/compare',
+  },
 };
 
 function getArticles(subdir) {

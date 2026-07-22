@@ -265,7 +265,8 @@
       "Bash(npx --yes esbuild --jsx=automatic src/components/Navbar.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk7\")",
       "Bash(npx --yes esbuild --jsx=automatic src/app/onboarding/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk8\")",
       "Bash(npx --yes esbuild --jsx=automatic src/app/onboarding/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk8b\")",
-      "Bash(npx --yes esbuild --jsx=automatic src/app/track-record/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk9\")"
+      "Bash(npx --yes esbuild --jsx=automatic src/app/track-record/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk9\")",
+      "Bash(xargs cat)"
     ]
   }
 }
