@@ -83,6 +83,9 @@ export default function SignalDetailPage() {
 
   const [calcAccountSize, setCalcAccountSize] = useState(10000);
   const [calcRiskPct, setCalcRiskPct] = useState(1.0);
+  const [calcLeverage, setCalcLeverage] = useState(1);
+  const [calcFeePct, setCalcFeePct] = useState(0.1);
+  const [calcSlippagePct, setCalcSlippagePct] = useState(0.05);
 
   useEffect(() => {
     if (profile) {
@@ -624,76 +627,208 @@ export default function SignalDetailPage() {
             </div>
           </div>
 
-          {/* Position Size Calculator */}
+          {/* Position Size Calculator - Full Trade Simulation */}
           <div className="bg-gradient-to-br from-[#0a0f1d] to-[#0d1426] border border-[#3054ff]/20 p-5 sm:p-6 rounded-xl text-left shadow-xl space-y-4">
-            <span className="block text-[11px] text-[#3054ff] font-extrabold uppercase tracking-widest">
-              📊 Position Size Calculator
-            </span>
-            <div className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[9px] text-slate-400 uppercase font-bold mb-2">Account Size</label>
-                  <div className="flex items-center gap-1 bg-slate-950 border border-[#3054ff]/30 rounded-lg p-2">
-                    <span className="text-slate-500">$</span>
-                    <input
-                      type="number"
-                      value={calcAccountSize}
-                      onChange={(e) => setCalcAccountSize(Number(e.target.value))}
-                      className="flex-1 bg-transparent text-white outline-none font-bold"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[9px] text-slate-400 uppercase font-bold mb-2">Risk per Trade</label>
-                  <div className="flex items-center gap-1 bg-slate-950 border border-[#3054ff]/30 rounded-lg p-2">
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={calcRiskPct}
-                      onChange={(e) => setCalcRiskPct(Number(e.target.value))}
-                      className="flex-1 bg-transparent text-white outline-none font-bold"
-                    />
-                    <span className="text-slate-500">%</span>
-                  </div>
-                </div>
-              </div>
-
-              {isFreePlan ? (
-                <div
-                  onClick={() => handleOpenModal("Unlock Parameters", "Upgrade to Pro to see Stop Loss & Take Profit levels, unlock ETH + BNB signals, and get Telegram alerts on the Pro channel.")}
-                  className="pt-3 border-t border-[#3054ff]/20 text-[11px] text-slate-500 cursor-pointer hover:text-[#3054ff] transition-colors font-bold"
-                >
-                  <Icons.Lock /> Unlock full position sizing → Upgrade to Pro
-                </div>
-              ) : (
-                <div className="pt-3 border-t border-[#3054ff]/20 space-y-2.5 bg-slate-950/40 p-3 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Risk per Trade</span>
-                    <span className="text-emerald-400 font-bold">${(calcAccountSize * (calcRiskPct / 100)).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Stop Loss Distance</span>
-                    <span className="text-rose-400 font-bold">{signal.sl_pct ? `${signal.sl_pct}%` : 'N/A'}</span>
-                  </div>
-                  <div className="border-t border-slate-700 pt-2.5 flex justify-between items-center">
-                    <span className="text-[#3054ff] font-bold uppercase text-[10px]">Position Size ($)</span>
-                    <span className="text-white font-black text-lg">
-                      {signal.sl_pct && signal.sl_pct > 0
-                        ? `$${((calcAccountSize * (calcRiskPct / 100)) / (signal.sl_pct / 100)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                        : 'N/A'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-slate-400">In {coinLabel}</span>
-                    <span className="text-cyan-400 font-bold">
-                      {signal.sl_pct && signal.sl_pct > 0 && signal.entry_price
-                        ? (((calcAccountSize * (calcRiskPct / 100)) / (signal.sl_pct / 100)) / signal.entry_price).toFixed(4)
-                        : 'N/A'}
-                    </span>
-                  </div>
-                </div>
-              )}
+            <div className="flex items-center justify-between">
+              <span className="block text-[11px] text-[#3054ff] font-extrabold uppercase tracking-widest">
+                Trade Simulator
+              </span>
+              <span className="text-[9px] text-slate-500 font-bold uppercase">Binance Fee Model</span>
             </div>
+
+            {isFreePlan ? (
+              <div
+                onClick={() => handleOpenModal("Unlock Parameters", "Upgrade to Pro to see Stop Loss & Take Profit levels, unlock ETH + BNB signals, and get Telegram alerts on the Pro channel.")}
+                className="pt-3 border-t border-[#3054ff]/20 text-[11px] text-slate-500 cursor-pointer hover:text-[#3054ff] transition-colors font-bold"
+              >
+                <Icons.Lock /> Unlock full trade simulation → Upgrade to Pro
+              </div>
+            ) : (
+              <div className="space-y-4 text-xs">
+                {/* Row 1: Account Size + Risk */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 uppercase font-bold mb-2">Account Size</label>
+                    <div className="flex items-center gap-1 bg-slate-950 border border-[#3054ff]/30 rounded-lg p-2">
+                      <span className="text-slate-500">$</span>
+                      <input
+                        type="number"
+                        value={calcAccountSize}
+                        onChange={(e) => setCalcAccountSize(Number(e.target.value))}
+                        className="flex-1 bg-transparent text-white outline-none font-bold w-full"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 uppercase font-bold mb-2">Risk per Trade</label>
+                    <div className="flex items-center gap-1 bg-slate-950 border border-[#3054ff]/30 rounded-lg p-2">
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={calcRiskPct}
+                        onChange={(e) => setCalcRiskPct(Number(e.target.value))}
+                        className="flex-1 bg-transparent text-white outline-none font-bold w-full"
+                      />
+                      <span className="text-slate-500">%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 2: Leverage quick-select */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-[9px] text-slate-400 uppercase font-bold">Leverage</label>
+                    <span className="text-[11px] text-white font-black">{calcLeverage}x</span>
+                  </div>
+                  <div className="grid grid-cols-6 gap-1">
+                    {[1, 3, 5, 10, 20, 50].map((lv) => (
+                      <button
+                        key={lv}
+                        onClick={() => setCalcLeverage(lv)}
+                        className={`py-1.5 rounded-lg text-[10px] font-bold transition-colors cursor-pointer border ${
+                          calcLeverage === lv
+                            ? 'bg-[#3054ff] border-[#3054ff] text-white'
+                            : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:border-[#3054ff]/40'
+                        }`}
+                      >
+                        {lv}x
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Row 3: Fee + Slippage */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[9px] text-slate-400 uppercase font-bold mb-2">Trading Fee</label>
+                    <div className="flex items-center gap-1 bg-slate-950 border border-[#3054ff]/30 rounded-lg p-2">
+                      <input
+                        type="number"
+                        step="0.005"
+                        value={calcFeePct}
+                        onChange={(e) => setCalcFeePct(Number(e.target.value))}
+                        className="flex-1 bg-transparent text-white outline-none font-bold w-full"
+                      />
+                      <span className="text-slate-500">%</span>
+                    </div>
+                    <button
+                      onClick={() => setCalcFeePct(0.075)}
+                      className="text-[9px] text-[#3054ff] hover:underline mt-1 cursor-pointer"
+                    >
+                      Use BNB discount (0.075%)
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] text-slate-400 uppercase font-bold mb-2">Slippage</label>
+                    <div className="flex items-center gap-1 bg-slate-950 border border-[#3054ff]/30 rounded-lg p-2">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={calcSlippagePct}
+                        onChange={(e) => setCalcSlippagePct(Number(e.target.value))}
+                        className="flex-1 bg-transparent text-white outline-none font-bold w-full"
+                      />
+                      <span className="text-slate-500">%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Simulation Results */}
+                {(() => {
+                  const slPct = signal.sl_pct || 0;
+                  const tpPct = signal.tp_pct || 0;
+                  const riskAmount = calcAccountSize * (calcRiskPct / 100);
+                  const roundTripFeePct = calcFeePct * 2;
+                  const roundTripSlippagePct = calcSlippagePct * 2;
+                  const totalCostPctAtSL = slPct + roundTripFeePct + roundTripSlippagePct;
+
+                  const hasSlTp = slPct > 0 && tpPct > 0 && signal.entry_price;
+                  const positionSizeUsd = hasSlTp ? riskAmount / (totalCostPctAtSL / 100) : 0;
+                  const marginRequired = calcLeverage > 0 ? positionSizeUsd / calcLeverage : positionSizeUsd;
+                  const positionSizeCoin = hasSlTp ? positionSizeUsd / signal.entry_price : 0;
+
+                  const entryFeeUsd = positionSizeUsd * (calcFeePct / 100);
+                  const exitFeeUsd = positionSizeUsd * (calcFeePct / 100);
+                  const totalFeesUsd = entryFeeUsd + exitFeeUsd;
+                  const slippageCostUsd = positionSizeUsd * (roundTripSlippagePct / 100);
+
+                  const netLossAtSL = positionSizeUsd * (totalCostPctAtSL / 100);
+                  const netProfitPctAtTP = tpPct - roundTripFeePct - roundTripSlippagePct;
+                  const netProfitAtTP = positionSizeUsd * (netProfitPctAtTP / 100);
+                  const netRR = netLossAtSL > 0 ? (netProfitAtTP / netLossAtSL) : 0;
+
+                  // Liquidation estimate (isolated margin, ~90% maintenance buffer)
+                  const liqDistancePct = calcLeverage > 1 ? (100 / calcLeverage) * 0.9 : null;
+                  const liquidationPrice = liqDistancePct && signal.entry_price
+                    ? (isBuy ? signal.entry_price * (1 - liqDistancePct / 100) : signal.entry_price * (1 + liqDistancePct / 100))
+                    : null;
+                  const liqWarning = liqDistancePct && slPct >= liqDistancePct;
+
+                  if (!hasSlTp) {
+                    return (
+                      <div className="pt-3 border-t border-[#3054ff]/20 text-[11px] text-slate-500 text-center py-4">
+                        SL/TP data unavailable for this signal — simulation requires both.
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="pt-3 border-t border-[#3054ff]/20 space-y-2.5 bg-slate-950/40 p-3 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">Position Size (Notional)</span>
+                        <span className="text-white font-bold">${positionSizeUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">Margin Required ({calcLeverage}x)</span>
+                        <span className="text-[#3054ff] font-bold">${marginRequired.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">Size in {coinLabel}</span>
+                        <span className="text-cyan-400 font-bold">{positionSizeCoin.toFixed(5)}</span>
+                      </div>
+
+                      <div className="border-t border-slate-800 pt-2.5 flex justify-between items-center">
+                        <span className="text-slate-400">Round-Trip Fees</span>
+                        <span className="text-amber-400 font-bold">${totalFeesUsd.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">Slippage Cost (est.)</span>
+                        <span className="text-amber-400 font-bold">${slippageCostUsd.toFixed(2)}</span>
+                      </div>
+
+                      <div className="border-t border-slate-800 pt-2.5 flex justify-between items-center">
+                        <span className="text-slate-400">Net Loss at SL</span>
+                        <span className="text-rose-400 font-bold">-${netLossAtSL.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400">Net Profit at TP</span>
+                        <span className="text-emerald-400 font-bold">+${netProfitAtTP.toFixed(2)}</span>
+                      </div>
+
+                      <div className="border-t border-slate-700 pt-2.5 flex justify-between items-center">
+                        <span className="text-[#3054ff] font-bold uppercase text-[10px]">Net Risk:Reward</span>
+                        <span className="text-white font-black text-lg">1 : {netRR.toFixed(2)}</span>
+                      </div>
+
+                      {liquidationPrice && (
+                        <div className={`flex justify-between items-center text-[11px] pt-2 ${liqWarning ? 'border border-rose-500/30 bg-rose-500/5 rounded-lg p-2' : ''}`}>
+                          <span className="text-slate-400">Est. Liquidation Price</span>
+                          <span className={liqWarning ? 'text-rose-400 font-bold' : 'text-slate-300 font-bold'}>
+                            {formatPrice(liquidationPrice, profile)}
+                          </span>
+                        </div>
+                      )}
+                      {liqWarning && (
+                        <div className="text-[10px] text-rose-400 font-bold flex items-start gap-1">
+                          <span>⚠</span>
+                          <span>Stop loss distance exceeds estimated liquidation buffer at {calcLeverage}x — position may be liquidated before SL triggers. Reduce leverage.</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
 
           {/* Timeframe Alignment */}
