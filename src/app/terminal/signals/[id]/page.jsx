@@ -431,23 +431,7 @@ export default function SignalDetailPage() {
           </span>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            onClick={() => setIsWatched(!isWatched)}
-            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 border font-bold text-[10px] sm:text-xs uppercase tracking-wider transition-all rounded-xl cursor-pointer ${
-              isWatched 
-                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/20' 
-                : 'bg-transparent border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900'
-            }`}
-          >
-            {isWatched ? '✓ Watching' : 'Watch'}
-          </button>
-          
-          <button onClick={() => router.push('/terminal')}
-            className="px-2.5 sm:px-4 py-1.5 sm:py-2 border border-slate-800 hover:bg-slate-800 font-bold text-[10px] sm:text-xs uppercase tracking-wider text-white transition-all bg-[#0a0f1d] cursor-pointer flex items-center gap-1 sm:gap-1.5 rounded-xl">
-            <Icons.Back /> <span className="hidden xs:inline">Back</span>
-          </button>
-        </div>
+        <div />
       </header>
 
       {/* TWO-COLUMN RESPONSIVE LAYOUT */}
@@ -457,8 +441,8 @@ export default function SignalDetailPage() {
         <div className="w-full lg:w-[45%] lg:border-r border-slate-800/80 p-4 sm:p-6 space-y-6 overflow-y-auto lg:h-full flex flex-col justify-start">
           
           {/* Signal Header */}
-          <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 text-left space-y-3 rounded-xl relative shadow-xl glass">
-            <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl ${isBuy ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+          <div className="bg-gradient-to-br from-[#0a0f1d] to-[#0d1426] border border-[#3054ff]/20 p-5 sm:p-6 text-left space-y-3 rounded-xl relative shadow-xl glass">
+            <div className={`absolute top-0 left-0 right-0 h-1.5 rounded-t-2xl ${isBuy ? 'bg-emerald-500' : 'bg-rose-500'}`} />
             
             <div className="flex justify-between items-start gap-4">
               <div className="space-y-1">
@@ -479,7 +463,7 @@ export default function SignalDetailPage() {
                 </p>
               </div>
               
-              <div className="relative group bg-[#111827] border border-slate-800/80 p-3 text-right rounded-xl shrink-0 cursor-help">
+              <div className="relative group bg-gradient-to-br from-[#111827] to-[#0f1622] border border-[#3054ff]/20 p-3 text-right rounded-xl shrink-0 cursor-help">
                 <span className="block text-[10px] uppercase tracking-widest text-slate-400 font-extrabold border-b border-dashed border-slate-500/50">Confidence</span>
                 <span className="text-2xl sm:text-3xl font-black text-white mt-0.5 block">{signal.confidence}%</span>
                 
@@ -492,7 +476,7 @@ export default function SignalDetailPage() {
           </div>
 
           {/* Price Position Tracker */}
-          <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-xl space-y-4 glass shadow-xl text-left">
+          <div className="bg-gradient-to-br from-[#0a0f1d] to-[#0d1426] border border-[#3054ff]/15 p-5 sm:p-6 rounded-xl space-y-4 glass shadow-xl text-left">
             <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
               {isClosed ? `Trade Settled & Closed (${signal.close_reason ? signal.close_reason.replace('_', ' ') : 'settled'})` : 'Live Price Tracking & Progress'}
             </span>
@@ -595,7 +579,7 @@ export default function SignalDetailPage() {
           </div>
 
           {/* Market Context at Signal Time */}
-          <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-xl text-left glass shadow-xl space-y-3">
+          <div className="bg-gradient-to-br from-[#0a0f1d] to-[#0d1426] border border-[#3054ff]/15 p-5 sm:p-6 rounded-xl text-left glass shadow-xl space-y-3">
             <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
               Market Context at Signal Time
             </span>
@@ -619,29 +603,8 @@ export default function SignalDetailPage() {
             </div>
           </div>
 
-          {/* AI Logic explanation */}
-          <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-xl space-y-3 text-left glass shadow-xl">
-            <div className="flex items-center gap-1.5">
-              <Icons.Brain />
-              <span className="text-xs text-[#3054ff] font-extrabold uppercase tracking-widest">AI Logic Rationale</span>
-            </div>
-            
-            <p className="text-slate-200 text-sm leading-relaxed bg-slate-950/40 p-4 border border-slate-800/60 font-medium rounded-xl normal-case">
-              {detailedRationale}
-            </p>
-
-            {isFreePlan && (
-              <div 
-                onClick={() => handleOpenModal("Unlock Extended Analysis", "Reveals multi-factor orderflow confluence validation, divergence detection indices, and institutional liquidity pool scanning details.")}
-                className="text-[11px] text-slate-400 hover:text-white cursor-pointer font-bold uppercase tracking-wider flex items-center pt-1.5 border-t border-slate-800/60"
-              >
-                <Icons.Lock /> Deeper multi-factor orderflow analysis locked - Pro
-              </div>
-            )}
-          </div>
-
           {/* What to Watch */}
-          <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-xl text-left glass shadow-xl space-y-3">
+          <div className="bg-gradient-to-br from-[#0a0f1d] to-[#0d1426] border border-[#3054ff]/15 p-5 sm:p-6 rounded-xl text-left glass shadow-xl space-y-3">
             <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
               What To Watch (Forward Targets)
             </span>
@@ -662,64 +625,70 @@ export default function SignalDetailPage() {
           </div>
 
           {/* Position Size Calculator */}
-          <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-xl text-left glass shadow-xl space-y-3">
-            <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
-              Position Size Calculator
+          <div className="bg-gradient-to-br from-[#0a0f1d] to-[#0d1426] border border-[#3054ff]/20 p-5 sm:p-6 rounded-xl text-left shadow-xl space-y-4">
+            <span className="block text-[11px] text-[#3054ff] font-extrabold uppercase tracking-widest">
+              📊 Position Size Calculator
             </span>
-            <div className="space-y-3 text-xs">
+            <div className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[9px] text-slate-500 uppercase font-bold mb-1">Account Size ($)</label>
-                  <input 
-                    type="number" 
-                    value={calcAccountSize} 
-                    onChange={(e) => setCalcAccountSize(Number(e.target.value))} 
-                    className="w-full bg-slate-950 text-white border border-slate-800 p-1.5 focus:outline-none focus:border-[#3054ff]"
-                  />
+                  <label className="block text-[9px] text-slate-400 uppercase font-bold mb-2">Account Size</label>
+                  <div className="flex items-center gap-1 bg-slate-950 border border-[#3054ff]/30 rounded-lg p-2">
+                    <span className="text-slate-500">$</span>
+                    <input
+                      type="number"
+                      value={calcAccountSize}
+                      onChange={(e) => setCalcAccountSize(Number(e.target.value))}
+                      className="flex-1 bg-transparent text-white outline-none font-bold"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-[9px] text-slate-500 uppercase font-bold mb-1">Risk per Trade (%)</label>
-                  <input 
-                    type="number" 
-                    step="0.1"
-                    value={calcRiskPct} 
-                    onChange={(e) => setCalcRiskPct(Number(e.target.value))} 
-                    className="w-full bg-slate-950 text-white border border-slate-800 p-1.5 focus:outline-none focus:border-[#3054ff]"
-                  />
+                  <label className="block text-[9px] text-slate-400 uppercase font-bold mb-2">Risk per Trade</label>
+                  <div className="flex items-center gap-1 bg-slate-950 border border-[#3054ff]/30 rounded-lg p-2">
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={calcRiskPct}
+                      onChange={(e) => setCalcRiskPct(Number(e.target.value))}
+                      className="flex-1 bg-transparent text-white outline-none font-bold"
+                    />
+                    <span className="text-slate-500">%</span>
+                  </div>
                 </div>
               </div>
 
               {isFreePlan ? (
-                <div 
+                <div
                   onClick={() => handleOpenModal("Unlock Parameters", "Upgrade to Pro to see Stop Loss & Take Profit levels, unlock ETH + BNB signals, and get Telegram alerts on the Pro channel.")}
-                  className="pt-2 border-t border-slate-800/60 text-[11px] text-slate-500 cursor-pointer hover:underline"
+                  className="pt-3 border-t border-[#3054ff]/20 text-[11px] text-slate-500 cursor-pointer hover:text-[#3054ff] transition-colors font-bold"
                 >
-                  <Icons.Lock /> Unlock stop loss to dynamically calculate position sizing. Upgrade to Pro &rarr;
+                  <Icons.Lock /> Unlock full position sizing → Upgrade to Pro
                 </div>
               ) : (
-                <div className="pt-2 border-t border-slate-800/60 space-y-1.5">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">STOP LOSS DISTANCE:</span>
-                    <span className="text-zinc-300 font-bold">{signal.sl_pct ? `${signal.sl_pct}%` : 'N/A'}</span>
+                <div className="pt-3 border-t border-[#3054ff]/20 space-y-2.5 bg-slate-950/40 p-3 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Risk per Trade</span>
+                    <span className="text-emerald-400 font-bold">${(calcAccountSize * (calcRiskPct / 100)).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">RISK AMOUNT:</span>
-                    <span className="text-zinc-300 font-bold">${(calcAccountSize * (calcRiskPct / 100)).toFixed(2)}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Stop Loss Distance</span>
+                    <span className="text-rose-400 font-bold">{signal.sl_pct ? `${signal.sl_pct}%` : 'N/A'}</span>
                   </div>
-                  <div className="flex justify-between border-t border-slate-800/45 pt-1.5 text-sm">
-                    <span className="text-[#3054ff] font-bold">REC. POSITION SIZE:</span>
-                    <span className="text-white font-black">
-                      {signal.sl_pct && signal.sl_pct > 0 
+                  <div className="border-t border-slate-700 pt-2.5 flex justify-between items-center">
+                    <span className="text-[#3054ff] font-bold uppercase text-[10px]">Position Size ($)</span>
+                    <span className="text-white font-black text-lg">
+                      {signal.sl_pct && signal.sl_pct > 0
                         ? `$${((calcAccountSize * (calcRiskPct / 100)) / (signal.sl_pct / 100)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                         : 'N/A'}
                     </span>
                   </div>
-                  <div className="flex justify-between text-[10px] text-slate-500">
-                    <span>POSITION SIZE ({coinLabel}):</span>
-                    <span>
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-slate-400">In {coinLabel}</span>
+                    <span className="text-cyan-400 font-bold">
                       {signal.sl_pct && signal.sl_pct > 0 && signal.entry_price
                         ? (((calcAccountSize * (calcRiskPct / 100)) / (signal.sl_pct / 100)) / signal.entry_price).toFixed(4)
-                        : 'N/A'} {coinLabel}
+                        : 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -728,7 +697,7 @@ export default function SignalDetailPage() {
           </div>
 
           {/* Timeframe Alignment */}
-          <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-xl text-left glass shadow-xl space-y-3">
+          <div className="bg-gradient-to-br from-[#0a0f1d] to-[#0d1426] border border-[#3054ff]/15 p-5 sm:p-6 rounded-xl text-left glass shadow-xl space-y-3">
             <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
               Multi-Timeframe Alignment
             </span>
@@ -774,8 +743,8 @@ export default function SignalDetailPage() {
 
           {/* Telegram Setup inline CTA */}
           {isFreePlan && (
-            <div className="bg-brand-orange/10 border border-brand-orange/20 p-5 sm:p-6 rounded-xl text-left space-y-3 shadow-xl">
-              <span className="flex items-center gap-1.5 text-[11px] font-bold text-brand-orange uppercase tracking-wider">
+            <div className="bg-gradient-to-br from-[#3054ff]/10 to-[#7c5cf6]/5 border border-[#3054ff]/30 p-5 sm:p-6 rounded-xl text-left space-y-3 shadow-xl">
+              <span className="flex items-center gap-1.5 text-[11px] font-bold text-[#3054ff] uppercase tracking-wider">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
@@ -793,54 +762,33 @@ export default function SignalDetailPage() {
             </div>
           )}
 
-          {/* Educational Accordions */}
-          <div className="space-y-2 text-left">
-            <span className="block text-[11px] text-slate-500 font-extrabold uppercase tracking-widest">Educational Layer</span>
-            
-            <div className="border border-slate-800/80 bg-[#0a0f1d] rounded-xl glass shadow-md overflow-hidden">
-              <button onClick={() => toggleAccordion('ha')}
-                className="w-full flex justify-between items-center p-3 text-xs font-bold uppercase tracking-wider border-0 bg-transparent text-white cursor-pointer">
-                <span>What is a Heikin Ashi Signal?</span>
-                <span className="text-slate-400 text-sm">{accordionOpen.ha ? '−' : '+'}</span>
-              </button>
-              {accordionOpen.ha && (
-                <div className="p-3 pt-0 text-slate-400 text-sm leading-relaxed border-t border-slate-800/60 normal-case">
-                  Heikin Ashi candles filter out market noise by averaging price movements. When the engine detects a consecutive run of specific colored candles matching local highs or lows, it flags potential market trend shifts.
-                </div>
-              )}
-            </div>
-
-            <div className="border border-slate-800/80 bg-[#0a0f1d] rounded-xl glass shadow-md overflow-hidden">
-              <button onClick={() => toggleAccordion('confidence')}
-                className="w-full flex justify-between items-center p-3 text-xs font-bold uppercase tracking-wider border-0 bg-transparent text-white cursor-pointer">
-                <span>What does Confidence Score mean?</span>
-                <span className="text-slate-400 text-sm">{accordionOpen.confidence ? '−' : '+'}</span>
-              </button>
-              {accordionOpen.confidence && (
-                <div className="p-3 pt-0 text-slate-400 text-sm leading-relaxed border-t border-slate-800/60 normal-case">
-                  The score reflects indicators such as relative volume strength, trend strength, and previous success metrics. Higher scores suggest reversals with high confirmations.
-                </div>
-              )}
-            </div>
-          </div>
-
         </div>
   
         {/* RIGHT COLUMN */}
         <div className="w-full lg:w-[55%] p-4 sm:p-6 lg:h-full flex flex-col justify-start overflow-y-auto space-y-6">
           
           {/* Performance Chart container */}
-          <div className="bg-[#0a0f1d] border border-slate-800/80 p-4 sm:p-5 rounded-xl glass shadow-2xl flex flex-col justify-between shrink-0">
+          <div className="bg-gradient-to-br from-[#0a0f1d] to-[#0d1426] border border-[#3054ff]/15 p-4 sm:p-5 rounded-xl glass shadow-2xl flex flex-col justify-between shrink-0">
             <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest text-left mb-3">
               Interactive Signal Performance Chart
             </span>
             <div className="w-full overflow-hidden">
-              <HAChart symbol={signal.symbol} interval={signal.interval} isFreePlan={isFreePlan} theme="dark" hideSymbolSelector={true} onPriceTick={(price) => setLivePrice(price)} activeSignal={signal} hideSignalCards={true} />
+              {sigLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="w-6 h-6 border-2 border-zinc-600 border-t-brand-orange rounded-full animate-spin" />
+                </div>
+              ) : signal && signal.symbol && signal.interval ? (
+                <HAChart symbol={signal.symbol} interval={signal.interval} isFreePlan={isFreePlan} theme="dark" hideSymbolSelector={true} onPriceTick={(price) => setLivePrice(price)} activeSignal={signal} hideSignalCards={true} />
+              ) : (
+                <div className="flex items-center justify-center py-16 text-xs text-zinc-500">
+                  Unable to load chart
+                </div>
+              )}
             </div>
           </div>
 
           {/* Timeframe Filter for Signal History & Performance */}
-          <div className="bg-[#0a0f1d] border border-slate-800/80 p-4 sm:p-5 rounded-xl glass shadow-2xl flex flex-col justify-between shrink-0 text-left space-y-4">
+          <div className="bg-gradient-to-br from-[#0a0f1d] to-[#0d1426] border border-[#3054ff]/15 p-4 sm:p-5 rounded-xl glass shadow-2xl flex flex-col justify-between shrink-0 text-left space-y-4">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
               <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
                 Signal History Filter
@@ -882,7 +830,7 @@ export default function SignalDetailPage() {
           </div>
 
           {/* History log table for the coin */}
-          <div className="bg-[#0a0f1d] border border-slate-800/80 p-5 sm:p-6 rounded-xl glass shadow-xl text-left">
+          <div className="bg-gradient-to-br from-[#0a0f1d] to-[#0d1426] border border-[#3054ff]/15 p-5 sm:p-6 rounded-xl glass shadow-xl text-left">
             <div className="flex justify-between items-center mb-4">
               <span className="block text-[11px] text-slate-400 font-extrabold uppercase tracking-widest">
                 Ledger Signal History for {coinLabel}

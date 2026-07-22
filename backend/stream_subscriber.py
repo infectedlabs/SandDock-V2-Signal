@@ -9,7 +9,11 @@ import os
 import requests
 import websockets
 import psycopg2
-import psycopg2.extras
+try:
+    import psycopg2.extras
+    HAS_PSYCOPG2_EXTRAS = True
+except (ImportError, AttributeError):
+    HAS_PSYCOPG2_EXTRAS = False
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
@@ -156,21 +160,39 @@ def store_candles_in_db(symbol, interval, ha_candles, db_conn):
                 c["open"], c["high"], c["low"], c["close"], c["volume"],
                 c["ha_open"], c["ha_high"], c["ha_low"], c["ha_close"]
             ))
-            
-        psycopg2.extras.execute_values(cur, """
-            INSERT INTO ohlcv_cache
-                (symbol, interval, open_time,
-                 open, high, low, close, volume,
-                 ha_open, ha_high, ha_low, ha_close)
-            VALUES %s
-            ON CONFLICT (symbol, interval, open_time) DO UPDATE SET
-                ha_open  = EXCLUDED.ha_open,
-                ha_high  = EXCLUDED.ha_high,
-                ha_low   = EXCLUDED.ha_low,
-                ha_close = EXCLUDED.ha_close,
-                close    = EXCLUDED.close,
-                volume   = EXCLUDED.volume
-        """, records)
+
+        if HAS_PSYCOPG2_EXTRAS:
+            psycopg2.extras.execute_values(cur, """
+                INSERT INTO ohlcv_cache
+                    (symbol, interval, open_time,
+                     open, high, low, close, volume,
+                     ha_open, ha_high, ha_low, ha_close)
+                VALUES %s
+                ON CONFLICT (symbol, interval, open_time) DO UPDATE SET
+                    ha_open  = EXCLUDED.ha_open,
+                    ha_high  = EXCLUDED.ha_high,
+                    ha_low   = EXCLUDED.ha_low,
+                    ha_close = EXCLUDED.ha_close,
+                    close    = EXCLUDED.close,
+                    volume   = EXCLUDED.volume
+            """, records)
+        else:
+            # Fallback: batch execute without extras module
+            for record in records:
+                cur.execute("""
+                    INSERT INTO ohlcv_cache
+                        (symbol, interval, open_time,
+                         open, high, low, close, volume,
+                         ha_open, ha_high, ha_low, ha_close)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (symbol, interval, open_time) DO UPDATE SET
+                        ha_open  = EXCLUDED.ha_open,
+                        ha_high  = EXCLUDED.ha_high,
+                        ha_low   = EXCLUDED.ha_low,
+                        ha_close = EXCLUDED.ha_close,
+                        close    = EXCLUDED.close,
+                        volume   = EXCLUDED.volume
+                """, record)
         db_conn.commit()
 
 # ── Self-Bootstrapping History ────────────────────────────────────────────────

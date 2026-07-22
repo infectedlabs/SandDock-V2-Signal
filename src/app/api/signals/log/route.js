@@ -97,6 +97,33 @@ export async function GET(request) {
 
     const allLogs = [];
 
+    // Calculate dynamic confidence based on recent win rate for each symbol
+    const confidenceCache = {};
+    await Promise.all(targetSymbols.map(async (sym) => {
+      try {
+        const { data: recentSignals } = await runWithTimeout(
+          supabaseAdmin
+            .from('signals')
+            .select('is_win')
+            .eq('symbol', sym.toUpperCase())
+            .eq('interval', tf)
+            .not('closed_at', 'is', null)
+            .order('bar_time', { ascending: false })
+            .limit(20),
+          1000
+        );
+        if (recentSignals && recentSignals.length > 0) {
+          const wins = recentSignals.filter(s => s.is_win).length;
+          const winRate = (wins / recentSignals.length) * 100;
+          confidenceCache[sym] = Math.min(Math.max(Math.round(winRate), 60), 95);
+        } else {
+          confidenceCache[sym] = 75;
+        }
+      } catch (e) {
+        confidenceCache[sym] = 75;
+      }
+    }));
+
     await Promise.all(targetSymbols.map(async (sym) => {
       try {
         const { data: dbSignals, error: dbError } = await runWithTimeout(
@@ -112,6 +139,7 @@ export async function GET(request) {
 
         if (!dbError && dbSignals && dbSignals.length > 0) {
           const currentPrice = priceCache[sym];
+          const symbolConfidence = confidenceCache[sym] || 75;
 
           dbSignals.forEach(sig => {
             const isLive = sig.closed_at === null;
@@ -148,7 +176,7 @@ export async function GET(request) {
               current_price: currentPrice || null,
               sl_pct: sig.sl_pct ? parseFloat(sig.sl_pct) : 0,
               tp_pct: sig.tp_pct ? parseFloat(sig.tp_pct) : 0,
-              confidence: sig.confidence || 95,
+              confidence: sig.confidence || symbolConfidence,
               rationale: sig.rationale,
               created_at: sig.created_at,
               closed_at: isTrulyClosedswing ? sig.closed_at : null,

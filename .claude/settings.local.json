@@ -266,7 +266,15 @@
       "Bash(npx --yes esbuild --jsx=automatic src/app/onboarding/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk8\")",
       "Bash(npx --yes esbuild --jsx=automatic src/app/onboarding/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk8b\")",
       "Bash(npx --yes esbuild --jsx=automatic src/app/track-record/page.jsx --outdir=\"C:/Users/GHURUP~1/AppData/Local/Temp/claude/C--Users-GHURU-PRASAATH-Desktop-sanddock/557b2d90-b1fd-4320-ab35-9793e847eef3/scratchpad/chk9\")",
-      "Bash(xargs cat)"
+      "Bash(xargs cat)",
+      "Bash(curl -s http://localhost:54886)",
+      "Bash(findstr :54886)",
+      "Bash(curl -I http://localhost:63712)",
+      "Bash(Start-Sleep -Seconds 3)",
+      "Bash(curl -s http://localhost:63712 -m 5)",
+      "PowerShell(curl.exe -s http://localhost:63712 -m 5)",
+      "Bash(xargs grep -l \"csv\\\\|CSV\")",
+      "Bash(grep -E \"\\\\.\\(js|jsx\\)$\")"
     ]
   }
 }

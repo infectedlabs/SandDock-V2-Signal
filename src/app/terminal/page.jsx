@@ -1311,7 +1311,7 @@ export default function TerminalPage() {
 
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-35 h-14 w-full flex-shrink-0 bg-[#000000]/90 backdrop-blur-md border-b border-[#1e2a3a] px-5 flex justify-between items-center">
-        <div className="flex items-center gap-3">
+        <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <img src="/sanddock-logo.png" alt="Sanddock" className="w-6 h-6 object-contain" />
           <span className="text-[15px] font-bold uppercase tracking-wider">
             Sanddock <span className="text-brand-orange">Console</span>
@@ -1320,7 +1320,7 @@ export default function TerminalPage() {
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Signals Live
           </span>
-        </div>
+        </a>
 
         <div className="flex items-center gap-3 relative">
           <span className="hidden xs:inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">
@@ -2009,7 +2009,32 @@ export default function TerminalPage() {
                     </div>
                     {/* Export button */}
                     <button
-                      onClick={() => isFreePlan ? triggerUpgradeGate('CSV Export Locked', 'Downloading as CSV is a Pro feature.') : alert('CSV download triggered!')}
+                      onClick={() => {
+                        if (isFreePlan) {
+                          triggerUpgradeGate('CSV Export Locked', 'Downloading as CSV is a Pro feature.');
+                          return;
+                        }
+                        // Generate CSV from cleanLogSignals
+                        const headers = ['Date', 'Pair', 'Type', 'Timeframe', 'Entry', 'Exit', 'PnL %', 'Confidence %'];
+                        const rows = cleanLogSignals.map(sig => [
+                          formatLogDate(sig.bar_time, profile),
+                          formatSymbol(sig.symbol),
+                          sig.signal_type.toUpperCase(),
+                          sig.interval,
+                          `$${sig.entry_price.toFixed(2)}`,
+                          sig.closed_at ? `$${sig.close_price?.toFixed(2) || 'N/A'}` : 'Open',
+                          sig.pnl_pct ? `${sig.pnl_pct.toFixed(2)}%` : '-',
+                          `${sig.confidence || 75}%`,
+                        ]);
+                        const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `sanddock-signals-${selectedSymbol}-${new Date().toISOString().split('T')[0]}.csv`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }}
                       className="px-3 py-1.5 border border-[#1e2d4a]/40 hover:bg-zinc-900 text-[12px] uppercase tracking-wider text-white hover:text-white cursor-pointer bg-transparent rounded-lg"
                     >
                       Export CSV {isFreePlan && <Icons.Lock />}
@@ -2336,17 +2361,25 @@ export default function TerminalPage() {
                       <div className="w-full border border-zinc-800 rounded-2xl p-6 bg-[#090909] shadow-none">
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 text-white">
                           {[
-                            { label: 'Average Outcome', val: computedStats?.avg_pnl != null ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${computedStats.avg_pnl}%` : '-', note: 'per closed trade' },
-                            { label: 'Total Logs', val: computedStats?.total_signals ?? '-', note: 'closed swings' },
-                            { label: 'Current Indicators', val: openSignalsCount, note: 'active metrics' },
-                            { label: 'Peak Trade Gain', val: computedStats?.best_trade != null ? `+${computedStats.best_trade}%` : '-', note: 'maximum outcome' },
-                            { label: 'Peak Drawdown', val: computedStats?.worst_trade != null ? `${computedStats.worst_trade}%` : '-', note: 'maximum loss' },
-                            { label: 'Outcome Ratio', val: computedStats ? `${computedStats.wins}W - ${computedStats.losses}L` : '-', note: 'wins vs losses' },
+                            { label: 'Average Outcome', val: computedStats?.avg_pnl != null ? `${parseFloat(computedStats.avg_pnl) >= 0 ? '+' : ''}${computedStats.avg_pnl}%` : '-', note: 'per closed trade', isCustom: false },
+                            { label: 'Total Logs', val: computedStats?.total_signals ?? '-', note: 'closed swings', isCustom: false },
+                            { label: 'Current Indicators', val: openSignalsCount, note: 'active metrics', isCustom: false },
+                            { label: 'Peak Trade Gain', val: computedStats?.best_trade != null ? `+${computedStats.best_trade}%` : '-', note: 'maximum outcome', isCustom: false },
+                            { label: 'Peak Drawdown', val: computedStats?.worst_trade != null ? `${computedStats.worst_trade}%` : '-', note: 'maximum loss', isCustom: false },
+                            { label: 'Outcome Ratio', val: null, note: 'wins vs losses', isCustom: true, wins: computedStats?.wins ?? 0, losses: computedStats?.losses ?? 0 },
                           ].map((s, i) => (
-                            <div key={i} className="text-left py-2 px-4 border-r last:border-0 border-zinc-800/40 space-y-1">
-                              <span className="block text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-white leading-none">{s.label}</span>
-                              <span className="block text-xl md:text-2xl font-black text-white tracking-tighter leading-none pt-1">{s.val}</span>
-                              <span className="block text-[9px] text-white leading-none pt-0.5">{s.note}</span>
+                            <div key={i} className="text-left py-4 px-4 border-r last:border-0 border-zinc-800/40 flex flex-col justify-center min-h-[100px]">
+                              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-white mb-2 h-4">{s.label}</span>
+                              {s.isCustom ? (
+                                <span className="text-lg md:text-xl font-black tracking-tighter mb-2 h-8 flex items-center gap-2">
+                                  <span className="text-[#00e676]">{s.wins}W</span>
+                                  <span className="text-zinc-600">–</span>
+                                  <span className="text-[#ff1744]">{s.losses}L</span>
+                                </span>
+                              ) : (
+                                <span className="text-lg md:text-xl font-black text-white tracking-tighter mb-2 h-8 flex items-center">{s.val}</span>
+                              )}
+                              <span className="text-[9px] text-zinc-400 h-4">{s.note}</span>
                             </div>
                           ))}
                         </div>

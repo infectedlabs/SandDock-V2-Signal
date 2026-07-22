@@ -286,9 +286,14 @@ export default function HAChart({
           return;
         }
 
-        // Build WebSocket URL from environment or default
+        // Build WebSocket URL from environment only (don't default to localhost:8000)
         let wsUrl;
-        const baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8000';
+        const baseUrl = process.env.NEXT_PUBLIC_WS_URL;
+
+        if (!baseUrl) {
+          console.info('[HAChart] WebSocket disabled - NEXT_PUBLIC_WS_URL not set, using polling only');
+          return;
+        }
 
         // Convert HTTP(S) URLs to WS(S) for WebSocket
         if (baseUrl.startsWith('https://')) {
@@ -301,50 +306,31 @@ export default function HAChart({
           wsUrl = `${proto}//${baseUrl}/ws/chart?token=${session.access_token}`;
         }
 
-        console.log(`[HAChart] Connecting WebSocket (attempt ${wsRetryCount + 1}/${MAX_WS_RETRIES}): ${wsUrl.replace(session.access_token, '***')}`);
-
         try {
           ws = new WebSocket(wsUrl);
+          console.log('[HAChart] WebSocket connecting...');
 
           ws.onopen = () => {
-            console.log('[HAChart] WebSocket open - subscribing to', selectedSymbol, selectedInterval);
+            console.log('[HAChart] WebSocket connected');
             wsRetryCount = 0;
             if (ws && ws.readyState === WebSocket.OPEN) {
               ws.send(JSON.stringify({ action: 'subscribe', symbol: selectedSymbol, interval: selectedInterval }));
             }
           };
 
-          ws.onerror = (event) => {
-            console.error('[HAChart] WebSocket error:', {
-              readyState: ws?.readyState,
-              url: wsUrl.replace(session.access_token, '***'),
-              eventType: event.type,
-              target: event.target?.readyState,
-            });
+          ws.onerror = () => {
+            console.warn('[HAChart] WebSocket connection failed, using polling mode');
           };
 
-          ws.onclose = (event) => {
-            console.warn('[HAChart] WebSocket closed:', {
-              code: event.code,
-              reason: event.reason || 'No reason provided',
-              wasClean: event.wasClean,
-            });
-
-            if (!event.wasClean && wsRetryCount < MAX_WS_RETRIES && isMounted) {
+          ws.onclose = () => {
+            if (wsRetryCount < MAX_WS_RETRIES && isMounted) {
               wsRetryCount++;
-              const delayMs = Math.min(1000 * Math.pow(2, wsRetryCount - 1), 10000);
-              console.log(`[HAChart] Scheduling WebSocket reconnect in ${delayMs}ms...`);
+              const delayMs = 5000 * wsRetryCount;
               setTimeout(connectWebSocket, delayMs);
             }
           };
         } catch (err) {
-          console.error('[HAChart] Failed to create WebSocket:', err.message);
-          if (wsRetryCount < MAX_WS_RETRIES && isMounted) {
-            wsRetryCount++;
-            const delayMs = Math.min(1000 * Math.pow(2, wsRetryCount - 1), 10000);
-            console.log(`[HAChart] Scheduling WebSocket reconnect in ${delayMs}ms...`);
-            setTimeout(connectWebSocket, delayMs);
-          }
+          console.warn('[HAChart] WebSocket unavailable:', err.message);
         }
       };
 
@@ -646,16 +632,40 @@ export default function HAChart({
             lastCandleTimeRef.current = candleData[candleData.length - 1].time;
 
             const candleSeries = seriesRef.current;
-            if (candleSeries && Number.isFinite(entryVal)) {
-              candleSeries.createPriceLine({
-                price: entryVal,
-                color: isBuySignal ? '#10b981' : '#ef4444',
-                lineWidth: 2,
-                lineStyle: lwc.LineStyle.Solid,
-                axisLabelVisible: true,
-                title: 'Entry (Live)',
-              });
-              // TP and SL lines removed - only show entry point and signal arrow
+            if (candleSeries) {
+              // Entry line (Blue)
+              if (Number.isFinite(entryVal)) {
+                candleSeries.createPriceLine({
+                  price: entryVal,
+                  color: '#3b82f6',
+                  lineWidth: 2,
+                  lineStyle: lwc.LineStyle.Solid,
+                  axisLabelVisible: true,
+                  title: 'Entry',
+                });
+              }
+              // TP line (Green)
+              if (Number.isFinite(tpVal)) {
+                candleSeries.createPriceLine({
+                  price: tpVal,
+                  color: '#10b981',
+                  lineWidth: 2,
+                  lineStyle: lwc.LineStyle.Dashed,
+                  axisLabelVisible: true,
+                  title: 'Take Profit',
+                });
+              }
+              // SL line (Red)
+              if (Number.isFinite(slVal)) {
+                candleSeries.createPriceLine({
+                  price: slVal,
+                  color: '#ef4444',
+                  lineWidth: 2,
+                  lineStyle: lwc.LineStyle.Dashed,
+                  axisLabelVisible: true,
+                  title: 'Stop Loss',
+                });
+              }
             }
           }
         } catch (liveSigErr) {
