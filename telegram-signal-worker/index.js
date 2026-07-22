@@ -2,7 +2,10 @@
 // Always-on Railway service: listens to Binance's live kline WebSocket for
 // BTC/ETH/BNB 30m candles, closes signals on genuine opposite swings,
 // creates new live signals, writes both to Supabase, and posts Telegram
-// alerts to a dedicated channel - the instant each candle closes.
+// alerts to a dedicated Pro channel - the instant each candle closes.
+// Separately, it posts a once-a-day performance digest to a public Telegram
+// group (free/community users) so they can see the gains without getting
+// the real-time Pro signal feed - a soft nudge toward upgrading.
 //
 // Why WebSocket and not REST polling: a signal is only useful in the
 // Telegram channel if it lands the moment it's confirmed, not minutes (or
@@ -50,7 +53,10 @@ const CANDLES_FETCH = 1000; // ~20.8 days of 30m candles - plenty of prior-swing
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID; // Pro channel - per-signal alerts
+const TELEGRAM_GROUP_CHAT_ID = process.env.TELEGRAM_GROUP_CHAT_ID; // Public group - once-a-day digest only
+// Hour of day (UTC) the public digest fires. Default 09:00 UTC.
+const TELEGRAM_DIGEST_HOUR_UTC = parseInt(process.env.TELEGRAM_DIGEST_HOUR_UTC || '9', 10);
 
 // Helper: Convert UTC date to local timezone string (e.g., "2026-07-18T18:35:00" IST)
 function toLocalTimeString(utcDate) {
@@ -70,7 +76,10 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   process.exit(1);
 }
 if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-  console.warn('[WARN] TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set - Telegram alerts are disabled.');
+  console.warn('[WARN] TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set - Pro channel alerts are disabled.');
+}
+if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_GROUP_CHAT_ID) {
+  console.warn('[WARN] TELEGRAM_GROUP_CHAT_ID not set - public daily digest is disabled.');
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
@@ -240,17 +249,23 @@ async function getDynamicConfidence(symbol) {
 const signalMessageIds = {}; // signal_id -> message_id
 
 // ─── Telegram ─────────────────────────────────────────────────────────────
-async function sendTelegram(text, replyToMessageId = null) {
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return null;
+// `chatId` defaults to the Pro channel; pass TELEGRAM_GROUP_CHAT_ID explicitly
+// to target the public group instead. `replyMarkup` carries an inline keyboard
+// (used by the public digest for the Contact/Apply/Track Record buttons).
+async function sendTelegram(text, { chatId = TELEGRAM_CHAT_ID, replyToMessageId = null, replyMarkup = null } = {}) {
+  if (!TELEGRAM_BOT_TOKEN || !chatId) return null;
   try {
     const payload = {
-      chat_id: TELEGRAM_CHAT_ID,
+      chat_id: chatId,
       text,
       parse_mode: 'HTML',
       disable_web_page_preview: true,
     };
     if (replyToMessageId) {
       payload.reply_to_message_id = replyToMessageId;
+    }
+    if (replyMarkup) {
+      payload.reply_markup = replyMarkup;
     }
 
     const { data } = await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, payload, { timeout: 10000 });
@@ -265,19 +280,40 @@ function coinLabel(symbol) {
   return symbol.replace('USDT', '') + '/USDT';
 }
 
-// Fetch today's performance metrics
-async function getTodayPerformance(symbol = null) {
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayISO = today.toISOString();
+// Turns a raw `signals` row set into the shared performance shape used by
+// both per-signal messages (today-only) and the public digest (today/week/30d).
+function computeStats(signals) {
+  if (!signals || signals.length === 0) {
+    return { totalSignals: 0, closedSignals: 0, wins: 0, losses: 0, winRate: 0, totalPnL: 0, avgPnL: 0 };
+  }
 
+  const closed = signals.filter(s => s.closed_at && s.pnl_pct != null);
+  const wins = closed.filter(s => s.pnl_pct > 0).length;
+  const losses = closed.filter(s => s.pnl_pct <= 0).length;
+  const totalPnL = closed.reduce((sum, s) => sum + (s.pnl_pct || 0), 0);
+  const avgPnL = closed.length > 0 ? totalPnL / closed.length : 0;
+  const winRate = closed.length > 0 ? (wins / closed.length * 100) : 0;
+
+  return {
+    totalSignals: signals.length,
+    closedSignals: closed.length,
+    wins,
+    losses,
+    winRate: winRate.toFixed(0),
+    totalPnL: totalPnL.toFixed(2),
+    avgPnL: avgPnL.toFixed(2),
+  };
+}
+
+// Fetch performance metrics for every closed signal since `sinceISO`.
+async function getPerformanceSince(sinceISO, symbol = null) {
+  try {
     let query = supabase
       .from('signals')
       .select('*')
       .eq('interval', INTERVAL)
       .not('closed_at', 'is', null)
-      .gte('closed_at', todayISO);
+      .gte('closed_at', sinceISO);
 
     if (symbol) {
       query = query.eq('symbol', symbol);
@@ -286,111 +322,122 @@ async function getTodayPerformance(symbol = null) {
     const { data: signals, error } = await query;
 
     if (error) {
-      log(`[Performance] Failed to fetch: ${error.message}`);
+      log(`[Performance] Failed to fetch since ${sinceISO}: ${error.message}`);
       return null;
     }
 
-    if (!signals || signals.length === 0) {
-      return {
-        totalSignals: 0,
-        closedSignals: 0,
-        wins: 0,
-        losses: 0,
-        winRate: 0,
-        totalPnL: 0,
-        avgPnL: 0,
-      };
-    }
-
-    const closed = signals.filter(s => s.closed_at && s.pnl_pct != null);
-    const wins = closed.filter(s => s.pnl_pct > 0).length;
-    const losses = closed.filter(s => s.pnl_pct <= 0).length;
-    const totalPnL = closed.reduce((sum, s) => sum + (s.pnl_pct || 0), 0);
-    const avgPnL = closed.length > 0 ? totalPnL / closed.length : 0;
-    const winRate = closed.length > 0 ? (wins / closed.length * 100) : 0;
-
-    return {
-      totalSignals: signals.length,
-      closedSignals: closed.length,
-      wins,
-      losses,
-      winRate: winRate.toFixed(0),
-      totalPnL: totalPnL.toFixed(2),
-      avgPnL: avgPnL.toFixed(2),
-    };
+    return computeStats(signals || []);
   } catch (err) {
-    log(`[Performance] Error: ${err.message}`);
+    log(`[Performance] Error since ${sinceISO}: ${err.message}`);
     return null;
   }
+}
+
+// Fetch today's performance metrics (local midnight, matching prior behavior).
+async function getTodayPerformance(symbol = null) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return getPerformanceSince(today.toISOString(), symbol);
 }
 
 function newSignalMessage(sig, perfData = null) {
   const isBuy = sig.signal_type === 'buy';
   const dir = isBuy ? 'BUY' : 'SELL';
+  const dirEmoji = isBuy ? '🟢' : '🔴';
   const rrRatio = (sig.tp_price - sig.entry_price) / Math.abs(sig.entry_price - sig.sl_price);
   const rrRatioStr = rrRatio.toFixed(1);
 
-  let perfSection = `<code>────────────────────</code>\n<b>TODAY'S PERFORMANCE</b>\n`;
+  let perfSection = `<code>────────────────────</code>\n📊 <b>Today's Performance</b>\n`;
 
   if (perfData) {
     const coinPerf = perfData.coinSpecific || {};
     const allPerf = perfData.allCoins || {};
 
-    perfSection += `${coinLabel(sig.symbol)} PnL today: <b>${coinPerf.totalPnL >= 0 ? '+' : ''}${coinPerf.totalPnL || 0}%</b>\n`;
-    perfSection += `All coins PnL today: <b>${allPerf.totalPnL >= 0 ? '+' : ''}${allPerf.totalPnL || 0}%</b>\n`;
-    perfSection += `Signals fired today: ${allPerf.totalSignals || 0}\n`;
+    perfSection += `${coinLabel(sig.symbol)} PnL: <b>${coinPerf.totalPnL >= 0 ? '+' : ''}${coinPerf.totalPnL || 0}%</b>\n`;
+    perfSection += `All coins PnL: <b>${allPerf.totalPnL >= 0 ? '+' : ''}${allPerf.totalPnL || 0}%</b>\n`;
+    perfSection += `Signals fired: ${allPerf.totalSignals || 0}\n`;
   } else {
-    perfSection += `${coinLabel(sig.symbol)} PnL today: pending\n`;
-    perfSection += `All coins PnL today: pending\n`;
-    perfSection += `Signals fired today: pending\n`;
+    perfSection += `<i>Performance data pending...</i>\n`;
   }
 
   return (
-    `<b>SANDDOCK SIGNAL - ${coinLabel(sig.symbol)}</b>\n` +
-    `Type: <b>${dir}</b> · Timeframe: 30m\n\n` +
-    `<b>ENTRY</b>       $${sig.entry_price.toFixed(2)}\n` +
-    `<b>STOP LOSS</b>   $${sig.sl_price.toFixed(2)}\n` +
-    `<b>TAKE PROFIT</b> $${sig.tp_price.toFixed(2)}\n` +
-    `<b>R:R RATIO</b>   1:${rrRatioStr}\n` +
-    `<b>CONFIDENCE</b>  ${sig.confidence}%\n\n` +
-    `Signal fired - position is now open.\n\n` +
+    `${dirEmoji} <b>SANDDOCK SIGNAL</b> — <b>${coinLabel(sig.symbol)}</b>\n` +
+    `<i>${dir} · 30m Timeframe</i>\n\n` +
+    `🎯 <b>Entry</b>        $${sig.entry_price.toFixed(2)}\n` +
+    `🛑 <b>Stop Loss</b>    $${sig.sl_price.toFixed(2)}\n` +
+    `💰 <b>Take Profit</b>  $${sig.tp_price.toFixed(2)}\n` +
+    `⚖️ <b>R:R Ratio</b>    1:${rrRatioStr}\n` +
+    `🔥 <b>Confidence</b>   ${sig.confidence}%\n\n` +
+    `<i>Signal fired — position is now open.</i>\n\n` +
     `${perfSection}` +
     `<code>────────────────────</code>\n\n` +
-    `sanddock.com/terminal`
+    `🔗 sanddock.com/terminal`
   );
 }
 
 function closedSignalMessage(sig, perfData = null) {
   const isBuy = sig.signal_type === 'buy';
   const dir = isBuy ? 'BUY' : 'SELL';
+  const isWin = sig.pnl_pct >= 0;
+  const resultEmoji = isWin ? '✅' : '❌';
   const pnlStr = `${sig.pnl_pct >= 0 ? '+' : ''}${sig.pnl_pct.toFixed(2)}%`;
   const reasonText = sig.close_reason === 'swing_opposite' ? 'Opposite swing' : 'Take-profit hit';
 
-  let perfSection = `<code>────────────────────</code>\n<b>TODAY'S PERFORMANCE</b>\n`;
+  let perfSection = `<code>────────────────────</code>\n📊 <b>Today's Performance</b>\n`;
 
   if (perfData) {
     const coinPerf = perfData.coinSpecific || {};
     const allPerf = perfData.allCoins || {};
 
-    perfSection += `${coinLabel(sig.symbol)} PnL today: <b>${coinPerf.totalPnL >= 0 ? '+' : ''}${coinPerf.totalPnL || 0}%</b>\n`;
-    perfSection += `All coins PnL today: <b>${allPerf.totalPnL >= 0 ? '+' : ''}${allPerf.totalPnL || 0}%</b>\n`;
-    perfSection += `Signals fired today: ${allPerf.totalSignals || 0} · Closed: ${allPerf.closedSignals || 0} · Win rate: ${allPerf.winRate || 0}%\n`;
+    perfSection += `${coinLabel(sig.symbol)} PnL: <b>${coinPerf.totalPnL >= 0 ? '+' : ''}${coinPerf.totalPnL || 0}%</b>\n`;
+    perfSection += `All coins PnL: <b>${allPerf.totalPnL >= 0 ? '+' : ''}${allPerf.totalPnL || 0}%</b>\n`;
+    perfSection += `Signals fired: ${allPerf.totalSignals || 0} · Closed: ${allPerf.closedSignals || 0} · Win rate: ${allPerf.winRate || 0}%\n`;
   } else {
-    perfSection += `${coinLabel(sig.symbol)} PnL today: pending\n`;
-    perfSection += `All coins PnL today: pending\n`;
-    perfSection += `Signals fired today: pending · Closed: pending · Win rate: pending\n`;
+    perfSection += `<i>Performance data pending...</i>\n`;
   }
 
   return (
-    `<b>SANDDOCK SIGNAL - ${coinLabel(sig.symbol)} [CLOSED]</b>\n` +
-    `Type: <b>${dir}</b> · Timeframe: 30m\n\n` +
-    `<b>ENTRY</b>       $${parseFloat(sig.entry_price).toFixed(2)}\n` +
-    `<b>EXIT</b>        $${parseFloat(sig.close_price).toFixed(2)}\n` +
-    `<b>PNL</b>         <b>${pnlStr}</b>\n` +
-    `<b>REASON</b>      ${reasonText}\n\n` +
+    `${resultEmoji} <b>SANDDOCK SIGNAL</b> — <b>${coinLabel(sig.symbol)}</b> <i>[CLOSED]</i>\n` +
+    `<i>${dir} · 30m Timeframe</i>\n\n` +
+    `🎯 <b>Entry</b>  $${parseFloat(sig.entry_price).toFixed(2)}\n` +
+    `🏁 <b>Exit</b>   $${parseFloat(sig.close_price).toFixed(2)}\n` +
+    `${resultEmoji} <b>PNL</b>    <b>${pnlStr}</b>\n` +
+    `📌 <b>Reason</b> <i>${reasonText}</i>\n\n` +
     `${perfSection}` +
     `<code>────────────────────</code>\n\n` +
-    `sanddock.com/terminal`
+    `🔗 sanddock.com/terminal`
+  );
+}
+
+// Inline keyboard attached to every public-group digest message.
+const DAILY_DIGEST_KEYBOARD = {
+  inline_keyboard: [
+    [{ text: '💬 Contact @alexsanddockcom', url: 'https://t.me/alexsanddockcom' }],
+    [
+      { text: '🚀 Apply for Pro', url: 'https://sanddock.com/apply' },
+      { text: '📊 See Track Record', url: 'https://sanddock.com/track-record' },
+    ],
+  ],
+};
+
+function dailyDigestMessage({ today, weekly, monthly }) {
+  const t = today || {};
+  const w = weekly || {};
+  const m = monthly || {};
+  const todayEmoji = (t.totalPnL || 0) >= 0 ? '📈' : '📉';
+  const dateStr = new Date().toISOString().slice(0, 10);
+
+  return (
+    `☀️ <b>SANDDOCK DAILY DIGEST</b>\n` +
+    `<i>Public community update · ${dateStr}</i>\n\n` +
+    `${todayEmoji} <b>Today</b>\n` +
+    `PnL: <b>${t.totalPnL >= 0 ? '+' : ''}${t.totalPnL || 0}%</b> · Signals: ${t.totalSignals || 0} · Win rate: <b>${t.winRate || 0}%</b>\n\n` +
+    `📅 <b>This Week</b>\n` +
+    `PnL: <b>${w.totalPnL >= 0 ? '+' : ''}${w.totalPnL || 0}%</b> · Win rate: <b>${w.winRate || 0}%</b>\n\n` +
+    `🗓️ <b>Last 30 Days</b>\n` +
+    `PnL: <b>${m.totalPnL >= 0 ? '+' : ''}${m.totalPnL || 0}%</b> · Win rate: <b>${m.winRate || 0}%</b>\n\n` +
+    `<code>────────────────────</code>\n` +
+    `🚀 <i>Ready to catch every signal in real time?</i>`
   );
 }
 
@@ -508,7 +555,7 @@ async function processSymbol(symbol) {
           allCoins: allPerf,
         };
 
-        await sendTelegram(closedSignalMessage({ ...openSignal, ...closeInfo }, perfData), replyToId);
+        await sendTelegram(closedSignalMessage({ ...openSignal, ...closeInfo }, perfData), { replyToMessageId: replyToId });
 
         // Send celebration gif if PnL > 1%
         if (closeInfo.pnl_pct > 1) {
@@ -665,6 +712,49 @@ function connectWebSocket() {
   }, 30000);
 }
 
+// ─── Public group daily digest ───────────────────────────────────────────
+async function sendDailyDigest() {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_GROUP_CHAT_ID) return;
+  try {
+    const weeklySinceISO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const monthlySinceISO = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    const [today, weekly, monthly] = await Promise.all([
+      getTodayPerformance(),
+      getPerformanceSince(weeklySinceISO),
+      getPerformanceSince(monthlySinceISO),
+    ]);
+
+    await sendTelegram(dailyDigestMessage({ today, weekly, monthly }), {
+      chatId: TELEGRAM_GROUP_CHAT_ID,
+      replyMarkup: DAILY_DIGEST_KEYBOARD,
+    });
+    log('[Digest] Public daily digest sent.');
+  } catch (err) {
+    log(`[Digest] Failed to send: ${err.message}`);
+  }
+}
+
+function msUntilNextUtcHour(hour) {
+  const now = new Date();
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), hour, 0, 0, 0));
+  if (next <= now) next.setUTCDate(next.getUTCDate() + 1);
+  return next.getTime() - now.getTime();
+}
+
+// Aligns the first send to a fixed UTC hour (TELEGRAM_DIGEST_HOUR_UTC), then
+// repeats every 24h from there - so the group gets it at the same time daily
+// instead of drifting based on process start time.
+function startDailyDigestScheduler() {
+  if (!TELEGRAM_GROUP_CHAT_ID) return;
+  const delay = msUntilNextUtcHour(TELEGRAM_DIGEST_HOUR_UTC);
+  log(`[Digest] First public digest in ${(delay / 60000).toFixed(1)}m (targeting ${TELEGRAM_DIGEST_HOUR_UTC}:00 UTC daily).`);
+  setTimeout(() => {
+    sendDailyDigest();
+    setInterval(sendDailyDigest, 24 * 60 * 60 * 1000);
+  }, delay);
+}
+
 // ─── REST safety net (backstop only) ──────────────────────────────────────
 // Catches the rare dropped WebSocket message. Reuses the same
 // change-detection guard in processSymbol, so this is a no-op (one cheap
@@ -702,6 +792,7 @@ app.listen(PORT, () => {
   for (const symbol of SYMBOLS) trigger(symbol, 'startup');
   connectWebSocket();
   startSafetyNet();
+  startDailyDigestScheduler();
 });
 
 process.on('SIGTERM', () => { log('SIGTERM received, shutting down.'); process.exit(0); });
