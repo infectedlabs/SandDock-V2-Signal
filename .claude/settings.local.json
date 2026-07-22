@@ -274,7 +274,11 @@
       "Bash(curl -s http://localhost:63712 -m 5)",
       "PowerShell(curl.exe -s http://localhost:63712 -m 5)",
       "Bash(xargs grep -l \"csv\\\\|CSV\")",
-      "Bash(grep -E \"\\\\.\\(js|jsx\\)$\")"
+      "Bash(grep -E \"\\\\.\\(js|jsx\\)$\")",
+      "Bash(npx eslint *)",
+      "Bash(git restore *)",
+      "Bash(grep -n \"Fired\\\\|router.push\\(\\\\`/terminal/signals\" src/app/terminal/page.jsx)",
+      "Bash(git stash *)"
     ]
   }
 }
