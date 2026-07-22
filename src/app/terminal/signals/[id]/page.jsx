@@ -342,7 +342,7 @@ export default function SignalDetailPage() {
 
   if (error || !signal) {
     return (
-      <div className="h-screen bg-[#020617] text-white flex flex-col items-center justify-center p-6 text-center border border-slate-800 m-4 rounded-xl glass">
+      <div className="h-screen bg-[#020617] text-white flex flex-col items-center justify-center p-6 text-center border border-[#3054ff]/20 m-4 rounded-xl glass">
         <div className="w-12 h-12 mb-3 rounded-xl bg-gradient-to-br from-[#3054ff]/25 to-[#7c5cf6]/15 border border-white/10 text-[#8fa2ff] flex items-center justify-center">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM7.05 16.95a7 7 0 019.9 0M4.222 14.122a11 11 0 0115.556 0M1.394 11.294a15 15 0 0121.212 0" />
@@ -353,7 +353,7 @@ export default function SignalDetailPage() {
           {error || 'This active or historical setup transaction could not be located.'}
         </p>
         <button onClick={() => router.push('/terminal')}
-          className="px-6 py-2.5 bg-[#3054ff] hover:bg-[#2040e0] text-white font-bold text-xs uppercase tracking-widest transition-all rounded-xl border border-white/10 cursor-pointer">
+          className="px-6 py-2.5 bg-[#3054ff] hover:bg-[#2040e0] text-white font-bold text-xs uppercase tracking-widest transition-all rounded-xl border border-[#3054ff]/30 cursor-pointer">
           &larr; Return to Console
         </button>
       </div>
