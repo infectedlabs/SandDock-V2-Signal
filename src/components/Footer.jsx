@@ -32,6 +32,7 @@ const columns = [
       { label: "How It Works", href: "/#how-it-works" },
       { label: "Terminal", href: "/terminal" },
       { label: "Pricing", href: "/pricing" },
+      { label: "Refer & Earn", href: "/refer" },
       { label: "Articles", href: "/articles" },
       { label: "FAQ", href: "/#faq" },
     ],

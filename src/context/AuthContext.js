@@ -33,27 +33,22 @@ export function AuthProvider({ children }) {
   const checkExpiry = async (uid, profileData) => {
     try {
       const now = Date.now();
-      const isPaidPlan = ['pro', 'master', 'lifetime'].includes(profileData?.plan);
+      // Grandmaster is a lifetime plan - it never expires.
+      const isExpiringPlan = ['pro', 'master'].includes(profileData?.plan);
 
-      // Check if their paid plan has expired or status is explicitly expired
       const paidExpired =
-        isPaidPlan &&
-        (profileData?.subscription_status === 'expired' ||
-         (profileData?.current_period_end &&
-          new Date(profileData.current_period_end).getTime() < now));
-
-      // Trial expired is permanently disabled
-      const trialExpired = false;
+        isExpiringPlan &&
+        profileData?.plan_ends_at &&
+        new Date(profileData.plan_ends_at).getTime() < now;
 
       if (paidExpired) {
         console.log('[AuthContext] Paid plan expired - downgrading user and clearing Telegram alerts…');
         console.log(`[Telegram Bot] Evicting user ${uid} from paid ${profileData.plan} Telegram channel due to plan expiry.`);
-        
+
         const updates = {
           plan: 'free',
-          subscription_status: 'expired',
-          current_period_end: null,
-          trial_ends_at: null,
+          billing_cycle: null,
+          plan_ends_at: null,
           telegram_chat_id: null,
           telegram_invite_link: null,
           telegram_invite_claimed: false
@@ -95,8 +90,7 @@ export function AuthProvider({ children }) {
           email: email || '',
           name: metadata?.full_name || email?.split('@')[0] || '',
           plan: 'free',
-          subscription_status: 'active',
-          trial_ends_at: null,
+          referral_code: uid.replace(/-/g, '').slice(0, 8).toUpperCase(),
           coins_selected: ['BTC'],
           alert_delivery: { web: true, telegram: false }
         };
@@ -126,8 +120,10 @@ export function AuthProvider({ children }) {
         email: email,
         name: name || email.split('@')[0],
         plan: 'free',
-        subscription_status: 'active',
-        trial_ends_at: null,
+        billing_cycle: null,
+        plan_ends_at: null,
+        referral_code: uid.replace(/-/g, '').slice(0, 8).toUpperCase(),
+        referred_by: null,
         experience_level: null,
         risk_style: null,
         primary_goal: null,
@@ -183,12 +179,16 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signUpWithEmail = async (email, password, name) => {
+    const referralCode = typeof window !== 'undefined'
+      ? localStorage.getItem('sanddock_ref_code')
+      : null;
+
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { full_name: name },
+          data: { full_name: name, ...(referralCode ? { referral_code: referralCode } : {}) },
         },
       });
       if (error) throw error;

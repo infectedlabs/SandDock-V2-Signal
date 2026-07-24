@@ -11,6 +11,7 @@ const navLinks = [
   { label: "Track Record", href: "/track-record" },
   { label: "How It Works", href: "/#how-it-works" },
   { label: "Pricing", href: "/pricing" },
+  { label: "Refer & Earn", href: "/refer" },
 ];
 
 export default function Navbar() {

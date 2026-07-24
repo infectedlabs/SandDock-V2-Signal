@@ -30,6 +30,13 @@ const PLAN_FEATURES = {
     ['Full CSV export', true],
     ['Priority support', true],
   ],
+  grandmaster: [
+    ['Everything in Master, permanently', true],
+    ['All future coins & features included', true],
+    ['Dedicated premium support', true],
+    ['GrandMaster certification tag', true],
+    ['No recurring fees, ever', true],
+  ],
 };
 
 function FeatureRow({ label, available }) {
@@ -130,7 +137,7 @@ export default function BillingPage() {
     currentPlan === 'free' ? 'Free'
       : currentPlan === 'pro' ? 'Pro'
       : currentPlan === 'master' ? 'Master'
-      : 'Lifetime';
+      : 'GrandMaster';
 
   const planSub =
     currentPlan === 'free' ? 'BTC signals only'
@@ -138,7 +145,18 @@ export default function BillingPage() {
       : currentPlan === 'master' ? 'All 15 pairs'
       : 'Lifetime access';
 
-  const features = PLAN_FEATURES[currentPlan] || PLAN_FEATURES.master;
+  const features = PLAN_FEATURES[currentPlan] || PLAN_FEATURES.grandmaster;
+
+  const billingCycleLabel = currentPlan === 'free'
+    ? 'Free forever'
+    : profile?.billing_cycle === 'yearly' ? 'Yearly'
+    : profile?.billing_cycle === 'lifetime' ? 'Lifetime (one-time)'
+    : 'Monthly';
+
+  const nextRenewalLabel = currentPlan === 'free'
+    ? 'N/A'
+    : !profile?.plan_ends_at ? 'Never (lifetime)'
+    : new Date(profile.plan_ends_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
   // Status banner content, keyed off the application state.
   const banner = isApproved
@@ -289,11 +307,11 @@ export default function BillingPage() {
                 Billing
               </span>
               <div className="mt-4 space-y-3.5">
-                <Field label="Billing cycle" value={currentPlan === 'free' ? 'Free forever' : 'Monthly'} />
-                <Field label="Next renewal" value={currentPlan === 'free' ? 'N/A' : 'Dec 21, 2026'} />
+                <Field label="Billing cycle" value={billingCycleLabel} />
+                <Field label="Next renewal" value={nextRenewalLabel} />
                 <Field
-                  label="Auto-renewal"
-                  value={currentPlan === 'free' ? 'N/A' : 'Active'}
+                  label="Payment method"
+                  value={currentPlan === 'free' ? 'N/A' : 'Manual USDT (TRC20)'}
                   tone={currentPlan === 'free' ? 'text-ink-2' : 'text-up'}
                 />
               </div>
@@ -347,7 +365,7 @@ export default function BillingPage() {
                           </td>
                           <td className="px-5 py-4 font-semibold text-ink">{payment.plan?.toUpperCase()}</td>
                           <td className="px-5 py-4 text-ink-2 tabular-nums">
-                            ${(payment.amount / 100).toFixed(2)}
+                            ${Number(payment.amount).toFixed(2)} {payment.currency || 'USDT'}
                           </td>
                           <td className="px-5 py-4">
                             <span

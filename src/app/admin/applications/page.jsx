@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import AdminShell, { AdminAccessDenied } from "@/components/admin/AdminShell";
+
+const STATUS_FILTERS = ["pending", "accepted", "waitlisted", "rejected"];
 
 export default function AdminApplicationsPage() {
   const { user } = useAuth();
@@ -13,7 +16,6 @@ export default function AdminApplicationsPage() {
   const [selectedApp, setSelectedApp] = useState(null);
   const [updatingAction, setUpdatingAction] = useState(null); // Format: "appId_status"
 
-  // Check admin access - only ghuruprasaath@gmail.com
   const ADMIN_EMAIL = "ghuruprasaath@gmail.com";
   const isAdmin = user?.email === ADMIN_EMAIL;
 
@@ -71,197 +73,171 @@ export default function AdminApplicationsPage() {
     }
   };
 
-  const filteredApps = applications.filter(a => a.status === filterStatus);
+  const filteredApps = applications.filter((a) => a.status === filterStatus);
 
-  if (!user || !isAdmin) {
-    return (
-      <div className="min-h-screen bg-white text-black flex items-center justify-center font-satoshi">
-        <div className="text-center space-y-4">
-          <p className="text-xl font-bold">Access Denied</p>
-          <p className="text-black">Only admin has access to this page.</p>
-          <a href="/" className="inline-block px-6 py-2 bg-black text-white font-bold text-sm uppercase rounded-lg hover:bg-brand-orange transition-all">
-            Go Home
-          </a>
-        </div>
-      </div>
-    );
-  }
+  if (!user || !isAdmin) return <AdminAccessDenied />;
 
   return (
-    <div className="min-h-screen bg-[#0a0e27] text-white font-satoshi">
-      <header className="sticky top-0 z-40 w-full border-b border-zinc-800 bg-[#0a0e27]/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
-          <h1 className="text-sm font-bold uppercase tracking-wider">Applications Admin</h1>
-          <a href="/terminal" className="text-[11px] hover:text-brand-orange transition-colors">
-            Back to Terminal →
-          </a>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* ── FILTER TABS ──────────────────────────────────────────────────── */}
-        <div className="flex gap-3 mb-8 border-b border-zinc-800 pb-4">
-          {["pending", "accepted", "waitlisted", "rejected"].map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilterStatus(status)}
-              className={`px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-lg transition-all ${
-                filterStatus === status
-                  ? "bg-brand-orange text-white"
-                  : "bg-zinc-900 text-white hover:text-white"
-              }`}
-            >
-              {status.charAt(0).toUpperCase() + status.slice(1)} ({applications.filter(a => a.status === status).length})
-            </button>
-          ))}
-        </div>
-
-        {/* ── APPLICATIONS TABLE ───────────────────────────────────────────── */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-          {loading ? (
-            <div className="p-8 text-center text-white">Loading...</div>
-          ) : filteredApps.length === 0 ? (
-            <div className="p-8 text-center text-white">No {filterStatus} applications.</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-zinc-800 border-b border-zinc-700">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Plan</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Experience</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Capital</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Applied</th>
-                    <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredApps.map((app) => (
-                    <tr key={app.id} className="border-b border-zinc-700 hover:bg-zinc-800/50 transition-colors">
-                      <td className="px-6 py-3 text-sm text-white">{app.name}</td>
-                      <td className="px-6 py-3 text-sm text-white">{app.email}</td>
-                      <td className="px-6 py-3 text-sm">
-                        <span className={`text-xs font-bold uppercase ${
-                          app.plan === 'pro' ? 'text-brand-orange' : 'text-purple-400'
-                        }`}>
-                          {app.plan}
-                        </span>
-                      </td>
-                      <td className="px-6 py-3 text-sm text-white text-xs">{app.experience}</td>
-                      <td className="px-6 py-3 text-sm text-white text-xs">{app.capital}</td>
-                      <td className="px-6 py-3 text-sm text-white text-xs">
-                        {new Date(app.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-3 text-sm">
-                        <button
-                          onClick={() => setSelectedApp(app)}
-                          className="text-brand-orange hover:text-brand-orange/80 text-xs font-bold uppercase transition-colors"
-                        >
-                          Review →
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+    <AdminShell
+      active="/admin/applications"
+      title="Applications"
+      description="Review pending Pro/Master applications and decide who gets access."
+    >
+      {/* FILTER TABS */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {STATUS_FILTERS.map((status) => (
+          <button
+            key={status}
+            onClick={() => setFilterStatus(status)}
+            className={`px-4 py-2 text-[12px] font-semibold rounded-full border transition-colors cursor-pointer ${
+              filterStatus === status
+                ? "bg-accent/15 text-accent-soft border-accent/30"
+                : "bg-transparent text-ink-2 border-line hover:text-ink"
+            }`}
+          >
+            {status.charAt(0).toUpperCase() + status.slice(1)} ({applications.filter((a) => a.status === status).length})
+          </button>
+        ))}
       </div>
 
-      {/* ── DETAIL MODAL ────────────────────────────────────────────────────── */}
+      {/* APPLICATIONS TABLE */}
+      <div className="card overflow-hidden !rounded-2xl">
+        {loading ? (
+          <div className="p-10 text-center text-ink-2 text-sm">Loading...</div>
+        ) : filteredApps.length === 0 ? (
+          <div className="p-10 text-center text-ink-2 text-sm">No {filterStatus} applications.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[720px]">
+              <thead>
+                <tr className="border-b border-line">
+                  <th className="text-left px-5 py-3.5 font-semibold uppercase tracking-[0.14em] text-[10px] text-ink-3">Name</th>
+                  <th className="text-left px-5 py-3.5 font-semibold uppercase tracking-[0.14em] text-[10px] text-ink-3">Email</th>
+                  <th className="text-left px-5 py-3.5 font-semibold uppercase tracking-[0.14em] text-[10px] text-ink-3">Plan</th>
+                  <th className="text-left px-5 py-3.5 font-semibold uppercase tracking-[0.14em] text-[10px] text-ink-3">Experience</th>
+                  <th className="text-left px-5 py-3.5 font-semibold uppercase tracking-[0.14em] text-[10px] text-ink-3">Capital</th>
+                  <th className="text-left px-5 py-3.5 font-semibold uppercase tracking-[0.14em] text-[10px] text-ink-3">Applied</th>
+                  <th className="text-left px-5 py-3.5 font-semibold uppercase tracking-[0.14em] text-[10px] text-ink-3">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/6">
+                {filteredApps.map((app) => (
+                  <tr key={app.id} className="hover:bg-white/[0.03] transition-colors">
+                    <td className="px-5 py-4 text-ink">{app.name}</td>
+                    <td className="px-5 py-4 text-ink-2">{app.email}</td>
+                    <td className="px-5 py-4">
+                      <span className={`chip ${app.plan === "pro" ? "chip-accent" : ""}`}>{app.plan}</span>
+                    </td>
+                    <td className="px-5 py-4 text-ink-2 text-xs">{app.experience}</td>
+                    <td className="px-5 py-4 text-ink-2 text-xs">{app.capital}</td>
+                    <td className="px-5 py-4 text-ink-2 text-xs tabular-nums">
+                      {new Date(app.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-5 py-4">
+                      <button
+                        onClick={() => setSelectedApp(app)}
+                        className="text-accent-soft hover:text-ink text-[12px] font-semibold transition-colors cursor-pointer"
+                      >
+                        Review →
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* DETAIL MODAL */}
       {selectedApp && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-zinc-800 border-b border-zinc-700 px-6 py-4 flex items-center justify-between">
-              <h2 className="font-bold uppercase tracking-wide">{selectedApp.name}</h2>
-              <button
-                onClick={() => setSelectedApp(null)}
-                className="text-white hover:text-white text-2xl"
-              >
-                ×
-              </button>
-            </div>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="card-gradient-border p-px max-w-2xl w-full max-h-[90vh]">
+            <div className="relative rounded-[17px] bg-surface-2/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-surface-2/95 backdrop-blur-xl border-b border-line px-6 py-4 flex items-center justify-between z-10">
+                <h2 className="text-[16px] font-semibold text-ink">{selectedApp.name}</h2>
+                <button
+                  onClick={() => setSelectedApp(null)}
+                  className="text-ink-2 hover:text-ink text-2xl leading-none cursor-pointer bg-transparent border-0"
+                >
+                  ×
+                </button>
+              </div>
 
-            <div className="p-6 space-y-6">
-              {/* Personal Info */}
-              <section>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-brand-orange mb-3">Personal Info</h3>
-                <div className="space-y-2 text-sm">
-                  <p><span className="text-white">Name:</span> <span className="text-white">{selectedApp.name}</span></p>
-                  <p><span className="text-white">Email:</span> <span className="text-white">{selectedApp.email}</span></p>
-                  {selectedApp.telegram && <p><span className="text-white">Telegram:</span> <span className="text-white">{selectedApp.telegram}</span></p>}
-                  <p><span className="text-white">Country:</span> <span className="text-white">{selectedApp.country}</span></p>
-                </div>
-              </section>
-
-              {/* Trading Info */}
-              <section className="pt-4 border-t border-zinc-800">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-brand-orange mb-3">Trading Profile</h3>
-                <div className="space-y-2 text-sm">
-                  <p><span className="text-white">Experience:</span> <span className="text-white">{selectedApp.experience}</span></p>
-                  <p><span className="text-white">Capital:</span> <span className="text-white">{selectedApp.capital}</span></p>
-                  {selectedApp.exchanges && <p><span className="text-white">Exchanges:</span> <span className="text-white">{selectedApp.exchanges}</span></p>}
-                  {selectedApp.current_services && <p><span className="text-white">Current Services:</span> <span className="text-white">{selectedApp.current_services}</span></p>}
-                </div>
-              </section>
-
-              {/* Application Details */}
-              <section className="pt-4 border-t border-zinc-800">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-brand-orange mb-3">Application</h3>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-xs text-white uppercase tracking-wider mb-1">Goal</p>
-                    <p className="text-sm text-white">{selectedApp.goal}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-white uppercase tracking-wider mb-1">Risk Management (THE KEY QUESTION)</p>
-                    <p className="text-sm text-white">{selectedApp.risk_management}</p>
-                  </div>
-                </div>
-              </section>
-
-              {/* Existing Notes */}
-              {selectedApp.reviewer_notes && (
-                <section className="pt-4 border-t border-zinc-800">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-brand-orange mb-3">Reviewer Notes</h3>
-                  <p className="text-sm text-zinc-300">{selectedApp.reviewer_notes}</p>
-                </section>
-              )}
-
-              {/* Action Buttons */}
-              {selectedApp.status === "pending" && (
-                <section className="pt-4 border-t border-zinc-800 space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => updateApplicationStatus(selectedApp.id, "accepted", "Approved - good risk management")}
-                      disabled={updatingAction === `${selectedApp.id}_accepted`}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-bold uppercase rounded-lg transition-all"
-                    >
-                      {updatingAction === `${selectedApp.id}_accepted` ? "Accepting..." : "Accept"}
-                    </button>
-                    <button
-                      onClick={() => updateApplicationStatus(selectedApp.id, "waitlisted", "Waitlisted - check back later")}
-                      disabled={updatingAction === `${selectedApp.id}_waitlisted`}
-                      className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-60 text-white text-sm font-bold uppercase rounded-lg transition-all"
-                    >
-                      {updatingAction === `${selectedApp.id}_waitlisted` ? "Waitlisting..." : "Waitlist"}
-                    </button>
-                    <button
-                      onClick={() => updateApplicationStatus(selectedApp.id, "rejected", "Rejected - does not meet risk management standards")}
-                      disabled={updatingAction === `${selectedApp.id}_rejected`}
-                      className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm font-bold uppercase rounded-lg transition-all col-span-2"
-                    >
-                      {updatingAction === `${selectedApp.id}_rejected` ? "Rejecting..." : "Reject"}
-                    </button>
+              <div className="p-6 space-y-6">
+                <section>
+                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-soft mb-3">Personal info</h3>
+                  <div className="space-y-1.5 text-[13.5px] text-ink-2">
+                    <p><span className="text-ink-3">Name:</span> {selectedApp.name}</p>
+                    <p><span className="text-ink-3">Email:</span> {selectedApp.email}</p>
+                    {selectedApp.telegram && <p><span className="text-ink-3">Telegram:</span> {selectedApp.telegram}</p>}
+                    <p><span className="text-ink-3">Country:</span> {selectedApp.country}</p>
                   </div>
                 </section>
-              )}
+
+                <section className="pt-5 border-t border-line">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-soft mb-3">Trading profile</h3>
+                  <div className="space-y-1.5 text-[13.5px] text-ink-2">
+                    <p><span className="text-ink-3">Experience:</span> {selectedApp.experience}</p>
+                    <p><span className="text-ink-3">Capital:</span> {selectedApp.capital}</p>
+                    {selectedApp.exchanges && <p><span className="text-ink-3">Exchanges:</span> {selectedApp.exchanges}</p>}
+                    {selectedApp.current_services && <p><span className="text-ink-3">Current services:</span> {selectedApp.current_services}</p>}
+                  </div>
+                </section>
+
+                <section className="pt-5 border-t border-line">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-soft mb-3">Application</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-[10px] text-ink-3 uppercase tracking-[0.14em] mb-1">Goal</p>
+                      <p className="text-[13.5px] text-ink-2">{selectedApp.goal}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-ink-3 uppercase tracking-[0.14em] mb-1">Risk management (the key question)</p>
+                      <p className="text-[13.5px] text-ink-2">{selectedApp.risk_management}</p>
+                    </div>
+                  </div>
+                </section>
+
+                {selectedApp.reviewer_notes && (
+                  <section className="pt-5 border-t border-line">
+                    <h3 className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-soft mb-3">Reviewer notes</h3>
+                    <p className="text-[13.5px] text-ink-2">{selectedApp.reviewer_notes}</p>
+                  </section>
+                )}
+
+                {selectedApp.status === "pending" && (
+                  <section className="pt-5 border-t border-line">
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => updateApplicationStatus(selectedApp.id, "accepted", "Approved - good risk management")}
+                        disabled={updatingAction === `${selectedApp.id}_accepted`}
+                        className="px-4 py-2.5 bg-up/15 hover:bg-up/25 disabled:opacity-50 text-up border border-up/30 text-[12px] font-semibold rounded-lg transition-all cursor-pointer"
+                      >
+                        {updatingAction === `${selectedApp.id}_accepted` ? "Accepting..." : "Accept"}
+                      </button>
+                      <button
+                        onClick={() => updateApplicationStatus(selectedApp.id, "waitlisted", "Waitlisted - check back later")}
+                        disabled={updatingAction === `${selectedApp.id}_waitlisted`}
+                        className="px-4 py-2.5 bg-amber-400/15 hover:bg-amber-400/25 disabled:opacity-50 text-amber-300 border border-amber-400/30 text-[12px] font-semibold rounded-lg transition-all cursor-pointer"
+                      >
+                        {updatingAction === `${selectedApp.id}_waitlisted` ? "Waitlisting..." : "Waitlist"}
+                      </button>
+                      <button
+                        onClick={() => updateApplicationStatus(selectedApp.id, "rejected", "Rejected - does not meet risk management standards")}
+                        disabled={updatingAction === `${selectedApp.id}_rejected`}
+                        className="col-span-2 px-4 py-2.5 bg-down/15 hover:bg-down/25 disabled:opacity-50 text-down border border-down/30 text-[12px] font-semibold rounded-lg transition-all cursor-pointer"
+                      >
+                        {updatingAction === `${selectedApp.id}_rejected` ? "Rejecting..." : "Reject"}
+                      </button>
+                    </div>
+                  </section>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </AdminShell>
   );
 }

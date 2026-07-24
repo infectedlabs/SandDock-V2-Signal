@@ -1426,6 +1426,31 @@ export default function Homepage() {
         </div>
       </section>
 
+      {/* SECTION 9.5 - REFER & EARN PROMO */}
+      <section className="relative py-24 md:py-28 border-b border-line reveal-scale">
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <div className="card-gradient-border p-px">
+            <div className="relative rounded-[17px] bg-surface-2/80 backdrop-blur-xl p-8 md:p-11 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-9 overflow-hidden">
+              <div className="pointer-events-none absolute -top-32 right-10 w-80 h-80 rounded-full bg-accent/18 blur-3xl" />
+              <div className="relative text-left max-w-2xl">
+                <span className="eyebrow">Refer &amp; earn</span>
+                <h3 className="mt-4 text-[28px] md:text-[34px] font-semibold tracking-[-0.03em] text-ink leading-tight">
+                  Earn 10% in USDT for every trader you bring in
+                </h3>
+                <p className="mt-3 text-ink-2 text-[15px] md:text-[16px] leading-relaxed">
+                  Share your unique link. When someone you invite upgrades to Pro, Master, or
+                  GrandMaster, you earn a one-time 10% commission - $10, $25, or $99.90. No cap on
+                  invites, no cap on earnings, claim weekly on Telegram.
+                </p>
+              </div>
+              <CtaPrimary href="/refer" className="relative flex-shrink-0">
+                See the referral program
+              </CtaPrimary>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* SECTION 10 - FAQ SECTION */}
       <section id="faq" className="relative py-24 md:py-28 border-b border-line reveal-right">
         <div className="relative z-10 max-w-4xl mx-auto px-6">

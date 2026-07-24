@@ -32,6 +32,12 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
     </svg>
   ),
+  Refer: () => (
+    <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M18 8a3 3 0 10-2.83-4H15a3 3 0 000 6h.17m2.66 6.34a3 3 0 11-2.83 4H15m2.83-4L8.17 10.66M15 14a3 3 0 10-2.83-4H12m0 0a3 3 0 10-2.83 4H9m0 0l5.66 3.34" />
+      <circle cx="6" cy="12" r="3" strokeWidth="2" />
+    </svg>
+  ),
   Settings: () => (
     <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.3 0-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -597,7 +603,7 @@ function CustomCoinsList({ userId, plan }) {
 
 // ── Main Terminal Page ────────────────────────────────────────────────────────
 export default function TerminalPage() {
-  const { user, profile, loading, updateProfile, signOut } = useAuth();
+  const { user, profile, loading, updateProfile, signOut, session } = useAuth();
   const router = useRouter();
 
   const [activeTab, setActiveTabState] = useState('signals');
@@ -644,6 +650,30 @@ export default function TerminalPage() {
 
   const [showFreeSuccessModal, setShowFreeSuccessModal] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState(null);
+
+  // Refer & Earn tab state
+  const [referralData, setReferralData] = useState(null);
+  const [referralLoading, setReferralLoading] = useState(true);
+  const [referralCopied, setReferralCopied] = useState(false);
+
+  useEffect(() => {
+    if (!session?.access_token) return;
+    const fetchReferral = async () => {
+      try {
+        const res = await fetch('/api/referral/me', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (res.ok) {
+          setReferralData(await res.json());
+        }
+      } catch (error) {
+        console.error('Failed to fetch referral data:', error);
+      } finally {
+        setReferralLoading(false);
+      }
+    };
+    fetchReferral();
+  }, [session?.access_token]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -730,7 +760,7 @@ export default function TerminalPage() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get('tab');
-      if (tab && ['signals', 'chart', 'history', 'stats'].includes(tab)) {
+      if (tab && ['signals', 'chart', 'history', 'stats', 'refer'].includes(tab)) {
         setActiveTabState(tab);
       }
     }
@@ -1311,6 +1341,7 @@ export default function TerminalPage() {
     { id: 'chart',   icon: Icons.Chart, label: 'Heikin Ashi Chart' },
     { id: 'history', icon: Icons.History, label: 'Signal Log' },
     { id: 'stats',   icon: Icons.Performance, label: 'Performance' },
+    { id: 'refer',   icon: Icons.Refer, label: 'Refer & Earn' },
   ];
 
   return (
@@ -1341,7 +1372,7 @@ export default function TerminalPage() {
                 ? 'bg-red-900/60 text-red-400 border border-red-700/50'
                 : isFreePlan
                 ? 'bg-zinc-800 text-white border border-zinc-700'
-                : userPlan === 'lifetime'
+                : userPlan === 'grandmaster'
                 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                 : 'bg-brand-orange text-white'
             }`}>
@@ -1377,6 +1408,10 @@ export default function TerminalPage() {
                   className="block w-full text-left px-4 py-2.5 text-[13px] text-zinc-300 hover:bg-[#111827] hover:text-white uppercase font-bold tracking-wider">
                   Billing & Plan
                 </a>
+                <button onClick={() => { setActiveTab('refer'); setProfileMenuOpen(false); }}
+                  className="w-full text-left px-4 py-2.5 text-[13px] text-zinc-300 hover:bg-[#111827] hover:text-white uppercase font-bold tracking-wider cursor-pointer bg-transparent border-0">
+                  Refer & Earn
+                </button>
                 {isFreePlan && (
                   <button onClick={() => { triggerUpgradeGate('Upgrade Account', 'Unlock advanced features and push alerts.'); setProfileMenuOpen(false); }}
                     className="w-full text-left px-4 py-2.5 text-[13px] text-brand-orange hover:bg-[#111827] uppercase font-bold tracking-wider cursor-pointer bg-transparent border-0">
@@ -2403,6 +2438,105 @@ export default function TerminalPage() {
                         <span className="text-xs font-bold text-white uppercase tracking-wider">Equity Growth curve</span>
                       </div>
                       <PerformanceChart signals={perfSignals} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ══ REFER & EARN TAB ══════════════════════════════════════════ */}
+            {activeTab === 'refer' && (
+              <div className="space-y-5 animate-slide-up">
+                <div className="bg-[#000000] border border-slate-800/50 rounded-2xl p-6 shadow-xl">
+                  <span className="block text-[10px] font-bold uppercase tracking-widest text-white mb-3">Your referral link</span>
+                  {referralLoading ? (
+                    <div className="text-zinc-400 text-sm">Loading…</div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <input
+                        readOnly
+                        value={typeof window !== 'undefined' && referralData
+                          ? `${window.location.origin}/refer?ref=${referralData.referralCode}`
+                          : ''}
+                        className="flex-1 bg-[#090909] border border-zinc-800 rounded-lg px-4 py-3 text-sm text-white font-mono"
+                      />
+                      <button
+                        onClick={() => {
+                          if (!referralData) return;
+                          navigator.clipboard.writeText(`${window.location.origin}/refer?ref=${referralData.referralCode}`);
+                          setReferralCopied(true);
+                          setTimeout(() => setReferralCopied(false), 2000);
+                        }}
+                        className="px-5 py-3 bg-brand-orange text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-brand-orange/80 transition-all cursor-pointer border-0"
+                      >
+                        {referralCopied ? 'Copied!' : 'Copy link'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 bg-[#000000] border border-slate-800/50 rounded-2xl p-6 shadow-xl">
+                  <div className="space-y-1">
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white">Invites</span>
+                    <span className="block text-3xl font-extrabold text-white">{referralData?.inviteCount ?? '—'}</span>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white">Upgraded to paid</span>
+                    <span className="block text-3xl font-extrabold text-white">{referralData?.conversionCount ?? '—'}</span>
+                  </div>
+                  <div className="space-y-1 col-span-2 lg:col-span-1">
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-white">Total earned</span>
+                    <span className="block text-3xl font-extrabold text-emerald-400">
+                      ${referralData ? referralData.totalEarned.toFixed(2) : '0.00'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-[#000000] border border-slate-800/50 rounded-2xl p-6 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="block text-[13px] font-bold text-white">Claim your USDT anytime, weekly, no limit</span>
+                    <span className="block text-[12px] text-zinc-400 mt-1">Message the admin on Telegram to claim your commission.</span>
+                  </div>
+                  <a
+                    href="https://t.me/alexsanddockcom"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2.5 bg-brand-orange text-white text-sm font-bold uppercase tracking-wider rounded-lg hover:bg-brand-orange/80 transition-all whitespace-nowrap"
+                  >
+                    Claim on Telegram
+                  </a>
+                </div>
+
+                <div className="bg-[#000000] border border-slate-800/50 rounded-2xl overflow-hidden shadow-xl">
+                  <div className="px-6 py-4 border-b border-zinc-800">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white">Conversion history</span>
+                  </div>
+                  {!referralData || referralData.conversions.length === 0 ? (
+                    <div className="p-8 text-center text-zinc-400 text-sm">
+                      No conversions yet - share your link to start earning.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm min-w-[520px]">
+                        <thead>
+                          <tr className="border-b border-zinc-800">
+                            <th className="text-left px-6 py-3 font-bold uppercase tracking-widest text-[10px] text-zinc-400">Date</th>
+                            <th className="text-left px-6 py-3 font-bold uppercase tracking-widest text-[10px] text-zinc-400">Referred user</th>
+                            <th className="text-left px-6 py-3 font-bold uppercase tracking-widest text-[10px] text-zinc-400">Plan</th>
+                            <th className="text-left px-6 py-3 font-bold uppercase tracking-widest text-[10px] text-zinc-400">Commission</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-900">
+                          {referralData.conversions.map((c) => (
+                            <tr key={c.id} className="hover:bg-zinc-950/40 transition-colors">
+                              <td className="px-6 py-4 text-zinc-300">{new Date(c.createdAt).toLocaleDateString()}</td>
+                              <td className="px-6 py-4 text-white">{c.referredEmail || '—'}</td>
+                              <td className="px-6 py-4 text-white uppercase font-bold text-xs">{c.plan} · {c.billingCycle}</td>
+                              <td className="px-6 py-4 font-bold text-emerald-400">${Number(c.commissionAmount).toFixed(2)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </div>

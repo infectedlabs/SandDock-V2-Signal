@@ -2,6 +2,7 @@ import localFont from "next/font/local";
 import { Instrument_Sans, Instrument_Serif } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import ReferralCapture from "@/components/ReferralCapture";
 import "./globals.css";
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://sanddock.com").replace(/\/$/, "");
@@ -135,6 +136,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
         />
         <AuthProvider>
+          <ReferralCapture />
           {children}
         </AuthProvider>
         <GoogleAnalytics />
